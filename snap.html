@@ -20,11 +20,12 @@
 		<script type="text/javascript" src="sha512.js"></script>
 		<script type="text/javascript" src="logging.js"></script>
 		<script type="text/javascript">
-			var world;
+			var world, ide;
 			window.onload = function () {
 				world = new WorldMorph(document.getElementById('world'));
                 world.worldCanvas.focus();
-				new IDE_Morph().openIn(world);
+				ide = new IDE_Morph();
+				ide.openIn(world);
 				setInterval(loop, 1);
 			};
 			function loop() {

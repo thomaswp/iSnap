@@ -4340,20 +4340,9 @@ function StageMorph(globals) {
     this.init(globals);
 }
 
-// Credit: http://stackoverflow.com/a/8809472
-StageMorph.prototype.newGuid = function() {
-    var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (d + Math.random()*16)%16 | 0;
-        d = Math.floor(d/16);
-        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
-    });
-    return uuid;
-};
-
 StageMorph.prototype.init = function (globals) {
     this.name = localize('Stage');
-    this.guid = StageMorph.prototype.newGuid();
+    this.guid = newGuid();
     this.threads = new ThreadManager();
     this.variables = new VariableFrame(globals || null, this);
     this.scripts = new ScriptsMorph(this);

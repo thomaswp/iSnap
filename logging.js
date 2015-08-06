@@ -4,9 +4,15 @@ var UserInfo;
 var Logger;
 var DBLogger;
 
-UserInfo = {};
-UserInfo.name = "Thomas";
-UserInfo.assignment = "Project 1";
+function newGuid() {
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+};
 
 if (!Date.now) {
     Date.now = function() { return new Date().getTime(); }
@@ -15,6 +21,26 @@ if (!Date.now) {
 function Logger(interval) {
     this.queue = [];
     this.start(interval);
+}
+
+Logger.sessionID = newGuid();
+
+Logger.prototype.userInfo = function() {
+    var browserID = null;
+    if (typeof(Storage) !== "undefined" && localStorage) {
+        browserID = localStorage.getItem("browserID");
+        if (!browserID) {
+            browserID = newGuid();
+            localStorage.setItem("browserID", browserID);
+        }
+    }
+    var projectID;
+    if (ide && ide.stage) projectID = ide.stage.guid;
+    return {
+        "sessionID": Logger.sessionID,
+        "browserID": browserID,
+        "projectID": projectID,
+    };
 }
 
 Logger.prototype.log = function(message, data) {
@@ -55,7 +81,7 @@ DBLogger.prototype = new Logger();
 
 DBLogger.prototype.storeMessages = function(logs) {
     var data = {
-        "userInfo": UserInfo,
+        "userInfo": this.userInfo(),
         "logs": logs,
     };
     var xhr = new XMLHttpRequest();

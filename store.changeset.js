@@ -49,6 +49,9 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
     if (model.stage.attributes.name) {
         project.stage.name = model.stage.attributes.name;
     }
+    if (model.stage.attributes.guid) {
+        project.stage.guid = model.stage.attributes.guid;
+    }
     if (model.stage.attributes.scheduled === 'true') {
         project.stage.fps = 30;
         StageMorph.prototype.frameRate = 30;
@@ -270,7 +273,7 @@ StageMorph.prototype.toXML = function (serializer) {
         '<project name="@" app="@" version="@">' +
             '<notes>$</notes>' +
             '<thumbnail>$</thumbnail>' +
-            '<stage name="@" width="@" height="@" ' +
+            '<stage name="@" guid="@" width="@" height="@" ' +
             'costume="@" tempo="@" threadsafe="@" ' +
             'lines="@" ' +
             'codify="@" ' +
@@ -294,6 +297,7 @@ StageMorph.prototype.toXML = function (serializer) {
         (ide && ide.projectNotes) ? ide.projectNotes : '',
         thumbdata,
         this.name,
+		this.guid,
         StageMorph.prototype.dimensions.x,
         StageMorph.prototype.dimensions.y,
         this.getCostumeIdx(),

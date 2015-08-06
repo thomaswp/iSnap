@@ -1,5 +1,6 @@
 StageMorph.prototype.init = function (globals) {
     this.name = localize('Stage');
+	this.guid = newGuid();
     this.threads = new ThreadManager();
     this.variables = new VariableFrame(globals || null, this);
     this.scripts = new ScriptsMorph(this);

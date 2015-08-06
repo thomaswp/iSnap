@@ -27,6 +27,7 @@ Logger.prototype.serializer = new SnapSerializer();
 
 Logger.prototype.init = function(interval) {
     this.queue = [];
+    this.log("Logger.started");
     this.start(interval);
 }
 
@@ -87,7 +88,7 @@ Logger.prototype.log = function(message, data, saveImmediately) {
 }
 
 Logger.prototype.addCode = function(log) {
-    if (!(ide && ide.stage)) return;
+    if (typeof(ide) == 'undefined' || !ide.stage) return;
     log.projectID = ide.stage.guid;
     log.code = this.serializer.serialize(ide.stage);
 }
@@ -118,7 +119,7 @@ Logger.prototype.start = function(interval) {
         if (myself.queue.length == 0) return;
         myself.flushSaveCode();
         myself.storeMessages(myself.queue)
-        myself.queue = []; // TODO: delete on successful log, not immediately
+        myself.queue = [];
     }, interval);
 }
 
@@ -128,9 +129,11 @@ function DiffLogger(interval) {
 
 DiffLogger.prototype = new Logger();
 
-DiffLogger.prototype.codeDiff = function(a, b) {
-    a = this.addXmlNewlines(a);
-    b = this.addXmlNewlines(b);
+DiffLogger.prototype.codeDiff = function(a, b, addNewLines) {
+    if (addNewLines) {
+        a = this.addXmlNewlines(a);
+        b = this.addXmlNewlines(b);
+    }
 
     aArray = a.split("\n");
     bArray = b.split("\n");
@@ -176,9 +179,25 @@ DBLogger.prototype.storeMessages = function(logs) {
         "userInfo": this.userInfo(),
         "logs": logs,
     };
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "log_mysql.php", true);
-    xhr.send(JSON.stringify(data));
+    this.sendToServer(JSON.stringify(data), 0);
 }
 
-var Trace = new DiffLogger(3000);
+DBLogger.prototype.sendToServer = function(data, attempts) {
+    if (attempts >= 3) return; // max retries if the logging fails
+
+    var xhr = new XMLHttpRequest();
+    var myself = this;
+    var retry = false;
+    xhr.onreadystatechange = function() {
+        if (xhr.status != 200 && !retry) {
+            retry = true;
+            setTimeout(function() {
+                myself.sendToServer(data, attempts + 1);
+            }, 1000);
+        }
+    };
+    xhr.open("POST", "log_mysql.php", true);
+    xhr.send(data);
+}
+
+var Trace = new Logger(3000);

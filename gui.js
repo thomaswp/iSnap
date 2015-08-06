@@ -253,6 +253,8 @@ IDE_Morph.prototype.init = function (isAutoFill) {
 };
 
 IDE_Morph.prototype.openIn = function (world) {
+    Trace.log("IDE.opened");
+
     var hash, usr, myself = this, urlLanguage = null;
 
     // get persistent user data, if any

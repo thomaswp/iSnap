@@ -863,6 +863,7 @@ IDE_Morph.prototype.createCategories = function () {
             colors,
             myself, // the IDE is the target
             function () {
+                Trace.log("IDE.changeCategory", category);
                 myself.currentCategory = category;
                 myself.categories.children.forEach(function (each) {
                     each.refresh();
@@ -966,6 +967,7 @@ IDE_Morph.prototype.createPalette = function (forSearching) {
             myself.currentSprite.wearCostume(null);
             droppedMorph.destroy();
         } else {
+            // TODO: possible block destroyed logging
             droppedMorph.destroy();
         }
     };

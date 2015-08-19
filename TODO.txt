@@ -1,0 +1,7 @@
+* parameters
+* variables
+* relabel
+* custom blocks
+* script/costume/sound tabs
+* sprite details
+* script area menu (clean up, etc)

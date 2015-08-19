@@ -348,6 +348,8 @@ function SyntaxElementMorph() {
 }
 
 SyntaxElementMorph.prototype.init = function () {
+    this._debugType = /function (.{1,})\(/.exec(this.constructor.toString())[1]; //TODO: REMOVE
+
     this.cachedClr = null;
     this.cachedClrBright = null;
     this.cachedClrDark = null;
@@ -2010,7 +2012,10 @@ BlockMorph.prototype.toString = function () {
 };
 
 BlockMorph.prototype.blockId = function() {
-    return this.selector + " (" + this.id + ")";
+    return {
+        "selector": this.selector,
+        "id": this.id,
+    };
 }
 
 BlockMorph.prototype.reactToTemplateCopy = function() {
@@ -2276,6 +2281,7 @@ BlockMorph.prototype.userMenu = function () {
     menu.addItem(
         "script pic...",
         function () {
+            Trace.log("Block.scriptPic", myself.blockId());
             window.open(myself.topBlock().fullImage().toDataURL());
         },
         'open a new window\nwith a picture of this script'
@@ -2333,6 +2339,7 @@ BlockMorph.prototype.hidePrimitive = function () {
         dict,
         cat;
     if (!ide) {return; }
+    Trace.log("Block.hidePrimitive", this.blockId());
     StageMorph.prototype.hiddenPrimitives[this.selector] = true;
     dict = {
         doWarp: 'control',
@@ -2509,6 +2516,7 @@ BlockMorph.prototype.restoreInputs = function (oldInputs) {
 };
 
 BlockMorph.prototype.showHelp = function () {
+    Trace.log("Block.showHelp", this.blockId());
     var myself = this,
         pic = new Image(),
         help,
@@ -3125,6 +3133,8 @@ BlockMorph.prototype.mouseClickLeft = function () {
     if (receiver) {
         stage = receiver.parentThatIsA(StageMorph);
         if (stage) {
+            Trace.log("Block.clickRun", top.blockId());
+            window.lastRun = top; //TODO: REMOVE
             stage.threads.toggleProcess(top);
         }
     }
@@ -3219,7 +3229,7 @@ BlockMorph.prototype.situation = function () {
 // BlockMorph sticky comments
 
 BlockMorph.prototype.prepareToBeGrabbed = function (hand) {
-    Trace.log("Block.grabbed", this.blockId());
+    Trace.log("Block.grabbed", {"id": this.blockId(), "origin": this.bounds.origin});
     var myself = this;
     this.allComments().forEach(function (comment) {
         comment.startFollowing(myself, hand.world);
@@ -3256,7 +3266,7 @@ BlockMorph.prototype.stackHeight = function () {
 };
 
 BlockMorph.prototype.snap = function () {
-    Trace.log("Block.snap", this.blockId());
+    Trace.log("Block.snapped", {"id": this.blockId(), "origin": this.bounds.origin});
     var top = this.topBlock();
     top.allComments().forEach(function (comment) {
         comment.align(top);

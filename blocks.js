@@ -1946,6 +1946,7 @@ SyntaxElementMorph.prototype.endLayout = function () {
 BlockMorph.prototype = new SyntaxElementMorph();
 BlockMorph.prototype.constructor = BlockMorph;
 BlockMorph.uber = SyntaxElementMorph.prototype;
+BlockMorph.nextId = 0;
 
 // BlockMorph preferences settings:
 
@@ -1973,6 +1974,8 @@ function BlockMorph() {
 }
 
 BlockMorph.prototype.init = function () {
+    this.id = BlockMorph.nextId++;
+
     this.selector = null; // name of method to be triggered
     this.blockSpec = ''; // formal description of label and arguments
     this.comment = null; // optional "sticky" comment morph
@@ -2005,6 +2008,21 @@ BlockMorph.prototype.toString = function () {
         ' ("' +
         this.blockSpec.slice(0, 30) + '...")';
 };
+
+BlockMorph.prototype.blockId = function() {
+    return this.selector + " (" + this.id + ")";
+}
+
+BlockMorph.prototype.reactToTemplateCopy = function() {
+    Trace.log("Block.created", this.blockId());
+    if (BlockMorph.uber.reactToTemplateCopy) {
+        BlockMorph.uber.reactToTemplateCopy.call(this);
+    }
+}
+
+BlockMorph.prototype.userDestroy = function() {
+    Trace.log("Block.userDestroy", this.blockId());
+}
 
 // BlockMorph spec:
 
@@ -2218,6 +2236,7 @@ BlockMorph.prototype.userMenu = function () {
     menu.addItem(
         "duplicate",
         function () {
+            Trace.log("Block.duplicateAll", myself.blockId());
             var dup = myself.fullCopy(),
                 ide = myself.parentThatIsA(IDE_Morph);
             dup.pickUp(world);
@@ -2234,6 +2253,7 @@ BlockMorph.prototype.userMenu = function () {
         menu.addItem(
             this.thumbnail(0.5, 60),
             function () {
+                Trace.log("Block.duplicateBlock", myself.blockId());
                 var cpy = this.fullCopy(),
                     nb = cpy.nextBlock(),
                     ide = myself.parentThatIsA(IDE_Morph);
@@ -2371,6 +2391,7 @@ BlockMorph.prototype.deleteBlock = function () {
 };
 
 BlockMorph.prototype.ringify = function () {
+    Trace.log("Block.ringify", this.blockId());
     // wrap a Ring around me
     var ring = new RingMorph(),
         top = this.topBlock(),
@@ -2395,6 +2416,7 @@ BlockMorph.prototype.ringify = function () {
 };
 
 BlockMorph.prototype.unringify = function () {
+    Trace.log("Block.unringify", this.blockId());
     // remove a Ring around me, if any
     var ring = this.parentThatIsA(RingMorph),
         scripts = this.parentThatIsA(ScriptsMorph),
@@ -3197,6 +3219,7 @@ BlockMorph.prototype.situation = function () {
 // BlockMorph sticky comments
 
 BlockMorph.prototype.prepareToBeGrabbed = function (hand) {
+    Trace.log("Block.grabbed", this.blockId());
     var myself = this;
     this.allComments().forEach(function (comment) {
         comment.startFollowing(myself, hand.world);
@@ -3233,6 +3256,7 @@ BlockMorph.prototype.stackHeight = function () {
 };
 
 BlockMorph.prototype.snap = function () {
+    Trace.log("Block.snap", this.blockId());
     var top = this.topBlock();
     top.allComments().forEach(function (comment) {
         comment.align(top);
@@ -3514,6 +3538,7 @@ CommandBlockMorph.prototype.isStop = function () {
 // CommandBlockMorph deleting
 
 CommandBlockMorph.prototype.userDestroy = function () {
+    CommandBlockMorph.uber.userDestroy.call(this);
     if (this.nextBlock()) {
         this.userDestroyJustThis();
         return;
@@ -4278,6 +4303,7 @@ ReporterBlockMorph.prototype.ExportResultPic = function () {
 
 ReporterBlockMorph.prototype.userDestroy = function () {
     // make sure to restore default slot of parent block
+    ReporterBlockMorph.uber.userDestroy.call(this);
     this.prepareToBeGrabbed(this.world().hand);
     this.destroy();
 };

@@ -967,7 +967,9 @@ IDE_Morph.prototype.createPalette = function (forSearching) {
             myself.currentSprite.wearCostume(null);
             droppedMorph.destroy();
         } else {
-            // TODO: possible block destroyed logging
+            if (droppedMorph instanceof BlockMorph) {
+                Trace.log("Block.dragDestroy", droppedMorph.blockId());
+            }
             droppedMorph.destroy();
         }
     };

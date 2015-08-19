@@ -5379,6 +5379,18 @@ ArgMorph.prototype.init = function (type) {
     this.setExtent(new Point(50, 50));
 };
 
+ArgMorph.prototype.argId = function() {
+    var block = this.parentThatIsA(BlockMorph);
+    if (!block) return null;
+    // Get the index of this arg out of all the parent's args
+    var index = block.children.filter(function(child) {
+            return child instanceof ArgMorph;
+    }).indexOf(this);
+    var id = block.blockId();
+    id.index = index;
+    return id;
+}
+
 // ArgMorph drag & drop: for demo puposes only
 
 ArgMorph.prototype.justDropped = function () {
@@ -6613,6 +6625,7 @@ InputSlotMorph.prototype.setContents = function (aStringOrFloat) {
 
 InputSlotMorph.prototype.dropDownMenu = function () {
     var choices = this.choices,
+        myself = this,
         key,
         menu = new MenuMorph(
             this.setContents,
@@ -6629,7 +6642,13 @@ InputSlotMorph.prototype.dropDownMenu = function () {
     if (!choices) {
         return null;
     }
-    menu.addItem(' ', null);
+    menu.addItem(' ', function() {
+        Trace.log("InputSlot.menuItemSelected", {
+            "id": myself.argId(),
+            "item": " ",
+        });
+        return ' ';
+    });
     for (key in choices) {
         if (Object.prototype.hasOwnProperty.call(choices, key)) {
             if (key[0] === '~') {
@@ -6637,7 +6656,18 @@ InputSlotMorph.prototype.dropDownMenu = function () {
             // } else if (key.indexOf('§_def') === 0) {
             //     menu.addItem(choices[key].blockInstance(), choices[key]);
             } else {
-                menu.addItem(key, choices[key]);
+                // capture the key in a function call to avoid closure nonsense
+                (function (fKey) {
+                    menu.addItem(key, function() {
+                        Trace.log("InputSlot.menuItemSelected", {
+                            "id": myself.argId(),
+                            "item": fKey,
+                        });
+                        var choice = choices[fKey];
+                        if (choice instanceof Function) return choice();
+                        return choice;
+                    });
+                })(key);
             }
         }
     }
@@ -7063,6 +7093,7 @@ InputSlotMorph.prototype.reactToKeystroke = function () {
 };
 
 InputSlotMorph.prototype.reactToEdit = function () {
+    Trace.log("InputSlot.edited", {"id": this.argId(), "text": this.contents().text})
     this.contents().clearSelection();
 };
 

@@ -2015,6 +2015,7 @@ BlockMorph.prototype.blockId = function() {
     return {
         "selector": this.selector,
         "id": this.id,
+        "template": this.isTemplate,
     };
 }
 
@@ -5383,11 +5384,11 @@ ArgMorph.prototype.argId = function() {
     var block = this.parentThatIsA(BlockMorph);
     if (!block) return null;
     // Get the index of this arg out of all the parent's args
-    var index = block.children.filter(function(child) {
+    var index = this.parent.children.filter(function(child) {
             return child instanceof ArgMorph;
     }).indexOf(this);
     var id = block.blockId();
-    id.index = index;
+    id.argIndex = index;
     return id;
 }
 
@@ -9224,6 +9225,10 @@ ColorSlotMorph.prototype.getUserColor = function () {
     hand.processMouseDown = nop;
 
     hand.processMouseUp = function () {
+        Trace.log("ColorArg.changeColor", {
+            "id": myself.argId(),
+            "color": myself.color,
+        });
         pal.destroy();
         hand.processMouseMove = mouseMoveBak;
         hand.processMouseDown = mouseDownBak;
@@ -9588,12 +9593,14 @@ MultiArgMorph.prototype.mouseClickLeft = function (pos) {
     if (rightArrow.bounds.containsPoint(pos)) {
         for (i = 0; i < repetition; i += 1) {
             if (rightArrow.isVisible) {
+                Trace.log("MultiArg.addInput", this.argId());
                 this.addInput();
             }
         }
     } else if (leftArrow.bounds.containsPoint(pos)) {
         for (i = 0; i < repetition; i += 1) {
             if (leftArrow.isVisible) {
+                Trace.log("MultiArg.removeInput", this.argId());
                 this.removeInput();
             }
         }

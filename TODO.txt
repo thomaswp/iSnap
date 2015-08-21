@@ -1,6 +1,3 @@
-* variables
-* undrop
 * custom blocks
 * script/costume/sound tabs
 * sprite details
-* script area menu (clean up, etc)

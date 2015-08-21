@@ -2016,6 +2016,7 @@ BlockMorph.prototype.blockId = function() {
         "selector": this.selector,
         "id": this.id,
         "template": this.isTemplate,
+        "spec": this.blockSpec,
     };
 }
 
@@ -5223,6 +5224,7 @@ ScriptsMorph.prototype.userMenu = function () {
 // ScriptsMorph user menu features:
 
 ScriptsMorph.prototype.cleanUp = function () {
+    Trace.log("Scripts.cleanUp");
     var origin = this.topLeft(),
         y = this.cleanUpMargin,
         myself = this;
@@ -5248,6 +5250,7 @@ ScriptsMorph.prototype.cleanUp = function () {
 };
 
 ScriptsMorph.prototype.exportScriptsPicture = function () {
+    Trace.log("Scripts.exportPicture");
     var pic = this.scriptsPicture();
     if (pic) {
         window.open(pic.toDataURL());
@@ -5285,6 +5288,7 @@ ScriptsMorph.prototype.addComment = function () {
 
 ScriptsMorph.prototype.undrop = function () {
     if (!this.lastDroppedBlock) {return; }
+    Trace.log("Scripts.undrop", this.lastDroppedBlock.blockId());
     if (this.lastDroppedBlock instanceof CommandBlockMorph) {
         if (this.lastNextBlock) {
             this.add(this.lastNextBlock);

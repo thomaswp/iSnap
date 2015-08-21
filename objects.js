@@ -2490,6 +2490,7 @@ SpriteMorph.prototype.searchBlocks = function () {
 // SpriteMorph variable management
 
 SpriteMorph.prototype.addVariable = function (name, isGlobal) {
+    Trace.log("Sprite.addVariable", name);
     var ide = this.parentThatIsA(IDE_Morph);
     if (isGlobal) {
         this.variables.parentFrame.addVar(name);
@@ -2503,6 +2504,7 @@ SpriteMorph.prototype.addVariable = function (name, isGlobal) {
 };
 
 SpriteMorph.prototype.deleteVariable = function (varName) {
+    Trace.log("Sprite.deleteVariable", varName);
     var ide = this.parentThatIsA(IDE_Morph);
     this.deleteVariableWatcher(varName);
     this.variables.deleteVar(varName);

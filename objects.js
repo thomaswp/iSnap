@@ -1425,7 +1425,11 @@ SpriteMorph.prototype.appearIn = function (ide) {
 // SpriteMorph versioning
 
 SpriteMorph.prototype.setName = function (string) {
-    this.name = string || this.name;
+    var name = string || this.name;
+    if (name != this.name) {
+        Trace.log("Sprite.setName", name);
+    }
+    this.name = name;
     this.version = Date.now();
 };
 

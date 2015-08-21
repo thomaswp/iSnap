@@ -1030,6 +1030,7 @@ IDE_Morph.prototype.createSpriteBar = function () {
             myself, // the IDE is the target
             function () {
                 if (myself.currentSprite instanceof SpriteMorph) {
+                    Trace.log("IDE.rotationStyleChanged", rotationStyle);
                     myself.currentSprite.rotationStyle = rotationStyle;
                     myself.currentSprite.changed();
                     myself.currentSprite.drawNew();
@@ -1113,6 +1114,8 @@ IDE_Morph.prototype.createSpriteBar = function () {
         function () {
             myself.currentSprite.isDraggable =
                 !myself.currentSprite.isDraggable;
+            Trace.log("IDE.setSpriteDraggable",
+                myself.currentSprite.isDraggable);
         },
         localize('draggable'),
         function () {
@@ -1141,6 +1144,7 @@ IDE_Morph.prototype.createSpriteBar = function () {
 
     // tab bar
     tabBar.tabTo = function (tabString) {
+        Trace.log("IDE.setSpriteTab", tabString);
         var active;
         myself.currentTab = tabString;
         this.children.forEach(function (each) {
@@ -3454,6 +3458,7 @@ IDE_Morph.prototype.toggleAppMode = function (appMode) {
         ];
 
     this.isAppMode = isNil(appMode) ? !this.isAppMode : appMode;
+    Trace.log("IDE.toggleAppMode", this.isAppMode);
 
     Morph.prototype.trackChanges = false;
     if (this.isAppMode) {
@@ -3508,6 +3513,7 @@ IDE_Morph.prototype.toggleStageSize = function (isSmall) {
 
     function toggle() {
         myself.isSmallStage = isNil(isSmall) ? !myself.isSmallStage : isSmall;
+        Trace.log("IDE.toggleStageSize", myself.isSmallStage);
     }
 
     function zoomIn() {

@@ -1,3 +1,2 @@
 * custom blocks
-* script/costume/sound tabs
-* sprite details
+* all the menus (maybe another day...)

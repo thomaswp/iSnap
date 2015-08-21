@@ -2209,7 +2209,13 @@ BlockMorph.prototype.userMenu = function () {
             function () {
                 new DialogBoxMorph(
                     myself,
-                    myself.setSpec,
+                    function(arg) {
+                        Trace.log("Block.rename", {
+                            "id": myself.blockId(),
+                            "name": arg,
+                        })
+                        myself.setSpec(arg);
+                    },
                     myself
                 ).prompt(
                     "Variable name",
@@ -2464,6 +2470,10 @@ BlockMorph.prototype.relabel = function (alternativeSelectors) {
         menu.addItem(
             block,
             function () {
+                Trace.log("Block.relabel", {
+                    "id": myself.blockId(),
+                    "selector": sel,
+                });
                 myself.setSelector(sel);
             }
         );
@@ -4272,7 +4282,8 @@ ReporterBlockMorph.prototype.getSlotSpec = function () {
 // ReporterBlockMorph events
 
 ReporterBlockMorph.prototype.mouseClickLeft = function (pos) {
-    var isRing;
+    var isRing,
+        myself = this;
     if (this.parent instanceof BlockInputFragmentMorph) {
         return this.parent.mouseClickLeft();
     }
@@ -4281,7 +4292,13 @@ ReporterBlockMorph.prototype.mouseClickLeft = function (pos) {
             this.parent.parent.parent instanceof RingMorph;
         new DialogBoxMorph(
             this,
-            this.setSpec,
+            function(arg) {
+                Trace.log("TemplateArg.rename", {
+                    "id": myself.parent.argId(),
+                    "name": arg,
+                });
+                myself.setSpec(arg);
+            },
             this
         ).prompt(
             isRing ? "Input name" : "Script variable name",

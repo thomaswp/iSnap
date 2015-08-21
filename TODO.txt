@@ -1,6 +1,5 @@
-* parameters
 * variables
-* relabel
+* undrop
 * custom blocks
 * script/costume/sound tabs
 * sprite details

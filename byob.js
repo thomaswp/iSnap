@@ -760,7 +760,9 @@ CustomCommandBlockMorph.prototype.userMenu = function () {
         // menu.addItem("export definition...", 'exportBlockDefinition');
         menu.addItem("delete block definition...", 'deleteBlockDefinition');
     }
-    menu.addItem("edit...", 'edit'); // works also for prototypes
+    if (!BlockEditorMorph.showing) {
+        menu.addItem("edit...", 'edit'); // works also for prototypes
+    }
     return menu;
 };
 
@@ -1654,6 +1656,9 @@ BlockEditorMorph.prototype = new DialogBoxMorph();
 BlockEditorMorph.prototype.constructor = BlockEditorMorph;
 BlockEditorMorph.uber = DialogBoxMorph.prototype;
 
+// We should really only allow one custom block editor at a time
+BlockEditorMorph.showing = false;
+
 // BlockEditorMorph instance creation:
 
 function BlockEditorMorph(definition, target) {
@@ -1665,6 +1670,15 @@ BlockEditorMorph.prototype.ok = function() {
     BlockEditorMorph.uber.ok.apply(this, arguments);
 }
 
+BlockEditorMorph.prototype.destroy = function() {
+    BlockEditorMorph.uber.destroy.apply(this, arguments);
+    // Apparently one can destroy dialogs multiple times, so we
+    // only set it to not showing if this is an open editor
+    if (this.destroyed) return;
+    this.destroyed = true;
+    BlockEditorMorph.showing = false;
+}
+
 BlockEditorMorph.prototype.init = function (definition, target) {
     var scripts, proto, scriptsFrame, block, comment, myself = this;
 
@@ -1673,6 +1687,10 @@ BlockEditorMorph.prototype.init = function (definition, target) {
         "category": definition.category,
         "type": definition.type,
     } : null);
+
+    console.log("shown");
+    this.destroyed = false;
+    BlockEditorMorph.showing = true;
 
     // additional properties:
     this.definition = definition;

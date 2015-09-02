@@ -5191,7 +5191,7 @@ ScriptsMorph.prototype.userMenu = function () {
         'exportScriptsPicture',
         'open a new window\nwith a picture of all scripts'
     );
-    if (ide) {
+    if (ide && !BlockEditorMorph.showing) {
         menu.addLine();
         menu.addItem(
             'make a block...',

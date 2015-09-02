@@ -2119,6 +2119,7 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         button = new PushButtonMorph(
             null,
             function () {
+                if (BlockEditorMorph.showing) return;
                 var ide = myself.parentThatIsA(IDE_Morph),
                     stage = myself.parentThatIsA(StageMorph);
                 new BlockDialogMorph(
@@ -5328,6 +5329,7 @@ StageMorph.prototype.blockTemplates = function (category) {
         button = new PushButtonMorph(
             null,
             function () {
+                if (BlockEditorMorph.showing) return;
                 var ide = myself.parentThatIsA(IDE_Morph);
                 new BlockDialogMorph(
                     null,

@@ -200,7 +200,7 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
             }, 1000);
         }
     };
-    xhr.open("POST", "log_mysql.php", true);
+    xhr.open("POST", "logging/mysql.php", true);
     xhr.send(data);
 }
 

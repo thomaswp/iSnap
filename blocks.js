@@ -348,8 +348,6 @@ function SyntaxElementMorph() {
 }
 
 SyntaxElementMorph.prototype.init = function () {
-    this._debugType = /function (.{1,})\(/.exec(this.constructor.toString())[1]; //TODO: REMOVE
-
     this.cachedClr = null;
     this.cachedClrBright = null;
     this.cachedClrDark = null;

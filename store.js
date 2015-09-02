@@ -1411,6 +1411,21 @@ StageMorph.prototype.toXML = function (serializer) {
     }
 
     this.removeAllClones();
+
+    // If the user is currently editing a custom block, we add it to the XML.
+    // This is just for logging - it is not used when importing from XML.
+    var editingBlock = '';
+    if (BlockEditorMorph.showing) {
+        var children = BlockEditorMorph.showing.allChildren().filter(function (child) {
+            return child instanceof ScriptsMorph;
+        });
+        if (children.length > 0) {
+            editingBlock = '<scripts>' +
+                children[0].toXML(serializer) +
+                '</scripts>';
+        }
+    }
+
     return serializer.format(
         '<project name="@" app="@" version="@">' +
             '<notes>$</notes>' +
@@ -1432,6 +1447,7 @@ StageMorph.prototype.toXML = function (serializer) {
             '<code>%</code>' +
             '<blocks>%</blocks>' +
             '<variables>%</variables>' +
+            '<editing>%</editing>' +
             '</project>',
         (ide && ide.projectName) ? ide.projectName : localize('Untitled'),
         serializer.app,
@@ -1463,7 +1479,8 @@ StageMorph.prototype.toXML = function (serializer) {
         code('codeMappings'),
         serializer.store(this.globalBlocks),
         (ide && ide.globalVariables) ?
-                    serializer.store(ide.globalVariables) : ''
+                    serializer.store(ide.globalVariables) : '',
+        editingBlock
     );
 };
 

@@ -1656,8 +1656,8 @@ BlockEditorMorph.prototype = new DialogBoxMorph();
 BlockEditorMorph.prototype.constructor = BlockEditorMorph;
 BlockEditorMorph.uber = DialogBoxMorph.prototype;
 
-// We should really only allow one custom block editor at a time
-BlockEditorMorph.showing = false;
+// Keep track of the currently showing block editor (and allow only one)
+BlockEditorMorph.showing = null;
 
 // BlockEditorMorph instance creation:
 
@@ -1672,11 +1672,8 @@ BlockEditorMorph.prototype.ok = function() {
 
 BlockEditorMorph.prototype.destroy = function() {
     BlockEditorMorph.uber.destroy.apply(this, arguments);
-    // Apparently one can destroy dialogs multiple times, so we
-    // only set it to not showing if this is an open editor
-    if (this.destroyed) return;
-    this.destroyed = true;
-    BlockEditorMorph.showing = false;
+    if (BlockEditorMorph.showing != this) return;
+    BlockEditorMorph.showing = null;
 }
 
 BlockEditorMorph.prototype.init = function (definition, target) {
@@ -1688,9 +1685,7 @@ BlockEditorMorph.prototype.init = function (definition, target) {
         "type": definition.type,
     } : null);
 
-    console.log("shown");
-    this.destroyed = false;
-    BlockEditorMorph.showing = true;
+    BlockEditorMorph.showing = this;
 
     // additional properties:
     this.definition = definition;

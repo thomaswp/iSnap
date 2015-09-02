@@ -90,7 +90,11 @@ Logger.prototype.log = function(message, data, saveImmediately) {
 Logger.prototype.addCode = function(log) {
     if (typeof(ide) == 'undefined' || !ide.stage) return;
     log.projectID = ide.stage.guid;
-    log.code = this.serializer.serialize(ide.stage);
+    var code = this.serializer.serialize(ide.stage);
+    if (code != this.lastCode) {
+        log.code = code;
+        this.lastCode = code;
+    }
 }
 
 Logger.prototype.addXmlNewlines = function(xml) {

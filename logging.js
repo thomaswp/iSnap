@@ -91,6 +91,7 @@ Logger.prototype.addCode = function(log) {
     if (typeof(ide) == 'undefined' || !ide.stage) return;
     log.projectID = ide.stage.guid;
     var code = this.serializer.serialize(ide.stage);
+    code = this.removeImages(code);
     if (code != this.lastCode) {
         log.code = code;
         this.lastCode = code;
@@ -100,6 +101,7 @@ Logger.prototype.addCode = function(log) {
 Logger.prototype.addXmlNewlines = function(xml) {
     // Add newlines at the end of each tag
     // TODO: there's probably a better regex way to do this
+    if (!xml) return xml;
     xml = xml.replace(/(<[^<>]*>)/g, "$1\n");
     xml = xml.replace(/(.)(<[^<>]*>)/g, "$1\n$2");
     xml = xml.trim();
@@ -125,6 +127,11 @@ Logger.prototype.start = function(interval) {
         myself.storeMessages(myself.queue)
         myself.queue = [];
     }, interval);
+}
+
+Logger.prototype.removeImages = function(xml) {
+    if (!xml) return xml;
+    return xml.replace(/data:image\/png;base64[^<\"]*/g, "");
 }
 
 function DiffLogger(interval) {
@@ -188,7 +195,7 @@ DBLogger.prototype.storeMessages = function(logs) {
 
 DBLogger.prototype.sendToServer = function(data, attempts) {
     if (attempts >= 3) {
-        Trace.log("Log.failure");
+        // Trace.log("Log.failure"); // creates a loop, probably not good
         return; // max retries if the logging fails
     }
 

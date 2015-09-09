@@ -204,4 +204,4 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
     xhr.send(data);
 }
 
-var Trace = new Logger(3000);
+var Trace = new DBLogger(3000);

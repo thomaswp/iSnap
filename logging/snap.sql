@@ -30,10 +30,12 @@ DROP TABLE IF EXISTS `trace`;
 
 CREATE TABLE IF NOT EXISTS `trace` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `time` datetime NOT NULL,
   `message` varchar(40) NOT NULL,
-  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `projectID` varchar(40) NOT NULL,
   `data` text NOT NULL,
+  `projectID` varchar(40) NOT NULL,
+  `sessionID` varchar(40) NOT NULL,
+  `browserID` varchar(40) NOT NULL,
   `code` text NOT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

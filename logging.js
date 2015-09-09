@@ -187,13 +187,16 @@ DBLogger.prototype.storeMessages = function(logs) {
 }
 
 DBLogger.prototype.sendToServer = function(data, attempts) {
-    if (attempts >= 3) return; // max retries if the logging fails
+    if (attempts >= 3) {
+        Trace.log("Log.failure");
+        return; // max retries if the logging fails
+    }
 
     var xhr = new XMLHttpRequest();
     var myself = this;
     var retry = false;
     xhr.onreadystatechange = function() {
-        if (xhr.status != 200 && !retry) {
+        if (xhr.status > 0 && xhr.status != 200 && !retry) {
             retry = true;
             setTimeout(function() {
                 myself.sendToServer(data, attempts + 1);

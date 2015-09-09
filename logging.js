@@ -108,7 +108,7 @@ Logger.prototype.addXmlNewlines = function(xml) {
 
 Logger.prototype.storeMessages = function(logs) {
     logs.forEach(function(log) {
-        console.log(log)
+        console.log(log);
     });
 }
 

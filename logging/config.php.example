@@ -1,5 +1,9 @@
+<?php
+
 $db = "snap";
 $user = "root";
-$password = "testing123"
+$password = "testing123";
 $host = "localhost";
 $table = "trace";
+
+?>

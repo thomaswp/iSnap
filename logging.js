@@ -1,8 +1,6 @@
 // Logs things. Not a morphic.
 
-var UserInfo;
-var Logger;
-var DBLogger;
+// Helper functions
 
 function newGuid() {
     var d = new Date().getTime();
@@ -17,6 +15,26 @@ function newGuid() {
 if (!Date.now) {
     Date.now = function() { return new Date().getTime(); }
 }
+
+// Credit: http://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript
+function getSearchParameters() {
+      var prmstr = window.location.search.substr(1);
+      return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+}
+
+function transformToAssocArray( prmstr ) {
+    var params = {};
+    var prmarr = prmstr.split("&");
+    for ( var i = 0; i < prmarr.length; i++) {
+        var tmparr = prmarr[i].split("=");
+        params[tmparr[0]] = tmparr[1];
+    }
+    return params;
+}
+
+var assignmentID = getSearchParameters()['assignment'];
+
+// Logger classes
 
 function Logger(interval) {
     this.init(interval);
@@ -43,6 +61,7 @@ Logger.prototype.userInfo = function() {
     return {
         "sessionID": Logger.sessionID,
         "browserID": browserID,
+        "assignmentID": assignmentID,
     };
 }
 
@@ -146,10 +165,10 @@ DiffLogger.prototype.codeDiff = function(a, b, addNewLines) {
         b = this.addXmlNewlines(b);
     }
 
-    aArray = a.split("\n");
-    bArray = b.split("\n");
+    var aArray = a.split("\n");
+    var bArray = b.split("\n");
 
-    difference = diff(aArray, bArray);
+    var difference = diff(aArray, bArray);
     var out = [];
     var line = 0;
     for (var i = 0; i < difference.length; i++) {

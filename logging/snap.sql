@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `trace` (
   `time` datetime NOT NULL,
   `message` varchar(40) NOT NULL,
   `data` text NOT NULL,
+  `assignmentID` varchar(40) NOT NULL,
   `projectID` varchar(40) NOT NULL,
   `sessionID` varchar(40) NOT NULL,
   `browserID` varchar(40) NOT NULL,

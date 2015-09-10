@@ -1,7 +1,8 @@
 window.assignments = {
 	"none": "None",
-	"guessLab": "Guessing Game (Lab)",
-	"guessHW": "Guessing Game (Homework)",
+	"guess1Lab": "Guessing Game Part 1 (Lab)",
+	"guess2HW": "Guessing Game Part 2 (Homework)",
 	"brickLab": "Brick Wall (Lab)",
-	"project": "Final Project"
+	"project": "Final Project",
+	"test": "Testing",
 }

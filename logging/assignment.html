@@ -21,6 +21,7 @@
 			var select = document.getElementById("assignment");
 			for (var key in assignments) {
 				if (assignments.hasOwnProperty(key)) {
+					if (key == "test") ccontinue;
 					var option = document.createElement("option");
 					option.text = assignments[key];
 					option.value = key;

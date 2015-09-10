@@ -19,6 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `snap`
 --
+CREATE DATABASE IF NOT EXISTS snap;
+USE snap;
 
 -- --------------------------------------------------------
 

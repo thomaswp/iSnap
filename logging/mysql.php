@@ -3,6 +3,7 @@
 include "config.php";
 
 try {
+    date_default_timezone_set('America/New_York');
 
     $mysqli = new mysqli($host, $user, $password, $db);
     if ($mysqli->connect_errno) {
@@ -22,8 +23,8 @@ try {
     
     foreach ($logs as $log) {
     
-        $keys = ['message', 'time', 'projectID', 'data', 'code'];
-    
+        $keys = array('message', 'time', 'projectID', 'data', 'code');
+
         foreach ($keys as $key) {
             if (!array_key_exists($key, $log)) {
                 $log[$key] = '';

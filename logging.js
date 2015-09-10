@@ -32,7 +32,18 @@ function transformToAssocArray( prmstr ) {
     return params;
 }
 
-var assignmentID = getSearchParameters()['assignment'];
+var assignmentID;
+
+function checkAssignment() {
+    assignmentID = getSearchParameters()['assignment'];
+    
+    if (!window.assignments) return;
+    if (!window.assignments[assignmentID]) {
+        window.location.replace("logging/assignment.html");
+    } 
+}
+
+checkAssignment();
 
 // Logger classes
 

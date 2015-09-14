@@ -39,10 +39,6 @@ include '../config.php';
 			#cleared {
 				clear: both;
 			}
-			.thin {
-				width: 350px;
-				word-wrap: break-word;
-			}
 		</style>
 		<script type="text/javascript">
 			function loadSnap(id) {
@@ -93,9 +89,19 @@ include '../config.php';
 							$link = $row['link'];
 							
 							$first = $time;
-							if ($link) $first = "<a href='#' onclick='loadSnap(\"$id\")'>$first</a>";
+							if ($link) $first = "<a href='#$id' onclick='loadSnap(\"$id\")'>$first</a>";
 							
-							echo "<tr><td>$first</td><td>$message</td><td><div class='thin'>$data</div></td></tr>";
+							$link = "http://www.bodurov.com/JsonFormatter/view.aspx?json=" . urlencode($data);
+							
+							$link_text = $data;
+							$cutoff = 45;
+							if ($link_text == "\"\"") $link_text = "";
+							if (strlen($link_text) > $cutoff) {
+								$link_text = substr($link_text, 0, $cutoff) . "...";
+							}
+							$link = "<a target='_blank' href='$link' title='$data'>$link_text</a>";
+							
+							echo "<tr><td>$first</td><td>$message</td><td>$link</td></tr>";
 						}
 						echo "</table>";
 					} else {

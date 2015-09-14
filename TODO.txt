@@ -1,2 +1,2 @@
-* all the menus (maybe another day...)
-* save to DB
+* loading projects: update projectID quicker
+* possible duplicate projectIDs?

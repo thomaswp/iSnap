@@ -27,6 +27,8 @@ include '../config.php';
 			#content {
 				float: right;
 				width: 100%;
+				display: block;
+				height: 100%;
 			}
 			#sidebar {
 				float: left;
@@ -36,6 +38,10 @@ include '../config.php';
 			}
 			#cleared {
 				clear: both;
+			}
+			.thin {
+				width: 350px;
+				word-wrap: break-word;
 			}
 		</style>
 		<script type="text/javascript">
@@ -58,6 +64,7 @@ include '../config.php';
 				 <iframe id="snap" width="100%" height="100%" src="../../snap.html?assignment=view"></iframe> 
 			</div>
 			<div id="content">
+				<div style="overflow: scroll; height: 100%;">
 				<?php
 					if ($enble_viewer) {
 						$id = $_GET['id'];
@@ -88,14 +95,14 @@ include '../config.php';
 							$first = $time;
 							if ($link) $first = "<a href='#' onclick='loadSnap(\"$id\")'>$first</a>";
 							
-							echo "<tr><td>$first</td><td>$message</td><td>$data</td></tr>";
+							echo "<tr><td>$first</td><td>$message</td><td><div class='thin'>$data</div></td></tr>";
 						}
 						echo "</table>";
-						
 					} else {
 						echo "You do not have permission to view this page";
 					}
 				?>
+				</div>
 			</div>
 			<div id="cleared"></div>
 		</div>

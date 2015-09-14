@@ -64,6 +64,7 @@ include '../config.php';
 				<?php
 					if ($enble_viewer) {
 						$id = $_GET['id'];
+						$assignment = $_GET['assignment'];
 						
 						echo "<h3>Project: $id</h3>";
 						
@@ -72,14 +73,14 @@ include '../config.php';
 							die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
 						}
 						
-						$query = "SELECT id, time, message, data, code <> '' as link FROM $table WHERE projectID='$id'";
+						$query = "SELECT id, time, message, data, code <> '' as link, sessionID FROM $table WHERE projectID='$id' AND assignmentID='$assignment'";
 						$result = $mysqli->query($query); 
 						if (!$result) {
 							die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
 						}
 						
 						echo "<table cellspacing='0'>";
-						echo "<thead><th>Time</th><th>Message</th><th>Data</th></thead>";
+						echo "<thead><th>Time</th><th>Message</th><th>Data</th><th>Session</th></thead>";
 						while($row = mysqli_fetch_array($result)) {
 							
 							$id = $row['id'];
@@ -87,6 +88,9 @@ include '../config.php';
 							$message = $row['message'];
 							$data = $row['data'];
 							$link = $row['link'];
+							$sessionID = $row['sessionID'];
+							
+							$sessionID = substr($sessionID, 0, 3); 
 							
 							$first = $time;
 							if ($link) $first = "<a href='#$id' onclick='loadSnap(\"$id\")'>$first</a>";
@@ -101,7 +105,7 @@ include '../config.php';
 							}
 							$link = "<a target='_blank' href='$link' title='$data'>$link_text</a>";
 							
-							echo "<tr><td>$first</td><td>$message</td><td>$link</td></tr>";
+							echo "<tr><td>$first</td><td>$message</td><td>$link</td><td>$sessionID</td></tr>";
 						}
 						echo "</table>";
 					} else {

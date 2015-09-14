@@ -25,7 +25,7 @@ include '../config.php';
 				}
 				
 				$query = "SELECT projectID, assignmentID, min(time) as start, max(time) as end, count(*) as logs FROM `trace` " .
-					"WHERE projectID <> '' GROUP BY projectID HAVING count(*) > 1 ORDER BY end DESC";
+					"WHERE projectID <> '' GROUP BY concat(projectID,assignmentID) HAVING count(*) > 1 ORDER BY end DESC";
 				$result = $mysqli->query($query); 
 				if (!$result) {
 					die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
@@ -39,7 +39,7 @@ include '../config.php';
 					$start = $row['start'];
 					$end = $row['end'];
 					$logs = $row['logs'];
-					echo "<tr><td><a target='_blank' href='display.php?id=$projectID'>$projectID</a></td>
+					echo "<tr><td><a target='_blank' href='display.php?id=$projectID&assignment=$assignmentID'>$projectID</a></td>
 						<td>$assignmentID</td><td>$start</td><td>$end</td><td>$logs</td></tr>";
 				}
 				echo "</table>";

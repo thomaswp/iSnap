@@ -5,4 +5,5 @@ window.assignments = {
 	"guess3Lab": "Guessing Game Part 3 (In Lab Activity 4)",
 	"project": "SNAP Project (Project Deliverable 1)",
 	"test": "Testing",
+	"view": "Viewing",
 }

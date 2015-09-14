@@ -244,4 +244,10 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
     xhr.send(data);
 }
 
-var Trace = new DBLogger(3000);
+var Trace;
+if (assignmentID == "view") {
+    Trace = new Logger(3000);
+} else {
+    Trace = new DBLogger(3000);
+}
+

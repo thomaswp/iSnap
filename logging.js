@@ -245,13 +245,10 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
 }
 
 var Trace;
-console.log("!!!");
 if (assignmentID == "view") {
     Trace = new Logger(3000);
     setTimeout(function() {
-        window.onbeforeunload = function() {
-            console.log("!");
-        }   
+        window.onbeforeunload = null;
     }, 2000);
 } else {
     Trace = new DBLogger(3000);

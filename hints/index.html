@@ -13,6 +13,7 @@
 				height: calc(100% - 20px);
 			}
 			/* Credit: http://stackoverflow.com/questions/5645986/two-column-div-layout-with-fluid-left-and-fixed-right-column */
+			/*
 			#wrapper {
 				margin-right: 400px;
 				height: 100%;
@@ -32,6 +33,16 @@
 			#cleared {
 				clear: both;
 			}
+			*/
+			#wrapper {
+				height: calc(100% - 110px);
+			}
+			#content {
+				height: 100px;
+			}
+			#sidebar {
+				height: 100%;
+			}
 		</style>
 		<script type="text/javascript" src="hints.js">
 		</script>
@@ -39,13 +50,13 @@
 	
 	<body>
 		<div id="wrapper">
-			<div id="sidebar">
-				 <iframe id="snap" width="100%" height="100%" src="../snap.html?assignment=view" onload="onSnapLoaded()"></iframe> 
-			</div>
 			<div id="content">
-				<div style="overflow: scroll; height: 100%;">
+				<div id="hint" style="overflow: scroll; height: 100%;">
 					Hello!
 				</div>
+			</div>
+			<div id="sidebar">
+				 <iframe id="snap" width="100%" height="100%" src="../snap.html?assignment=view" onload="onSnapLoaded()"></iframe> 
 			</div>
 			<div id="cleared"></div>
 		</div>

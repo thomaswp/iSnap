@@ -7,7 +7,6 @@ function onSnapLoaded() {
 				code = log.code;
 			}
 		});
-		console.log(code);
 		getHint(code);
 	}
 }
@@ -43,20 +42,22 @@ function getHint(code) {
 	// All HTML5 Rocks properties support CORS.
 	var url = 'http://localhost:8080/HintServer/hints';
 	
+	var hintDiv = document.getElementById("hint");
+	
 	var xhr = createCORSRequest('POST', url);
 	if (!xhr) {
-		alert('CORS not supported');
+		hintDiv.innerHTML = "CORS not supported on this browser.";
 		return;
 	}
 	
 	// Response handlers.
 	xhr.onload = function() {
-		document.getElementById("hint").innerHTML = xhr.responseText;
+		hintDiv.innerHTML = xhr.responseText;
 	};
 	
 	xhr.onerror = function(e) {
 		console.log(e);
-		alert('Woops, there was an error making the request.');
+		hintDiv.innerHTML = "Error contacting hint server.";
 	};
 	
 	xhr.send(code);

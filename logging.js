@@ -246,7 +246,7 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
 
 var Trace;
 if (assignmentID == "view") {
-    Trace = new Logger(3000);
+    Trace = new Logger(50);
     setTimeout(function() {
         window.onbeforeunload = null;
     }, 2000);

@@ -71,7 +71,7 @@ function getHint(code) {
 	if (!code) return;
 	
 	// All HTML5 Rocks properties support CORS.
-	var url = 'http://localhost:8080/HintServer/hints';
+	var url = 'http://{0}:8080/HintServer/hints'.format(location.hostname);
 	
 	var hintDiv = document.getElementById("hint");
 	

@@ -40,31 +40,37 @@ function getHintHtml(json) {
 	try {
 		var hints = JSON.parse(json);
 		var html = "";
-		var cssMap = {
-			"+": "plus",
-			"=": "equals",
-			"-": "minus",
-		}
 		for (var i = 0; i < hints.length; i++) {
 			if (html.length > 0) html += "<div/>";
 			var hint = hints[i];
-			var matchRegex = /:|\[|\]|,|\s|\w*/g
-			var code0 = hint.from.match(matchRegex);
-			var code1 = hint.to.match(matchRegex);
-			var codeDiff = diff(code0, code1);
-			html += "<span class='hint'>";
-			html += "[{0},{1}]: ".format(hint.context, hint.quality);
-			for (var j = 0; j < codeDiff.length; j++) {
-				var block = cssMap[codeDiff[j][0]];
-				var code = codeDiff[j][1].join("");
-				html += "<code class={0}>{1}</code>".format(block, code);
-			}
-			html += "</span>";
+			html += createDiff(hint.from, hint.to, hint.context, hint.quality);
+			
 		}
 		return html;
 	} catch (e) {
 		return "Error parsing hints: " + e;
 	}
+}
+
+function createDiff(from, to, context, quality) {
+	var cssMap = {
+		"+": "plus",
+		"=": "equals",
+		"-": "minus",
+	};
+	var matchRegex = /:|\[|\]|,|\s|\w*/g;
+	var code0 = from.match(matchRegex);
+	var code1 = to.match(matchRegex);
+	var codeDiff = diff(code0, code1);
+	var html = "<span class='hint'>";
+	html += "[{0},{1}]: ".format(context, quality);
+	for (var j = 0; j < codeDiff.length; j++) {
+		var block = cssMap[codeDiff[j][0]];
+		var code = codeDiff[j][1].join("");
+		html += "<code class={0}>{1}</code>".format(block, code);
+	}
+	html += "</span>";
+	return html;
 }
 
 function getHint(code) {

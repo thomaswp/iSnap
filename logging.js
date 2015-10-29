@@ -208,7 +208,7 @@ function DiffLogger(interval) {
     Logger.call(this, interval);
 }
 
-DiffLogger.prototype = new Logger();
+DiffLogger.prototype = Object.create(Logger.prototype);
 
 DiffLogger.prototype.codeDiff = function(a, b, addNewLines) {
     if (addNewLines) {
@@ -249,14 +249,15 @@ DiffLogger.prototype.addCode = function(log) {
     this.lastProject = log.projectID;
 }
 
-function DBLogger(interval) {
-    Logger.call(this, interval);
-}
 
 // DBLogger logs to a the logging/mysql.php page,
 // which saves to a MySQL database. See more in 
 // logging/README.md
-DBLogger.prototype = new Logger();
+function DBLogger(interval) {
+    Logger.call(this, interval);
+}
+
+DBLogger.prototype = Object.create(Logger.prototype);
 
 DBLogger.prototype.storeMessages = function(logs) {
     var data = {
@@ -289,7 +290,7 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
 
 // Log to the console
 
-ConsoleLogger.prototype = new Logger();
+ConsoleLogger.prototype = Object.create(Logger.prototype);
 
 function ConsoleLogger(interval) {
     Logger.call(this, interval);

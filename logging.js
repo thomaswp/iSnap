@@ -296,8 +296,10 @@ function ConsoleLogger(interval) {
     Logger.call(this, interval);
 }
 
-ConsoleLogger.storeMessages = function(logs) { 
+ConsoleLogger.prototype.storeMessages = function(logs) { 
+    var myself = this;
     logs.forEach(function(log) {
+        log.userInfo = myself.userInfo();
         console.log(log);
     });
 }

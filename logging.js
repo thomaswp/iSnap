@@ -1,7 +1,12 @@
 // Logs things. Not a morphic.
 
+// The assignment the student is working on
+var assignmentID;
+
 // Helper functions
 
+// Generates a random GUID to help us keep track of things across sessions
+// Credit: http://stackoverflow.com/a/8809472/816458
 function newGuid() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -16,7 +21,8 @@ if (!Date.now) {
     Date.now = function() { return new Date().getTime(); }
 }
 
-// Credit: http://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript
+// Gets a map of the GET parameters in the URL
+// Credit: http://stackoverflow.com/a/5448635/816458
 function getSearchParameters() {
       var prmstr = window.location.search.substr(1);
       return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
@@ -32,18 +38,16 @@ function transformToAssocArray( prmstr ) {
     return params;
 }
 
-var assignmentID;
-
+// Get the assignment passed via GET parameter 
 function checkAssignment() {
     assignmentID = getSearchParameters()['assignment'];
     
-    if (!window.assignments) return;
+    if (!window.assignments || !window.requireAssignment) return;
     if (!window.assignments[assignmentID]) {
+        // redirect if no assignment is listed
         window.location.replace("logging/assignment.html");
     } 
 }
-
-checkAssignment();
 
 // Logger classes
 
@@ -60,8 +64,10 @@ Logger.prototype.init = function(interval) {
     this.start(interval);
 }
 
+// Get user identifying user info and bundle it as an object
 Logger.prototype.userInfo = function() {
     var browserID = null;
+    // browser ID stored in cache or local storage
     if (typeof(Storage) !== "undefined" && localStorage) {
         browserID = localStorage.getItem("browserID");
         if (!browserID) {
@@ -87,6 +93,23 @@ Logger.prototype.flushSaveCode = function() {
     }
 }
 
+/**
+ * Logs a message. Depending on the logger being used, the message
+ * may be output to the console or sent to be stored in a database.
+ * 
+ * @this {Logger}
+ * @param {string} message The message to be logged. This is usually
+ * of the form "[Class].[action]", e.g. "Logger.started", "IDE.selectSprite"
+ * or "Block.snapped"
+ * @param {object} data A javascript object to be logged in its entirety. Be
+ * careful not to pass large objects here.
+ * @param {boolean} saveImmediately If true, the code state will be saved
+ * immediately. By default, the code is saved on the next frame, allowing
+ * logging calls to capture code changes that occur immediately the logging
+ * statement. For example, this allows a logging statement to come at the
+ * beginning of a method which alters the code, and have that state change
+ * still captured.
+ */
 Logger.prototype.log = function(message, data, saveImmediately) {
     if (!(message || data)) return;
 
@@ -139,15 +162,27 @@ Logger.prototype.addXmlNewlines = function(xml) {
 }
 
 Logger.prototype.storeMessages = function(logs) {
-    logs.forEach(function(log) {
-        console.log(log);
-    });
+    
 }
 
+/**
+ * Stops the logger from posting messages.
+ * Messages can still be logged and will post
+ * when the logger is started.
+ * 
+ * @this {Logger}
+ */
 Logger.prototype.stop = function() {
     clearInterval(this.storeCallback);
 }
 
+/**
+ * Starts the logger. Messages will be posted
+ * at the provided interval.
+ * 
+ * @param {int} interval The interval at which to post
+ * logged messages. 
+ */
 Logger.prototype.start = function(interval) {
     if (!interval) return;
     var myself = this;
@@ -164,6 +199,11 @@ Logger.prototype.removeImages = function(xml) {
     return xml.replace(/data:image\/png;base64[^<\"]*/g, "");
 }
 
+
+
+// The DiffLogger requires a reference to simplediff, not currently setup
+// https://github.com/paulgb/simplediff
+// It reduces output by only recordering the diff between two code states.
 function DiffLogger(interval) {
     Logger.call(this, interval);
 }
@@ -179,7 +219,7 @@ DiffLogger.prototype.codeDiff = function(a, b, addNewLines) {
     var aArray = a.split("\n");
     var bArray = b.split("\n");
 
-    var difference = diff(aArray, bArray);
+    var difference = window.diff(aArray, bArray);
     var out = [];
     var line = 0;
     for (var i = 0; i < difference.length; i++) {
@@ -213,6 +253,9 @@ function DBLogger(interval) {
     Logger.call(this, interval);
 }
 
+// DBLogger logs to a the logging/mysql.php page,
+// which saves to a MySQL database. See more in 
+// logging/README.md
 DBLogger.prototype = new Logger();
 
 DBLogger.prototype.storeMessages = function(logs) {
@@ -244,12 +287,35 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
     xhr.send(data);
 }
 
-var Trace;
-if (assignmentID == "view") {
-    Trace = new Logger(50);
-    setTimeout(function() {
-        window.onbeforeunload = null;
-    }, 2000);
-} else {
-    Trace = new DBLogger(3000);
+// Log to the console
+
+ConsoleLogger.prototype = new Logger();
+
+function ConsoleLogger(interval) {
+    Logger.call(this, interval);
 }
+
+ConsoleLogger.storeMessages = function(logs) { 
+    logs.forEach(function(log) {
+        console.log(log);
+    });
+}
+
+// Setup
+function setupLogging() {
+    checkAssignment();
+
+    if (window.createLogger) {
+        window.Trace = window.createLogger(assignmentID);
+    } else {
+        window.Trace = new Logger(50);
+    }
+    
+    if (window.easyReload && window.easyReload(assignmentID)) {
+        setTimeout(function() {
+            window.onbeforeunload = null;
+        }, 2000);
+    }
+}
+
+setupLogging();

@@ -1425,7 +1425,11 @@ SpriteMorph.prototype.appearIn = function (ide) {
 // SpriteMorph versioning
 
 SpriteMorph.prototype.setName = function (string) {
-    this.name = string || this.name;
+    var name = string || this.name;
+    if (name != this.name) {
+        Trace.log("Sprite.setName", name);
+    }
+    this.name = name;
     this.version = Date.now();
 };
 
@@ -2115,6 +2119,7 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         button = new PushButtonMorph(
             null,
             function () {
+                if (BlockEditorMorph.showing) return;
                 var ide = myself.parentThatIsA(IDE_Morph),
                     stage = myself.parentThatIsA(StageMorph);
                 new BlockDialogMorph(
@@ -2241,6 +2246,7 @@ SpriteMorph.prototype.freshPalette = function (category) {
             menu.addItem(
                 'show primitives',
                 function () {
+                    Trace.log("IDE.showPrimitives", ide.currentCategory);
                     var hiddens = StageMorph.prototype.hiddenPrimitives,
                         defs = SpriteMorph.prototype.blocks;
                     Object.keys(hiddens).forEach(function (sel) {
@@ -2489,6 +2495,7 @@ SpriteMorph.prototype.searchBlocks = function () {
 // SpriteMorph variable management
 
 SpriteMorph.prototype.addVariable = function (name, isGlobal) {
+    Trace.log("Sprite.addVariable", name);
     var ide = this.parentThatIsA(IDE_Morph);
     if (isGlobal) {
         this.variables.parentFrame.addVar(name);
@@ -2502,6 +2509,7 @@ SpriteMorph.prototype.addVariable = function (name, isGlobal) {
 };
 
 SpriteMorph.prototype.deleteVariable = function (varName) {
+    Trace.log("Sprite.deleteVariable", varName);
     var ide = this.parentThatIsA(IDE_Morph);
     this.deleteVariableWatcher(varName);
     this.variables.deleteVar(varName);
@@ -4342,6 +4350,7 @@ function StageMorph(globals) {
 
 StageMorph.prototype.init = function (globals) {
     this.name = localize('Stage');
+    this.guid = newGuid();
     this.threads = new ThreadManager();
     this.variables = new VariableFrame(globals || null, this);
     this.scripts = new ScriptsMorph(this);
@@ -5320,6 +5329,7 @@ StageMorph.prototype.blockTemplates = function (category) {
         button = new PushButtonMorph(
             null,
             function () {
+                if (BlockEditorMorph.showing) return;
                 var ide = myself.parentThatIsA(IDE_Morph);
                 new BlockDialogMorph(
                     null,

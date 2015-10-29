@@ -1,5 +1,7 @@
 
-Snap! Build Your Own Blocks
+# Snap! Build Your Own Blocks
+
+> For information on logging, see [logging/README.md](logging/README.md)
 
 http://snap.berkeley.edu
 

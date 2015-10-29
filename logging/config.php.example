@@ -1,0 +1,10 @@
+<?php
+
+$enble_viewer = true;
+$db = "snap";
+$user = "root";
+$password = "testing123";
+$host = "localhost";
+$table = "trace";
+
+?>

@@ -1,0 +1,2 @@
+* loading projects: update projectID quicker
+* possible duplicate projectIDs?

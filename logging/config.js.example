@@ -1,0 +1,35 @@
+
+// A list of assignments that users can select from when using Snap
+// The assignmentID will be logged with each statement
+// "test" and "view" will not show up on the selection menu
+window.assignments = {
+	"none": "None",
+	"guess1Lab": "Guessing Game Part 1 (In Lab Activity 3)",
+	"guess2HW": "Guessing Game Part 2 (Homework 3)",
+	"guess3Lab": "Guessing Game Part 3 (In Lab Activity 4)",
+	"project": "SNAP Project (Project Deliverable 1)",
+	"test": "Testing",
+	"view": "Viewing",
+}
+
+// If true, requires the Snap users to select an assignment before
+// proceeding. Assignments can be pre-specified by using the url
+// snap.html?assignment=id
+window.requireAssignment = true;
+
+// Create the logger you want to use on this snap deployment
+window.createLogger = function(assignmentID) {
+    if (assignmentID == "view") {
+		// Logs to the console
+        return new ConsoleLogger(50);
+    } else {
+		// Logs to a MySQL database
+        return new DBLogger(3000);
+    }
+}
+
+// If this function returns true, Snap will not confirm before
+// you leave the page. This is handy for debugging.
+window.easyReload = function(assignmentID) {
+    return (assignmentID == "test" || assignmentID == "view");
+}

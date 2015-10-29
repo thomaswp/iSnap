@@ -668,6 +668,10 @@ CustomCommandBlockMorph.prototype.edit = function () {
             null,
             function (definition) {
                 if (definition) { // temporarily update everything
+                    Trace.log("BlockEditor.changeType", definition ? {
+                        "category": definition.category,
+                        "type": definition.type,
+                    } : null);
                     hat.blockCategory = definition.category;
                     hat.type = definition.type;
                     myself.refreshPrototype();
@@ -756,7 +760,9 @@ CustomCommandBlockMorph.prototype.userMenu = function () {
         // menu.addItem("export definition...", 'exportBlockDefinition');
         menu.addItem("delete block definition...", 'deleteBlockDefinition');
     }
-    menu.addItem("edit...", 'edit'); // works also for prototypes
+    if (!BlockEditorMorph.showing) {
+        menu.addItem("edit...", 'edit'); // works also for prototypes
+    }
     return menu;
 };
 
@@ -775,6 +781,11 @@ CustomCommandBlockMorph.prototype.deleteBlockDefinition = function () {
     new DialogBoxMorph(
         this,
         function () {
+            Trace.log("IDE.deleteCustomBlock", myself.definition ? {
+                "spec": myself.definition.spec,
+                "category": myself.definition.category,
+                "type": myself.definition.type,
+            } : null);
             rcvr = myself.receiver();
             rcvr.deleteAllBlockInstances(myself.definition);
             if (myself.definition.isGlobal) {
@@ -1223,6 +1234,21 @@ BlockDialogMorph.prototype.init = function (target, action, environment) {
     this.fixLayout();
 };
 
+BlockDialogMorph.prototype.prompt = function() {
+    Trace.log("BlockTypeDialog.newBlock");
+    BlockDialogMorph.uber.prompt.apply(this, arguments);
+}
+
+BlockDialogMorph.prototype.ok = function() {
+    Trace.log("BlockTypeDialog.ok");
+    BlockDialogMorph.uber.ok.apply(this, arguments);
+}
+
+BlockDialogMorph.prototype.cancel = function() {
+    Trace.log("BlockTypeDialog.cancel");
+    BlockDialogMorph.uber.cancel.apply(this, arguments);
+}
+
 BlockDialogMorph.prototype.openForChange = function (
     title,
     category,
@@ -1231,6 +1257,8 @@ BlockDialogMorph.prototype.openForChange = function (
     pic,
     preventTypeChange // <bool>
 ) {
+    Trace.log("BlockTypeDialog.changeBlockType");
+
     var clr = SpriteMorph.prototype.blockColor[category];
     this.key = 'changeABlock';
     this.category = category;
@@ -1628,14 +1656,36 @@ BlockEditorMorph.prototype = new DialogBoxMorph();
 BlockEditorMorph.prototype.constructor = BlockEditorMorph;
 BlockEditorMorph.uber = DialogBoxMorph.prototype;
 
+// Keep track of the currently showing block editor (and allow only one)
+BlockEditorMorph.showing = null;
+
 // BlockEditorMorph instance creation:
 
 function BlockEditorMorph(definition, target) {
     this.init(definition, target);
 }
 
+BlockEditorMorph.prototype.ok = function() {
+    Trace.log("BlockEditor.ok");
+    BlockEditorMorph.uber.ok.apply(this, arguments);
+}
+
+BlockEditorMorph.prototype.destroy = function() {
+    BlockEditorMorph.uber.destroy.apply(this, arguments);
+    if (BlockEditorMorph.showing != this) return;
+    BlockEditorMorph.showing = null;
+}
+
 BlockEditorMorph.prototype.init = function (definition, target) {
     var scripts, proto, scriptsFrame, block, comment, myself = this;
+
+    Trace.log("BlockEditor.start", definition ? {
+        "spec": definition.spec,
+        "category": definition.category,
+        "type": definition.type,
+    } : null);
+
+    BlockEditorMorph.showing = this;
 
     // additional properties:
     this.definition = definition;
@@ -1748,6 +1798,7 @@ BlockEditorMorph.prototype.accept = function () {
 };
 
 BlockEditorMorph.prototype.cancel = function () {
+    Trace.log("BlockEditor.cancel");
     //this.refreshAllBlockInstances();
     this.close();
 };
@@ -1822,6 +1873,8 @@ BlockEditorMorph.prototype.updateDefinition = function () {
         pos = this.body.contents.position(),
         element,
         myself = this;
+
+    Trace.log("BlockEditor.apply");
 
     this.definition.receiver = this.target; // only for serialization
     this.definition.spec = this.prototypeSpec();
@@ -2223,6 +2276,7 @@ BlockLabelFragmentMorph.prototype.mouseClickLeft = function () {
 };
 
 BlockLabelFragmentMorph.prototype.updateBlockLabel = function (newFragment) {
+    Trace.log("BlockEditor.updateBlockLabel", newFragment)
     var prot = this.parentThatIsA(BlockMorph);
 
     this.fragment = newFragment;

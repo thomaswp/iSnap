@@ -253,6 +253,8 @@ IDE_Morph.prototype.init = function (isAutoFill) {
 };
 
 IDE_Morph.prototype.openIn = function (world) {
+    Trace.log("IDE.opened");
+
     var hash, usr, myself = this, urlLanguage = null;
 
     // get persistent user data, if any
@@ -861,6 +863,7 @@ IDE_Morph.prototype.createCategories = function () {
             colors,
             myself, // the IDE is the target
             function () {
+                Trace.log("IDE.changeCategory", category);
                 myself.currentCategory = category;
                 myself.categories.children.forEach(function (each) {
                     each.refresh();
@@ -964,6 +967,9 @@ IDE_Morph.prototype.createPalette = function (forSearching) {
             myself.currentSprite.wearCostume(null);
             droppedMorph.destroy();
         } else {
+            if (droppedMorph instanceof BlockMorph) {
+                Trace.log("Block.dragDestroy", droppedMorph.blockId());
+            }
             droppedMorph.destroy();
         }
     };
@@ -1024,6 +1030,7 @@ IDE_Morph.prototype.createSpriteBar = function () {
             myself, // the IDE is the target
             function () {
                 if (myself.currentSprite instanceof SpriteMorph) {
+                    Trace.log("IDE.rotationStyleChanged", rotationStyle);
                     myself.currentSprite.rotationStyle = rotationStyle;
                     myself.currentSprite.changed();
                     myself.currentSprite.drawNew();
@@ -1107,6 +1114,8 @@ IDE_Morph.prototype.createSpriteBar = function () {
         function () {
             myself.currentSprite.isDraggable =
                 !myself.currentSprite.isDraggable;
+            Trace.log("IDE.setSpriteDraggable",
+                myself.currentSprite.isDraggable);
         },
         localize('draggable'),
         function () {
@@ -1135,6 +1144,7 @@ IDE_Morph.prototype.createSpriteBar = function () {
 
     // tab bar
     tabBar.tabTo = function (tabString) {
+        Trace.log("IDE.setSpriteTab", tabString);
         var active;
         myself.currentTab = tabString;
         this.children.forEach(function (each) {
@@ -1724,13 +1734,16 @@ IDE_Morph.prototype.stopFastTracking = function () {
 };
 
 IDE_Morph.prototype.runScripts = function () {
+    Trace.log("IDE.greenFlag");
     this.stage.fireGreenFlagEvent();
 };
 
 IDE_Morph.prototype.togglePauseResume = function () {
     if (this.stage.threads.isPaused()) {
+        Trace.log("IDE.unpause");
         this.stage.threads.resumeAll(this.stage);
     } else {
+        Trace.log("IDE.pause");
         this.stage.threads.pauseAll(this.stage);
     }
     this.controlBar.pauseButton.refresh();
@@ -1742,10 +1755,12 @@ IDE_Morph.prototype.isPaused = function () {
 };
 
 IDE_Morph.prototype.stopAllScripts = function () {
+    Trace.log("IDE.stop");
     this.stage.fireStopAllEvent();
 };
 
 IDE_Morph.prototype.selectSprite = function (sprite) {
+    Trace.log("IDE.selectSprite", sprite.name);
     this.currentSprite = sprite;
     this.createPalette();
     this.createSpriteBar();
@@ -1872,6 +1887,7 @@ IDE_Morph.prototype.addNewSprite = function () {
         rnd = Process.prototype.reportRandom;
 
     sprite.name = this.newSpriteName(sprite.name);
+    Trace.log("IDE.addSprite", sprite.name);
     sprite.setCenter(this.stage.center());
     this.stage.add(sprite);
 
@@ -1893,6 +1909,7 @@ IDE_Morph.prototype.paintNewSprite = function () {
         myself = this;
 
     sprite.name = this.newSpriteName(sprite.name);
+    Trace.log("IDE.paintNewSprite", sprite.name);
     sprite.setCenter(this.stage.center());
     this.stage.add(sprite);
     this.sprites.add(sprite);
@@ -1912,6 +1929,7 @@ IDE_Morph.prototype.paintNewSprite = function () {
 
 IDE_Morph.prototype.duplicateSprite = function (sprite) {
     var duplicate = sprite.fullCopy();
+    Trace.log("IDE.duplicateSprite", sprite.name);
 
     duplicate.setPosition(this.world().hand.position());
     duplicate.appearIn(this);
@@ -1920,6 +1938,7 @@ IDE_Morph.prototype.duplicateSprite = function (sprite) {
 };
 
 IDE_Morph.prototype.removeSprite = function (sprite) {
+    Trace.log("IDE.removeSprite", sprite.name);
     var idx, myself = this;
     sprite.parts.forEach(function (part) {myself.removeSprite(part); });
     idx = this.sprites.asArray().indexOf(sprite) + 1;
@@ -2819,6 +2838,7 @@ IDE_Morph.prototype.editProjectNotes = function () {
 };
 
 IDE_Morph.prototype.newProject = function () {
+    Trace.log("IDE.newProject");
     this.source = SnapCloud.username ? 'cloud' : 'local';
     if (this.stage) {
         this.stage.destroy();
@@ -2861,6 +2881,7 @@ IDE_Morph.prototype.save = function () {
 
 
 IDE_Morph.prototype.saveProject = function (name) {
+    Trace.log("IDE.saveProject", name);
     var myself = this;
     this.nextSteps([
         function () {
@@ -2895,6 +2916,7 @@ IDE_Morph.prototype.rawSaveProject = function (name) {
 };
 
 IDE_Morph.prototype.saveProjectToDisk = function () {
+    Trace.log("IDE.saveProjectToDisk");
     var data,
         link = document.createElement('a');
 
@@ -2920,6 +2942,7 @@ IDE_Morph.prototype.saveProjectToDisk = function () {
 };
 
 IDE_Morph.prototype.exportProject = function (name, plain) {
+    Trace.log("IDE.exportProject", name);
     var menu, str;
     if (name) {
         this.setProjectName(name);
@@ -2952,6 +2975,7 @@ IDE_Morph.prototype.exportProject = function (name, plain) {
 };
 
 IDE_Morph.prototype.exportGlobalBlocks = function () {
+    Trace.log("IDE.exportGlobalBlocks");
     if (this.stage.globalBlocks.length > 0) {
         new BlockExportDialogMorph(
             this.serializer,
@@ -2967,6 +2991,7 @@ IDE_Morph.prototype.exportGlobalBlocks = function () {
 };
 
 IDE_Morph.prototype.exportSprite = function (sprite) {
+    Trace.log("IDE.exportSprite", sprite.name);
     var str = encodeURIComponent(
         this.serializer.serialize(sprite.allParts())
     );
@@ -2980,6 +3005,7 @@ IDE_Morph.prototype.exportSprite = function (sprite) {
 };
 
 IDE_Morph.prototype.exportScriptsPicture = function () {
+    Trace.log("IDE.exportScriptsPicture");
     var pics = [],
         pic,
         padding = 20,
@@ -3030,6 +3056,7 @@ IDE_Morph.prototype.exportScriptsPicture = function () {
 };
 
 IDE_Morph.prototype.openProjectString = function (str) {
+    Trace.log("IDE.openProjectString");
     var msg,
         myself = this;
     this.nextSteps([
@@ -3072,6 +3099,7 @@ IDE_Morph.prototype.rawOpenProjectString = function (str) {
 };
 
 IDE_Morph.prototype.openCloudDataString = function (str) {
+    Trace.log("IDE.openCloudDataString");
     var msg,
         myself = this;
     this.nextSteps([
@@ -3123,6 +3151,7 @@ IDE_Morph.prototype.rawOpenCloudDataString = function (str) {
 };
 
 IDE_Morph.prototype.openBlocksString = function (str, name, silently) {
+    Trace.log("IDE.openBlocksString");
     var msg,
         myself = this;
     this.nextSteps([
@@ -3170,6 +3199,7 @@ IDE_Morph.prototype.rawOpenBlocksString = function (str, name, silently) {
 };
 
 IDE_Morph.prototype.openSpritesString = function (str) {
+    Trace.log("IDE.openSpritesString");
     var msg,
         myself = this;
     this.nextSteps([
@@ -3199,6 +3229,7 @@ IDE_Morph.prototype.rawOpenSpritesString = function (str) {
 };
 
 IDE_Morph.prototype.openMediaString = function (str) {
+    Trace.log("IDE.openMediaString");
     if (Process.prototype.isCatchingErrors) {
         try {
             this.serializer.loadMedia(str);
@@ -3212,6 +3243,7 @@ IDE_Morph.prototype.openMediaString = function (str) {
 };
 
 IDE_Morph.prototype.openProject = function (name) {
+    Trace.log("IDE.openProject", name);
     var str;
     if (name) {
         this.showMessage('opening project\n' + name);
@@ -3426,6 +3458,7 @@ IDE_Morph.prototype.toggleAppMode = function (appMode) {
         ];
 
     this.isAppMode = isNil(appMode) ? !this.isAppMode : appMode;
+    Trace.log("IDE.toggleAppMode", this.isAppMode);
 
     Morph.prototype.trackChanges = false;
     if (this.isAppMode) {
@@ -3480,6 +3513,7 @@ IDE_Morph.prototype.toggleStageSize = function (isSmall) {
 
     function toggle() {
         myself.isSmallStage = isNil(isSmall) ? !myself.isSmallStage : isSmall;
+        Trace.log("IDE.toggleStageSize", myself.isSmallStage);
     }
 
     function zoomIn() {
@@ -3568,6 +3602,7 @@ IDE_Morph.prototype.languageMenu = function () {
 };
 
 IDE_Morph.prototype.setLanguage = function (lang, callback) {
+    Trace.log("IDE.setLanguage", lang);
     var translation = document.getElementById('language'),
         src = 'lang-' + lang + '.js',
         myself = this;
@@ -3950,6 +3985,7 @@ IDE_Morph.prototype.logout = function () {
 };
 
 IDE_Morph.prototype.saveProjectToCloud = function (name) {
+    Trace.log("IDE.saveProjectToCloud", name);
     var myself = this;
     if (name) {
         this.showMessage('Saving project\nto the cloud...');
@@ -3963,6 +3999,7 @@ IDE_Morph.prototype.saveProjectToCloud = function (name) {
 };
 
 IDE_Morph.prototype.exportProjectMedia = function (name) {
+    Trace.log("IDE.exportProjectMedia", name);
     var menu, media;
     this.serializer.isCollectingMedia = true;
     if (name) {
@@ -4002,6 +4039,7 @@ IDE_Morph.prototype.exportProjectMedia = function (name) {
 };
 
 IDE_Morph.prototype.exportProjectNoMedia = function (name) {
+    Trace.log("IDE.exportProjectMedia", name);
     var menu, str;
     this.serializer.isCollectingMedia = true;
     if (name) {
@@ -4034,6 +4072,7 @@ IDE_Morph.prototype.exportProjectNoMedia = function (name) {
 };
 
 IDE_Morph.prototype.exportProjectAsCloudData = function (name) {
+    Trace.log("IDE.exportProejctAsCloudData", name);
     var menu, str, media, dta;
     this.serializer.isCollectingMedia = true;
     if (name) {

@@ -2202,6 +2202,8 @@ function Morph() {
 
 Morph.prototype.init = function (noDraw) {
     Morph.uber.init.call(this);
+    
+    this._debugType = /function (.{1,})\(/.exec(this.constructor.toString())[1]; //TODO: REMOVE
     this.isMorph = true;
     this.bounds = new Rectangle(0, 0, 50, 40);
     this.color = new Color(80, 80, 80);

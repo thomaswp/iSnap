@@ -61,7 +61,7 @@ function createDiff(from, to, context, quality) {
 	var matchRegex = /:|\[|\]|,|\s|\w*/g;
 	var code0 = from.match(matchRegex);
 	var code1 = to.match(matchRegex);
-	var codeDiff = diff(code0, code1);
+	var codeDiff = window.diff(code0, code1);
 	var html = "<span class='hint'>";
 	html += "[{0},{1}]: ".format(context, quality);
 	for (var j = 0; j < codeDiff.length; j++) {
@@ -76,7 +76,6 @@ function createDiff(from, to, context, quality) {
 function getHint(code) {
 	if (!code) return;
 	
-	// All HTML5 Rocks properties support CORS.
 	var url = 'http://{0}:8080/HintServer/hints'.format(location.hostname);
 	
 	var hintDiv = document.getElementById("hint");
@@ -112,4 +111,26 @@ if (!String.prototype.format) {
       ;
     });
   };
+}
+
+function getCode(ref) {
+	if (ref.parent == null) {
+		return window.ide;
+	}
+	
+	var parent = getCode(ref.parent);
+	var label = ref.label;
+	
+	switch (label) {
+		case "stage": return parent.stage;
+		case "sprite": return parent.children[ref.index];
+		case "script":
+			if (ref.parent.label == "sprite") 
+				return parent.scripts.children[ref.index];
+			return parent.getInputs()[ref.index].children[0];
+		case "var":
+			if (ref.parent.label == "snapshot")
+				return "?";
+			return parent.variables.vars;
+	}
 }

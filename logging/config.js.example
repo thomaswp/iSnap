@@ -21,10 +21,10 @@ window.requireAssignment = true;
 window.createLogger = function(assignmentID) {
     if (assignmentID == "view") {
 		// Logs to the console
-        return new ConsoleLogger(50);
+        return new window.ConsoleLogger(50);
     } else {
 		// Logs to a MySQL database
-        return new DBLogger(3000);
+        return new window.DBLogger(3000);
     }
 }
 

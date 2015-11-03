@@ -38,22 +38,24 @@ function createCORSRequest(method, url) {
 }
 
 function getHintHtml(json) {
-	try {
+	//try {
 		var hints = JSON.parse(json);
 		var html = "";
 		for (var i = 0; i < hints.length; i++) {
 			if (html.length > 0) html += "<div/>";
 			var hint = hints[i];
-			html += createDiff(hint.from, hint.to, hint.context, hint.quality);
-			
+			html += createDiff(hint.from, hint.to);
+			console.log(hint.from);
+			console.log(getCode(hint.data));
 		}
 		return html;
-	} catch (e) {
-		return "Error parsing hints: " + e;
-	}
+	//} catch (e) {
+	//	console.log(e);
+	//	return "Error parsing hints: " + e;
+	//}
 }
 
-function createDiff(from, to, context, quality) {
+function createDiff(from, to) {
 	var cssMap = {
 		"+": "plus",
 		"=": "equals",
@@ -64,7 +66,6 @@ function createDiff(from, to, context, quality) {
 	var code1 = to.match(matchRegex);
 	var codeDiff = window.diff(code0, code1);
 	var html = "<span class='hint'>";
-	html += "[{0},{1}]: ".format(context, quality);
 	for (var j = 0; j < codeDiff.length; j++) {
 		var block = cssMap[codeDiff[j][0]];
 		var code = codeDiff[j][1].join("");
@@ -127,29 +128,32 @@ function getCode(ref) {
 	
 	switch (ref.parent.label) {
 		case "snapshot":
-			if (label == "var") 
-				return parent.globalVariables.vars;
-			else if (label == "stage")
+			if (label == "stage")
 				return parent.stage;
 			else if (label == "customBlock")
-				return parent.stage.globalBlocks[index];
+				return parent.stage.globalBlocks[index - 1];
+			else if (label == "var") 
+				return parent.globalVariables.vars;
 			break;
 		case "stage":
 			if (label == "sprite") return parent.children[index];
 		case "sprite":
+			var nVars = Object.keys(parent.variables.vars).length;
+			var nScripts = parent.scripts.children.length;
 			if (label == "var")
 				return parent.variables.vars;
-			else if (label == "customBlock")
-				return parent.customBlocks[index];
 			else if (label == "script")
-				return parent.scripts.children[index];
+				return parent.scripts.children[index - nVars];
+			else if (label == "customBlock")
+				return parent.customBlocks[index - nVars - nScripts];
 			break;
 		case "script":
 			var block = parent;
+			if (block._debugType == "CSlotMorph") block = block.children[0];
 			for (var i = 0; i < index; i++) block = block.nextBlock();
 			return block;
 		case "customBlock":
-			return parent.scripts.children[index];
+			return parent.scripts[index];
 		default:
 			return parent.inputs()[index];
 	}

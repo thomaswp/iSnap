@@ -1727,7 +1727,7 @@ ReporterBlockMorph.prototype.toScriptXML = function (
 };
 
 CustomCommandBlockMorph.prototype.toBlockXML = function (serializer) {
-    var scope = this.definition.isGlobal ? undefined
+    var scope = (this.definition.isGlobal || !this.definition.receiver) ? undefined
         : this.definition.receiver.name;
     return serializer.format(
         '<custom-block id="@" s="@"%>%%%</custom-block>',

@@ -1,5 +1,6 @@
 function onSnapLoaded() {
 	var snap = document.getElementById("snap");
+	window.ide = snap.contentWindow.ide;
 	snap.contentWindow.Trace.storeMessages = function(logs) {
 		var code = null;
 		logs.forEach(function(log) {
@@ -113,24 +114,43 @@ if (!String.prototype.format) {
   };
 }
 
+
 function getCode(ref) {
 	if (ref.parent == null) {
 		return window.ide;
 	}
 	
 	var parent = getCode(ref.parent);
+		
 	var label = ref.label;
+	var index = ref.index;
 	
-	switch (label) {
-		case "stage": return parent.stage;
-		case "sprite": return parent.children[ref.index];
+	switch (ref.parent.label) {
+		case "snapshot":
+			if (label == "var") 
+				return parent.globalVariables.vars;
+			else if (label == "stage")
+				return parent.stage;
+			else if (label == "customBlock")
+				return parent.stage.globalBlocks[index];
+			break;
+		case "stage":
+			if (label == "sprite") return parent.children[index];
+		case "sprite":
+			if (label == "var")
+				return parent.variables.vars;
+			else if (label == "customBlock")
+				return parent.customBlocks[index];
+			else if (label == "script")
+				return parent.scripts.children[index];
+			break;
 		case "script":
-			if (ref.parent.label == "sprite") 
-				return parent.scripts.children[ref.index];
-			return parent.getInputs()[ref.index].children[0];
-		case "var":
-			if (ref.parent.label == "snapshot")
-				return "?";
-			return parent.variables.vars;
+			var block = parent;
+			for (var i = 0; i < index; i++) block = block.nextBlock();
+			return block;
+		case "customBlock":
+			return parent.scripts.children[index];
+		default:
+			return parent.inputs()[index];
 	}
 }

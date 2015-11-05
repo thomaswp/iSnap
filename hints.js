@@ -56,13 +56,7 @@ HintProvider.prototype.init = function(url, displays) {
 	this.displays = displays;
 	
 	var myself = this;
-	Trace.storeMessages = function(logs) {
-		var code = null;
-		logs.forEach(function(log) {
-			if (log.code) {
-				code = log.code;
-			}
-		});
+	Trace.onCodeChanged = function(code) {
 		myself.getHintsFromServer(code);
 	}
 }
@@ -91,7 +85,7 @@ HintProvider.prototype.getHintsFromServer = function(code) {
 	
 	xhr.onerror = function(e) {
 		myself.displays.forEach(function(display) {
-			display.showError(e);
+			display.showError("Error contacting hint server!");
 		});
 	};
 	
@@ -110,6 +104,7 @@ HintProvider.prototype.processHints = function(json) {
 			});
 		}
 	//} catch (e) {
+	//  display.showError("Error parsing hint!");
 	//	display.showError(e);
 	//}
 }
@@ -166,8 +161,7 @@ HintDisplay.prototype.showHint = function(hint) {
 }
 
 HintDisplay.prototype.showError = function(error) {
-	console.error("Error contacting Hint Server!");
-	if (error) console.error(error);
+	console.error(error);
 }
 
 HintDisplay.prototype.clear = function() {
@@ -200,6 +194,7 @@ DebugDisplay.prototype.showHint = function(hint) {
 }
 
 DebugDisplay.prototype.showError = function(error) {
+	if (error.message) error = error.message
 	this.div.innerHTML = error;
 }
 

@@ -60,6 +60,7 @@ Logger.prototype.serializer = new SnapSerializer();
 
 Logger.prototype.init = function(interval) {
     this.queue = [];
+    this.onCodeChanged = null;
     this.log("Logger.started");
     this.start(interval);
 }
@@ -148,6 +149,7 @@ Logger.prototype.addCode = function(log) {
     if (code != this.lastCode) {
         log.code = code;
         this.lastCode = code;
+        if (this.onCodeChanged) this.onCodeChanged(code); 
     }
 }
 

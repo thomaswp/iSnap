@@ -21,20 +21,18 @@ include '../config.php';
 			}
 			/* Credit: http://stackoverflow.com/questions/5645986/two-column-div-layout-with-fluid-left-and-fixed-right-column */
 			#wrapper {
-				margin-left: 1200px;
 				height: 100%;
 			}
 			#content {
 				float: right;
-				width: 100%;
+				width: 800px;
 				display: block;
 				height: 100%;
 			}
 			#sidebar {
-				float: left;
-				width: 1180px;
-				margin-left: -1200px;
+				width: calc(100% - 810px);
 				height: 100%;
+				float: left;
 			}
 			#cleared {
 				clear: both;
@@ -115,6 +113,12 @@ include '../config.php';
 				</div>
 			</div>
 			<div id="cleared"></div>
+			<script type="text/javascript">
+				var snap = document.getElementById("snap"); 
+				snap.onload = function() {
+					snap.contentWindow.ide.toggleStageSize();
+				}
+			</script>
 		</div>
 	</body>
 </html>

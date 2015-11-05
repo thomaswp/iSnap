@@ -109,49 +109,6 @@ HintProvider.prototype.processHints = function(json) {
 	//}
 }
 
-HintProvider.prototype.getCode = function(ref) {
-	if (ref.parent == null) {
-		return window.ide;
-	}
-	
-	var parent = this.getCode(ref.parent);
-		
-	var label = ref.label;
-	var index = ref.index;
-	
-	switch (ref.parent.label) {
-		case "snapshot":
-			if (label == "stage")
-				return parent.stage;
-			else if (label == "customBlock")
-				return parent.stage.globalBlocks[index - 1];
-			else if (label == "var") 
-				return parent.globalVariables.vars;
-			break;
-		case "stage":
-			if (label == "sprite") return parent.children[index];
-		case "sprite":
-			var nVars = Object.keys(parent.variables.vars).length;
-			var nScripts = parent.scripts.children.length;
-			if (label == "var")
-				return parent.variables.vars;
-			else if (label == "script")
-				return parent.scripts.children[index - nVars];
-			else if (label == "customBlock")
-				return parent.customBlocks[index - nVars - nScripts];
-			break;
-		case "script":
-			var block = parent;
-			if (block._debugType == "CSlotMorph") block = block.children[0];
-			for (var i = 0; i < index; i++) block = block.nextBlock();
-			return block;
-		case "customBlock":
-			return parent.scripts[index];
-		default:
-			return parent.inputs()[index];
-	}
-}
-
 // HintDisplay: outputs hitns to the console
 
 function HintDisplay() { }
@@ -228,7 +185,57 @@ function SnapDisplay() {
 
 SnapDisplay.prototype = Object.create(HintDisplay.prototype);
 
+SnapDisplay.prototype.getCode = function(ref) {
+	if (ref.parent == null) {
+		return window.ide;
+	}
+	
+	var parent = this.getCode(ref.parent);
+		
+	var label = ref.label;
+	var index = ref.index;
+	
+	switch (ref.parent.label) {
+		case "snapshot":
+			if (label == "stage")
+				return parent.stage;
+			else if (label == "customBlock")
+				return parent.stage.globalBlocks[index - 1];
+			else if (label == "var") 
+				return parent.globalVariables.vars;
+			break;
+		case "stage":
+			if (label == "sprite") return parent.children[index];
+		case "sprite":
+			var nVars = Object.keys(parent.variables.vars).length;
+			var nScripts = parent.scripts.children.length;
+			if (label == "var")
+				return parent.variables.vars;
+			else if (label == "script")
+				return parent.scripts.children[index - nVars];
+			else if (label == "customBlock")
+				return parent.customBlocks[index - nVars - nScripts];
+			break;
+		case "script":
+			var block = parent;
+			if (block._debugType == "CSlotMorph") block = block.children[0];
+			for (var i = 0; i < index; i++) block = block.nextBlock();
+			return block;
+		case "customBlock":
+			return parent.scripts[index];
+		default:
+			return parent.inputs()[index];
+	}
+}
 
+SnapDisplay.prototype.showHint = function(hint) {
+	console.log(hint);
+	var block = this.getCode(hint.data); 
+	console.log(block);
+	// if (block.addHighlight) {
+	// 	block.addHighlight();
+	// }
+}
 
 if (window.getHintProvider) {
 	window.hintProvider = window.getHintProvider();

@@ -70,7 +70,7 @@ HintProvider.prototype.getHintsFromServer = function(code) {
 		display.clear();
 	});
 	
-	var xhr = createCORSRequest('POST', this.url);
+	var xhr = createCORSRequest('POST', this.url + "?assignmentID=" + window.assignmentID);
 	if (!xhr) {
 		myself.displays.forEach(function(display) {
 			display.showError("CORS not supported on this browser.");
@@ -122,7 +122,7 @@ HintDisplay.prototype.showError = function(error) {
 }
 
 HintDisplay.prototype.clear = function() {
-	console.log("Receiving Hints:");
+	console.log("-----------------------------------------");
 }
 
 // DebugDisplay: outputs hints to a div
@@ -228,15 +228,41 @@ SnapDisplay.prototype.getCode = function(ref) {
 	}
 }
 
+SnapDisplay.prototype.clear = function() { }
+
 SnapDisplay.prototype.showHint = function(hint) {
-	console.log(hint);
-	var block = this.getCode(hint.data); 
-	console.log(block);
-	// if (block.addHighlight) {
-	// 	block.addHighlight();
-	// }
+	// console.log(hint);
+	var root = this.getCode(hint.data.root);
+	var label = hint.data.root.label;
+	var f = this["show" + label.charAt(0).toUpperCase() + label.slice(1) + "Hint"];
+	if (!f) f = this.showBlockHint;
+	f(root, hint.data.from, hint.data.to);
 }
 
-if (window.getHintProvider) {
+SnapDisplay.prototype.showSnapshotHint = function(root, from , to) {
+	
+}
+
+SnapDisplay.prototype.showCustomBlockHint = function(root, from , to) {
+	
+}
+
+SnapDisplay.prototype.showStageHint = function(root, from , to) {
+	
+}
+
+SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
+	
+}
+
+SnapDisplay.prototype.showScriptHint = function(root, from , to) {
+	// console.log("Script hint: " + from + " -> " + to);
+}
+
+SnapDisplay.prototype.showBlockHint = function(root, from , to) {
+	// console.log("Block hint: " + from + " -> " + to);
+}
+
+if (window.getHintProvider && window.assignmentID) {
 	window.hintProvider = window.getHintProvider();
 }

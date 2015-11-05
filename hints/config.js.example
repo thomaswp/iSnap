@@ -2,6 +2,6 @@
 function getHintProvider() {
 	var url = 'http://' + location.hostname + ':8080/HintServer/hints';
 	// Options: HintDisplay, DebugDisplay, SnapDisplay
-	var displays = [new HintDisplay()];
+	var displays = [new SnapDisplay()];
 	return new HintProvider(url, displays);
 }

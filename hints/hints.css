@@ -15,11 +15,10 @@ div.debug {
     overflow: auto;
     position: fixed;
 	background-color: #fff;
-    opacity: 0.7;
+    opacity: 1;
 	transition: opacity .15s ease-in-out;
-	pointer-events: none;
 }
 
 div.debug:hover {
-	opacity: 0.5;
+	opacity: 1;
 }

@@ -66,6 +66,12 @@ HintProvider.prototype.getHintsFromServer = function(code) {
 	
 	var myself = this;
 	
+	if (this.lastXHR) {
+		// cancel the last hit request's callbacks
+		this.lastXHR.onload = null;
+		this.lastXHR.onerror = null;
+	}
+	
 	myself.displays.forEach(function(display) {
 		display.clear();
 	});
@@ -77,6 +83,7 @@ HintProvider.prototype.getHintsFromServer = function(code) {
 		});
 		return;
 	}
+	this.lastXHR = xhr;
 	
 	// Response handlers.
 	xhr.onload = function() {

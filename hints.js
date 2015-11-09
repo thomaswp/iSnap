@@ -187,7 +187,7 @@ DebugDisplay.prototype.createDiff = function(from, to) {
 }
 
 function SnapDisplay() {
-	
+	this.buttons = [];
 }
 
 SnapDisplay.prototype = Object.create(HintDisplay.prototype);
@@ -235,15 +235,21 @@ SnapDisplay.prototype.getCode = function(ref) {
 	}
 }
 
-SnapDisplay.prototype.clear = function() { }
+SnapDisplay.prototype.clear = function() { 
+	this.buttons.forEach(function(b) {
+		b.destroy();
+	});
+	this.buttons = [];
+}
 
 SnapDisplay.prototype.showHint = function(hint) {
 	// console.log(hint);
 	var root = this.getCode(hint.data.root);
+	if (!root) return;
 	var label = hint.data.root.label;
 	var f = this["show" + label.charAt(0).toUpperCase() + label.slice(1) + "Hint"];
 	if (!f) f = this.showBlockHint;
-	f(root, hint.data.from, hint.data.to);
+	f.call(this, root, hint.data.from, hint.data.to);
 }
 
 SnapDisplay.prototype.showSnapshotHint = function(root, from , to) {
@@ -263,13 +269,78 @@ SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.showScriptHint = function(root, from , to) {
-	// console.log("Script hint: " + from + " -> " + to);
+	root.scriptHintCallback = function() {
+		console.log("Clicked script hint: " + from + " -> " + to);
+	}
+	
+	this.createHintButton(root, function() {
+		console.log("Clicked script hint: " + from + " -> " + to);
+	});
 }
 
 SnapDisplay.prototype.showBlockHint = function(root, from , to) {
-	// console.log("Block hint: " + from + " -> " + to);
+	root.blockHintCallback = function() {
+		console.log("Clicked block hint: " + from + " -> " + to);
+	}
+}
+
+SnapDisplay.prototype.createHintButton = function(parent, callback) {
+	var button = new PushButtonMorph(null, callback, new SymbolMorph("speechBubble"));
+	parent.children.push(button);
+	
+	button.parent = parent;
+	button.setLeft(parent.left() - 40);
+	button.setTop(parent.top() + 15);
+	button.setRight(button.left() + 30);
+	button.setBottom(button.top() + 30);
+	button.fixLayout();
+	
+	this.buttons.push(button);
 }
 
 if (window.getHintProvider && window.assignmentID) {
 	window.hintProvider = window.getHintProvider();
 }
+
+BlockMorph.prototype.basicUserMenu = BlockMorph.prototype.userMenu;
+BlockMorph.prototype.userMenu = function() {
+	var menu = this.basicUserMenu();
+	var callback = this.topBlockInScript().scriptHintCallback; 
+	if (callback) {
+		menu.addItem(
+			"Get Script Hint!",
+			callback
+		);
+	}
+	var inputs = this.inputs();
+	for (var i = 0; i < inputs.length; i++) {
+		callback = inputs[i].scriptHintCallback;
+		if (callback) {
+			menu.addItem(
+				"Get Body Hint! (" + i + ")",
+				callback
+			);
+		}
+	}
+	callback = this.blockHintCallback;
+	if (callback) {
+		menu.addItem(
+			"Get Argument Hint!",
+			callback
+		);
+	}
+	return menu;
+}
+
+BlockMorph.prototype.topBlockInScript = function() {
+	if (this.parent.nextBlock && this.parent.nextBlock() == this) {
+		return this.parent.topBlockInScript();
+	}
+	return this;
+}
+
+function HintButtonMorph() {
+	
+}
+
+HintButtonMorph.prototype = Object.create(PushButtonMorph.prototype);

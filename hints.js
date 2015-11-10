@@ -237,9 +237,9 @@ SnapDisplay.prototype.getCode = function(ref) {
 
 SnapDisplay.prototype.clear = function() { 
 	this.buttons.forEach(function(b) {
-		b.destroy();
+		b.hide();
 	});
-	this.buttons = [];
+	// this.buttons = [];
 }
 
 SnapDisplay.prototype.showHint = function(hint) {
@@ -285,14 +285,12 @@ SnapDisplay.prototype.showBlockHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.createHintButton = function(parent, callback) {
-	var button = new PushButtonMorph(null, callback, new SymbolMorph("speechBubble"));
-	parent.children.push(button);
+	var button = new PushButtonMorph(null, callback, new SymbolMorph("speechBubble", 20));
+	parent.add(button);
 	
-	button.parent = parent;
+	button.labelColor = new Color(200, 170, 11);
 	button.setLeft(parent.left() - 40);
-	button.setTop(parent.top() + 15);
-	button.setRight(button.left() + 30);
-	button.setBottom(button.top() + 30);
+	button.setTop(parent.top() + 5);
 	button.fixLayout();
 	
 	this.buttons.push(button);

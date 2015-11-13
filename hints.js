@@ -273,9 +273,9 @@ SnapDisplay.prototype.showScriptHint = function(root, from , to) {
 		console.log("Clicked script hint: " + from + " -> " + to);
 	}
 	
-	this.createHintButton(root, function() {
-		console.log("Clicked script hint: " + from + " -> " + to);
-	});
+	// this.createHintButton(root, function() {
+	// 	console.log("Clicked script hint: " + from + " -> " + to);
+	// });
 }
 
 SnapDisplay.prototype.showBlockHint = function(root, from , to) {

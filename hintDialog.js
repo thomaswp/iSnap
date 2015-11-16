@@ -17,7 +17,8 @@ HintDialogBoxMorph.showing = null;
 // HintDialogBoxMorph instance creation
 function HintDialogBoxMorph(target,list) {
 	this.init(target,list);
-	this.test();
+	this.loadHint(list);
+	// this.test();
 }
 
 HintDialogBoxMorph.prototype.destoy = function() {
@@ -34,12 +35,13 @@ HintDialogBoxMorph.prototype.test = function() {
 	console.log(typeof list[0]);
 	console.log(list[1].length);
 	console.log(typeof list[1]);
+	
+	console.log(this.body.contents.children[0]);
 }
 
 HintDialogBoxMorph.prototype.init = function(target,list) {
 	var scripts,  
 		scriptsFrame,
-		blck = null, //store the first hint block, init with null 
 		myself = this;
 	
 	//Trace.log("HintDialogBox.start",null);
@@ -68,24 +70,6 @@ HintDialogBoxMorph.prototype.init = function(target,list) {
 	scripts.color = IDE_Morph.prototype.groupColor;
 	scripts.cachedTexture = IDE_Morph.prototype.scriptsPaneTexture;
 	scripts.cleanUpMargin = 10; //No idea what this does?
-
-	list = ['forward','turn','turnLeft'];
-	//read blocks and add to scripts
-	if (list !== null) {
-		for (var i = list.length; i >= 0; i -= 1) {
-			if (blck === null) {
-				blck = SpriteMorph.prototype.blockForSelector(list[i],true);
-			} else {
-				var secondBlock = blck;
-				blck = SpriteMorph.prototype.blockForSelector(list[i],true);
-				blck.nextBlock(secondBlock);
-			}
-		}
-		
-		//set block position
-		blck.setPosition(new Point(20,20));
-		scripts.add(blck);
-	}
 	
 	// create scripts frame for scripts
 	scriptsFrame = new ScrollFrameMorph(scripts);
@@ -106,7 +90,51 @@ HintDialogBoxMorph.prototype.init = function(target,list) {
 	this.setExtent(new Point(500,400));
 	this.fixLayout();
 	//scripts.fixMultiArgs();
+
 }
+
+// load hint to scripts Morph
+// referencing this.body.contents.children
+HintDialogBoxMorph.prototype.loadHint = function (list) {
+	list = ['doUntil','reportTrue','forward'];
+	
+	var holderBlock = SpriteMorph.prototype.blockForSelector(list[0],true);
+	var reporter = SpriteMorph.prototype.blockForSelector(list[1],true);
+	var csBlocks = SpriteMorph.prototype.blockForSelector(list[2],true);
+	
+	holderBlock.children[2].parent.silentReplaceInput(holderBlock.children[2],reporter);
+	
+	holderBlock.children[3].nestedBlock(csBlocks);
+	
+	holderBlock.setPosition(new Point(40,80));
+	
+	this.body.contents.add(holderBlock);
+	this.body.contents.changed();
+}
+
+// read a sequence of block morph
+// pure sequence block without parameter
+HintDialogBoxMorph.prototype.readBlocks = function (list) {
+	var blck = null, //store the first hint block, init with null 
+	list = ['forward','turn','turnLeft'];
+	//read blocks and add to scripts
+	if (list !== null) {
+		for (var i = list.length; i >= 0; i -= 1) {
+			if (blck === null) {
+				blck = SpriteMorph.prototype.blockForSelector(list[i],true);
+			} else {
+				var secondBlock = blck;
+				blck = SpriteMorph.prototype.blockForSelector(list[i],true);
+				blck.nextBlock(secondBlock);
+			}
+		}
+		
+		//set block position
+		blck.setPosition(new Point(20,20));
+		scripts.add(blck);
+	}
+}
+
 
 // define function when accept button is clicked
 HintDialogBoxMorph.prototype.accept = function () {

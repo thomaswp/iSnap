@@ -374,8 +374,7 @@ SyntaxElementMorph.prototype.parts = function () {
     return this.children.filter(function (child) {
         return (child !== nb)
             && !(child instanceof ShadowMorph)
-            && !(child instanceof BlockHighlightMorph)
-            && !(child instanceof PushButtonMorph);
+            && !(child instanceof BlockHighlightMorph);
     });
 };
 
@@ -5357,8 +5356,12 @@ ScriptsMorph.prototype.fixMultiArgs = function () {
 
 ScriptsMorph.prototype.wantsDropOf = function (aMorph) {
     // override the inherited method
-    return aMorph instanceof SyntaxElementMorph ||
+    if (this.acceptsDrops) {
+        return aMorph instanceof SyntaxElementMorph ||
         aMorph instanceof CommentMorph;
+    } else {
+        return false;
+    }
 };
 
 ScriptsMorph.prototype.reactToDropOf = function (droppedMorph, hand) {

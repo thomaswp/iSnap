@@ -15,9 +15,10 @@ HintDialogBoxMorph.uber = DialogBoxMorph.prototype;
 HintDialogBoxMorph.showing = null;
 
 // HintDialogBoxMorph instance creation
-function HintDialogBoxMorph(target,list) {
-	this.init(target,list);
-	this.loadHint(list);
+function HintDialogBoxMorph(target) {
+	this.init(target);
+	// this.showScriptHint('doUntil',1,['doSayFor','doAsk','forward','doAsk']);
+	// this.loadHint(list);
 	// this.test();
 }
 
@@ -93,7 +94,65 @@ HintDialogBoxMorph.prototype.init = function(target,list) {
 
 }
 
-// load hint to scripts Morph
+HintDialogBoxMorph.prototype.showScriptHint = function (arg1, arg2, arg3) {
+	var blck1, // correspond to arg1
+		blck2; // correspond to arg3
+	
+	// if arg1 is null, it means no nesting, e.g. doUntil
+	if (arg1 === null) {
+		// get corresponding blck2 from arg3
+		blck2 = this.readBlocks(arg3); //readBlocks can read a sequence of block and return the top one.
+		
+		// check if get blck2 correctly
+		if (blck2 === null) {
+			console.log('bad arg3 in HintDialogBoxMorph.prototype.loadScriptHint: 1');
+			return;
+		}		
+		
+		//set block position
+		blck2.setPosition(new Point(30,60));
+			
+		this.body.contents.add(blck2);
+		this.body.contents.changed();
+	// if arg1 is not null, there is nesting
+	} else {
+		// get corresponding blck1 from arg1
+		blck1 = SpriteMorph.prototype.blockForSelector(arg1, true);
+		
+		// get corresponding blck2 from arg3
+		blck2 = this.readBlocks(arg3);
+		
+		// check if get blck1 correctly
+		if (blck1 === null) {
+			console.log('bad arg1 in HintDialogBoxMorph.prototype.loadScriptHint: 1');
+			return;
+		}
+		
+		//check if get blck2 correctly
+		if (blck2 === null) {
+			console.log('bad arg2 in HintDialogBoxMorph.prototype.loadScriptHint: 2');
+			return;
+		}
+		
+		// if the number arg2 child is a CSlotMorph, then it is a nested structure
+		if (blck1.inputs()[arg2] instanceof CSlotMorph) {
+			blck1.inputs()[arg2].nestedBlock(blck2);
+		// else, it is parameter input
+		} else {
+			blck1.inputs()[arg2].parent.silentReplaceInput(blck1.inputs()[arg2],blck2);
+		}
+		
+		// set block position
+		blck1.setPosition(new Point(30,60));
+		
+		this.body.contents.add(blck1);
+		this.body.contents.changed();
+	}
+	this.popUp();
+}
+
+
+// load hint to nested Morph (for testing purpose)
 // referencing this.body.contents.children
 HintDialogBoxMorph.prototype.loadHint = function (list) {
 	list = ['doUntil','reportTrue','forward'];
@@ -112,11 +171,14 @@ HintDialogBoxMorph.prototype.loadHint = function (list) {
 	this.body.contents.changed();
 }
 
-// read a sequence of block morph
+// read a sequence of block morph, concat them and return the one on top
 // pure sequence block without parameter
 HintDialogBoxMorph.prototype.readBlocks = function (list) {
-	var blck = null, //store the first hint block, init with null 
-	list = ['forward','turn','turnLeft'];
+	var blck = null; //store the first hint block, init with null 
+	
+	// used for testing
+	// list = ['forward','turn','turnLeft'];
+	
 	//read blocks and add to scripts
 	if (list !== null) {
 		for (var i = list.length; i >= 0; i -= 1) {
@@ -128,10 +190,8 @@ HintDialogBoxMorph.prototype.readBlocks = function (list) {
 				blck.nextBlock(secondBlock);
 			}
 		}
-		
-		//set block position
-		blck.setPosition(new Point(20,20));
-		scripts.add(blck);
+
+		return blck;
 	}
 }
 
@@ -172,6 +232,8 @@ HintDialogBoxMorph.prototype.popUp = function () {
 
 // define close function
 HintDialogBoxMorph.prototype.close = function() {
+	// set showing to null, indicating not showing
+	HintDialogBoxMorph.showing = null;
 	this.destroy();
 }
 

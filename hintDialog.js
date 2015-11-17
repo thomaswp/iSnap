@@ -181,17 +181,36 @@ HintDialogBoxMorph.prototype.readBlocks = function (list) {
 	
 	//read blocks and add to scripts
 	if (list !== null) {
-		for (var i = list.length; i >= 0; i -= 1) {
+		for (var i = list.length-1; i >= 0; i -= 1) {
 			if (blck === null) {
 				blck = SpriteMorph.prototype.blockForSelector(list[i],true);
+				this.clearParameter(blck);
 			} else {
 				var secondBlock = blck;
 				blck = SpriteMorph.prototype.blockForSelector(list[i],true);
+				this.clearParameter(blck);
 				blck.nextBlock(secondBlock);
 			}
 		}
 
 		return blck;
+	}
+}
+
+// clear specific/all parameter input in a blck
+// num is the 
+HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
+	// if num is left empty,or input other than number, clear all parameters
+	if (num === null || typeof num === 'undefined' || typeof num === 'string' || typeof num === 'boolean') {
+		blck.inputs().forEach(function (input) {
+			input.setContents(null);
+		});
+	// else clear the slot at specific position
+	} else {
+		// check if the InputSlot specified by num actually exists/defined
+		if (blck.inputs()[num] instanceof InputSlotMorph) {
+			blck.inputs()[num].setContents(null);
+		}
 	}
 }
 

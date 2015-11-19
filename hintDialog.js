@@ -145,6 +145,11 @@ HintDialogBoxMorph.prototype.showBlockHint = function (arg1, arg2, arg3) {
 		return;
 	}
 	
+	// clear all parameters in blck1 and blck2
+	this.clearParameter(blck1);
+	this.clearParameter(blck2);
+	
+	// add blck2 to blck1
 	blck1.inputs()[arg2].parent.silentReplaceInput(blck1.inputs()[arg2],blck2);
 	
 	// set block position
@@ -267,7 +272,9 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 	// if num is left empty,or input other than number, clear all parameters
 	if (num === null || typeof num === 'undefined' || typeof num === 'string' || typeof num === 'boolean') {
 		blck.inputs().forEach(function (input) {
-			input.setContents(null);
+			if (input instanceof InputSlotMorph) {
+				input.setContents(null);
+			}				
 		});
 	// else clear the slot at specific position
 	} else {

@@ -346,13 +346,20 @@ BlockMorph.prototype.topBlockInScript = function() {
 
 BlockMorph.prototype.mouseEnter = function() {
 	if (this.blockHintCallback != null) {
-		this.blockHintCallback();
+		if (this.hintHighlight == null) {
+			this.hintHighlight = this.addHighlight();
+			this.fullChanged();
+			console.log("Added highlight");
+		}
 	}
 }
 
 BlockMorph.prototype.mouseLeave = function() {
-	if (0) {
-		
+	if (this.hintHighlight) {
+		this.removeChild(this.hintHighlight);
+		this.hintHighlight = null;
+		this.fullChanged();
+		console.log("Removed highlight");
 	}
 }
 

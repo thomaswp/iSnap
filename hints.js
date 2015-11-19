@@ -344,6 +344,18 @@ BlockMorph.prototype.topBlockInScript = function() {
 	return this;
 }
 
+BlockMorph.prototype.mouseEnter = function() {
+	if (this.blockHintCallback != null) {
+		this.blockHintCallback();
+	}
+}
+
+BlockMorph.prototype.mouseLeave = function() {
+	if (0) {
+		
+	}
+}
+
 function HintButtonMorph() {
 	
 }

@@ -357,6 +357,7 @@ BlockMorph.prototype.mouseEnter = function() {
 BlockMorph.prototype.mouseLeave = function() {
 	if (this.hintHighlight) {
 		this.removeChild(this.hintHighlight);
+		this.hintHighlight.fullChanged();
 		this.hintHighlight = null;
 		this.fullChanged();
 		console.log("Removed highlight");

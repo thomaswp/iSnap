@@ -94,6 +94,70 @@ HintDialogBoxMorph.prototype.init = function(target,list) {
 
 }
 
+// interface for showing hint for a single block
+// showBlockHint("doUntil", 0, "literal")
+HintDialogBoxMorph.prototype.showBlockHint = function (arg1, arg2, arg3) {
+	var blck1,	//corresponding to arg1
+		blck2;	//corresponding to arg3
+	
+	// check if arg1 is valid	
+	if (arg1 === null || typeof arg1 === 'undefined') {
+		console.log('bad arg 1 in HintDialogBoxMorph.prototype.showBlockHint: 1');
+		return;
+	}
+	// check if arg2 is valid
+	if (arg2 === null || typeof arg2 === 'undefined') {
+		console.log('bad arg 2 in HintDialogBoxMorph.prototype.showBlockHint: 1');
+		return;
+	}
+	// check if arg3 is valid
+	if (arg3 === null || typeof arg3 === 'undefined') {
+		console.log('bad arg 3 in HintDialogBoxMorph.prototype.showBlockHint: 1');
+		return;
+	}
+	
+	// get blck1, blck2 with arg1, arg3 from blockForSelector
+	blck1 = SpriteMorph.prototype.blockForSelector(arg1, true);
+	blck2 = SpriteMorph.prototype.blockForSelector(arg3, true);
+	
+	// blck1 is null means arg1 is incorrect
+	if (blck1 === null) {
+		console.log('bad arg 1 in HintDialogBoxMorph.prototype.showBlockHint: 2');
+		return;
+	}
+	
+	// blck2 is null means arg3 is incorrect
+	if (blck2 === null) {
+		console.log('bad arg 3 in HintDialogBoxMorph.prototype.showBlockHint: 2');
+		return;
+	}
+	
+	// means no corresponding input child at arg2
+	if (typeof blck1.inputs()[arg2] === 'undefined') {
+		console.log('bad arg 2 in HintDialogBoxMorph.prototype.showBlockHint: 2');
+		return;
+	}
+	
+	// return if corresponding input is not a InputSlotMorph
+	// ??? how to get _proto_ from an object?
+	if (blck1.inputs()[arg2] instanceof CSlotMorph) {
+		console.log('bad arg 2 in HintDialogBoxMorph.prototype.showBlockHint: 3');
+		return;
+	}
+	
+	blck1.inputs()[arg2].parent.silentReplaceInput(blck1.inputs()[arg2],blck2);
+	
+	// set block position
+	blck1.setPosition(new Point(30,60));
+		
+	this.body.contents.add(blck1);
+	this.body.contents.changed();
+	
+	this.popUp();
+}
+
+// interface for showing hint for a script(sequence of blocks)
+// showScriptHint("doUntil", 1, ["doMove"])
 HintDialogBoxMorph.prototype.showScriptHint = function (arg1, arg2, arg3) {
 	var blck1, // correspond to arg1
 		blck2; // correspond to arg3

@@ -10,7 +10,7 @@ if ($enble_viewer) {
 	
 	$id = $_GET['id'];
 	
-	$query = "SELECT code FROM $table WHERE id=$id";
+	$query = "SELECT code FROM $table WHERE id <= $id AND code <> '' ORDER BY id DESC LIMIT 1;";
 	$result = $mysqli->query($query); 
 	if (!$result) {
 		die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);

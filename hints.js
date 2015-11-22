@@ -224,6 +224,7 @@ DebugDisplay.prototype.createDiff = function(from, to) {
 
 function SnapDisplay() {
 	this.buttons = [];
+	this.hintBars = [];
 }
 
 SnapDisplay.prototype = Object.create(HintDisplay.prototype);
@@ -272,12 +273,25 @@ SnapDisplay.prototype.getCode = function(ref) {
 }
 
 SnapDisplay.prototype.clear = function() { 
-	this.buttons.forEach(function(b) {
-		b.hide();
-		b.fullChanged();
-	});
-	this.ide.scripts
+	// this.buttons.forEach(function(b) {
+	// 	b.hide();
+	// 	b.fullChanged();
+	// });
 	// this.buttons = [];
+	
+	this.hintBars.forEach(function(bar) {
+		var parent = bar.parent;
+		bar.destroy();
+		if (parent && parent.getShadow) {
+			if (parent.getShadow()) {
+				parent.removeShadow();
+				parent.addShadow();
+			}
+		}
+	});
+	
+	this.hintBars = [];
+	window.ide.changed();
 }
 
 SnapDisplay.prototype.showHint = function(hint) {
@@ -323,23 +337,34 @@ SnapDisplay.prototype.showBlockHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.createHintButton = function(parent, callback) {
-	for (var i = 0; i < this.buttons.length; i++) {
-		if (this.buttons[i].parent == parent) {
-			this.buttons[i].callback = callback;
-			this.buttons[i].show();
-			return;
-		}
+	// for (var i = 0; i < this.buttons.length; i++) {
+	// 	if (this.buttons[i].parent == parent) {
+	// 		this.buttons[i].callback = callback;
+	// 		this.buttons[i].show();
+	// 		return;
+	// 	}
+	// }
+	
+	var topBlock = parent.topBlock();
+	if (!topBlock) return;
+	
+	var hintBar = topBlock.hintBar;
+	if (hintBar == null) {
+		hintBar = new HintBarMorph(topBlock);
+		topBlock.hintBar = hintBar;
 	}
+	hintBar.setLeft(topBlock.left() - 40);
+	hintBar.setTop(topBlock.top() + 5);
+	this.hintBars.push(hintBar);
 	
-	var button = new PushButtonMorph(null, callback, new SymbolMorph("speechBubble", 20));
-	parent.add(button);
-	
+	var button = new PushButtonMorph(hintBar, callback, new SymbolMorph("speechBubble", 20));
 	button.labelColor = new Color(200, 170, 11);
-	button.setLeft(parent.left() - 40);
-	button.setTop(parent.top() + 5);
+	button.idealY = parent.top() - topBlock.top();
 	button.fixLayout();
+	hintBar.add(button);
+	hintBar.layout();
 	
-	this.buttons.push(button);
+	// this.buttons.push(button);
 }
 
 if (window.getHintProvider && window.assignmentID) {
@@ -404,7 +429,44 @@ BlockMorph.prototype.topBlockInScript = function() {
 // }
 
 function HintButtonMorph() {
-	
+	this.idealY = 0;
 }
 
 HintButtonMorph.prototype = Object.create(PushButtonMorph.prototype);
+
+function HintBarMorph(parent) {
+	this.init(parent);
+}
+
+HintBarMorph.prototype = Object.create(Morph.prototype);
+HintBarMorph.prototype.constructor = HintBarMorph;
+HintBarMorph.uber = Morph.prototype;
+
+HintBarMorph.prototype.init = function(parent) {
+	HintBarMorph.uber.init.call(this, true);
+	this.color = new Color(0, 0, 0, 0);
+	if (parent) parent.add(this);
+}
+
+HintBarMorph.prototype.layout = function() {
+	this.children.sort(function(a, b) {
+		return (a.idealY || 0) - (b.idealY || 0);
+	});
+	var right = 0, bottom = 0;
+	for (var i = 0; i < this.children.length; i++) {
+		var child = this.children[i];
+		child.setLeft(this.left());
+		var idealY = this.top() + (child.idealY || 0);
+		if (i == 0) {
+			child.setTop(idealY);
+		} else {
+			var lastChild = this.children[i - 1];
+			var minY = lastChild.bottom() + 5;
+			child.setTop(Math.max(minY, idealY));
+		}
+		right = Math.max(right, child.right());
+		bottom = Math.max(bottom, child.bottom());
+	}
+	this.setExtent(new Point(right - this.left(), bottom - this.top()));
+	this.fullChanged();
+}

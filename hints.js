@@ -44,11 +44,11 @@ if (!String.prototype.format) {
 
 // HintProvider
 
-function HintProvider(url, displays) {
-	this.init(url, displays);
+function HintProvider(url, displays, reloadCode) {
+	this.init(url, displays, reloadCode);
 }
 
-HintProvider.prototype.init = function(url, displays) {
+HintProvider.prototype.init = function(url, displays, reloadCode) {
 	this.url = url;
 	
 	if (!displays) displays = [];
@@ -57,12 +57,28 @@ HintProvider.prototype.init = function(url, displays) {
 	
 	var myself = this;
 	Trace.onCodeChanged = function(code) {
-		myself.getHintsFromServer(code);
+		myself.clearDisplays();
+		myself.code = code;
+		// myself.getHintsFromServer(code);
+	}
+	
+	if (reloadCode) {
+		window.onunload = function() {
+			myself.saveCode();
+		}
+		
+		myself.loadCode();
 	}
 }
 
-HintProvider.prototype.getHintsFromServer = function(code) {
-	if (!code) return;
+HintProvider.prototype.clearDisplays = function() {
+	this.displays.forEach(function(display) {
+		display.clear();
+	});
+}
+
+HintProvider.prototype.getHintsFromServer = function() {
+	if (!this.code) return;
 	
 	var myself = this;
 	
@@ -72,9 +88,7 @@ HintProvider.prototype.getHintsFromServer = function(code) {
 		this.lastXHR.onerror = null;
 	}
 	
-	myself.displays.forEach(function(display) {
-		display.clear();
-	});
+	this.clearDisplays();
 	
 	var xhr = createCORSRequest('POST', this.url + "?assignmentID=" + window.assignmentID);
 	if (!xhr) {
@@ -96,7 +110,7 @@ HintProvider.prototype.getHintsFromServer = function(code) {
 		});
 	};
 	
-	xhr.send(code);
+	xhr.send(this.code);
 }
 
 HintProvider.prototype.processHints = function(json) {
@@ -114,6 +128,28 @@ HintProvider.prototype.processHints = function(json) {
 	//  display.showError("Error parsing hint!");
 	//	display.showError(e);
 	//}
+}
+
+HintProvider.prototype.saveCode = function() {
+	if (typeof(Storage) !== "undefined" && localStorage) {
+		localStorage.setItem("lastCode", this.code);
+    }
+}
+
+HintProvider.prototype.loadCode = function() {
+	if (typeof(Storage) !== "undefined" && localStorage) {
+		var code = localStorage.getItem("lastCode");
+		if (code) {
+			if (window.ide) {
+				window.ide.droppedText(code);
+			} else {
+				var myself = this;
+				setTimeout(function() {
+					myself.loadCode();
+				}, 100);
+			}
+		}
+	}
 }
 
 // HintDisplay: outputs hitns to the console
@@ -237,8 +273,10 @@ SnapDisplay.prototype.getCode = function(ref) {
 
 SnapDisplay.prototype.clear = function() { 
 	this.buttons.forEach(function(b) {
-		// b.hide();
+		b.hide();
+		b.fullChanged();
 	});
+	this.ide.scripts
 	// this.buttons = [];
 }
 
@@ -273,9 +311,9 @@ SnapDisplay.prototype.showScriptHint = function(root, from , to) {
 		console.log("Clicked script hint: " + from + " -> " + to);
 	}
 	
-	// this.createHintButton(root, function() {
-	// 	console.log("Clicked script hint: " + from + " -> " + to);
-	// });
+	this.createHintButton(root, function() {
+		console.log("Clicked script hint: " + from + " -> " + to);
+	});
 }
 
 SnapDisplay.prototype.showBlockHint = function(root, from , to) {
@@ -288,6 +326,7 @@ SnapDisplay.prototype.createHintButton = function(parent, callback) {
 	for (var i = 0; i < this.buttons.length; i++) {
 		if (this.buttons[i].parent == parent) {
 			this.buttons[i].callback = callback;
+			this.buttons[i].show();
 			return;
 		}
 	}
@@ -344,25 +383,25 @@ BlockMorph.prototype.topBlockInScript = function() {
 	return this;
 }
 
-BlockMorph.prototype.mouseEnter = function() {
-	if (this.blockHintCallback != null) {
-		if (this.hintHighlight == null) {
-			this.hintHighlight = this.addHighlight();
-			this.fullChanged();
-			console.log("Added highlight");
-		}
-	}
-}
+// BlockMorph.prototype.mouseEnter = function() {
+// 	if (this.blockHintCallback != null) {
+// 		if (this.hintHighlight == null) {
+// 			this.hintHighlight = this.addHighlight();
+// 			this.fullChanged();
+// 			console.log("Added highlight");
+// 		}
+// 	}
+// }
 
-BlockMorph.prototype.mouseLeave = function() {
-	if (this.hintHighlight) {
-		this.removeChild(this.hintHighlight);
-		this.hintHighlight.fullChanged();
-		this.hintHighlight = null;
-		this.fullChanged();
-		console.log("Removed highlight");
-	}
-}
+// BlockMorph.prototype.mouseLeave = function() {
+// 	if (this.hintHighlight) {
+// 		this.removeChild(this.hintHighlight);
+// 		this.hintHighlight.fullChanged();
+// 		this.hintHighlight = null;
+// 		this.fullChanged();
+// 		console.log("Removed highlight");
+// 	}
+// }
 
 function HintButtonMorph() {
 	

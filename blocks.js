@@ -375,7 +375,7 @@ SyntaxElementMorph.prototype.parts = function () {
         return (child !== nb)
             && !(child instanceof ShadowMorph)
             && !(child instanceof BlockHighlightMorph)
-            && !(child instanceof PushButtonMorph)
+            && !(child instanceof HintBarMorph)
             && !(child instanceof BlockHighlightMorph);
     });
 };

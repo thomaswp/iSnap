@@ -59,7 +59,7 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
 	Trace.onCodeChanged = function(code) {
 		myself.clearDisplays();
 		myself.code = code;
-		// myself.getHintsFromServer(code);
+		myself.getHintsFromServer(code);
 	}
 	
 	if (reloadCode) {
@@ -281,6 +281,7 @@ SnapDisplay.prototype.clear = function() {
 	
 	this.hintBars.forEach(function(bar) {
 		var parent = bar.parent;
+		parent.hintBar = null;
 		bar.destroy();
 		if (parent && parent.getShadow) {
 			if (parent.getShadow()) {
@@ -325,7 +326,7 @@ SnapDisplay.prototype.showScriptHint = function(root, from , to) {
 		console.log("Clicked script hint: " + from + " -> " + to);
 	}
 	
-	this.createHintButton(root, function() {
+	this.createHintButton(root, new Color(255, 127, 29), function() {
 		console.log("Clicked script hint: " + from + " -> " + to);
 	});
 }
@@ -334,9 +335,13 @@ SnapDisplay.prototype.showBlockHint = function(root, from , to) {
 	root.blockHintCallback = function() {
 		console.log("Clicked block hint: " + from + " -> " + to);
 	}
+	
+	this.createHintButton(root, new Color(34, 174, 76), function() {
+		console.log("Clicked script hint: " + from + " -> " + to);
+	});
 }
 
-SnapDisplay.prototype.createHintButton = function(parent, callback) {
+SnapDisplay.prototype.createHintButton = function(parent, color, callback) {
 	// for (var i = 0; i < this.buttons.length; i++) {
 	// 	if (this.buttons[i].parent == parent) {
 	// 		this.buttons[i].callback = callback;
@@ -354,11 +359,12 @@ SnapDisplay.prototype.createHintButton = function(parent, callback) {
 		topBlock.hintBar = hintBar;
 	}
 	hintBar.setLeft(topBlock.left() - 40);
+	hintBar.setWidth(35);
 	hintBar.setTop(topBlock.top() + 5);
 	this.hintBars.push(hintBar);
 	
 	var button = new PushButtonMorph(hintBar, callback, new SymbolMorph("speechBubble", 20));
-	button.labelColor = new Color(200, 170, 11);
+	button.labelColor = color;
 	button.idealY = parent.top() - topBlock.top();
 	button.fixLayout();
 	hintBar.add(button);
@@ -452,21 +458,26 @@ HintBarMorph.prototype.layout = function() {
 	this.children.sort(function(a, b) {
 		return (a.idealY || 0) - (b.idealY || 0);
 	});
-	var right = 0, bottom = 0;
+	var right = 0, bottom = 0, left = this.left();
 	for (var i = 0; i < this.children.length; i++) {
 		var child = this.children[i];
-		child.setLeft(this.left());
 		var idealY = this.top() + (child.idealY || 0);
-		if (i == 0) {
-			child.setTop(idealY);
-		} else {
+		child.setRight(this.right());
+		child.setTop(idealY);
+		for (var j = i - 1; j >= 0; j--) {
 			var lastChild = this.children[i - 1];
 			var minY = lastChild.bottom() + 5;
-			child.setTop(Math.max(minY, idealY));
+			var minX = lastChild.left() - 5;
+			if (idealY < minY) {
+				child.setRight(minX);
+			}
+			break;
 		}
 		right = Math.max(right, child.right());
 		bottom = Math.max(bottom, child.bottom());
+		left = Math.min(left, child.left());
 	}
+	this.setLeft(left);
 	this.setExtent(new Point(right - this.left(), bottom - this.top()));
 	this.fullChanged();
 }

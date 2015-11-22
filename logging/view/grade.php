@@ -71,8 +71,8 @@ include '../config.php';
 							die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
 						}
 						
-						// $query = "SELECT max(id) AS id, time, projectID FROM trace WHERE assignmentID='guess1Lab' AND message='IDE.exportProject' AND time < '$time' GROUP BY projectID ORDER BY time ASC;";
-						$query = "SELECT id, time, projectID FROM trace WHERE assignmentID='guess1Lab' AND message='IDE.exportProject' AND time < '$time' ORDER BY projectID, time ASC;";
+						// $query = "SELECT max(id) AS id, time, projectID FROM $table WHERE assignmentID='guess1Lab' AND message='IDE.exportProject' AND time < '$time' GROUP BY projectID ORDER BY time ASC;";
+						$query = "SELECT id, time, projectID FROM $table WHERE assignmentID='guess1Lab' AND message='IDE.exportProject' AND time < '$time' ORDER BY projectID, time ASC;";
 						$result = $mysqli->query($query); 
 						if (!$result) {
 							die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);

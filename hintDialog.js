@@ -22,7 +22,7 @@ function HintDialogBoxMorph(target) {
 	// this.test();
 }
 
-HintDialogBoxMorph.prototype.destoy = function() {
+HintDialogBoxMorph.prototype.destroy = function() {
 	HintDialogBoxMorph.uber.destroy.apply(this, arguments);
 	if (HintDialogBoxMorph.showing != this)
 		return;
@@ -40,7 +40,7 @@ HintDialogBoxMorph.prototype.test = function() {
 	console.log(this.body.contents.children[0]);
 }
 
-HintDialogBoxMorph.prototype.init = function(target,list) {
+HintDialogBoxMorph.prototype.init = function(target) {
 	var scripts,  
 		scriptsFrame,
 		myself = this;

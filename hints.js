@@ -358,12 +358,11 @@ SnapDisplay.prototype.createHintButton = function(parent, color, callback) {
 		hintBar = new HintBarMorph(topBlock);
 		topBlock.hintBar = hintBar;
 	}
-	hintBar.setLeft(topBlock.left() - 40);
-	hintBar.setWidth(35);
-	hintBar.setTop(topBlock.top() + 5);
+	hintBar.setRight(topBlock.left() - 5);
+	hintBar.setTop(topBlock.top());
 	this.hintBars.push(hintBar);
 	
-	var button = new PushButtonMorph(hintBar, callback, new SymbolMorph("speechBubble", 20));
+	var button = new PushButtonMorph(hintBar, callback, new SymbolMorph("speechBubble", 14));
 	button.labelColor = color;
 	button.idealY = parent.top() - topBlock.top();
 	button.fixLayout();
@@ -449,16 +448,34 @@ HintBarMorph.prototype.constructor = HintBarMorph;
 HintBarMorph.uber = Morph.prototype;
 
 HintBarMorph.prototype.init = function(parent) {
-	HintBarMorph.uber.init.call(this, true);
+	HintBarMorph.uber.init.call(this);
 	this.color = new Color(0, 0, 0, 0);
 	if (parent) parent.add(this);
 }
 
-HintBarMorph.prototype.layout = function() {
+HintBarMorph.prototype.drawNew = function() {
+	this.image = newCanvas(this.extent());
+}
+
+HintBarMorph.prototype.layout = function(now) {
+	if (!now) {
+		if (!this.scheduledLayout) {
+			this.scheduledLayout = true;
+			var myself = this;
+			setTimeout(function() {
+				myself.scheduledLayout = false;
+				myself.layout(true);
+			}, 0);
+		}
+		return;
+	}
+	
+	// console.log("layout");
+	
 	this.children.sort(function(a, b) {
 		return (a.idealY || 0) - (b.idealY || 0);
 	});
-	var right = 0, bottom = 0, left = this.left();
+	var bottom = 0, left = this.right();
 	for (var i = 0; i < this.children.length; i++) {
 		var child = this.children[i];
 		var idealY = this.top() + (child.idealY || 0);
@@ -468,16 +485,22 @@ HintBarMorph.prototype.layout = function() {
 			var lastChild = this.children[i - 1];
 			var minY = lastChild.bottom() + 5;
 			var minX = lastChild.left() - 5;
-			if (idealY < minY) {
+			if (Math.abs(child.idealY - lastChild.idealY) < 15) {
 				child.setRight(minX);
+				child.setTop(lastChild.top());
+				// console.log(i + " right: " + minX);
+			} else if (idealY < minY) {
+				child.setTop(minY);
+				// console.log(i + " top: " + minY);
 			}
 			break;
 		}
-		right = Math.max(right, child.right());
 		bottom = Math.max(bottom, child.bottom());
 		left = Math.min(left, child.left());
 	}
-	this.setLeft(left);
-	this.setExtent(new Point(right - this.left(), bottom - this.top()));
-	this.fullChanged();
+	// this.setLeft(left);
+	// var right = this.right();
+	// this.setExtent(new Point(right - left, bottom - this.top()));
+	// this.setRight(right);
+	// this.fullChanged();
 }

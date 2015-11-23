@@ -326,7 +326,7 @@ SnapDisplay.prototype.showScriptHint = function(root, from , to) {
 		console.log("Clicked script hint: " + from + " -> " + to);
 	}
 	
-	this.createHintButton(root, new Color(255, 127, 29), function() {
+	this.createHintButton(root, new Color(255, 127, 29), true, function() {
 		console.log("Clicked script hint: " + from + " -> " + to);
 	});
 }
@@ -336,12 +336,12 @@ SnapDisplay.prototype.showBlockHint = function(root, from , to) {
 		console.log("Clicked block hint: " + from + " -> " + to);
 	}
 	
-	this.createHintButton(root, new Color(34, 174, 76), function() {
+	this.createHintButton(root, new Color(34, 174, 76), false, function() {
 		console.log("Clicked script hint: " + from + " -> " + to);
 	});
 }
 
-SnapDisplay.prototype.createHintButton = function(parent, color, callback) {
+SnapDisplay.prototype.createHintButton = function(parent, color, script, callback) {
 	// for (var i = 0; i < this.buttons.length; i++) {
 	// 	if (this.buttons[i].parent == parent) {
 	// 		this.buttons[i].callback = callback;
@@ -364,9 +364,8 @@ SnapDisplay.prototype.createHintButton = function(parent, color, callback) {
 	
 	var button = new PushButtonMorph(hintBar, callback, new SymbolMorph("speechBubble", 14));
 	button.labelColor = color;
-	button.idealY = parent.top() - topBlock.top();
 	button.fixLayout();
-	hintBar.addButton(button, parent);
+	hintBar.addButton(button, parent, script);
 	
 	// this.buttons.push(button);
 }
@@ -412,12 +411,33 @@ BlockMorph.prototype.topBlockInScript = function() {
 	return this;
 }
 
+BlockMorph.prototype.addHighlightBasic = BlockMorph.prototype.addHighlight; 
+BlockMorph.prototype.addHighlight = function() {
+	var index = this.children.indexOf(this.hintBar);
+	if (index >= 0) {
+		this.children.splice(index, 1);
+		var highlight = this.addHighlightBasic();
+		this.children.splice(index, 0, this.hintBar);
+		this.fullChanged();
+		return highlight;
+	} else {
+		return this.addHighlightBasic();	
+	}
+}
+
 BlockMorph.prototype.addSingleHighlight = function() {
 	var children = this.children;
 	this.children = [];
-	children.push(this.addHighlight());
+	var highlight = this.addHighlight(); 
+	children.push(highlight);
 	this.children = children;
 	this.fullChanged();
+	return highlight;
+}
+
+// We need block highlights not to intercept pointer events
+BlockHighlightMorph.prototype.topMorphAt = function(point) {
+	return null;
 }
 
 // BlockMorph.prototype.mouseEnter = function() {
@@ -471,13 +491,15 @@ HintBarMorph.prototype.destroy = function() {
 	}
 }
 
-HintBarMorph.prototype.addButton = function(button, block) {
-	this.add(button);
-	this.layout();
-	
+HintBarMorph.prototype.addButton = function(button, block, script) {
 	while (block instanceof ArgMorph) {
 		block = block.parent;
 	}
+	button.idealY = block.top() - block.topBlock().top();
+	
+	this.add(button);
+	this.layout();
+	
 	if (!block.addHighlight) {
 		console.log(block);
 		return;
@@ -487,17 +509,17 @@ HintBarMorph.prototype.addButton = function(button, block) {
 	var oldMouseEnter = button.mouseEnter;
 	button.mouseEnter = function() {
 		oldMouseEnter.call(button);
-		myself.updateHighlight(block, true);
+		myself.updateHighlight(block, script, true);
 	}
 	
 	var oldMouseLeave = button.mouseLeave;
 	button.mouseLeave = function() {
 		oldMouseLeave.call(button);
-		myself.updateHighlight(block, false);
+		myself.updateHighlight(block, script, false);
 	}
 }
 
-HintBarMorph.prototype.updateHighlight = function(block, hovering) {
+HintBarMorph.prototype.updateHighlight = function(block, script, hovering) {
 	if (!hovering && this.highlightBlock == block) {
 		block.removeHighlight();
 		this.highlightBlock = null;
@@ -512,7 +534,11 @@ HintBarMorph.prototype.updateHighlight = function(block, hovering) {
 			}
 		}
 		this.highlightBlock = block;
-		block.addSingleHighlight();
+		if (script) {
+			block.addHighlight();
+		} else {
+			block.addSingleHighlight();
+		}
 	}
 }
 
@@ -542,8 +568,8 @@ HintBarMorph.prototype.layout = function(now) {
 		child.setTop(idealY);
 		for (var j = i - 1; j >= 0; j--) {
 			var lastChild = this.children[i - 1];
-			var minY = lastChild.bottom() + 5;
-			var minX = lastChild.left() - 5;
+			var minY = lastChild.bottom() + 3;
+			var minX = lastChild.left() - 3;
 			if (Math.abs(child.idealY - lastChild.idealY) < 15) {
 				child.setRight(minX);
 				child.setTop(lastChild.top());

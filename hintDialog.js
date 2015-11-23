@@ -64,6 +64,9 @@ HintDialogBoxMorph.prototype.init = function(target,list) {
 	this.key = 'hintDialog';
 	this.labelString = 'Magical Hint!!!';
 	this.createLabel();
+	
+	// create labels for scripts frame
+	this.createLabels();
 		
 	// create scripting area
 	scripts = new ScriptsMorph(target);
@@ -79,11 +82,18 @@ HintDialogBoxMorph.prototype.init = function(target,list) {
     scriptsFrame.isDraggable = false;
     scriptsFrame.acceptsDrops = false;
     scriptsFrame.contents.acceptsDrops = true;
+	scriptsFrame.isScrollingByDragging = false; //don't allow scrolling by dragging
     scripts.scrollFrame = scriptsFrame;
 	scripts.acceptsDrops = false; //does not allow edit
 	
 	// add elements to dialogue box
-	this.addBody(scriptsFrame);
+	this.addBody(new AlignmentMorph('row', this.padding))
+	
+	// add 2 scriptFrames to this.body
+	this.addScriptsFrame(scriptsFrame);
+	this.addScriptsFrame(scriptsFrame.fullCopy());
+	
+	// add accept and decline button
 	this.addButton('accept','Good one!');
 	this.addButton('decline','I don\'t think so...');
 	
@@ -96,7 +106,7 @@ HintDialogBoxMorph.prototype.init = function(target,list) {
 
 // interface for showing hint for a single block
 // showBlockHint("doUntil", 0, "literal")
-HintDialogBoxMorph.prototype.showBlockHint = function (arg1, arg2, arg3) {
+HintDialogBoxMorph.prototype.showBlockHint = function (arg1, arg2, arg3, studentBlock) {
 	var blck1,	//corresponding to arg1
 		blck2;	//corresponding to arg3
 	
@@ -152,18 +162,25 @@ HintDialogBoxMorph.prototype.showBlockHint = function (arg1, arg2, arg3) {
 	// add blck2 to blck1
 	blck1.inputs()[arg2].parent.silentReplaceInput(blck1.inputs()[arg2],blck2);
 	
-	// set block position
-	blck1.setPosition(new Point(30,60));
-		
-	this.body.contents.add(blck1);
-	this.body.contents.changed();
+	// add student's block to the first scriptsFrame, if exist
+	if (studentBlock !== null && typeof studentBlock !== 'undefined') {
+		this.addBlock(studentBlock,0);
+	}
+	
+	//add suggested block to second scriptsFrame
+	this.addBlock(blck1,1);
+	
+	// refresh layout
+	this.fixExtent(); // fix Extent to fit the hints
+	this.fixLayout();
+	this.adjustScroll(); // adjust v and h scroll bars to original position and hide them
 	
 	this.popUp();
 }
 
 // interface for showing hint for a script(sequence of blocks)
 // showScriptHint("doUntil", 1, ["doMove"])
-HintDialogBoxMorph.prototype.showScriptHint = function (arg1, arg2, arg3) {
+HintDialogBoxMorph.prototype.showScriptHint = function (arg1, arg2, arg3, studentBlock) {
 	var blck1, // correspond to arg1
 		blck2; // correspond to arg3
 	
@@ -178,11 +195,10 @@ HintDialogBoxMorph.prototype.showScriptHint = function (arg1, arg2, arg3) {
 			return;
 		}		
 		
-		//set block position
-		blck2.setPosition(new Point(30,60));
+		// set block position
+		// blck2.setPosition(new Point(30,60));
 			
-		this.body.contents.add(blck2);
-		this.body.contents.changed();
+		this.addBlock(blck2,1);
 	// if arg1 is not null, there is nesting
 	} else {
 		// get corresponding blck1 from arg1
@@ -212,13 +228,88 @@ HintDialogBoxMorph.prototype.showScriptHint = function (arg1, arg2, arg3) {
 		}
 		
 		// set block position
-		blck1.setPosition(new Point(30,60));
-		
-		this.body.contents.add(blck1);
-		this.body.contents.changed();
+		//blck1.setPosition(new Point(2*this.padding,2*this.padding));
+	
+		//this.body.contents.add(blck1);
+		this.addBlock(blck1,1);
 	}
+	
+	// add student's block to the first scriptsFrame, if exist
+	if (studentBlock !== null && typeof studentBlock !== 'undefined') {
+		this.addBlock(studentBlock,0);
+	}
+	
+	// refresh layout
+	this.fixExtent(); // fix Extent to fit the hints
+	this.fixLayout();
+	this.adjustScroll(); // adjust v and h scroll bars to original position and hide them
+	
 	this.popUp();
 }
+
+// add scriptsFrame to AlignmentMorph in body
+HintDialogBoxMorph.prototype.addScriptsFrame = function (scriptsFrame) {
+	if (this.body) {
+		this.body.add(scriptsFrame);
+	}
+}
+
+// add block to a scriptsFrame specified by num
+HintDialogBoxMorph.prototype.addBlock = function(blck, num) {
+	// check if blck exists
+	if (blck === null) {
+		console.log('blck is null in HintDialogBoxMorph.prototype.addBlock: 1');
+		return;
+	}
+	// check if specified scriptsFrame exists
+	if (typeof this.body.children[num] === 'undefined') {
+		console.log('bad num in HintDialogBoxMorph.prototype.addBlock: 1');
+		return;
+	}
+	
+	this.body.children[num].contents.add(blck);
+	this.body.children[num].contents.changed();
+}
+
+// customized fixExtend function
+// first resize two scriptFrame to fit the hint blocks
+// then resize this.extent to fit the scriptFrames and buttons
+HintDialogBoxMorph.prototype.fixExtent = function() {
+	var th = fontHeight(this.titleFontSize) + this.titlePadding * 2,
+		w = 0,
+		h = 0;
+		
+	// calculate the size of scriptsFrame
+	this.body.children.forEach(function(child) {
+		//child.children[0].setExtent(new Point(250,h));
+		if (child.contents.children[0]) {
+			w = Math.max(child.contents.children[0].fullImage().width,w);
+			h = Math.max(child.contents.children[0].fullImage().height,h);
+		}
+	});
+	
+	w = w + 2*this.padding;
+	h = h + 2*this.padding;
+	
+	this.body.children.forEach(function(child) {
+		child.setExtent(new Point(w, h));
+	});
+	
+	this.setExtent(new Point(2*w+3*this.padding,th+this.buttons.height()+h+3*this.padding));
+	
+}
+
+
+// adjust v and h scroll bars to original position and hide them
+HintDialogBoxMorph.prototype.adjustScroll = function() {
+	this.body.children.forEach(function(child) {
+		child.scrollX(child.contents.width());
+		child.scrollY(child.contents.height());
+		child.hBar.destroy(); // hide horizontal scroll bar
+		child.vBar.destroy(); // hide vertical scroll bar
+	});	
+}
+
 
 
 // load hint to nested Morph (for testing purpose)
@@ -327,6 +418,44 @@ HintDialogBoxMorph.prototype.close = function() {
 	this.destroy();
 }
 
+// create labels for scripts frame
+HintDialogBoxMorph.prototype.createLabels = function() {
+	var shading = !MorphicPreferences.isFlat || this.is3D,
+		myself = this,
+		th = fontHeight(this.titleFontSize) + this.titlePadding * 2;
+	
+	if (this.labels) {
+		this.labels.destroy();
+	}
+	// create a alignmentMorph to 
+	this.labels = [new StringMorph(
+            localize("Your Code"),
+            this.titleFontSize,
+            this.fontStyle,
+            true,
+            false,
+            false,
+            null,
+            this.titleBarColor.darker(this.contrast)
+        ),
+		new StringMorph(
+            localize("Suggested Code"),
+            this.titleFontSize,
+            this.fontStyle,
+            true,
+            false,
+            false,
+            null,
+            this.titleBarColor.darker(this.contrast)
+        )];
+	
+	this.labels.forEach(function(label) {
+		label.color = new Color(0,0,0);
+		label.drawNew();
+		myself.add(label);
+	});
+}
+
 // define HintDialogBoxMorph layout
 HintDialogBoxMorph.prototype.fixLayout = function() {
 	var th = fontHeight(this.titleFontSize) + this.titlePadding * 2;
@@ -342,8 +471,11 @@ HintDialogBoxMorph.prototype.fixLayout = function() {
         )));
         this.body.setExtent(new Point(
             this.width() - this.padding * 2,
-            this.height() - this.padding * 3 - th - this.buttons.height()
+           this.height() - this.padding * 3 - th - this.buttons.height()
         ));
+		this.body.setCenter(this.center());
+		this.body.setTop(this.top()+this.padding+th+this.labels[0].height());
+		
     }
 
     if (this.label) {
@@ -355,4 +487,13 @@ HintDialogBoxMorph.prototype.fixLayout = function() {
         this.buttons.setCenter(this.center());
         this.buttons.setBottom(this.bottom() - this.padding);
     }
+	
+	if (this.labels) {
+		this.labels[0].setTop(this.body.children[0].top() - this.labels[0].height()-4);
+		this.labels[0].setLeft(this.body.children[0].left());
+		this.labels[1].setTop(this.body.children[1].top() - this.labels[0].height()-4);
+		this.labels[1].setLeft(this.body.children[1].left());
+		
+		this.silentSetHeight(this.height() + this.labels[0].height());
+	}
 }

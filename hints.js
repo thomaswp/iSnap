@@ -366,8 +366,7 @@ SnapDisplay.prototype.createHintButton = function(parent, color, callback) {
 	button.labelColor = color;
 	button.idealY = parent.top() - topBlock.top();
 	button.fixLayout();
-	hintBar.add(button);
-	hintBar.layout();
+	hintBar.addButton(button, parent);
 	
 	// this.buttons.push(button);
 }
@@ -413,6 +412,14 @@ BlockMorph.prototype.topBlockInScript = function() {
 	return this;
 }
 
+BlockMorph.prototype.addSingleHighlight = function() {
+	var children = this.children;
+	this.children = [];
+	children.push(this.addHighlight());
+	this.children = children;
+	this.fullChanged();
+}
+
 // BlockMorph.prototype.mouseEnter = function() {
 // 	if (this.blockHintCallback != null) {
 // 		if (this.hintHighlight == null) {
@@ -455,6 +462,58 @@ HintBarMorph.prototype.init = function(parent) {
 
 HintBarMorph.prototype.drawNew = function() {
 	this.image = newCanvas(this.extent());
+}
+
+HintBarMorph.prototype.destroy = function() {
+	HintBarMorph.uber.destroy.call(this);
+	if (this.highlightBlock) {
+		this.highlightBlock.removeHighlight();
+	}
+}
+
+HintBarMorph.prototype.addButton = function(button, block) {
+	this.add(button);
+	this.layout();
+	
+	while (block instanceof ArgMorph) {
+		block = block.parent;
+	}
+	if (!block.addHighlight) {
+		console.log(block);
+		return;
+	}
+	
+	var myself = this;
+	var oldMouseEnter = button.mouseEnter;
+	button.mouseEnter = function() {
+		oldMouseEnter.call(button);
+		myself.updateHighlight(block, true);
+	}
+	
+	var oldMouseLeave = button.mouseLeave;
+	button.mouseLeave = function() {
+		oldMouseLeave.call(button);
+		myself.updateHighlight(block, false);
+	}
+}
+
+HintBarMorph.prototype.updateHighlight = function(block, hovering) {
+	if (!hovering && this.highlightBlock == block) {
+		block.removeHighlight();
+		this.highlightBlock = null;
+	}
+	
+	if (hovering) {
+		if (this.highlightBlock) {
+			if (this.highlightBlock == block) {
+				return;
+			} else {
+				this.highlightBlock.removeHighlight();
+			}
+		}
+		this.highlightBlock = block;
+		block.addSingleHighlight();
+	}
 }
 
 HintBarMorph.prototype.layout = function(now) {

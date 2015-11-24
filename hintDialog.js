@@ -106,29 +106,29 @@ HintDialogBoxMorph.prototype.init = function(target) {
 
 // interface for showing hint for a single block
 // showBlockHint("doUntil", 0, "literal")
-HintDialogBoxMorph.prototype.showBlockHint = function (arg1, arg2, arg3, studentBlock) {
+HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, index, from, to, studentBlock) {
 	var blck1,	//corresponding to arg1
 		blck2;	//corresponding to arg3
 	
 	// check if arg1 is valid	
-	if (arg1 === null || typeof arg1 === 'undefined') {
+	if (parentSelector === null || typeof parentSelector === 'undefined') {
 		console.log('bad arg 1 in HintDialogBoxMorph.prototype.showBlockHint: 1');
 		return;
 	}
 	// check if arg2 is valid
-	if (arg2 === null || typeof arg2 === 'undefined') {
+	if (index === null || typeof index === 'undefined') {
 		console.log('bad arg 2 in HintDialogBoxMorph.prototype.showBlockHint: 1');
 		return;
 	}
 	// check if arg3 is valid
-	if (arg3 === null || typeof arg3 === 'undefined') {
+	if (to === null || typeof to === 'undefined') {
 		console.log('bad arg 3 in HintDialogBoxMorph.prototype.showBlockHint: 1');
 		return;
 	}
 	
 	// get blck1, blck2 with arg1, arg3 from blockForSelector
-	blck1 = SpriteMorph.prototype.blockForSelector(arg1, true);
-	blck2 = SpriteMorph.prototype.blockForSelector(arg3, true);
+	blck1 = SpriteMorph.prototype.blockForSelector(parentSelector, true);
+	blck2 = SpriteMorph.prototype.blockForSelector(to, true);
 	
 	// blck1 is null means arg1 is incorrect
 	if (blck1 === null) {
@@ -143,14 +143,14 @@ HintDialogBoxMorph.prototype.showBlockHint = function (arg1, arg2, arg3, student
 	}
 	
 	// means no corresponding input child at arg2
-	if (typeof blck1.inputs()[arg2] === 'undefined') {
+	if (typeof blck1.inputs()[index] === 'undefined') {
 		console.log('bad arg 2 in HintDialogBoxMorph.prototype.showBlockHint: 2');
 		return;
 	}
 	
 	// return if corresponding input is not a InputSlotMorph
 	// ??? how to get _proto_ from an object?
-	if (blck1.inputs()[arg2] instanceof CSlotMorph) {
+	if (blck1.inputs()[index] instanceof CSlotMorph) {
 		console.log('bad arg 2 in HintDialogBoxMorph.prototype.showBlockHint: 3');
 		return;
 	}
@@ -160,7 +160,7 @@ HintDialogBoxMorph.prototype.showBlockHint = function (arg1, arg2, arg3, student
 	this.clearParameter(blck2);
 	
 	// add blck2 to blck1
-	blck1.inputs()[arg2].parent.silentReplaceInput(blck1.inputs()[arg2],blck2);
+	blck1.inputs()[index].parent.silentReplaceInput(blck1.inputs()[index],blck2);
 	
 	// add student's block to the first scriptsFrame, if exist
 	if (studentBlock !== null && typeof studentBlock !== 'undefined') {
@@ -180,63 +180,67 @@ HintDialogBoxMorph.prototype.showBlockHint = function (arg1, arg2, arg3, student
 
 // interface for showing hint for a script(sequence of blocks)
 // showScriptHint("doUntil", 1, ["doMove"])
-HintDialogBoxMorph.prototype.showScriptHint = function (arg1, arg2, arg3, studentBlock) {
-	var blck1, // correspond to arg1
-		blck2; // correspond to arg3
+HintDialogBoxMorph.prototype.showScriptHint = function (parentSelector, index, from, to, studentBlock) {
 	
 	// if arg1 is null, it means no nesting, e.g. doUntil
-	if (arg1 === null) {
+	if (parentSelector === null) {
 		// get corresponding blck2 from arg3
-		blck2 = this.readBlocks(arg3); //readBlocks can read a sequence of block and return the top one.
+		var block1 = this.readBlocks(from);
+		var block2 = this.readBlocks(to); //readBlocks can read a sequence of block and return the top one.
 		
 		// check if get blck2 correctly
-		if (blck2 === null) {
+		if (block2 === null) {
 			console.log('bad arg3 in HintDialogBoxMorph.prototype.loadScriptHint: 1');
 			return;
 		}		
 		
 		// set block position
 		// blck2.setPosition(new Point(30,60));
-			
-		this.addBlock(blck2,1);
+		
+		this.addBlock(block1,0);
+		this.addBlock(block2,1);
 	// if arg1 is not null, there is nesting
 	} else {
 		// get corresponding blck1 from arg1
-		blck1 = SpriteMorph.prototype.blockForSelector(arg1, true);
+		var block1 = SpriteMorph.prototype.blockForSelector(parentSelector, true);
+		var block2 = SpriteMorph.prototype.blockForSelector(parentSelector, true);
 		
 		// get corresponding blck2 from arg3
-		blck2 = this.readBlocks(arg3);
+		var block1Body = this.readBlocks(from);
+		var block2Body = this.readBlocks(to);
 		
 		// check if get blck1 correctly
-		if (blck1 === null) {
+		if (block1 === null) {
 			console.log('bad arg1 in HintDialogBoxMorph.prototype.loadScriptHint: 1');
 			return;
 		}
 		
 		//check if get blck2 correctly
-		if (blck2 === null) {
+		if (block2 === null) {
 			console.log('bad arg2 in HintDialogBoxMorph.prototype.loadScriptHint: 2');
 			return;
 		}
 		
+		var input1 = block1.inputs()[index];
+		var input2 = block2.inputs()[index];
+		
 		// if the number arg2 child is a CSlotMorph, then it is a nested structure
-		if (blck1.inputs()[arg2] instanceof CSlotMorph) {
-			blck1.inputs()[arg2].nestedBlock(blck2);
+		if (input1 instanceof CSlotMorph) {
+			input1.nestedBlock(block1Body);
+			input2.nestedBlock(block2Body);
+			
 		// else, it is parameter input
 		} else {
-			blck1.inputs()[arg2].parent.silentReplaceInput(blck1.inputs()[arg2],blck2);
+			input1.parent.silentReplaceInput(input1,block1Body);
+			input2.parent.silentReplaceInput(input2,block2Body);
 		}
 		
 		// set block position
 		//blck1.setPosition(new Point(2*this.padding,2*this.padding));
 	
 		//this.body.contents.add(blck1);
-		this.addBlock(blck1,1);
-	}
-	
-	// add student's block to the first scriptsFrame, if exist
-	if (studentBlock !== null && typeof studentBlock !== 'undefined') {
-		this.addBlock(studentBlock,0);
+		this.addBlock(block1,0);
+		this.addBlock(block2,1);
 	}
 	
 	// refresh layout

@@ -322,22 +322,34 @@ SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.showScriptHint = function(root, from , to) {
+	var block = root.enclosingBlock();
+	var showHint = function() {
+		var selector = block ? block.selector : null;
+		new HintDialogBoxMorph(window.ide).showScriptHint(selector, 1, from, to);
+	}
+	
 	root.scriptHintCallback = function() {
-		console.log("Clicked script hint: " + from + " -> " + to);
+		showHint();
 	}
 	
 	this.createHintButton(root, new Color(255, 127, 29), true, function() {
-		console.log("Clicked script hint: " + from + " -> " + to);
+		showHint();
 	});
 }
 
 SnapDisplay.prototype.showBlockHint = function(root, from , to) {
+	var block = root.enclosingBlock();
+	var showHint = function() {
+		var selector = block ? block.selector : null;
+		new HintDialogBoxMorph(window.ide).showScriptHint(selector, 1, from, to);
+	}
+	
 	root.blockHintCallback = function() {
-		console.log("Clicked block hint: " + from + " -> " + to);
+		showHint();
 	}
 	
 	this.createHintButton(root, new Color(34, 174, 76), false, function() {
-		console.log("Clicked script hint: " + from + " -> " + to);
+		showHint();
 	});
 }
 
@@ -372,6 +384,14 @@ SnapDisplay.prototype.createHintButton = function(parent, color, script, callbac
 
 if (window.getHintProvider && window.assignmentID) {
 	window.hintProvider = window.getHintProvider();
+}
+
+SyntaxElementMorph.prototype.enclosingBlock = function() {
+	var block = this.parent;
+	while (block && !(block instanceof BlockMorph)) {
+		block = block.parent;
+	}
+	return block;
 }
 
 BlockMorph.prototype.basicUserMenu = BlockMorph.prototype.userMenu;

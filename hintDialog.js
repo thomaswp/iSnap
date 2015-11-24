@@ -106,18 +106,13 @@ HintDialogBoxMorph.prototype.init = function(target) {
 
 // interface for showing hint for a single block
 // showBlockHint("doUntil", 0, "literal")
-HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, index, from, to, studentBlock) {
-	var blck1,	//corresponding to arg1
-		blck2;	//corresponding to arg3
+HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, from, to, studentBlock) {
+	var block1,	//corresponding to arg1
+		block2;	//corresponding to arg3
 	
 	// check if arg1 is valid	
 	if (parentSelector === null || typeof parentSelector === 'undefined') {
 		console.log('bad arg 1 in HintDialogBoxMorph.prototype.showBlockHint: 1');
-		return;
-	}
-	// check if arg2 is valid
-	if (index === null || typeof index === 'undefined') {
-		console.log('bad arg 2 in HintDialogBoxMorph.prototype.showBlockHint: 1');
 		return;
 	}
 	// check if arg3 is valid
@@ -127,48 +122,24 @@ HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, index, fr
 	}
 	
 	// get blck1, blck2 with arg1, arg3 from blockForSelector
-	blck1 = SpriteMorph.prototype.blockForSelector(parentSelector, true);
-	blck2 = SpriteMorph.prototype.blockForSelector(to, true);
+	block1 = this.createBlockWithParams(parentSelector, from);
+	block2 = this.createBlockWithParams(parentSelector, to);
 	
 	// blck1 is null means arg1 is incorrect
-	if (blck1 === null) {
+	if (block1 === null) {
 		console.log('bad arg 1 in HintDialogBoxMorph.prototype.showBlockHint: 2');
 		return;
 	}
 	
 	// blck2 is null means arg3 is incorrect
-	if (blck2 === null) {
+	if (block2 === null) {
 		console.log('bad arg 3 in HintDialogBoxMorph.prototype.showBlockHint: 2');
 		return;
 	}
 	
-	// means no corresponding input child at arg2
-	if (typeof blck1.inputs()[index] === 'undefined') {
-		console.log('bad arg 2 in HintDialogBoxMorph.prototype.showBlockHint: 2');
-		return;
-	}
-	
-	// return if corresponding input is not a InputSlotMorph
-	// ??? how to get _proto_ from an object?
-	if (blck1.inputs()[index] instanceof CSlotMorph) {
-		console.log('bad arg 2 in HintDialogBoxMorph.prototype.showBlockHint: 3');
-		return;
-	}
-	
-	// clear all parameters in blck1 and blck2
-	this.clearParameter(blck1);
-	this.clearParameter(blck2);
-	
-	// add blck2 to blck1
-	blck1.inputs()[index].parent.silentReplaceInput(blck1.inputs()[index],blck2);
-	
-	// add student's block to the first scriptsFrame, if exist
-	if (studentBlock !== null && typeof studentBlock !== 'undefined') {
-		this.addBlock(studentBlock,0);
-	}
-	
 	//add suggested block to second scriptsFrame
-	this.addBlock(blck1,1);
+	this.addBlock(block1,0);
+	this.addBlock(block2,1);
 	
 	// refresh layout
 	this.fixExtent(); // fix Extent to fit the hints
@@ -176,6 +147,41 @@ HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, index, fr
 	this.adjustScroll(); // adjust v and h scroll bars to original position and hide them
 	
 	this.popUp();
+}
+
+HintDialogBoxMorph.prototype.createBlockWithParams = function(selector, params) {
+	var block = SpriteMorph.prototype.blockForSelector(selector, true);
+	var inputs = block.inputs();
+	if (inputs.length == 1 && inputs[0] instanceof MultiArgMorph) {
+		var multiArg = inputs[0];
+		while (multiArg.inputs().length > params.length) {
+			multiArg.removeInput();
+		}
+		while (multiArg.inputs().length < params.length) {
+			multiArg.addInput();
+		}
+		inputs = multiArg.inputs();
+	}
+	this.clearParameter(block);
+	for (var i = 0; i < params.length; i++) {
+		if (params[i] === 'script' || params[i] === 'literal') continue;
+		var param = this.createBlock(params[i]);
+		this.clearParameter(param); 
+		var input = inputs[i];
+		input.parent.silentReplaceInput(input,param);
+	}
+	return block;
+}
+
+HintDialogBoxMorph.prototype.createBlock = function(selector) {
+	var param;
+	if (selector === 'var') {
+		param = SpriteMorph.prototype.variableBlock(selector, true);
+		param.isDraggable = false;
+	} else {
+		param = SpriteMorph.prototype.blockForSelector(selector, true);
+	}
+	return param;
 }
 
 // interface for showing hint for a script(sequence of blocks)
@@ -347,11 +353,11 @@ HintDialogBoxMorph.prototype.readBlocks = function (list) {
 	if (list !== null) {
 		for (var i = list.length-1; i >= 0; i -= 1) {
 			if (blck === null) {
-				blck = SpriteMorph.prototype.blockForSelector(list[i],true);
+				blck = this.createBlock(list[i]);
 				this.clearParameter(blck);
 			} else {
 				var secondBlock = blck;
-				blck = SpriteMorph.prototype.blockForSelector(list[i],true);
+				blck = this.createBlock(list[i]);;
 				this.clearParameter(blck);
 				blck.nextBlock(secondBlock);
 			}
@@ -364,18 +370,23 @@ HintDialogBoxMorph.prototype.readBlocks = function (list) {
 // clear specific/all parameter input in a blck
 // num is the 
 HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
+	var inputs = blck.inputs();
+	if (inputs.length == 1 && inputs[0] instanceof MultiArgMorph) {
+		inputs = inputs[0].inputs();
+	}
+	
 	// if num is left empty,or input other than number, clear all parameters
 	if (num === null || typeof num === 'undefined' || typeof num === 'string' || typeof num === 'boolean') {
-		blck.inputs().forEach(function (input) {
+		inputs.forEach(function (input) {
 			if (input instanceof InputSlotMorph) {
 				input.setContents(null);
-			}				
+			}			
 		});
 	// else clear the slot at specific position
 	} else {
 		// check if the InputSlot specified by num actually exists/defined
-		if (blck.inputs()[num] instanceof InputSlotMorph) {
-			blck.inputs()[num].setContents(null);
+		if (inputs[num] instanceof InputSlotMorph) {
+			inputs[num].setContents(null);
 		}
 	}
 }

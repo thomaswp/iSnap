@@ -322,10 +322,19 @@ SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.showScriptHint = function(root, from , to) {
-	var block = root.enclosingBlock();
+	var block = root.parent;
+	if (block.enclosingBlock) block = block.enclosingBlock();
+	else block = null;
+	
+	var index = 0;
+	if (block && block != root && block.inputs) {
+		index = block.inputs().indexOf(root);
+		if (index == -1) console.writeln("Bad index!");
+	}
+	
 	var showHint = function() {
 		var selector = block ? block.selector : null;
-		new HintDialogBoxMorph(window.ide).showScriptHint(selector, 1, from, to);
+		new HintDialogBoxMorph(window.ide).showScriptHint(selector, index, from, to);
 	}
 	
 	root.scriptHintCallback = function() {
@@ -341,7 +350,7 @@ SnapDisplay.prototype.showBlockHint = function(root, from , to) {
 	var block = root.enclosingBlock();
 	var showHint = function() {
 		var selector = block ? block.selector : null;
-		new HintDialogBoxMorph(window.ide).showScriptHint(selector, 1, from, to);
+		new HintDialogBoxMorph(window.ide).showBlockHint(selector, from, to);
 	}
 	
 	root.blockHintCallback = function() {
@@ -387,7 +396,7 @@ if (window.getHintProvider && window.assignmentID) {
 }
 
 SyntaxElementMorph.prototype.enclosingBlock = function() {
-	var block = this.parent;
+	var block = this;
 	while (block && !(block instanceof BlockMorph)) {
 		block = block.parent;
 	}

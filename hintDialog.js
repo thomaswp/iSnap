@@ -65,7 +65,9 @@ HintDialogBoxMorph.prototype.init = function(target) {
     scriptsFrame.isDraggable = false;
     scriptsFrame.acceptsDrops = false;
     scriptsFrame.contents.acceptsDrops = true;
-	scriptsFrame.isScrollingByDragging = false; //don't allow scrolling by dragging
+	scriptsFrame.mouseDownLeft = function(){}; //don't allow scrolling by dragging
+	scriptsFrame.mouseScroll = function(){}; // don't allow scroll by mouse
+	scriptsFrame.startAutoScrolling = function(){}; //don't allow autoscroll
     scripts.scrollFrame = scriptsFrame;
 	scripts.acceptsDrops = false; //does not allow edit
 	
@@ -333,7 +335,7 @@ HintDialogBoxMorph.prototype.readBlocks = function (list) {
 }
 
 // clear specific/all parameter input in a blck
-// num is the 
+// num is optional 
 HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 	var inputs = blck.inputs();
 	if (inputs.length == 1 && inputs[0] instanceof MultiArgMorph) {
@@ -345,6 +347,11 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 		inputs.forEach(function (input) {
 			if (input instanceof InputSlotMorph) {
 				input.setContents(null);
+				// disable editing of input slots
+				if (input.children[0] instanceof StringMorph) {
+					input.children[0].isEditable = false;
+				}
+				input.getVarNamesDict = function(){}; // disable this function to avoid error
 			}			
 		});
 	// else clear the slot at specific position

@@ -17,9 +17,6 @@ HintDialogBoxMorph.showing = null;
 // HintDialogBoxMorph instance creation
 function HintDialogBoxMorph(target) {
 	this.init(target);
-	// this.showScriptHint('doUntil',1,['doSayFor','doAsk','forward','doAsk']);
-	// this.loadHint(list);
-	// this.test();
 }
 
 HintDialogBoxMorph.prototype.destroy = function() {
@@ -29,23 +26,9 @@ HintDialogBoxMorph.prototype.destroy = function() {
 	HintDialogBoxMorph.showing = null;
 }
 
-HintDialogBoxMorph.prototype.test = function() {
-	var list = ['doSayFor',['move','forward']];
-	
-	console.log(list[0].length);
-	console.log(typeof list[0]);
-	console.log(list[1].length);
-	console.log(typeof list[1]);
-	
-	console.log(this.body.contents.children[0]);
-}
-
 HintDialogBoxMorph.prototype.init = function(target) {
 	var scripts,  
-		scriptsFrame,
-		myself = this;
-	
-	//Trace.log("HintDialogBox.start",null);
+		scriptsFrame;
 	
 	HintDialogBoxMorph.showing = this;
 	
@@ -98,26 +81,27 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	this.addButton('decline','I don\'t think so...');
 	
 	// set layout
-	this.setExtent(new Point(500,400));
 	this.fixLayout();
-	//scripts.fixMultiArgs();
-
 }
 
 // interface for showing hint for a single block
-// showBlockHint("doUntil", 0, "literal")
-HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, from, to, studentBlock) {
+HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, from, to) {
 	var block1,	//corresponding to arg1
 		block2;	//corresponding to arg3
 	
+	//set HintDialogBox body alignment to vertical alignment
+	this.body.orientation = 'col'; //set alignment to vertical
+	this.body.padding = 2*this.padding; // change padding to 2 times of original padding
+	this.body.drawNew(); //re-draw alignmentMorph
+	
 	// check if arg1 is valid	
 	if (parentSelector === null || typeof parentSelector === 'undefined') {
-		console.log('bad arg 1 in HintDialogBoxMorph.prototype.showBlockHint: 1');
+		console.log('bad parentSelector in HintDialogBoxMorph.prototype.showBlockHint: 1');
 		return;
 	}
 	// check if arg3 is valid
 	if (to === null || typeof to === 'undefined') {
-		console.log('bad arg 3 in HintDialogBoxMorph.prototype.showBlockHint: 1');
+		console.log('bad to in HintDialogBoxMorph.prototype.showBlockHint: 1');
 		return;
 	}
 	
@@ -127,13 +111,13 @@ HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, from, to,
 	
 	// blck1 is null means arg1 is incorrect
 	if (block1 === null) {
-		console.log('bad arg 1 in HintDialogBoxMorph.prototype.showBlockHint: 2');
+		console.log('bad parentSelector and from in HintDialogBoxMorph.prototype.showBlockHint: 2');
 		return;
 	}
 	
 	// blck2 is null means arg3 is incorrect
 	if (block2 === null) {
-		console.log('bad arg 3 in HintDialogBoxMorph.prototype.showBlockHint: 2');
+		console.log('bad parentSelector and to in HintDialogBoxMorph.prototype.showBlockHint: 2');
 		return;
 	}
 	
@@ -185,8 +169,10 @@ HintDialogBoxMorph.prototype.createBlock = function(selector) {
 }
 
 // interface for showing hint for a script(sequence of blocks)
-// showScriptHint("doUntil", 1, ["doMove"])
-HintDialogBoxMorph.prototype.showScriptHint = function (parentSelector, index, from, to, studentBlock) {
+HintDialogBoxMorph.prototype.showScriptHint = function (parentSelector, index, from, to) {
+	//set HintDialogBox body alignment to horizontal alignment
+	this.body.orientation = 'row'; //set alignment to horizontal
+	this.body.drawNew(); //re-draw alignmentMorph
 	
 	// if arg1 is null, it means no nesting, e.g. doUntil
 	if (parentSelector === null) {
@@ -199,9 +185,6 @@ HintDialogBoxMorph.prototype.showScriptHint = function (parentSelector, index, f
 			console.log('bad arg3 in HintDialogBoxMorph.prototype.loadScriptHint: 1');
 			return;
 		}		
-		
-		// set block position
-		// blck2.setPosition(new Point(30,60));
 		
 		this.addBlock(block1,0);
 		this.addBlock(block2,1);
@@ -240,11 +223,7 @@ HintDialogBoxMorph.prototype.showScriptHint = function (parentSelector, index, f
 			input1.parent.silentReplaceInput(input1,block1Body);
 			input2.parent.silentReplaceInput(input2,block2Body);
 		}
-		
-		// set block position
-		//blck1.setPosition(new Point(2*this.padding,2*this.padding));
-	
-		//this.body.contents.add(blck1);
+
 		this.addBlock(block1,0);
 		this.addBlock(block2,1);
 	}
@@ -298,15 +277,21 @@ HintDialogBoxMorph.prototype.fixExtent = function() {
 		}
 	});
 	
-	w = w + 2*this.padding;
-	h = h + 2*this.padding;
+	w = w + 2*this.padding; // final width of a single scriptFrame
+	h = h + 2*this.padding; // final height of a single scriptFrame
 	
 	this.body.children.forEach(function(child) {
 		child.setExtent(new Point(w, h));
 	});
 	
-	this.setExtent(new Point(2*w+3*this.padding,th+this.buttons.height()+h+3*this.padding));
-	
+	// decide the extent of HintDialogBox based on body orientation
+	if (this.body.orientation === 'row') {
+		this.setExtent(new Point(2*w+3*this.padding,th+this.buttons.height()+h+3*this.padding+this.labels[0].height()));
+	} else {
+		this.buttons.fixLayout(); //fix button layout before calculating width
+		w = Math.max(w,this.label.width(),this.buttons.width());
+		this.setExtent(new Point(w+2*this.padding,th+this.buttons.height()+2*h+4*this.padding+2*this.labels[0].height()));
+	}
 }
 
 
@@ -320,26 +305,6 @@ HintDialogBoxMorph.prototype.adjustScroll = function() {
 	});	
 }
 
-
-
-// load hint to nested Morph (for testing purpose)
-// referencing this.body.contents.children
-HintDialogBoxMorph.prototype.loadHint = function (list) {
-	list = ['doUntil','reportTrue','forward'];
-	
-	var holderBlock = SpriteMorph.prototype.blockForSelector(list[0],true);
-	var reporter = SpriteMorph.prototype.blockForSelector(list[1],true);
-	var csBlocks = SpriteMorph.prototype.blockForSelector(list[2],true);
-	
-	holderBlock.children[2].parent.silentReplaceInput(holderBlock.children[2],reporter);
-	
-	holderBlock.children[3].nestedBlock(csBlocks);
-	
-	holderBlock.setPosition(new Point(40,80));
-	
-	this.body.contents.add(holderBlock);
-	this.body.contents.changed();
-}
 
 // read a sequence of block morph, concat them and return the one on top
 // pure sequence block without parameter
@@ -390,7 +355,6 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 		}
 	}
 }
-
 
 // define function when accept button is clicked
 HintDialogBoxMorph.prototype.accept = function () {
@@ -508,7 +472,5 @@ HintDialogBoxMorph.prototype.fixLayout = function() {
 		this.labels[0].setLeft(this.body.children[0].left());
 		this.labels[1].setTop(this.body.children[1].top() - this.labels[0].height()-4);
 		this.labels[1].setLeft(this.body.children[1].left());
-		
-		this.silentSetHeight(this.height() + this.labels[0].height());
 	}
 }

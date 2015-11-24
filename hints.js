@@ -306,7 +306,15 @@ SnapDisplay.prototype.showHint = function(hint) {
 }
 
 SnapDisplay.prototype.showSnapshotHint = function(root, from , to) {
+	var myself = this;
+	var message = from.length > to.length ?
+					"You may have too many global variables." :
+					"You may need another global variable.";
+	var showHint = function() {
+		myself.showMessageDialog(message, "Hint");
+	};
 	
+	this.createHintButton(window.ide.currentSprite.scripts, new Color(163, 73, 164), false, showHint)
 }
 
 SnapDisplay.prototype.showCustomBlockHint = function(root, from , to) {
@@ -318,7 +326,39 @@ SnapDisplay.prototype.showStageHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
+	var fromVars = this.countWhere(from, 'var'), 
+		fromScripts = this.countWhere(from, 'script'), 
+		toVars = this.countWhere(to, 'var'), 
+		toScripts = this.countWhere(to, 'script');
 	
+	var messages = [];
+	if (fromScripts > toScripts) {
+		messages.push("You may have too many scripts in this sprite.");
+	} else if (fromScripts < toScripts) {
+		messages.push("You may need another script in this sprite.")
+	}
+	
+	if (fromVars > toVars) {
+		messages.push("You may have too many local variables in this sprite.");
+	} else if (fromVars < toVars) {
+		messages.push("You may need another  local variable in this sprite.")
+	}
+	
+	var myself = this;
+	for (var i = 0; i < messages.length; i++) {
+		var message = messages[i];
+		this.createHintButton(root.scripts, new Color(163, 73, 164), false, function() {
+			myself.showMessageDialog(message, "Hint");
+		});
+	}
+}
+
+SnapDisplay.prototype.countWhere = function(array, item) {
+	var count = 0;
+	for (var i = 0; i < array.length; i++) {
+		if (array[i] == item) count++;
+	}
+	return count;
 }
 
 SnapDisplay.prototype.showScriptHint = function(root, from , to) {
@@ -335,15 +375,13 @@ SnapDisplay.prototype.showScriptHint = function(root, from , to) {
 	var showHint = function() {
 		var selector = block ? block.selector : null;
 		new HintDialogBoxMorph(window.ide).showScriptHint(selector, index, from, to);
-	}
+	};
 	
-	root.scriptHintCallback = function() {
-		showHint();
-	}
+	// root.scriptHintCallback = function() {
+	// 	showHint();
+	// }
 	
-	this.createHintButton(root, new Color(255, 127, 29), true, function() {
-		showHint();
-	});
+	this.createHintButton(root, new Color(255, 127, 29), true, showHint);
 }
 
 SnapDisplay.prototype.showBlockHint = function(root, from , to) {
@@ -351,44 +389,71 @@ SnapDisplay.prototype.showBlockHint = function(root, from , to) {
 	var showHint = function() {
 		var selector = block ? block.selector : null;
 		new HintDialogBoxMorph(window.ide).showBlockHint(selector, from, to);
-	}
+	};
 	
-	root.blockHintCallback = function() {
-		showHint();
-	}
+	// root.blockHintCallback = function() {
+	// 	showHint();
+	// }
 	
-	this.createHintButton(root, new Color(34, 174, 76), false, function() {
-		showHint();
-	});
+	this.createHintButton(root, new Color(34, 174, 76), false, showHint);
+}
+
+SnapDisplay.prototype.showMessageDialog = function(message, title) {
+	var dialog = new DialogBoxMorph(window.ide);
+    var txt = new TextMorph(
+        localize(message),
+        dialog.fontSize,
+        dialog.fontStyle,
+        true,
+        false,
+        'center',
+        null,
+        null,
+        new Point(1, 1),
+        new Color(255, 255, 255)
+    );
+
+    dialog.labelString = title
+    dialog.createLabel();
+    dialog.addBody(txt);
+    dialog.addButton('ok', 'Ok');
+    dialog.addButton('cancel', 'Cancel');
+    dialog.fixLayout();
+    dialog.drawNew();
+    dialog.fixLayout();
+    dialog.popUp(window.world);
 }
 
 SnapDisplay.prototype.createHintButton = function(parent, color, script, callback) {
-	// for (var i = 0; i < this.buttons.length; i++) {
-	// 	if (this.buttons[i].parent == parent) {
-	// 		this.buttons[i].callback = callback;
-	// 		this.buttons[i].show();
-	// 		return;
-	// 	}
-	// }
-	
-	var topBlock = parent.topBlock();
-	if (!topBlock) return;
-	
-	var hintBar = topBlock.hintBar;
-	if (hintBar == null) {
-		hintBar = new HintBarMorph(topBlock);
-		topBlock.hintBar = hintBar;
+	var hintBar;
+	if (parent instanceof SyntaxElementMorph) {
+		var topBlock = parent.topBlock();
+		if (!topBlock) return;
+		
+		hintBar = topBlock.hintBar;
+		if (hintBar == null) {
+			hintBar = new HintBarMorph(topBlock);
+			topBlock.hintBar = hintBar;
+		}
+		hintBar.setRight(topBlock.left() - 5);
+		hintBar.setTop(topBlock.top());
+		this.hintBars.push(hintBar);
+	} else {
+		var scripts = parent;
+		hintBar = scripts.hintBar;
+		if (hintBar == null) {
+			hintBar = new HintBarMorph(scripts);
+			scripts.hintBar = hintBar;
+		}
+		hintBar.setLeft(scripts.left() + 10);
+		hintBar.setTop(scripts.top() + 20);
+		this.hintBars.push(hintBar);
 	}
-	hintBar.setRight(topBlock.left() - 5);
-	hintBar.setTop(topBlock.top());
-	this.hintBars.push(hintBar);
 	
 	var button = new PushButtonMorph(hintBar, callback, new SymbolMorph("speechBubble", 14));
 	button.labelColor = color;
 	button.fixLayout();
 	hintBar.addButton(button, parent, script);
-	
-	// this.buttons.push(button);
 }
 
 if (window.getHintProvider && window.assignmentID) {
@@ -520,17 +585,24 @@ HintBarMorph.prototype.destroy = function() {
 	}
 }
 
-HintBarMorph.prototype.addButton = function(button, block, script) {
-	while (block instanceof ArgMorph) {
-		block = block.parent;
-	}
-	button.idealY = block.top() - block.topBlock().top();
-	
+HintBarMorph.prototype.addButton = function(button, parent, script) {
 	this.add(button);
+	
+	if (!(parent instanceof SyntaxElementMorph)) {
+		button.ideaY = this.children.length * 20;
+		this.layout();
+		return;
+	}
+	
+	while (parent instanceof ArgMorph) {
+		parent = parent.parent;
+	}
+	button.idealY = parent.top() - parent.topBlock().top();
+	
 	this.layout();
 	
-	if (!block.addHighlight) {
-		console.log(block);
+	if (!parent.addHighlight) {
+		console.log(parent);
 		return;
 	}
 	
@@ -538,13 +610,13 @@ HintBarMorph.prototype.addButton = function(button, block, script) {
 	var oldMouseEnter = button.mouseEnter;
 	button.mouseEnter = function() {
 		oldMouseEnter.call(button);
-		myself.updateHighlight(block, script, true);
+		myself.updateHighlight(parent, script, true);
 	}
 	
 	var oldMouseLeave = button.mouseLeave;
 	button.mouseLeave = function() {
 		oldMouseLeave.call(button);
-		myself.updateHighlight(block, script, false);
+		myself.updateHighlight(parent, script, false);
 	}
 }
 

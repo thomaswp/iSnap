@@ -1220,11 +1220,39 @@ IDE_Morph.prototype.createSpriteBar = function () {
     this.spriteBar.tabBar = tabBar;
     this.spriteBar.add(this.spriteBar.tabBar);
 
+    //Hint Button
+    var hintButton = new PushButtonMorph(
+        myself,
+        'getHint',
+        '  ' + localize('Hint') + '  '
+    );
+    hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
+    hintButton.corner = DialogBoxMorph.prototype.buttonCorner;
+    hintButton.edge = DialogBoxMorph.prototype.buttonEdge;
+    hintButton.outline = DialogBoxMorph.prototype.buttonOutline;
+    hintButton.outlineColor = this.spriteBar.color;
+    hintButton.outlineGradient = false;
+    hintButton.padding = DialogBoxMorph.prototype.buttonPadding;
+    hintButton.contrast = DialogBoxMorph.prototype.buttonContrast;
+    hintButton.drawNew();
+    hintButton.fixLayout();
+    hintButton.setPosition(new Point(this.stage.left()-hintButton.width()-20,nameField.top()));
+
+    this.spriteBar.hintButton = hintButton;
+    this.spriteBar.add(this.spriteBar.hintButton);
+
+
+
+
     this.spriteBar.fixLayout = function () {
         this.tabBar.setLeft(this.left());
         this.tabBar.setBottom(this.bottom());
     };
 };
+
+IDE_Morph.prototype.getHint = function() {
+    console.log('getHint triggered');
+}
 
 IDE_Morph.prototype.createSpriteEditor = function () {
     // assumes that the logo pane and the stage have already been created
@@ -1509,6 +1537,8 @@ IDE_Morph.prototype.fixLayout = function (situation) {
             this.categories.bottom() - this.spriteBar.top() - padding
         ));
         this.spriteBar.fixLayout();
+        //set position for hint button
+        this.spriteBar.hintButton.setPosition(new Point(this.stage.left()-this.spriteBar.hintButton.width()-20,this.spriteBar.hintButton.top()));
 
         // spriteEditor
         if (this.spriteEditor.isVisible) {
@@ -1546,7 +1576,7 @@ IDE_Morph.prototype.setProjectName = function (string) {
 // IDE_Morph resizing
 
 IDE_Morph.prototype.setExtent = function (point) {
-    var padding = new Point(430, 110),
+    var padding = new Point(480, 110),
         minExt,
         ext;
 

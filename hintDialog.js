@@ -84,6 +84,7 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	
 	// set layout
 	this.fixLayout();
+	Trace.log("HintDialogBox.init");
 }
 
 // interface for showing hint for a single block
@@ -133,6 +134,7 @@ HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, from, to)
 	this.adjustScroll(); // adjust v and h scroll bars to original position and hide them
 	
 	this.popUp();
+	Trace.log("HintDialogBox.blockHintPopUp");
 }
 
 HintDialogBoxMorph.prototype.createBlockWithParams = function(selector, params) {
@@ -236,6 +238,8 @@ HintDialogBoxMorph.prototype.showScriptHint = function (parentSelector, index, f
 	this.adjustScroll(); // adjust v and h scroll bars to original position and hide them
 	
 	this.popUp();
+	
+	Trace.log("HintDialogBox.scriptHintPopUp");
 }
 
 // add scriptsFrame to AlignmentMorph in body
@@ -365,7 +369,7 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 
 // define function when accept button is clicked
 HintDialogBoxMorph.prototype.accept = function () {
-	Trace.log("HintDialog.accept");
+	Trace.log("HintDialogBox.accept");
 	
 	//TODO log accept
 	
@@ -374,7 +378,7 @@ HintDialogBoxMorph.prototype.accept = function () {
 
 // define function when decline button is clicked
 HintDialogBoxMorph.prototype.decline = function () {
-	Trace.log("HintDialog.decline");
+	Trace.log("HintDialogBox.decline");
 	
 	//TODO log decline;
 	
@@ -399,6 +403,7 @@ HintDialogBoxMorph.prototype.popUp = function () {
 
 // define close function
 HintDialogBoxMorph.prototype.close = function() {
+	Trace.log("HintDialogBox.closed");
 	// set showing to null, indicating not showing
 	HintDialogBoxMorph.showing = null;
 	this.destroy();

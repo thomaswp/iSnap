@@ -61,8 +61,8 @@ include '../config.php';
 				<div style="overflow: scroll; height: 100%;">
 				<?php
 					if ($enble_viewer) {
-						$id = $_GET['id'];
-						$assignment = $_GET['assignment'];
+						$id = mysql_real_escape_string($_GET['id']);
+						$assignment = mysql_real_escape_string($_GET['assignment']);
 						
 						echo "<h3>Project: $id</h3>";
 						

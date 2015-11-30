@@ -69,8 +69,8 @@ include '../config.php';
 				<div style="overflow: scroll; height: 100%;">
 				<?php
 					if ($enble_viewer) {
-						$assignment = $_GET['assignment'];
-						$time = $_GET['time'];
+						$assignment = mysql_real_escape_string($_GET['assignment']);
+						$time = mysql_real_escape_string($_GET['time']);
 						
 						echo "<h3>Projects: $assignment</h3>";
 						

@@ -39,14 +39,14 @@ include '../config.php';
 			}
 		</style>
 		<script type="text/javascript">
-			function loadSnap(id) {
+			function loadSnap(id, project) {
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						document.getElementById('snap').contentWindow.ide.droppedText(xhr.responseText);
 					}
 				};
-				xhr.open("GET", "code.php?id=" + id, true);
+				xhr.open("GET", "code.php?id=" + id + "&project=" + project, true);
 				xhr.send();
 			}
 		</script>
@@ -87,7 +87,7 @@ include '../config.php';
 							$projectID = $row['projectID']; 
 							
 							$first = $time;
-							$first = "<a href='#$id' onclick='loadSnap(\"$id\")'>$first</a>";
+							$first = "<a href='#$id' onclick='loadSnap(\"$id\", \"$projectID\")'>$first</a>";
 														
 							echo "<tr><td>$first</td><td>$id</td><td>$projectID</td></tr>";
 						}

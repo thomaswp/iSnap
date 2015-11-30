@@ -39,14 +39,14 @@ include '../config.php';
 			}
 		</style>
 		<script type="text/javascript">
-			function loadSnap(id) {
+			function loadSnap(id, project) {
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						document.getElementById('snap').contentWindow.ide.droppedText(xhr.responseText);
 					}
 				};
-				xhr.open("GET", "code.php?id=" + id, true);
+				xhr.open("GET", "code.php?id=" + id + "&project=" + project, true);
 				xhr.send();
 			}
 		</script>
@@ -81,7 +81,7 @@ include '../config.php';
 						echo "<thead><th>Time</th><th>Message</th><th>Data</th><th>Session</th></thead>";
 						while($row = mysqli_fetch_array($result)) {
 							
-							$id = $row['id'];
+							$rid = $row['id'];
 							$time = $row['time'];
 							$message = $row['message'];
 							$data = $row['data'];
@@ -91,7 +91,7 @@ include '../config.php';
 							$sessionID = substr($sessionID, 0, 3); 
 							
 							$first = $time;
-							if ($link) $first = "<a href='#$id' onclick='loadSnap(\"$id\")'>$first</a>";
+							if ($link) $first = "<a href='#$rid' onclick='loadSnap(\"$rid\", \"$id\")'>$first</a>";
 							
 							$link = "http://www.bodurov.com/JsonFormatter/view.aspx?json=" . urlencode($data);
 							

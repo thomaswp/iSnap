@@ -9,8 +9,9 @@ if ($enble_viewer) {
 	}
 	
 	$id = $_GET['id'];
+	$project = $_GET['project'];
 	
-	$query = "SELECT code FROM $table WHERE id <= $id AND code <> '' ORDER BY id DESC LIMIT 1;";
+	$query = "SELECT code FROM $table WHERE id <= $id AND projectID = '$project' AND code <> '' ORDER BY id DESC LIMIT 1;";
 	$result = $mysqli->query($query); 
 	if (!$result) {
 		die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);

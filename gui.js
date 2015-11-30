@@ -1250,10 +1250,6 @@ IDE_Morph.prototype.createSpriteBar = function () {
     };
 };
 
-IDE_Morph.prototype.getHint = function() {
-    console.log('getHint triggered');
-}
-
 IDE_Morph.prototype.createSpriteEditor = function () {
     // assumes that the logo pane and the stage have already been created
     var scripts = this.currentSprite.scripts,

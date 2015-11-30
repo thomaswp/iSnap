@@ -80,8 +80,8 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	this.addScriptsFrame(scriptsFrame.fullCopy());
 	
 	// add accept and decline button
-	this.addButton('accept','Good one!');
-	this.addButton('decline','I don\'t think so...');
+	this.addButton('rate','Rate!');
+	this.addButton('decline','Other Hints...');
 	
 	// set layout
 	this.fixLayout();
@@ -369,11 +369,11 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 }
 
 // define function when accept button is clicked
-HintDialogBoxMorph.prototype.accept = function () {
+HintDialogBoxMorph.prototype.rate = function () {
 	Trace.log("HintDialogBox.accept");
 	
 	//TODO log accept
-	
+
 	this.close();
 }
 
@@ -382,7 +382,7 @@ HintDialogBoxMorph.prototype.decline = function () {
 	Trace.log("HintDialogBox.decline");
 	
 	//TODO log decline;
-	
+	window.hintProvider.setDisplayHint(true);
 	this.close();
 }
 
@@ -392,6 +392,7 @@ HintDialogBoxMorph.prototype.popUp = function () {
 		minHeight = 0,
 		world = this.target.world();
 	
+	// The minimum width and minimum height when adjusting dialogue scale
 	minWidth = this.width();
 	minHeight = this.height();
 	
@@ -405,6 +406,8 @@ HintDialogBoxMorph.prototype.popUp = function () {
             this.corner
         );
     }
+	
+	window.hintProvider.setDisplayHint(false);
 };
 
 // define close function
@@ -601,6 +604,8 @@ IntentionDialogMorph.prototype.showHintBubbles = function() {
 	// TODO: showHintBubbles;
 	console.log("Showing Hint Bubbles");
 	
+	window.hintProvider.setDisplayHint(true);
+	
 	this.close();
 }
 
@@ -686,3 +691,13 @@ IDE_Morph.prototype.getHint = function() {
     console.log('getHint triggered');
 }
 
+
+// set if we want to display Hint
+HintProvider.prototype.setDisplayHint = function(value) {
+	this.displayHint = value;
+	if (this.displayHint) {
+		this.getHintsFromServer();
+	} else {
+		this.clearDisplays();
+	}
+}

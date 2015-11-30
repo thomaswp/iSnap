@@ -37,6 +37,14 @@ include '../config.php';
 			#cleared {
 				clear: both;
 			}
+			tr.bold td {
+				background: #aaa;
+				color: black;
+			}
+			tr.bold:hover td {
+				background: #999;
+				color: black;
+			}
 		</style>
 		<script type="text/javascript">
 			function loadSnap(id, project) {
@@ -84,12 +92,32 @@ include '../config.php';
 							
 							$id = $row['id'];
 							$time = $row['time'];
-							$projectID = $row['projectID']; 
+							$projectID = $row['projectID'];
+							
+							// TODO: --- start delete 
+							$badPID = '';
+							
+							$query = "SELECT projectID FROM $table WHERE id <= $id AND code <> '' ORDER BY id DESC LIMIT 1;";
+							$r = $mysqli->query($query); 
+							if (!$r) {
+								die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
+							}
+							while($rr = mysqli_fetch_array($r)) {
+								$badPID = $rr['projectID'];
+								break;
+							}
+							
+							$style = "";
+							if ($projectID != $badPID) {
+								$style = "bold";
+							}
+							// --- end delete
 							
 							$first = $time;
 							$first = "<a href='#$id' onclick='loadSnap(\"$id\", \"$projectID\")'>$first</a>";
-														
-							echo "<tr><td>$first</td><td>$id</td><td>$projectID</td></tr>";
+											
+							// TODO: remove style		
+							echo "<tr class='$style'><td>$first</td><td>$id</td><td>$projectID</td></tr>";
 						}
 						echo "</table>";
 					} else {

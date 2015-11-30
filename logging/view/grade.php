@@ -37,16 +37,24 @@ include '../config.php';
 			#cleared {
 				clear: both;
 			}
+			tr.bold td {
+				background: #aaa;
+				color: black;
+			}
+			tr.bold:hover td {
+				background: #999;
+				color: black;
+			}
 		</style>
 		<script type="text/javascript">
-			function loadSnap(id) {
+			function loadSnap(id, project) {
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						document.getElementById('snap').contentWindow.ide.droppedText(xhr.responseText);
 					}
 				};
-				xhr.open("GET", "code.php?id=" + id, true);
+				xhr.open("GET", "code.php?id=" + id + "&project=" + project, true);
 				xhr.send();
 			}
 		</script>
@@ -61,8 +69,8 @@ include '../config.php';
 				<div style="overflow: scroll; height: 100%;">
 				<?php
 					if ($enble_viewer) {
-						$assignment = $_GET['assignment'];
-						$time = $_GET['time'];
+						$assignment = mysql_real_escape_string($_GET['assignment']);
+						$time = mysql_real_escape_string($_GET['time']);
 						
 						echo "<h3>Projects: $assignment</h3>";
 						
@@ -84,12 +92,32 @@ include '../config.php';
 							
 							$id = $row['id'];
 							$time = $row['time'];
-							$projectID = $row['projectID']; 
+							$projectID = $row['projectID'];
+							
+							// TODO: --- start delete 
+							$badPID = '';
+							
+							$query = "SELECT projectID FROM $table WHERE id <= $id AND code <> '' ORDER BY id DESC LIMIT 1;";
+							$r = $mysqli->query($query); 
+							if (!$r) {
+								die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
+							}
+							while($rr = mysqli_fetch_array($r)) {
+								$badPID = $rr['projectID'];
+								break;
+							}
+							
+							$style = "";
+							if ($projectID != $badPID) {
+								$style = "bold";
+							}
+							// --- end delete
 							
 							$first = $time;
-							$first = "<a href='#$id' onclick='loadSnap(\"$id\")'>$first</a>";
-														
-							echo "<tr><td>$first</td><td>$id</td><td>$projectID</td></tr>";
+							$first = "<a href='#$id' onclick='loadSnap(\"$id\", \"$projectID\")'>$first</a>";
+											
+							// TODO: remove style		
+							echo "<tr class='$style'><td>$first</td><td>$id</td><td>$projectID</td></tr>";
 						}
 						echo "</table>";
 					} else {

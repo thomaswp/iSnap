@@ -8,9 +8,10 @@ if ($enble_viewer) {
 		die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
 	}
 	
-	$id = $_GET['id'];
+	$id = mysql_real_escape_string($_GET['id']);
+	$project = mysql_real_escape_string($_GET['project']);
 	
-	$query = "SELECT code FROM $table WHERE id <= $id AND code <> '' ORDER BY id DESC LIMIT 1;";
+	$query = "SELECT code FROM $table WHERE id <= $id AND projectID = '$project' AND code <> '' ORDER BY id DESC LIMIT 1;";
 	$result = $mysqli->query($query); 
 	if (!$result) {
 		die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);

@@ -81,7 +81,7 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	
 	// add accept and decline button
 	this.addButton('rate','Rate!');
-	this.addButton('decline','Other Hints...');
+	this.addButton('otherHints','Other Hints...');
 	
 	// set layout
 	this.fixLayout();
@@ -135,7 +135,11 @@ HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, from, to)
 	this.adjustScroll(); // adjust v and h scroll bars to original position and hide them
 	
 	this.popUp();
-	Trace.log("HintDialogBox.blockHintPopUp");
+	Trace.log("HintDialogBox.showBlockHint", {
+		"parentSelector": parentSelector,
+		"from": from,
+		"to": to
+	});
 }
 
 HintDialogBoxMorph.prototype.createBlockWithParams = function(selector, params) {
@@ -240,7 +244,12 @@ HintDialogBoxMorph.prototype.showScriptHint = function (parentSelector, index, f
 	
 	this.popUp();
 	
-	Trace.log("HintDialogBox.scriptHintPopUp");
+	Trace.log("HintDialogBox.showScriptHint",{
+		"parentSelector": parentSelector,
+		"index": index,
+		"from": from,
+		"to": to
+	});
 }
 
 // add scriptsFrame to AlignmentMorph in body
@@ -370,7 +379,7 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 
 // define function when accept button is clicked
 HintDialogBoxMorph.prototype.rate = function () {
-	Trace.log("HintDialogBox.accept");
+	Trace.log("HintDialogBox.rateClicked");
 	
 	//TODO log accept
 
@@ -378,8 +387,8 @@ HintDialogBoxMorph.prototype.rate = function () {
 }
 
 // define function when decline button is clicked
-HintDialogBoxMorph.prototype.decline = function () {
-	Trace.log("HintDialogBox.decline");
+HintDialogBoxMorph.prototype.otherHints = function () {
+	Trace.log("HintDialogBox.otherHintsClicked");
 	
 	//TODO log decline;
 	window.hintProvider.setDisplayHint(true);
@@ -599,10 +608,9 @@ IntentionDialogMorph.prototype.createLabels = function() {
 
 // define function when Show Available Hints button is clicked
 IntentionDialogMorph.prototype.showHintBubbles = function() {
-	Trace.log("IntentionDialog.showAvailableHintsClicked");
+	Trace.log("IntentionDialog.showAvailableHintsClicked",this.body.contents().text.text);
 	
 	// TODO: showHintBubbles;
-	console.log("Showing Hint Bubbles");
 	
 	window.hintProvider.setDisplayHint(true);
 	
@@ -643,6 +651,8 @@ IntentionDialogMorph.prototype.popUp = function() {
             this.corner
         );
     }
+	
+	Trace.log("IntentionDialog.popUp");
 }
 
 IntentionDialogMorph.prototype.fixLayout = function() {
@@ -688,7 +698,8 @@ IDE_Morph.prototype.getHint = function() {
 		return;
 	}
 	new IntentionDialogMorph(this).popUp();
-    console.log('getHint triggered');
+	
+	Trace.log("HintButton.clicked");
 }
 
 

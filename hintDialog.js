@@ -46,7 +46,7 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	
 	// override inherited properties
 	this.key = 'hintDialog';
-	this.labelString = 'Magical Hint!!!';
+	this.labelString = 'Hint';
 	this.createLabel();
 	
 	// create labels for scripts frame

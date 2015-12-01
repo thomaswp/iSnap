@@ -50,6 +50,7 @@ function HintProvider(url, displays, reloadCode) {
 
 HintProvider.prototype.init = function(url, displays, reloadCode) {
 	this.url = url;
+	this.displayHint = false;
 	
 	if (!displays) displays = [];
 	if (!displays.length) displays = [displays];
@@ -115,6 +116,7 @@ HintProvider.prototype.getHintsFromServer = function() {
 
 HintProvider.prototype.processHints = function(json) {
 	//try {
+	if (this.displayHint) {
 		var hints = JSON.parse(json);
 		for (var i = 0; i < hints.length; i++) {
 			var hint = hints[i];
@@ -124,6 +126,7 @@ HintProvider.prototype.processHints = function(json) {
 				display.showHint(hint);
 			});
 		}
+	}
 	//} catch (e) {
 	//  display.showError("Error parsing hint!");
 	//	display.showError(e);

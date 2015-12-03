@@ -80,7 +80,7 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	this.addScriptsFrame(scriptsFrame.fullCopy());
 	
 	// add accept and decline button
-	this.addButton('rate','Rate!');
+	this.addButton('rate','Done');
 	this.addButton('decline','Other Hints...');
 	
 	// set layout
@@ -542,7 +542,7 @@ IntentionDialogMorph.prototype.init = function (target) {
 	
 	// override inherited properties
 	this.key = 'intentionDialog';
-	this.labelString = 'What is your intention?';
+	this.labelString = 'Help';
 	this.createLabel();
 	
 	// add text field to body of dialog box
@@ -556,7 +556,7 @@ IntentionDialogMorph.prototype.init = function (target) {
 	this.addBody(txt);
 	
 	// add accept and decline button
-	this.addButton('showHintBubbles','Show Available Hints!');
+	this.addButton('showHintBubbles','Show Available Hints');
 	this.addButton('cancel','Cancel');
 	
 	// set layout
@@ -583,7 +583,7 @@ IntentionDialogMorph.prototype.createLabels = function() {
 	}
 	
 	this.labels = new StringMorph(
-            localize("Please tell me your intention:"),
+            localize("What do you need help with?"),
             this.titleFontSize,
             this.fontStyle,
             true,

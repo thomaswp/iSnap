@@ -381,8 +381,7 @@ HintDialogBoxMorph.prototype.rate = function () {
 HintDialogBoxMorph.prototype.decline = function () {
 	Trace.log("HintDialogBox.decline");
 	
-	//TODO log decline;
-	window.hintProvider.setDisplayHint(true);
+	window.hintProvider.setDisplayEnabled(SnapDisplay, true);
 	this.close();
 }
 
@@ -407,7 +406,7 @@ HintDialogBoxMorph.prototype.popUp = function () {
         );
     }
 	
-	window.hintProvider.setDisplayHint(false);
+	window.hintProvider.setDisplayEnabled(SnapDisplay, false);
 };
 
 // define close function
@@ -601,10 +600,7 @@ IntentionDialogMorph.prototype.createLabels = function() {
 IntentionDialogMorph.prototype.showHintBubbles = function() {
 	Trace.log("IntentionDialog.showAvailableHintsClicked");
 	
-	// TODO: showHintBubbles;
-	console.log("Showing Hint Bubbles");
-	
-	window.hintProvider.setDisplayHint(true);
+	window.hintProvider.setDisplayEnabled(SnapDisplay, true);
 	
 	this.close();
 }
@@ -688,16 +684,4 @@ IDE_Morph.prototype.getHint = function() {
 		return;
 	}
 	new IntentionDialogMorph(this).popUp();
-    console.log('getHint triggered');
-}
-
-
-// set if we want to display Hint
-HintProvider.prototype.setDisplayHint = function(value) {
-	this.displayHint = value;
-	if (this.displayHint) {
-		this.getHintsFromServer();
-	} else {
-		this.clearDisplays();
-	}
 }

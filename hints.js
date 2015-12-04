@@ -50,17 +50,23 @@ function HintProvider(url, displays, reloadCode) {
 
 HintProvider.prototype.init = function(url, displays, reloadCode) {
 	this.url = url;
-	this.displayHint = false;
+	this.lastHints = [];
 	
 	if (!displays) displays = [];
 	if (!displays.length) displays = [displays];
 	this.displays = displays;
 	
+	displays.forEach(function(display) {
+		display.enabled = true;
+	});
+	
 	var myself = this;
-	Trace.onCodeChanged = function(code) {
-		myself.clearDisplays();
-		myself.code = code;
-		myself.getHintsFromServer(code);
+	if (displays.length > 0) {
+		Trace.onCodeChanged = function(code) {
+			myself.clearDisplays();
+			myself.code = code;
+			myself.getHintsFromServer(code);
+		}
 	}
 	
 	if (reloadCode) {
@@ -71,13 +77,11 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
 		myself.loadCode();
 	}
 	
-	var oldLoad = window.onload;
-	window.onload = function() {
-		oldLoad();
+	window.onWorldLoaded = function() {
 		myself.displays.forEach(function(display) {
 			if (display.initDisplay) display.initDisplay();
 		});
-	}
+	};
 }
 
 HintProvider.prototype.clearDisplays = function() {
@@ -102,7 +106,9 @@ HintProvider.prototype.getHintsFromServer = function() {
 	var xhr = createCORSRequest('POST', this.url + "?assignmentID=" + window.assignmentID);
 	if (!xhr) {
 		myself.displays.forEach(function(display) {
-			display.showError("CORS not supported on this browser.");
+			if (display.enabled) {
+				display.showError("CORS not supported on this browser.");
+			}
 		});
 		return;
 	}
@@ -115,7 +121,9 @@ HintProvider.prototype.getHintsFromServer = function() {
 	
 	xhr.onerror = function(e) {
 		myself.displays.forEach(function(display) {
-			display.showError("Error contacting hint server!");
+			if (display.enabled) {
+				display.showError("Error contacting hint server!");
+			}
 		});
 	};
 	
@@ -124,17 +132,18 @@ HintProvider.prototype.getHintsFromServer = function() {
 
 HintProvider.prototype.processHints = function(json) {
 	//try {
-	if (this.displayHint) {
-		var hints = JSON.parse(json);
-		for (var i = 0; i < hints.length; i++) {
-			var hint = hints[i];
-			// console.log(hint.from);
-			// console.log(this.getCode(hint.data));
-			this.displays.forEach(function(display) {
+	var hints = JSON.parse(json);
+	for (var i = 0; i < hints.length; i++) {
+		var hint = hints[i];
+		// console.log(hint.from);
+		// console.log(this.getCode(hint.data));
+		this.displays.forEach(function(display) {
+			if (display.enabled) {
 				display.showHint(hint);
-			});
-		}
+			}
+		});
 	}
+	this.lastHints = hints;
 	//} catch (e) {
 	//  display.showError("Error parsing hint!");
 	//	display.showError(e);
@@ -161,6 +170,22 @@ HintProvider.prototype.loadCode = function() {
 			}
 		}
 	}
+}
+
+HintProvider.prototype.setDisplayEnabled = function(displayType, enabled) {
+	var myself = this;
+	this.displays.forEach(function(display) {
+		if (display instanceof displayType) {
+			display.enabled = enabled;
+			if (enabled) {
+				myself.lastHints.forEach(function(hint) {
+					display.showHint(hint);
+				});
+			}  else {
+				display.clear();
+			}
+		}
+	});
 }
 
 // HintDisplay: outputs hitns to the console
@@ -194,11 +219,11 @@ function DebugDisplay() {
     head.appendChild(script);
 }
 
+DebugDisplay.prototype = Object.create(HintDisplay.prototype);
+
 DebugDisplay.prototype.initDisplay = function() {
 	document.body.appendChild(this.div);
 }
-
-DebugDisplay.prototype = Object.create(HintDisplay.prototype);
 
 DebugDisplay.prototype.showHint = function(hint) {
 	this.div.innerHTML += this.createDiff(hint.from, hint.to) + "<br />";
@@ -241,6 +266,7 @@ function SnapDisplay() {
 SnapDisplay.prototype = Object.create(HintDisplay.prototype);
 
 SnapDisplay.prototype.initDisplay = function() {
+	this.enabled = false;
 	
 	var ide = window.ide;
     var hintButton = new PushButtonMorph(
@@ -261,14 +287,14 @@ SnapDisplay.prototype.initDisplay = function() {
     hintButton.fixLayout();
     hintButton.setPosition(new Point(
 		ide.stage.left() - hintButton.width() - 20, 
-		ide.spriteBar.hintButton.top()));
+		ide.spriteBar.hintButton.top() + 50));
 
     ide.spriteBar.hintButton = hintButton;
     ide.spriteBar.add(ide.spriteBar.hintButton);
 	
 	var oldFixLayout = IDE_Morph.prototype.fixLayout;
 	IDE_Morph.prototype.fixLayout = function() {
-		oldFixLayout();
+		oldFixLayout.call(this, arguments);
         this.spriteBar.hintButton.setPosition(new Point(
 			this.stage.left() - this.spriteBar.hintButton.width() - 20,
 			this.spriteBar.hintButton.top()));

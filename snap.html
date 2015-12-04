@@ -32,6 +32,9 @@
 				ide = new IDE_Morph();
 				ide.openIn(world);
 				setInterval(loop, 1);
+				if (window.onWorldLoaded) {
+					window.onWorldLoaded();
+				}
 			};
 			function loop() {
 				world.doOneCycle();

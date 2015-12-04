@@ -24,7 +24,7 @@
 				if (assignments.hasOwnProperty(key)) {
 					if (key == "test" || key == "view") continue;
 					var option = document.createElement("option");
-					option.text = assignments[key].name;
+					option.text = assignments[key].name || assignments[key];
 					option.value = key;
 					select.add(option);
 				}

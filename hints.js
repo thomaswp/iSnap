@@ -56,18 +56,7 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
 	if (!displays.length) displays = [displays];
 	this.displays = displays;
 	
-	displays.forEach(function(display) {
-		display.enabled = true;
-	});
-	
 	var myself = this;
-	if (displays.length > 0) {
-		Trace.onCodeChanged = function(code) {
-			myself.clearDisplays();
-			myself.code = code;
-			myself.getHintsFromServer(code);
-		}
-	}
 	
 	if (reloadCode) {
 		window.onunload = function() {
@@ -75,6 +64,20 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
 		}
 		
 		myself.loadCode();
+	}
+	
+	if (displays.length == 0) return;
+	var assignment = window.assignments[window.assignmentID];
+	if (!assignment || !assignment.hints) return;
+	
+	displays.forEach(function(display) {
+		display.enabled = true;
+	});
+	
+	Trace.onCodeChanged = function(code) {
+		myself.clearDisplays();
+		myself.code = code;
+		myself.getHintsFromServer(code);
 	}
 	
 	window.onWorldLoaded = function() {

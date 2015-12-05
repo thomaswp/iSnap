@@ -271,38 +271,43 @@ SnapDisplay.prototype = Object.create(HintDisplay.prototype);
 SnapDisplay.prototype.initDisplay = function() {
 	this.enabled = false;
 	
-	var ide = window.ide;
-    var hintButton = new PushButtonMorph(
-        ide,
-        'getHint',
-        '  ' + localize('Hint') + '  '
-    );
-	ide.spriteBar.hintButton = hintButton;
-    hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
-    hintButton.corner = DialogBoxMorph.prototype.buttonCorner;
-    hintButton.edge = DialogBoxMorph.prototype.buttonEdge;
-    hintButton.outline = DialogBoxMorph.prototype.buttonOutline;
-    hintButton.outlineColor = ide.spriteBar.color;
-    hintButton.outlineGradient = false;
-    hintButton.padding = DialogBoxMorph.prototype.buttonPadding;
-    hintButton.contrast = DialogBoxMorph.prototype.buttonContrast;
-    hintButton.drawNew();
-    hintButton.fixLayout();
-    hintButton.setPosition(new Point(
-		ide.stage.left() - hintButton.width() - 20, 
-		ide.spriteBar.hintButton.top() + 50));
-
-    ide.spriteBar.hintButton = hintButton;
-    ide.spriteBar.add(ide.spriteBar.hintButton);
+	var createButton = function(ide) {
+		var hintButton = new PushButtonMorph(
+			ide,
+			'getHint',
+			'  ' + localize('Hint') + '  '
+		);
+		ide.spriteBar.hintButton = hintButton;
+		hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
+		hintButton.corner = DialogBoxMorph.prototype.buttonCorner;
+		hintButton.edge = DialogBoxMorph.prototype.buttonEdge;
+		hintButton.outline = DialogBoxMorph.prototype.buttonOutline;
+		hintButton.outlineColor = ide.spriteBar.color;
+		hintButton.outlineGradient = false;
+		hintButton.padding = DialogBoxMorph.prototype.buttonPadding;
+		hintButton.contrast = DialogBoxMorph.prototype.buttonContrast;
+		hintButton.drawNew();
+		hintButton.fixLayout();
+		hintButton.setPosition(new Point(
+			ide.stage.left() - hintButton.width() - 20, 
+			ide.spriteBar.hintButton.top() + 50));
+	
+		ide.spriteBar.hintButton = hintButton;
+		ide.spriteBar.add(ide.spriteBar.hintButton);
+	}   
 	
 	var oldFixLayout = IDE_Morph.prototype.fixLayout;
 	IDE_Morph.prototype.fixLayout = function() {
 		oldFixLayout.call(this, arguments);
-		if (!this.spriteBar.hintButton) return;
+		if (!this.spriteBar.hintButton) {
+			createButton(this);
+		};
         this.spriteBar.hintButton.setPosition(new Point(
 			this.stage.left() - this.spriteBar.hintButton.width() - 20,
 			this.spriteBar.hintButton.top()));
-	} 
+	}
+	
+	window.ide.fixLayout();
 }
 
 SnapDisplay.prototype.getCode = function(ref) {

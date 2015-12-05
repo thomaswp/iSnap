@@ -66,7 +66,7 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
 		myself.loadCode();
 	}
 	
-	if (displays.length == 0) return;
+	if (displays.length == 0 || !window.assignments) return;
 	var assignment = window.assignments[window.assignmentID];
 	if (!assignment || !assignment.hints) return;
 	
@@ -298,6 +298,7 @@ SnapDisplay.prototype.initDisplay = function() {
 	var oldFixLayout = IDE_Morph.prototype.fixLayout;
 	IDE_Morph.prototype.fixLayout = function() {
 		oldFixLayout.call(this, arguments);
+		if (!this.spriteBar.hintButton) return;
         this.spriteBar.hintButton.setPosition(new Point(
 			this.stage.left() - this.spriteBar.hintButton.width() - 20,
 			this.spriteBar.hintButton.top()));

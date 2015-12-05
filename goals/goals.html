@@ -1,0 +1,92 @@
+<link type="text/css" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,300">
+<div id = "theNavBarContainer">
+  <div id = "theNavBar">
+	 <div id = "beginning">
+		<div class="rowOnLeftHalfOfNavBar" id = "titleOfAssignment"><span id="assignmentChosen">The Guessing Game</span></div>
+	 </div>
+	 <div id = "middle">
+		<div class = "theButtons">
+		   <div class="aButton"><input class = "theInput" type="button" value="Create Variables" id="button1" onClick="goalBar.chooseObjective(this)"> </input></div>
+		   <div class="aButton"><input class = "theInput" type="button" value="Greet Player" id="button2" onClick="goalBar.chooseObjective(this)"> </input></div>
+		   <div class="aButton"><input class = "theInput" type="button" value="Store Secret Number" id="button3" onClick="goalBar.chooseObjective(this)"> </input></div>
+		   <div class="aButton"><input class = "theInput" type="button" value="Say if correct guess" id="button4" onClick="goalBar.chooseObjective(this)"> </input></div>
+		   <div class= "switchButtons"><input class="fa fa-arrow-left" type="button" title = "choose different objective" value="&#xf060" id="button5" onClick="goalBar.chooseDifferentObjective()"> </input></div>
+		   <div class = "switchButtons"> <input class = "fa fa-check" type="button" title = "finished objective" value = "&#xf00c" id="button6" onClick="goalBar.finishedObjective()"> </input></div>
+		   <div id = "finishedAssignment"><span id="Congratulations"> Congratulations, you have completed the Guessing Game. </span></div>
+		</div>
+	 </div>
+	 <div id = "end">
+		<div id = "progressBarRow">
+		   <div class="progressRowItem" id = "bar"> <span class="bar-fill"> </span> </div>
+		   <div class="progressRowItem"><a href="#openModal"> <i class="fa fa-list-alt"></i> </a> </div>
+		   <div id = "openModal" class="modalDialog"> 
+			  <div> 
+				 <a href="#close" title="Close" class="close">X</a>
+				 <h2>Assignment:    The Guessing Game</h2>
+				 <hr> </hr>
+				 <table style="width: 100%">
+					<tr>
+					   <th> Objective </th>
+					   <th> Description </th>
+					   <th class="progressCheck"> Progress </th>
+					</tr>
+					<tr>
+					   <td>Create Variables</td>
+					   <td>Create Variables</td>
+					   <td class="progressCheck"><i class="fa fa-check fa-2x"></i></td>
+					</tr>
+					<tr>
+					   <td>Greet Player</td>
+					   <td>Greet the player by name</td>
+					   <td class="progressCheck"><i class="fa fa-check fa-2x"></i></td>
+					</tr>
+					<tr>
+					   <td>Get guess</td>
+					   <td>Get a guess from the player</td>
+					   <td class="progressCheck"><i class="fa fa-check fa-2x"></i></td>
+					</tr>
+					<tr>
+					   <td>Store secret number</td>
+					   <td>Pick and store the secret number</td>
+					   <td class="progressCheck"><i class="fa fa-check fa-2x"></i></td>
+					</tr>
+					<tr>
+					   <td>Say if correct guess</td>
+					   <td>Say if the player guessed correctly</td>
+					   <td class="progressCheck"><i class="fa fa-check fa-2x"></i></td>
+					</tr>
+					<tr>
+					   <td>Say if too low</td>
+					   <td>Say if the player guessed too low</td>
+					   <td class="progressCheck"><i class="fa fa-check fa-2x"></i></td>
+					</tr>
+					<tr>
+					   <td>Repeat Game</td>
+					   <td>Make the game repeat until the player gets it right</td>
+					   <td class="progressCheck"><i class="fa fa-check fa-2x"></i></td>
+					</tr>
+					<tr>
+					   <td>Set guess range</td>
+					   <td>Let the player set the range of possible numbers</td>
+					   <td class="progressCheck"><i class="fa fa-check fa-2x"></i></td>
+					</tr>
+					<tr>
+					   <td>Tell attempts</td>
+					   <td>Tell the player how many guesses it took them to win</td>
+					   <td class="progressCheck"><i class="fa fa-check fa-2x"></i></td>
+					</tr>
+					<tr>
+					   <td>Record attempts</td>
+					   <td>Keep track of how many guesses the player made</td>
+					   <td class="progressCheck"><i class="fa fa-check fa-2x"></i></td>
+					</tr>
+				 </table>
+			  </div>
+		   </div>
+		</div>
+	 </div>
+  </div>
+</div>
+
+

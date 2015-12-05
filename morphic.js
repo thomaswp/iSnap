@@ -9870,13 +9870,13 @@ WorldMorph.uber = FrameMorph.prototype;
 
 // WorldMorph instance creation:
 
-function WorldMorph(aCanvas, fillPage) {
-    this.init(aCanvas, fillPage);
+function WorldMorph(aCanvas, fillPage, fillParent) {
+    this.init(aCanvas, fillPage, fillParent);
 }
 
 // WorldMorph initialization:
 
-WorldMorph.prototype.init = function (aCanvas, fillPage) {
+WorldMorph.prototype.init = function (aCanvas, fillPage, fillParent) {
     WorldMorph.uber.init.call(this);
     this.color = new Color(205, 205, 205); // (130, 130, 130)
     this.alpha = 1;
@@ -9897,6 +9897,7 @@ WorldMorph.prototype.init = function (aCanvas, fillPage) {
     if (this.useFillPage === undefined) {
         this.useFillPage = true;
     }
+    this.fillParent = fillParent;
     this.isDevMode = false;
     this.broken = [];
     this.hand = new HandMorph(this);
@@ -9970,29 +9971,32 @@ WorldMorph.prototype.doOneCycle = function () {
 };
 
 WorldMorph.prototype.fillPage = function () {
+    var fillParent = this.fillParent;
+    
     var pos = getDocumentPositionOf(this.worldCanvas),
-        clientHeight = window.innerHeight,
-        clientWidth = window.innerWidth,
+        clientHeight = fillParent ? this.worldCanvas.offsetHeight : window.innerHeight,
+        clientWidth = fillParent ? this.worldCanvas.offsetWidth : window.innerWidth,
         myself = this;
 
-
-    if (pos.x > 0) {
-        this.worldCanvas.style.position = "absolute";
-        this.worldCanvas.style.left = "0px";
-        pos.x = 0;
-    }
-    if (pos.y > 0) {
-        this.worldCanvas.style.position = "absolute";
-        this.worldCanvas.style.top = "0px";
-        pos.y = 0;
-    }
-    if (document.documentElement.scrollTop) {
-        // scrolled down b/c of viewport scaling
-        clientHeight = document.documentElement.clientHeight;
-    }
-    if (document.documentElement.scrollLeft) {
-        // scrolled left b/c of viewport scaling
-        clientWidth = document.documentElement.clientWidth;
+    if (!fillParent) {
+        if (pos.x > 0) {
+            this.worldCanvas.style.position = "absolute";
+            this.worldCanvas.style.left = "0px";
+            pos.x = 0;
+        }
+        if (pos.y > 0) {
+            this.worldCanvas.style.position = "absolute";
+            this.worldCanvas.style.top = "0px";
+            pos.y = 0;
+        }
+        if (document.documentElement.scrollTop) {
+            // scrolled down b/c of viewport scaling
+            clientHeight = document.documentElement.clientHeight;
+        }
+        if (document.documentElement.scrollLeft) {
+            // scrolled left b/c of viewport scaling
+            clientWidth = document.documentElement.clientWidth;
+        }
     }
     if (this.worldCanvas.width !== clientWidth) {
         this.worldCanvas.width = clientWidth;

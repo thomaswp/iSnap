@@ -222,6 +222,7 @@ IDE_Morph.prototype.init = function (isAutoFill) {
     this.currentTab = 'scripts';
     this.projectName = '';
     this.projectNotes = '';
+    this.setProjectData('');
 
     this.logo = null;
     this.controlBar = null;
@@ -1543,6 +1544,24 @@ IDE_Morph.prototype.setProjectName = function (string) {
     this.controlBar.updateLabel();
 };
 
+IDE_Morph.prototype.getProjectData = function() {
+    return this.projectData;
+}
+
+IDE_Morph.prototype.setProjectData = function(string) {
+    if (!string || !string.length) {
+        this.projectData = {};
+        return;
+    }
+    try {
+        var data = JSON.parse(string);
+        if (data) this.projectData = data;
+    } catch (e) {
+        console.log("Error parsing project data: " + string);
+        console.error(e);
+    }
+}
+
 // IDE_Morph resizing
 
 IDE_Morph.prototype.setExtent = function (point) {
@@ -2857,6 +2876,7 @@ IDE_Morph.prototype.newProject = function () {
     SpriteMorph.prototype.useFlatLineEnds = false;
     this.setProjectName('');
     this.projectNotes = '';
+    this.setProjectData('');
     this.createStage();
     this.add(this.stage);
     this.createCorral();

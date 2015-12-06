@@ -267,7 +267,7 @@ DBLogger.prototype.storeMessages = function(logs) {
         "logs": logs,
     };
     this.sendToServer(JSON.stringify(data), 0);
-}
+};
 
 DBLogger.prototype.sendToServer = function(data, attempts) {
     if (attempts >= 3) {
@@ -288,7 +288,7 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
     };
     xhr.open("POST", "logging/mysql.php", true);
     xhr.send(data);
-}
+};
 
 // Log to the console
 
@@ -304,7 +304,7 @@ ConsoleLogger.prototype.storeMessages = function(logs) {
         log.userInfo = myself.userInfo();
         console.log(log);
     });
-}
+};
 
 // Setup
 function setupLogging() {

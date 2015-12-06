@@ -20,6 +20,10 @@
 
 function InitGoalBar(assignment) {
       
+      function copy(obj) {
+            return JSON.parse(JSON.stringify(obj));
+      }
+      
       var assignmentObjectives = assignment.goals;
       document.getElementById("assignmentChosen").innerHTML = assignment.name;
            
@@ -149,12 +153,12 @@ function InitGoalBar(assignment) {
             var currentState = {
                   allObjectives: assignmentObjectives
             }
-            return JSON.stringify(currentState);
+            return copy(currentState);
       }
 
 
       this.loadState = function (state) {
-            state = JSON.parse(state);
+            state = copy(state);
             assignmentObjectives = state.allObjectives;
             toUpdateObjectives();
       }
@@ -209,6 +213,31 @@ function InitGoalBar(assignment) {
       }
       
       this.assignmentObjectives = assignmentObjectives;
+      
+      
+      // Project Data saving / loading
+      
+      var myself = this;
+      var originalState = this.saveState();
+      var oldGet = IDE_Morph.prototype.getProjectData;
+      IDE_Morph.prototype.getProjectData = function() {
+            var data = oldGet.call(this);
+            data.assignmentID = window.assignmentID;
+            data.goals = myself.saveState();
+            return data;
+      };
+      
+      var oldSet = IDE_Morph.prototype.setProjectData; 
+      IDE_Morph.prototype.setProjectData = function(data) {
+            oldSet.call(this, data);
+            if (!this.projectData) return;
+            var assignmentID = this.projectData.assignmentID;
+            var goals = this.projectData.goals;
+            if (!goals || (assignmentID && assignmentID != window.assignmentID)) {
+                  goals = originalState;
+            }
+            myself.loadState(goals);
+      }
 
       toUpdateObjectives();
 }

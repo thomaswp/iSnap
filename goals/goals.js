@@ -159,12 +159,14 @@ function InitGoalBar(assignment) {
             var currentState = {
                   allObjectives: assignmentObjectives
             }
-            return copy(currentState);
+            var state = copy(currentState); 
+            return state;
       }
 
 
       this.loadState = function (state) {
             state = copy(state);
+            log("Subgoal.loadState", state);
             assignmentObjectives = state.allObjectives;
             toUpdateObjectives();
       }
@@ -187,12 +189,12 @@ function InitGoalBar(assignment) {
       this.chooseObjective = function(ele) {
             var id = ele.id;
             var title = document.getElementById(id).value;
+            log("Subgoal.selected", title);
             var description = document.getElementById(id);
             var parentEl = document.getElementById(id).parentElement;
             var theButtonSelected = document.getElementById(id);
             for (var i = 0; i < assignmentObjectives.length; i++) {
                   if (assignmentObjectives[i].title == title) {
-                        log("Subgoal.selected", title);
                         /* set the currentObjective variable to the objective the user selected */
                         currentObjective = assignmentObjectives[i];
                         description.value = assignmentObjectives[i].description;

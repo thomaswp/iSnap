@@ -275,7 +275,7 @@ SnapDisplay.prototype.initDisplay = function() {
 		var hintButton = new PushButtonMorph(
 			ide,
 			'getHint',
-			'  ' + localize('Hint') + '  '
+			'  ' + localize('Help') + '  '
 		);
 		ide.spriteBar.hintButton = hintButton;
 		hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
@@ -386,16 +386,37 @@ SnapDisplay.prototype.showHint = function(hint) {
 	f.call(this, root, hint.data.from, hint.data.to);
 }
 
-SnapDisplay.prototype.showSnapshotHint = function(root, from , to) {
+SnapDisplay.prototype.showStructureHint = function(from, to, scripts, map, postfix) {
 	var myself = this;
-	var message = from.length > to.length ?
-					"You may have too many global variables." :
-					"You may need another global variable.";
-	var showHint = function() {
-		myself.showMessageDialog(message, "Hint");
-	};
-	
-	this.createHintButton(window.ide.currentSprite.scripts, new Color(163, 73, 164), false, showHint)
+	if (!postfix) postfix = "";
+	for (var key in map) {
+		if (!map.hasOwnProperty(key)) continue;
+		
+		var fromItems = this.countWhere(from, key);
+		var toItems = this.countWhere(to, key);
+		
+		var message = null;
+		if (fromItems > toItems) {
+			message = "You may have too many " + map[key] + "s" + postfix + ".";
+		} else if (fromItems < toItems) {
+			message = "You may need another " + map[key] + postfix + ".";
+		}
+		
+		if (message == null) continue;
+		
+		(function(message) {	
+			myself.createHintButton(scripts, new Color(163, 73, 164), false, function() {
+				myself.showMessageDialog(message, "Suggestion");
+			});
+		})(message);
+	}
+}
+
+SnapDisplay.prototype.showSnapshotHint = function(root, from , to) {
+	this.showStructureHint(from, to, window.ide.currentSprite.scripts, {
+		"var": "global variable",
+		"customBlock": "custom block"
+	});
 }
 
 SnapDisplay.prototype.showCustomBlockHint = function(root, from , to) {
@@ -403,35 +424,17 @@ SnapDisplay.prototype.showCustomBlockHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.showStageHint = function(root, from , to) {
-	
+	this.showStructureHint(from, to, window.ide.currentSprite.scripts, {
+		"sprite": "sprite"
+	});
 }
 
 SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
-	var fromVars = this.countWhere(from, 'var'), 
-		fromScripts = this.countWhere(from, 'script'), 
-		toVars = this.countWhere(to, 'var'), 
-		toScripts = this.countWhere(to, 'script');
-	
-	var messages = [];
-	if (fromScripts > toScripts) {
-		messages.push("You may have too many scripts in this sprite.");
-	} else if (fromScripts < toScripts) {
-		messages.push("You may need another script in this sprite.")
-	}
-	
-	if (fromVars > toVars) {
-		messages.push("You may have too many local variables in this sprite.");
-	} else if (fromVars < toVars) {
-		messages.push("You may need another  local variable in this sprite.")
-	}
-	
-	var myself = this;
-	for (var i = 0; i < messages.length; i++) {
-		var message = messages[i];
-		this.createHintButton(root.scripts, new Color(163, 73, 164), false, function() {
-			myself.showMessageDialog(message, "Hint");
-		});
-	}
+	this.showStructureHint(from, to, root.scripts, {
+		"var": "variable",
+		"script": "script",
+		"customBlock": "custom block"
+	}, " in this sprite");
 }
 
 SnapDisplay.prototype.countWhere = function(array, item) {
@@ -506,6 +509,8 @@ SnapDisplay.prototype.showMessageDialog = function(message, title) {
 }
 
 SnapDisplay.prototype.createHintButton = function(parent, color, script, callback) {
+	if (parent == null) return;
+	
 	var hintBar;
 	if (parent instanceof SyntaxElementMorph) {
 		var topBlock = parent.topBlock();

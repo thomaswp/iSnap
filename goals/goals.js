@@ -50,6 +50,7 @@ function InitGoalBar(assignment) {
       var chooseButtons = document.querySelectorAll(".switchButtons");
       /* the congratulations text */
       var congratulations = document.getElementById("Congratulations");
+      congratulations.innerHTML = "Congratulations, you have completed " + assignment.name + ".";
       /* all the buttons including objectives, finished objective, and choose different objective buttons*/
       var theButtons = document.querySelector(".theButtons");
       /* array of objective buttons, there is a objective Buttons 2 for css reasons*/
@@ -122,11 +123,10 @@ function InitGoalBar(assignment) {
                   objectiveButtons3[y].className = "aButton";
             }
 
-            if (assignmentObjectives.every(function (objective) {
+            var finished = assignmentObjectives.every(function (objective) {
                   return objective.isCompleted;
-            })) {
-                  congratulations.style.display = "initial";
-            }
+            });
+            congratulations.style.display = finished ? "initial" : "";
             updateChecks();
             fillProgressBar();
       }
@@ -309,4 +309,8 @@ function InitGoalBar(assignment) {
 	}
 
       toUpdateObjectives();
+      
+      if (world.useFillPage) {
+            world.fillPage();
+      }
 }

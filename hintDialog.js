@@ -46,7 +46,7 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	
 	// override inherited properties
 	this.key = 'hintDialog';
-	this.labelString = 'Hint';
+	this.labelString = 'Suggestion';
 	this.createLabel();
 	
 	// create labels for scripts frame
@@ -81,7 +81,7 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	
 	// add accept and decline button
 	this.addButton('rate','Done');
-	this.addButton('otherHints','Other Hints...');
+	this.addButton('otherHints','Other Suggestions...');
 	
 	// set layout
 	this.fixLayout();
@@ -564,7 +564,7 @@ IntentionDialogMorph.prototype.init = function (target) {
 	this.addBody(txt);
 	
 	// add accept and decline button
-	this.addButton('showHintBubbles','Show Available Hints');
+	this.addButton('showHintBubbles','Show Suggestions');
 	this.addButton('cancel','Cancel');
 	
 	// set layout

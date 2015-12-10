@@ -2,6 +2,7 @@
 
 // The assignment the student is working on
 var assignmentID;
+var Trace;
 
 // Helper functions
 
@@ -311,9 +312,9 @@ function setupLogging() {
     checkAssignment();
 
     if (window.createLogger) {
-        window.Trace = window.createLogger(assignmentID);
+        Trace = window.createLogger(assignmentID);
     } else {
-        window.Trace = new Logger(50);
+        Trace = new Logger(50);
     }
     
     if (window.easyReload && window.easyReload(assignmentID)) {
@@ -321,6 +322,14 @@ function setupLogging() {
             window.onbeforeunload = null;
         }, 2000);
     }
+    
+    window.onerror = function(msg, url, line) {
+        Trace.log("Error", {
+            "message": msg,
+            "url": url,
+            "line": line 
+        });
+    };
 }
 
 setupLogging();

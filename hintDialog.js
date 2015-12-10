@@ -609,6 +609,7 @@ IntentionDialogMorph.prototype.createLabels = function() {
 IntentionDialogMorph.prototype.showHintBubbles = function() {
 	Trace.log("IntentionDialog.showAvailableHintsClicked",this.body.contents().text.text);
 	
+	window.hintProvider.clearDisplays();
 	window.hintProvider.setDisplayEnabled(SnapDisplay, true);
 	
 	this.close();

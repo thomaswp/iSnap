@@ -72,6 +72,7 @@ body{
    align-items: center;
    justify-content: center;
    width: 12.5%;
+   min-width: 130px;
    max-width: 900px;
    border-right: 2px solid #9A9A9A;
    background: rgb(57,75,99);
@@ -102,7 +103,8 @@ body{
 
 /* the assignment text on the left side of the screen*/
 #assignmentChosen{
-	color: white;
+   color: #E4E1E2;
+   padding-left: 5px;
 }
 
 /* the top bar on the left side of the screen */
@@ -256,15 +258,6 @@ body{
    width: 100%;
 }
 
-.fa-check, fa-arrow-left{
-   font-family: FontAwesome, "Helvetica Neue", Helvetica, Arial, sans-serif;
-   color: green;
-}
-
-.fa-check{
-   color: white;
-}
-
 #Congratulations{
    color: rgb(150,174,58);
    display: none;
@@ -325,10 +318,6 @@ body{
 
 th{
    text-align: left;
-}
-
-td .fa-check{
-   color: rgb(150,174,58);
 }
 
 td{

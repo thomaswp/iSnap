@@ -42,7 +42,6 @@ function InitGoalBar(assignment) {
       var currentObjective;
       /* variables related to progress bar */
       var bar = document.querySelector(".bar-fill");
-      
       /* array of objective buttons*/
       var objectiveButtons = document.querySelectorAll(".aButton input");
       /* variable for all objective buttons*/
@@ -56,6 +55,11 @@ function InitGoalBar(assignment) {
       /* array of objective buttons, there is a objective Buttons 2 for css reasons*/
       var objectiveButtons2 = document.querySelectorAll(".theInput");
       var objectiveButtons3 = document.querySelectorAll(".aButton");
+   
+      var progressChecks = document.getElementsByClassName("fa-2x");
+      var descriptionInProgressSummary = document.getElementsByClassName("descriptionSummary");
+      var objectiveInProgressSummary = document.getElementsByClassName("objectiveSummary");
+   
       /* end Assignment setup //////////////////////////////////////////////////////////////////////////////////*/
       
       /* fill the progress bar when objective has been completed */
@@ -88,6 +92,7 @@ function InitGoalBar(assignment) {
                                     return prereqObjective.isCompleted && prereqObjective.title == objective.prerequisites[i];
 
                               })) {
+                                    
                                     met = false;
                                     break;
                               }
@@ -126,10 +131,11 @@ function InitGoalBar(assignment) {
             })) {
                   congratulations.style.display = "initial";
             }
-
+            updateChecks();
             fillProgressBar();
       }
       
+
       /* used only in the special case when there is only 1 objective left, this function is called in chooseObjective */
       function updateButtons2() {
             var count = 0;
@@ -240,4 +246,34 @@ function InitGoalBar(assignment) {
       }
 
       toUpdateObjectives();
+   
+   function updateChecks(){
+      var metPrerequisites = true;
+      /** update checks*/
+      for (var i in assignmentObjectives) {
+         if(assignmentObjectives[i].isCompleted){
+            progressChecks[i].style.color = "rgb(150,174,58)";
+         }
+      }
+   
+      /** update available objectives*/
+      for (var m = 0; m < assignmentObjectives.length; m++){
+         metPrerequisites = true;
+         for(var c = 0; c < assignmentObjectives[m].prerequisites.length; c++){
+            if(!assignmentObjectives.some(function (prereqs){
+               return prereqs.isCompleted && prereqs.title == assignmentObjectives[m].prerequisites[c];
+            })){
+               metPrerequisites = false;
+               break;
+            }
+         }
+         if(metPrerequisites){
+            objectiveInProgressSummary[m].style.color = "black";
+            descriptionInProgressSummary[m].style.color = "black";
+         } else {
+            objectiveInProgressSummary[m].style.color = "#E4E1E2";
+            descriptionInProgressSummary[m].style.color = "#E4E1E2";
+         }
+      }
+   }
 }

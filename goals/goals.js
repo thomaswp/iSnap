@@ -56,10 +56,6 @@ function InitGoalBar(assignment) {
       var objectiveButtons2 = document.querySelectorAll(".theInput");
       var objectiveButtons3 = document.querySelectorAll(".aButton");
    
-      var progressChecks = document.getElementsByClassName("fa-2x");
-      var descriptionInProgressSummary = document.getElementsByClassName("descriptionSummary");
-      var objectiveInProgressSummary = document.getElementsByClassName("objectiveSummary");
-   
       /* end Assignment setup //////////////////////////////////////////////////////////////////////////////////*/
       
       /* fill the progress bar when objective has been completed */
@@ -251,30 +247,48 @@ function InitGoalBar(assignment) {
    
    function updateChecks(){
       var metPrerequisites = true;
-      /** update checks*/
-      for (var i = 0 ; i< assignmentObjectives.length; i++) {
-         var color = assignmentObjectives[i].isCompleted ? "rgb(150,174,58)" : "#E4E1E2"; 
-         progressChecks[i].style.color = color;
-      }
+      
+      document.getElementById("assignmentTitle").innerHTML = assignment.name;
+      
+      var table = document.getElementById("objectivesTable");
+      table.innerHTML = "";
+      
+      var createChild = function(parent, tag, html, clazz) {
+            var element = document.createElement(tag);
+            if (html) element.innerHTML = html;
+            if (clazz) element.classList.add(clazz);
+            if (parent) parent.appendChild(element);
+            return element;
+      };
+      
+      var header = createChild(table, "tr");
+      createChild(header, "th", "Objective");
+      createChild(header, "th", "Description");
+      createChild(header, "th", "Complete", "progressCheck");
+      
    
       /** update available objectives*/
-      for (var m = 0; m < assignmentObjectives.length; m++){
+      for (var i = 0; i < assignmentObjectives.length; i++){
+         
+         var objective = assignmentObjectives[i];
+            
          metPrerequisites = true;
-         for(var c = 0; c < assignmentObjectives[m].prerequisites.length; c++){
+         for(var c = 0; c < objective.prerequisites.length; c++){
             if(!assignmentObjectives.some(function (prereqs){
-               return prereqs.isCompleted && prereqs.title == assignmentObjectives[m].prerequisites[c];
+               return prereqs.isCompleted && prereqs.title == objective.prerequisites[c];
             })){
                metPrerequisites = false;
                break;
             }
          }
-         if(metPrerequisites){
-            objectiveInProgressSummary[m].style.color = "black";
-            descriptionInProgressSummary[m].style.color = "black";
-         } else {
-            objectiveInProgressSummary[m].style.color = "#E4E1E2";
-            descriptionInProgressSummary[m].style.color = "#E4E1E2";
-         }
+         
+         var row = createChild(table, "tr");
+         var textColor = metPrerequisites ? "black" : "#E4E1E2";
+         var checkColor = objective.isCompleted ? "rgb(150,174,58)" : "#E4E1E2";  
+         
+         createChild(row, "td", objective.title).style.color = textColor;
+         createChild(row, "td", objective.description).style.color = textColor;
+         createChild(row, "td", "<i class=\"fa fa-check fa-2x\"></i>", "progressCheck").style.color = checkColor;
       }
    }
 }

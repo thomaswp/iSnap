@@ -238,11 +238,11 @@ body{
 
 
 /* icons*/
-.fa{
+.button{
    color: #E4E1E2;
 }
 
-.fa:hover{
+.button:hover{
    cursor:  pointer;
    color: white;
 }

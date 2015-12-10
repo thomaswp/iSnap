@@ -252,10 +252,9 @@ function InitGoalBar(assignment) {
    function updateChecks(){
       var metPrerequisites = true;
       /** update checks*/
-      for (var i in assignmentObjectives) {
-         if(assignmentObjectives[i].isCompleted){
-            progressChecks[i].style.color = "rgb(150,174,58)";
-         }
+      for (var i = 0 ; i< assignmentObjectives.length; i++) {
+         var color = assignmentObjectives[i].isCompleted ? "rgb(150,174,58)" : "#E4E1E2"; 
+         progressChecks[i].style.color = color;
       }
    
       /** update available objectives*/

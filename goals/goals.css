@@ -146,6 +146,10 @@ body{
    transition: all 600ms;
 }
 
+.highlight {
+    background: #FAB700;
+}
+
 /* when you hover on the buttons in the second row */
 .theInput:hover{
    border: 2px solid #d1d1d1;

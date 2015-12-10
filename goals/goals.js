@@ -146,7 +146,54 @@ function InitGoalBar(assignment) {
                   }
                   buttonsHide[5].style.display = "initial";
             }
+      }      
+   
+   function updateChecks(){
+      var metPrerequisites = true;
+      
+      document.getElementById("assignmentTitle").innerHTML = assignment.name;
+      
+      var table = document.getElementById("objectivesTable");
+      table.innerHTML = "";
+      
+      var createChild = function(parent, tag, html, clazz) {
+            var element = document.createElement(tag);
+            if (html) element.innerHTML = html;
+            if (clazz) element.classList.add(clazz);
+            if (parent) parent.appendChild(element);
+            return element;
+      };
+      
+      var header = createChild(table, "tr");
+      createChild(header, "th", "Objective");
+      createChild(header, "th", "Description");
+      createChild(header, "th", "Complete", "progressCheck");
+      
+   
+      /** update available objectives*/
+      for (var i = 0; i < assignmentObjectives.length; i++){
+         
+         var objective = assignmentObjectives[i];
+            
+         metPrerequisites = true;
+         for(var c = 0; c < objective.prerequisites.length; c++){
+            if(!assignmentObjectives.some(function (prereqs){
+               return prereqs.isCompleted && prereqs.title == objective.prerequisites[c];
+            })){
+               metPrerequisites = false;
+               break;
+            }
+         }
+         
+         var row = createChild(table, "tr");
+         var textColor = metPrerequisites ? "black" : "#E4E1E2";
+         var checkColor = objective.isCompleted ? "rgb(150,174,58)" : "#E4E1E2";  
+         
+         createChild(row, "td", objective.title).style.color = textColor;
+         createChild(row, "td", objective.description).style.color = textColor;
+         createChild(row, "td", "<i class=\"fa fa-check fa-2x\"></i>", "progressCheck").style.color = checkColor;
       }
+   }
       
       /** for loading and saving the state of the nav bar */
 
@@ -242,53 +289,24 @@ function InitGoalBar(assignment) {
             }
             myself.loadState(goals);
       }
+      
+      var oldCodeChanged = Trace.onCodeChanged;
+      var flashing = false;
+      Trace.onCodeChanged = function(code) {
+		oldCodeChanged(code);
+            if (!flashing && !currentObjective) {
+                  flashing = true;
+                  for (var i = 0; i < objectiveButtons.length; i++) {
+                        objectiveButtons[i].classList.add("highlight");      
+                  }
+                  setTimeout(function() {
+                        flashing = false;
+                        for (var i = 0; i < objectiveButtons.length; i++) {
+                              objectiveButtons[i].classList.remove("highlight");      
+                        }
+                  }, 500);
+            }
+	}
 
       toUpdateObjectives();
-   
-   function updateChecks(){
-      var metPrerequisites = true;
-      
-      document.getElementById("assignmentTitle").innerHTML = assignment.name;
-      
-      var table = document.getElementById("objectivesTable");
-      table.innerHTML = "";
-      
-      var createChild = function(parent, tag, html, clazz) {
-            var element = document.createElement(tag);
-            if (html) element.innerHTML = html;
-            if (clazz) element.classList.add(clazz);
-            if (parent) parent.appendChild(element);
-            return element;
-      };
-      
-      var header = createChild(table, "tr");
-      createChild(header, "th", "Objective");
-      createChild(header, "th", "Description");
-      createChild(header, "th", "Complete", "progressCheck");
-      
-   
-      /** update available objectives*/
-      for (var i = 0; i < assignmentObjectives.length; i++){
-         
-         var objective = assignmentObjectives[i];
-            
-         metPrerequisites = true;
-         for(var c = 0; c < objective.prerequisites.length; c++){
-            if(!assignmentObjectives.some(function (prereqs){
-               return prereqs.isCompleted && prereqs.title == objective.prerequisites[c];
-            })){
-               metPrerequisites = false;
-               break;
-            }
-         }
-         
-         var row = createChild(table, "tr");
-         var textColor = metPrerequisites ? "black" : "#E4E1E2";
-         var checkColor = objective.isCompleted ? "rgb(150,174,58)" : "#E4E1E2";  
-         
-         createChild(row, "td", objective.title).style.color = textColor;
-         createChild(row, "td", objective.description).style.color = textColor;
-         createChild(row, "td", "<i class=\"fa fa-check fa-2x\"></i>", "progressCheck").style.color = checkColor;
-      }
-   }
 }

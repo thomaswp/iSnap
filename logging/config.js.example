@@ -6,9 +6,18 @@ window.assignments = {
 	"none": {
 		name: "None",
 	},
+	"lightsCamerActionHW": {
+		name: "Lights, Camera, Action! (Homework 1)"	
+	},
+	"polygonMakerLab": {
+		name: "Polygon Maker (In Lab Activity 2)"	
+	},
+	"squiralHW": {
+		name: "Squiral (Homework 2)"
+	},
 	"guess1Lab": {
 		name: "Guessing Game Part 1 (In Lab Activity 3)",
-		hints: true, // indicates this assignment allows hints
+		hints: true,
 	},
 	"guess2HW": {
 		name: "Guessing Game Part 2 (Homework 3)", 

@@ -13,12 +13,12 @@
             var goalBar = document.getElementById('goalbar');
             goalBar.innerHTML = this.responseText;
             document.getElementById('world').style.height = "calc(100% - " + goalBar.offsetHeight + "px)";
-            window.goalBar = new InitGoalBar(assignment);
+            window.goalBar = new GoalBar(assignment);
       };
       xhr.send();
 })();
 
-function InitGoalBar(assignment) {
+function GoalBar(assignment) {
       
       function copy(obj) {
             return JSON.parse(JSON.stringify(obj));

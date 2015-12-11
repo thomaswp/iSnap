@@ -1,5 +1,5 @@
 /* assignments consist of objectives; this is the constructor for an individual objective. each objective has a description which tells more about the objective than the title, each objective has a boolean to indicate completion, each objective has a title, and each objective has prerequisites - meaning that before this objective can be shown other objectives have to be completed first */
-function AssignmentObjective(description, title, prerequisites) {
+function AssignmentObjective(title, description, prerequisites) {
 	this.description = description;
 	this.isCompleted = false;
 	this.title = title;
@@ -19,19 +19,16 @@ function addObjectives(assignmentID, objectives) {
 }
 
 (function() {
-	var objective0 = new AssignmentObjective("Create Variables", "Create Variables");
-	var objective1 = new AssignmentObjective("Greet the player by name", "Greet Player");
-	var objective2 = new AssignmentObjective("Get a guess from the player", "Get guess", [objective0]);
-	var objective3 = new AssignmentObjective("Pick and store the secret number", "Store secret number", [objective0]);
-	var objective4 = new AssignmentObjective("Say if the player guessed correctly", "Say if correct guess", [objective1]);
-	var objective5 = new AssignmentObjective("Say if the player guessed too low", "Say if too low", [objective0, objective1]);
-	var objective6 = new AssignmentObjective("Make the game repeat until the player gets it right", "Repeat Game", [objective3]);
-	var objective7 = new AssignmentObjective("Let the player set the range of possible numbers", "Set guess range", [objective5, objective3]);
-	var objective8 = new AssignmentObjective("Tell the player how many guesses it took them to win", "Tell attempts", [objective6, objective7]);
-	var objective9 = new AssignmentObjective("Keep track of how many guesses the player made", "Record attempts", [objective8]);
-	/* creating array of objectives for assignment*/
-	var objectives = [objective0, objective1, objective2, objective3, objective4, objective5, objective6, objective7, objective8, objective9];
+	var welcome = new AssignmentObjective("Welcome the Player", "Welcome the player to the game.", []);
+	var greetByName = new AssignmentObjective("Greet the Player", "Greet the player by name.", [welcome]);
+	var storeNumber = new AssignmentObjective("Store Secret Number", "Store a random secret number from 1-10.", []);
+	var getAGuess = new AssignmentObjective("Get a Guess", "Have the player guess the secret number.", [greetByName]);
+	var sayIfCorrect = new AssignmentObjective("Say if Correct", "Tell the player if they guessed correctly.", [getAGuess, storeNumber]);
+	var sayIfTooHighOrLow = new AssignmentObjective("Say if Too High/Low", "Tell the player if they guessed too high or too low.", [getAGuess, storeNumber]);
+	var repeat = new AssignmentObjective("Repeat", "Make the player guess until they guess the secret number.", [getAGuess, storeNumber]);
+
+	var objectives = [welcome, greetByName, variables, storeNumber, getAGuess, sayIfCorrect, sayIfTooHighOrLow, repeat];
 	
 	addObjectives("guess1Lab", objectives);
-}());
+})();
 

@@ -281,7 +281,7 @@ body{
    display: none;
 }
 
-.modalDialog{
+.modalDialog {
    position: fixed;
    top: 0;
    right: 0;
@@ -296,7 +296,7 @@ body{
    pointer-events: none;
 }
 
-.modalDialog:target{
+.showing {
    opacity: 1;
    pointer-events: auto;
 }

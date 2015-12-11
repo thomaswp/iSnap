@@ -310,7 +310,7 @@ function InitGoalBar(assignment) {
 
       toUpdateObjectives();
       
-      if (world.useFillPage) {
+      if (world && world.useFillPage) {
             world.fillPage();
       }
 }

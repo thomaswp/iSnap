@@ -56,6 +56,8 @@ function InitGoalBar(assignment) {
       /* array of objective buttons, there is a objective Buttons 2 for css reasons*/
       var objectiveButtons2 = document.querySelectorAll(".theInput");
       var objectiveButtons3 = document.querySelectorAll(".aButton");
+      
+      var instructions = document.getElementById("instructions");
    
       /* end Assignment setup //////////////////////////////////////////////////////////////////////////////////*/
       
@@ -127,6 +129,7 @@ function InitGoalBar(assignment) {
                   return objective.isCompleted;
             });
             congratulations.style.display = finished ? "initial" : "";
+            instructions.innerHTML = finished ? "" : "Choose an objective:";
             updateChecks();
             fillProgressBar();
       }
@@ -241,6 +244,7 @@ function InitGoalBar(assignment) {
                         /* set the currentObjective variable to the objective the user selected */
                         currentObjective = assignmentObjectives[i];
                         description.value = assignmentObjectives[i].description;
+                        instructions.innerHTML = "Click the check when finished.";
                         /* hide objective buttons and display the FINISHED OBJECTIVE button and the CHOOSE OBJECTIVE button*/
                         for (var i = 0; i < 4; i++) {
                               buttonsHide[i].style.display = "none";

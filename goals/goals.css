@@ -64,16 +64,13 @@ body{
 
 
 /* set width for left side of nav bar, and background color*/
-#beginning{
+#beginning, #instructions{
    display: flex;
    display: -webkit-box;
    display: -webkit-flex;
    display: -ms- flexbox;
    align-items: center;
    justify-content: center;
-   width: 12.5%;
-   min-width: 130px;
-   max-width: 900px;
    border-right: 2px solid #9A9A9A;
    background: rgb(57,75,99);
    background: #6A8DA6;
@@ -83,6 +80,20 @@ body{
    background: #E4E1E2;
    background: rgb(13, 41, 55);
    background-image: url(blackTiles.png);
+}
+
+#beginning {
+   width: 12.5%;
+   min-width: 130px;
+   max-width: 900px;
+}
+
+#instructions {
+   width: 7.5%;
+   min-width: 70px;
+   font-size: 12px;
+   color: #E4E1E2;
+   padding: 5px;
 }
 
 /* set width and background color for right side of nav bar */

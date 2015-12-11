@@ -291,26 +291,35 @@ function InitGoalBar(assignment) {
       }
       
       var oldCodeChanged = Trace.onCodeChanged;
-      var flashing = false;
+      var objectivesFlashing = false;
       Trace.onCodeChanged = function(code) {
 		oldCodeChanged(code);
-            if (!flashing && !currentObjective) {
-                  flashing = true;
+            if (!objectivesFlashing && !currentObjective) {
+                  objectivesFlashing = true;
                   for (var i = 0; i < objectiveButtons.length; i++) {
                         objectiveButtons[i].classList.add("highlight");      
                   }
                   setTimeout(function() {
-                        flashing = false;
+                        objectivesFlashing = false;
                         for (var i = 0; i < objectiveButtons.length; i++) {
                               objectiveButtons[i].classList.remove("highlight");      
                         }
                   }, 500);
             }
 	}
+      var checkButton = document.getElementById("button6");
+      setInterval(function() {
+            if (!currentObjective) return;
+            console.log("!");
+            checkButton.classList.add("highlight");
+            setTimeout(function() {
+                  checkButton.classList.remove("highlight");
+            }, 600);
+      }, 6000)
 
       toUpdateObjectives();
       
-      if (world && world.useFillPage) {
-            world.fillPage();
+      if (window.world && window.world.useFillPage) {
+            window.world.fillPage();
       }
 }

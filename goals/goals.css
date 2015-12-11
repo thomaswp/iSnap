@@ -138,16 +138,12 @@ body{
    background: #E4E1E2;
    border: 2px solid #d1d1d1; 
    width: 100%;
-   color: rgb(13, 41, 55;);
+   color: rgb(13, 41, 55);
    padding: 3px;
    border-radius: 4px;
    outline: none;
    height: 30px;
    transition: all 600ms;
-}
-
-.highlight {
-    background: #FAB700;
 }
 
 /* when you hover on the buttons in the second row */
@@ -343,3 +339,12 @@ make sure I am still logging to SQL
 The Progress Summary button. 
 watch dev tips video on buttons and apply it to my buttons. 
 */
+
+.highlight {
+    background-color: #FAB700;
+}
+
+#button6.highlight {
+    background-color: white;
+    color: rgb(150,174,58);
+}

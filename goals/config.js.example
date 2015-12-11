@@ -27,8 +27,20 @@ function addObjectives(assignmentID, objectives) {
 	var sayIfTooHighOrLow = new AssignmentObjective("Say if Too High/Low", "Tell the player if they guessed too high or too low.", [getAGuess, storeNumber]);
 	var repeat = new AssignmentObjective("Repeat", "Make the player guess until they guess the secret number.", [getAGuess, storeNumber]);
 
-	var objectives = [welcome, greetByName, variables, storeNumber, getAGuess, sayIfCorrect, sayIfTooHighOrLow, repeat];
+	var objectives = [welcome, greetByName, storeNumber, getAGuess, sayIfCorrect, sayIfTooHighOrLow, repeat];
 	
 	addObjectives("guess1Lab", objectives);
+})();
+
+(function() {
+	var createBlock = new AssignmentObjective("Deinfe Block", "Define a custom polygon drawing block with three parameters: size, number of sizes and pen thickness.", []);
+	var implementBlock = new AssignmentObjective("Implement Block", "Add code to your block to make it draw the polygon.", [createBlock]);
+	var squareTest = new AssignmentObjective("Square Test", "Test your block by drawing a polygon with 3 sides, 100 length and 5 thickness.", [implementBlock]);
+	var decagonTest = new AssignmentObjective("Decagon Test", "Test your block by drawing a polygon with 10 sides, 50 length and 6 thickness.", [implementBlock]);
+	var mysteryTest = new AssignmentObjective("Mystery Test", "Test your block by drawing a polygon with 50 sides, 7 length and 2 thickness. What do you think it will draw?", [implementBlock]);
+
+	var objectives = [createBlock, implementBlock, squareTest, decagonTest, mysteryTest];
+	
+	addObjectives("polygonMakerLab", objectives);
 })();
 

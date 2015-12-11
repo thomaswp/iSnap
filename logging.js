@@ -307,7 +307,6 @@ ConsoleLogger.prototype.storeMessages = function(logs) {
     });
 };
 
-console.log("abc");
 // Setup
 function setupLogging() {
     checkAssignment();

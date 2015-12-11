@@ -297,16 +297,18 @@ function GoalBar(assignment) {
       var oldCodeChanged = Trace.onCodeChanged;
       var objectivesFlashing = false;
       Trace.onCodeChanged = function(code) {
-		oldCodeChanged(code);
+		if (oldCodeChanged) oldCodeChanged(code);
             if (!objectivesFlashing && !currentObjective) {
                   objectivesFlashing = true;
                   for (var i = 0; i < objectiveButtons.length; i++) {
-                        objectiveButtons[i].classList.add("highlight");      
+                        objectiveButtons[i].classList.add("highlight");
+                        instructions.classList.add("highlight");
                   }
                   setTimeout(function() {
                         objectivesFlashing = false;
                         for (var i = 0; i < objectiveButtons.length; i++) {
-                              objectiveButtons[i].classList.remove("highlight");      
+                              objectiveButtons[i].classList.remove("highlight");
+                              instructions.classList.remove("highlight");      
                         }
                   }, 500);
             }
@@ -314,12 +316,11 @@ function GoalBar(assignment) {
       var checkButton = document.getElementById("button6");
       setInterval(function() {
             if (!currentObjective) return;
-            console.log("!");
             checkButton.classList.add("highlight");
             setTimeout(function() {
-                  checkButton.classList.remove("highlight");
-            }, 600);
-      }, 6000)
+                  checkButton.classList.remove("highlight");  
+            }, 800);
+      }, 4000)
 
       toUpdateObjectives();
       

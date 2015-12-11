@@ -90,10 +90,17 @@ body{
 
 #instructions {
    width: 7.5%;
-   min-width: 70px;
+   min-width: 90px;
+   font-weight: bold;
    font-size: 12px;
+   text-align: right;
    color: #E4E1E2;
    padding: 5px;
+   transition: all 600ms;
+}
+
+#instructions.highlight {
+    color: #FAB700;    
 }
 
 /* set width and background color for right side of nav bar */
@@ -115,7 +122,7 @@ body{
 /* the assignment text on the left side of the screen*/
 #assignmentChosen{
    color: #E4E1E2;
-   padding-left: 5px;
+   padding: 5px;
 }
 
 /* the top bar on the left side of the screen */
@@ -154,7 +161,7 @@ body{
    border-radius: 4px;
    outline: none;
    height: 30px;
-   transition: all 600ms;
+   transition: background-color 600ms;
 }
 
 /* when you hover on the buttons in the second row */
@@ -227,7 +234,7 @@ body{
    width: 1%;
    border-radius: 3px;
    -webkit-transition: width 0.7s ease;
-   transition: width 0.8 ease;
+   transition: width 0.8s ease;
 }
 
 /* parent to the progress bar and child of leftHalfOfNavBar*/

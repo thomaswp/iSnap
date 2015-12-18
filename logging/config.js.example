@@ -4,9 +4,9 @@
 // "test" and "view" will not show up on the selection menu
 window.assignments = {
 	"none": {
-		name: "None",
+		name: "None (just using Snap)",
 	},
-	"lightsCamerActionHW": {
+	"lightsCameraActionHW": {
 		name: "Lights, Camera, Action! (Homework 1)"	
 	},
 	"polygonMakerLab": {

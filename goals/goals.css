@@ -4,35 +4,7 @@
    margin: 0px;
 }
 
-.widthAdjust{
-   width: 100%;
-   height: 100%;
-   margin-right: 3px;
-   
-}
-
-.alternativeButtons{
-   display: flex;
-   width: 100%;
-   align-items: center;
-   justify-content: flex-end;
-}
-
-.aButtonAlternative{
-   font-size: 14px;
-   background: #E4E1E2;
-   color: black;
-   height: 33px;
-   width: 100%;
-   padding: 3px;
-   margin: 0px;
-   border: none;
-   outline: none;
-   margin-left: 5px;
-   margin-right: 5px;
-}
-
-/* extend width and height of html to include the Snap! iframe */
+/*  */
 html{
    height: 100%;
    width: 100%;
@@ -46,14 +18,10 @@ body{
    width: 100%;
 }
 
-/* the width of the nav bar */
+/*The whole NAV bar container */
 #theNavBarContainer, #theNavBar{
-   height: 40px;
-}
-
-/*The whole NAV bar container, the background matches the color on the right side of the screen */
-#theNavBarContainer{
 	background: rgb(13,41,55);
+    height: 40px;
 }
 
 /* theNavBar*/
@@ -61,7 +29,6 @@ body{
 	display: flex;
 	border: 1px solid #9A9A9A;
 }
-
 
 /* set width for left side of nav bar, and background color*/
 #beginning, #instructions{
@@ -72,12 +39,6 @@ body{
    align-items: center;
    justify-content: center;
    border-right: 2px solid #9A9A9A;
-   background: rgb(57,75,99);
-   background: #6A8DA6;
-   background: #d2d6d5;
-   background: #aab3a7;
-   background: #cec6b0;
-   background: #E4E1E2;
    background: rgb(13, 41, 55);
    background-image: url(blackTiles.png);
 }
@@ -95,6 +56,7 @@ body{
    font-size: 12px;
    text-align: right;
    color: #E4E1E2;
+   border-right: none;
    padding: 5px;
    transition: all 600ms;
 }
@@ -103,7 +65,7 @@ body{
     color: #FAB700;    
 }
 
-/* set width and background color for right side of nav bar */
+/*  */
 #middle{
    display: flex;
    width: 72.5%; 
@@ -132,8 +94,9 @@ body{
    font-size: 12px;
 }
 
-/* start of button styling ///////////////////////////////////////////////////////////////////////*/
-/* the parent that holds the buttons on the second row*/ 
+/* start of button styling //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+/* the parent that holds the buttons*/ 
 .theButtons{
    margin-left: 2px;
    display: flex;
@@ -142,7 +105,7 @@ body{
    align-items: center;
 }
 
-/* the buttons on the second row*/
+/* the div element for the 4 buttons*/
 .aButton{
    width: 100%;
    height: 100%;
@@ -150,7 +113,14 @@ body{
    margin-right: 3px;
 }
 
-/* the buttons on the second row*/
+/* when an objective is chosen, the class - for the div elements - for the 4 buttons changes to widthAdjust - 0nly difference is the max width is excluded*/
+.widthAdjust{
+   width: 100%;
+   height: 100%;
+   margin-right: 3px;
+}
+
+/* the input in the div elements for the buttons */
 .theInput{
    font-size: 13px;
    background: #E4E1E2;
@@ -164,7 +134,22 @@ body{
    transition: background-color 600ms;
 }
 
-/* when you hover on the buttons in the second row */
+/* when an objective is chosen, the class for THE INPUT of the div elements for the 4 buttons changes to aButtonAlternative*/
+.aButtonAlternative{
+   font-size: 14px;
+   background: #E4E1E2;
+   color: black;
+   height: 33px;
+   width: 100%;
+   padding: 3px;
+   margin: 0px;
+   border: none;
+   outline: none;
+   margin-left: 5px;
+   margin-right: 5px;
+}
+
+/* when you hover on the buttons*/
 .theInput:hover{
    border: 2px solid #d1d1d1;
    color: white;
@@ -206,9 +191,9 @@ body{
    transition: all 600ms;
    
 }
-/* end of button styling /////////////////////////////////////////////////////////////////////////////*/
+/* end of button styling ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
-/* start of progress bar styling ////////////////////////////////////////////////////////////////////*/
+/* start of progress bar styling /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 /* white section background of bar AKA the progress bar*/
 #bar{
    margin-right: 5px;
@@ -252,7 +237,7 @@ body{
    width: 10%;
    margin-right: 5px;
 }
-/* end of progress bar styling ////////////////////////////////////////////////////////////////////////*/
+/* end of progress bar styling /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 
 /* icons*/
@@ -265,12 +250,6 @@ body{
    color: white;
 }
 
-/*iFrame stuffs */
-#iFrameContainer{
-   height: 100%;
-   width: 100%;
-}
-
 #snap{
    height: 100%;
    width: 100%;
@@ -281,6 +260,7 @@ body{
    display: none;
 }
 
+/* start of modal dialog box styling ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 .modalDialog {
    position: fixed;
    top: 0;
@@ -308,9 +288,6 @@ body{
    padding: 5px 20px 13px 20px;
    border-radius: 10px;
    background: #fff;
-   background: -moz-linear-gradient(#fff, #fff);
-   background: -webkit-linear-gradient(#fff, #fff);
-   background: -o-linear-gradient(#fff, #fff);
 }
 
 .close{
@@ -332,7 +309,7 @@ body{
    box-shadow: 1px 1px 3px #000;
 }
 
-.close:hover{ background: #FAB700;}
+.close:hover{ background: #FAB700; cursor: pointer;}
 
 th{
    text-align: left;
@@ -347,16 +324,7 @@ td{
 .progressCheck{
    text-align: center;
 }
-/*
-to do: change font style
-create a green checkmark button for completed and a back arrow for go back to objective  -- completed
-   add the little notification message thing when you hover over something so that it says choose different objective and finished objective on my buttons with symbols. 
-change hover state on buttons. 
-JSON stringify thing he asked me to do
-make sure I am still logging to SQL
-The Progress Summary button. 
-watch dev tips video on buttons and apply it to my buttons. 
-*/
+/* end of modal dialog box styling ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 .highlight {
     background-color: #FAB700;

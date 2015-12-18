@@ -33,17 +33,15 @@ function GoalBar(assignment) {
       }
       /* when the page first loads, want to record that a Subgoal has been started*/
       log("Subgoal.started");
-      /* end Logger setup ///////////////////////////////////////////////////////////////////////////*/
+      /* end Logger setup ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
       
-      /* start Assignment setup ////////////////////////////////////////////////////////////////////*/
-      /* constructing the guessing game objectives */
-      
+      /* start Assignment setup /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+      /* constructing objectives */
+   
       /* the current objective that the player is trying to complete */
       var currentObjective;
       /* variables related to progress bar */
       var bar = document.querySelector(".bar-fill");
-      /* array of objective buttons*/
-      var objectiveButtons = document.querySelectorAll(".aButton input");
       /* variable for all objective buttons*/
       var buttonsHide = document.querySelectorAll(".aButton");
       /* the finished objective and choose different objective buttons*/
@@ -53,13 +51,16 @@ function GoalBar(assignment) {
       congratulations.innerHTML = "Congratulations, you have completed " + assignment.name + ".";
       /* all the buttons including objectives, finished objective, and choose different objective buttons*/
       var theButtons = document.querySelector(".theButtons");
+      /* array of objective buttons*/
+      var objectiveButtons = document.querySelectorAll(".aButton input");
       /* array of objective buttons, there is a objective Buttons 2 for css reasons*/
       var objectiveButtons2 = document.querySelectorAll(".theInput");
+      /* the div element of the objective buttons*/
       var objectiveButtons3 = document.querySelectorAll(".aButton");
       
       var instructions = document.getElementById("instructions");
    
-      /* end Assignment setup //////////////////////////////////////////////////////////////////////////////////*/
+      /* end Assignment setup /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
       
       /* fill the progress bar when objective has been completed */
       function fillProgressBar() {
@@ -153,12 +154,9 @@ function GoalBar(assignment) {
    
    function updateChecks(){
       var metPrerequisites = true;
-      
       document.getElementById("assignmentTitle").innerHTML = assignment.name;
-      
       var table = document.getElementById("objectivesTable");
       table.innerHTML = "";
-      
       var createChild = function(parent, tag, html, clazz) {
             var element = document.createElement(tag);
             if (html) element.innerHTML = html;
@@ -172,12 +170,9 @@ function GoalBar(assignment) {
       createChild(header, "th", "Description");
       createChild(header, "th", "Complete", "progressCheck");
       
-   
       /** update available objectives*/
       for (var i = 0; i < assignmentObjectives.length; i++){
-         
          var objective = assignmentObjectives[i];
-            
          metPrerequisites = true;
          for(var c = 0; c < objective.prerequisites.length; c++){
             if(!assignmentObjectives.some(function (prereqs){
@@ -199,8 +194,6 @@ function GoalBar(assignment) {
    }
       
       /** for loading and saving the state of the nav bar */
-
-
       this.saveState = function () {
             var currentState = {
                   allObjectives: assignmentObjectives
@@ -216,7 +209,6 @@ function GoalBar(assignment) {
             assignmentObjectives = state.allObjectives;
             toUpdateObjectives();
       }
-      
       
       /* user has choosen to go back to list of objectives and select a new objective*/
       this.chooseDifferentObjective = function() {
@@ -251,7 +243,6 @@ function GoalBar(assignment) {
                         }    
                         /* unhide the button that was selected */
                         parentEl.style.display = "initial";
-                        theButtons.className = "alternativeButtons";
                         for (var q = 0; q < objectiveButtons2.length; q++) {
                               objectiveButtons2[q].className = "aButtonAlternative";
                         }
@@ -269,9 +260,7 @@ function GoalBar(assignment) {
       
       this.assignmentObjectives = assignmentObjectives;
       
-      
       // Project Data saving / loading
-      
       var myself = this;
       var originalState = this.saveState();
       var oldGet = IDE_Morph.prototype.getProjectData;
@@ -312,7 +301,8 @@ function GoalBar(assignment) {
                         }
                   }, 500);
             }
-	}
+	  }
+      
       var checkButton = document.getElementById("button6");
       setInterval(function() {
             if (!currentObjective) return;

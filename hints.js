@@ -360,10 +360,16 @@ SnapDisplay.prototype.clear = function() {
 	// });
 	// this.buttons = [];
 	
+	// console.log("Clear");
 	this.hintBars.forEach(function(bar) {
 		var parent = bar.parent;
+		// console.log(parent);
 		parent.hintBar = null;
+		// console.log("A: " + JSON.stringify(parent.bounds));
+		// console.log("B: " + JSON.stringify(parent.fullBounds()));
 		bar.destroy();
+		// console.log("C: " + JSON.stringify(parent.bounds));
+		// console.log("D: " + JSON.stringify(parent.fullBounds()));
 		if (parent && parent.getShadow) {
 			if (parent.getShadow()) {
 				parent.removeShadow();
@@ -520,20 +526,20 @@ SnapDisplay.prototype.createHintButton = function(parent, color, script, callbac
 		if (hintBar == null) {
 			hintBar = new HintBarMorph(topBlock);
 			topBlock.hintBar = hintBar;
+			this.hintBars.push(hintBar);
 		}
 		hintBar.setRight(topBlock.left() - 5);
 		hintBar.setTop(topBlock.top());
-		this.hintBars.push(hintBar);
 	} else {
 		var scripts = parent;
 		hintBar = scripts.hintBar;
 		if (hintBar == null) {
 			hintBar = new HintBarMorph(scripts);
 			scripts.hintBar = hintBar;
+			this.hintBars.push(hintBar);
 		}
 		hintBar.setLeft(scripts.left() + 10);
 		hintBar.setTop(scripts.top() + 20);
-		this.hintBars.push(hintBar);
 	}
 	
 	var button = new PushButtonMorph(hintBar, callback, new SymbolMorph("speechBubble", 14));

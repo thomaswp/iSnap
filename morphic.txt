@@ -9,7 +9,7 @@
 
 	Copyright (C) 2015 by Jens Mönig
 
-	this documentation last changed: June 26, 2015
+	this documentation last changed: Dec 21, 2015
 
 	This file is part of Snap!.
 
@@ -148,12 +148,14 @@
     III. yet to implement
     ---------------------
     - keyboard support for scroll frames and lists
+    - full keyboard support for menus (partial support exists)
     - virtual keyboard support for Android and IE
 
 
     IV. open issues
     ----------------
-    - blurry shadows don't work well in Chrome
+    - clipboard support (copy & paste) for non-textual data
+    - native (unscaled) high-resolution display support
 
 
     V. browser compatibility
@@ -164,12 +166,15 @@
 
     - Firefox for Windows
     - Firefox for Mac
-    - Chrome for Windows (blurry shadows have some issues)
+    - Firefox for Android
+    - Chrome for Windows
     - Chrome for Mac
-    - Safari for Windows
+    - Chrome for Android
+    - Safari for Windows (deprecated)
     - safari for Mac
     - Safari for iOS (mobile)
     - IE for Windows
+    - Edge for Windows
     - Opera for Windows
     - Opera for Mac
 
@@ -259,10 +264,11 @@
                 window.onload = function () {
                     world = new WorldMorph(
                         document.getElementById('world'));
-                    setInterval(loop, 50);
+                    loop();
                 };
 
                 function loop() {
+                    requestAnimationFrame(loop);
                     world.doOneCycle();
                 }
             </script>
@@ -306,10 +312,11 @@
                         document.getElementById('world1'), false);
                     world2 = new WorldMorph(
                         document.getElementById('world2'), false);
-                    setInterval(loop, 50);
+                    loop();
                 };
 
                 function loop() {
+                    requestAnimationFrame(loop);
                     world1.doOneCycle();
                     world2.doOneCycle();
                 }
@@ -374,10 +381,11 @@
                         x = 0;
                         y += 1;
                     }
-                    setInterval(loop, 50);
+                    loop();
                 };
 
                 function loop() {
+                    requestAnimationFrame(loop);
                     world.doOneCycle();
                 }
             </script>
@@ -1040,5 +1048,6 @@
     background texture handling, countless bug fixes and optimizations.
     Ian Reynolds contributed backspace key handling for Chrome.
     Davide Della Casa contributed performance optimizations for Firefox.
+    Jason N (@cyderize) contributed native copy & paste for text editing.
 
     - Jens Mönig

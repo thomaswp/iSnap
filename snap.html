@@ -35,10 +35,10 @@
                 world.worldCanvas.focus();
 				ide = new IDE_Morph();
 				ide.openIn(world);
+        		loop();
 				if (window.onWorldLoaded) {
 					window.onWorldLoaded();
 				}
-        		loop();
 			};
 			function loop() {
         		requestAnimationFrame(loop);

@@ -640,12 +640,6 @@ BlockHighlightMorph.prototype.topMorphAt = function(point) {
 // 	}
 // }
 
-function HintButtonMorph() {
-	this.idealY = 0;
-}
-
-HintButtonMorph.prototype = Object.create(PushButtonMorph.prototype);
-
 function HintBarMorph(parent) {
 	this.init(parent);
 }
@@ -675,7 +669,7 @@ HintBarMorph.prototype.addButton = function(button, parent, script) {
 	this.add(button);
 	
 	if (!(parent instanceof SyntaxElementMorph)) {
-		button.ideaY = this.children.length * 20;
+		// button.idealY = this.children.length * 20;
 		this.layout();
 		return;
 	}

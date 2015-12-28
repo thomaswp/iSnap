@@ -7,3 +7,18 @@ code.minus {
 code.equals {
 	color: darkgray;
 }
+
+div.debug {
+	bottom: 0px;
+    height: 100px;
+    width: 100%;
+    overflow: auto;
+    position: fixed;
+	background-color: #fff;
+    opacity: 1;
+	transition: opacity .15s ease-in-out;
+}
+
+div.debug:hover {
+	opacity: 1;
+}

@@ -2,6 +2,7 @@
 
 // The assignment the student is working on
 var assignmentID;
+var Trace;
 
 // Helper functions
 
@@ -60,6 +61,7 @@ Logger.prototype.serializer = new SnapSerializer();
 
 Logger.prototype.init = function(interval) {
     this.queue = [];
+    this.onCodeChanged = null;
     this.log("Logger.started");
     this.start(interval);
 }
@@ -148,6 +150,7 @@ Logger.prototype.addCode = function(log) {
     if (code != this.lastCode) {
         log.code = code;
         this.lastCode = code;
+        if (this.onCodeChanged) this.onCodeChanged(code); 
     }
 }
 
@@ -265,7 +268,7 @@ DBLogger.prototype.storeMessages = function(logs) {
         "logs": logs,
     };
     this.sendToServer(JSON.stringify(data), 0);
-}
+};
 
 DBLogger.prototype.sendToServer = function(data, attempts) {
     if (attempts >= 3) {
@@ -286,7 +289,7 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
     };
     xhr.open("POST", "logging/mysql.php", true);
     xhr.send(data);
-}
+};
 
 // Log to the console
 
@@ -302,16 +305,16 @@ ConsoleLogger.prototype.storeMessages = function(logs) {
         log.userInfo = myself.userInfo();
         console.log(log);
     });
-}
+};
 
 // Setup
 function setupLogging() {
     checkAssignment();
 
     if (window.createLogger) {
-        window.Trace = window.createLogger(assignmentID);
+        Trace = window.createLogger(assignmentID);
     } else {
-        window.Trace = new Logger(50);
+        Trace = new Logger(50);
     }
     
     if (window.easyReload && window.easyReload(assignmentID)) {
@@ -319,6 +322,14 @@ function setupLogging() {
             window.onbeforeunload = null;
         }, 2000);
     }
+    
+    window.onerror = function(msg, url, line) {
+        Trace.log("Error", {
+            "message": msg,
+            "url": url,
+            "line": line 
+        });
+    };
 }
 
 setupLogging();

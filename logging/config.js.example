@@ -3,13 +3,37 @@
 // The assignmentID will be logged with each statement
 // "test" and "view" will not show up on the selection menu
 window.assignments = {
-	"none": "None",
-	"guess1Lab": "Guessing Game Part 1 (In Lab Activity 3)",
-	"guess2HW": "Guessing Game Part 2 (Homework 3)",
-	"guess3Lab": "Guessing Game Part 3 (In Lab Activity 4)",
-	"project": "SNAP Project (Project Deliverable 1)",
-	"test": "Testing",
-	"view": "Viewing",
+	"none": {
+		name: "None (just using Snap)",
+	},
+	"lightsCameraActionHW": {
+		name: "Lights, Camera, Action! (Homework 1)"	
+	},
+	"polygonMakerLab": {
+		name: "Polygon Maker (In Lab Activity 2)"	
+	},
+	"squiralHW": {
+		name: "Squiral (Homework 2)"
+	},
+	"guess1Lab": {
+		name: "Guessing Game Part 1 (In Lab Activity 3)",
+		hints: true,
+	},
+	"guess2HW": {
+		name: "Guessing Game Part 2 (Homework 3)", 
+	},
+	"guess3Lab": {
+		name: "Guessing Game Part 3 (In Lab Activity 4)",
+	},
+	"project": {
+		name: "SNAP Project (Project Deliverable 1)",
+	},
+	"test": {
+		name: "Testing",	
+	},
+	"view": {
+		name: "Viewing",
+	},
 }
 
 // If true, requires the Snap users to select an assignment before

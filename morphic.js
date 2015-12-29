@@ -2736,10 +2736,10 @@ Morph.prototype.toggleVisibility = function () {
 
 Morph.prototype.fullImageClassic = function () {
     // why doesn't this work for all Morphs?
-    var fb = this.fullBounds(),
+    var fb = this.cachedFullBounds || this.fullBounds(),
         img = newCanvas(fb.extent()),
         ctx = img.getContext('2d');
-    ctx.translate(-this.bounds.origin.x, -this.bounds.origin.y);
+    ctx.translate(-fb.origin.x, -fb.origin.y);
     this.fullDrawOn(img, fb);
     img.globalAlpha = this.alpha;
     return img;

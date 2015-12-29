@@ -353,29 +353,26 @@ SnapDisplay.prototype.getCode = function(ref) {
 	}
 }
 
-SnapDisplay.prototype.clear = function() { 
-	// this.buttons.forEach(function(b) {
-	// 	b.hide();
-	// 	b.fullChanged();
-	// });
-	// this.buttons = [];
-	
-	// console.log("Clear");
+SnapDisplay.prototype.clear = function() {
+    
 	this.hintBars.forEach(function(bar) {
 		var parent = bar.parent;
-		// console.log(parent);
 		parent.hintBar = null;
-		// console.log("A: " + JSON.stringify(parent.bounds));
-		// console.log("B: " + JSON.stringify(parent.fullBounds()));
 		bar.destroy();
-		// console.log("C: " + JSON.stringify(parent.bounds));
-		// console.log("D: " + JSON.stringify(parent.fullBounds()));
-		if (parent && parent.getShadow) {
+        if (!parent) return;
+		if (parent.getShadow) {
 			if (parent.getShadow()) {
 				parent.removeShadow();
 				parent.addShadow();
 			}
 		}
+        if (parent.cachedFullBounds) {
+            parent.cachedFullBounds = parent.fullBounds();
+        }
+        if (parent.cachedFullImage) {
+            parent.cachedFullImage = null;
+            parent.cachedFullImage = parent.fullImageClassic();
+        }
 	});
 	
 	this.hintBars = [];

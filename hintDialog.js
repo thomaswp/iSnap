@@ -90,8 +90,9 @@ HintDialogBoxMorph.prototype.init = function(target) {
 
 HintDialogBoxMorph.prototype.initButtons = function() {
     // add accept and decline button
-	this.addButton('rate','Done');
-	this.addButton('otherHints','Other Hints...');
+	this.addButton('good','Helpful!');
+	this.addButton('otherHints','Another...');
+    this.addButton('cancel','Cancel');
 }
 
 // interface for showing hint for a single block
@@ -289,7 +290,9 @@ HintDialogBoxMorph.prototype.fixExtent = function() {
 	var th = fontHeight(this.titleFontSize) + this.titlePadding * 2,
 		w = 0,
 		h = 0;
-		
+	
+    this.buttons.fixLayout();
+    
 	// calculate the size of scriptsFrame
 	this.body.children.forEach(function(child) {
 		//child.children[0].setExtent(new Point(250,h));
@@ -299,7 +302,7 @@ HintDialogBoxMorph.prototype.fixExtent = function() {
 		}
 	});
 	
-	w = w + 2*this.padding; // final width of a single scriptFrame
+	w = Math.max(w,this.buttons.width()) + 2*this.padding; // final width of a single scriptFrame
 	h = h + 2*this.padding; // final height of a single scriptFrame
 	
 	this.body.children.forEach(function(child) {
@@ -384,8 +387,8 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 }
 
 // define function when accept button is clicked
-HintDialogBoxMorph.prototype.rate = function () {
-	Trace.log("HintDialogBox.rateClicked");
+HintDialogBoxMorph.prototype.good = function () {
+	Trace.log("HintDialogBox.goodClicked");
 	
 	//TODO log accept
 
@@ -400,6 +403,12 @@ HintDialogBoxMorph.prototype.otherHints = function () {
 	this.close();
 }
 
+HintDialogBoxMorph.prototype.cancel = function () {
+    Trace.log("HintDialogBox.cancelClicked");
+    
+    this.close();
+}
+
 // define popUp function
 HintDialogBoxMorph.prototype.popUp = function () {
     var minWidth = 0,
@@ -409,7 +418,7 @@ HintDialogBoxMorph.prototype.popUp = function () {
 	// The minimum width and minimum height when adjusting dialogue scale
 	minWidth = this.width();
 	minHeight = this.height();
-	
+    
     if (world) {
         HintDialogBoxMorph.uber.popUp.call(this, world);
         this.handle = new HandleMorph(
@@ -748,6 +757,7 @@ MessageHintDialogMorph.prototype.init = function(message, title, target) {
     
     this.initButtons();
     
+    this.fixExtent();
     this.fixLayout();
     Trace.log("MessageHintDialog.init");
 }
@@ -756,12 +766,16 @@ MessageHintDialogMorph.prototype.initButtons = function() {
     HintDialogBoxMorph.prototype.initButtons.call(this);
 }
 
-MessageHintDialogMorph.prototype.rate = function() {
-    HintDialogBoxMorph.prototype.rate.call(this);
+MessageHintDialogMorph.prototype.good = function() {
+    HintDialogBoxMorph.prototype.good.call(this);
 }
 
 MessageHintDialogMorph.prototype.otherHints = function() {
     HintDialogBoxMorph.prototype.otherHints.call(this);
+}
+
+MessageHintDialogMorph.prototype.cancel = function () {
+    HintDialogBoxMorph.prototype.cancel.call(this);
 }
 
 MessageHintDialogMorph.prototype.popUp = function() {
@@ -772,7 +786,35 @@ MessageHintDialogMorph.prototype.popUp = function() {
 }
 
 MessageHintDialogMorph.prototype.fixLayout = function() {
-    DialogBoxMorph.prototype.fixLayout.call(this);
+    var th = fontHeight(this.titleFontSize) + this.titlePadding * 2;
+
+    if (this.buttons && (this.buttons.children.length > 0)) {
+        this.buttons.fixLayout();
+    }
+
+    if (this.body) {
+        this.body.setPosition(this.position().add(new Point(
+            this.padding,
+            th + this.padding
+        )));
+        this.body.setExtent(new Point(
+            this.width() - this.padding * 2,
+           this.height() - this.padding * 3 - th - this.buttons.height()
+        ));
+		this.body.setCenter(this.center());
+		this.body.setTop(this.top()+this.padding+th);
+		
+    }
+
+    if (this.label) {
+        this.label.setCenter(this.center());
+        this.label.setTop(this.top() + (th - this.label.height()) / 2);
+    }
+
+    if (this.buttons && (this.buttons.children.length > 0)) {
+        this.buttons.setCenter(this.center());
+        this.buttons.setBottom(this.bottom() - this.padding);
+    }
 }
 
 MessageHintDialogMorph.prototype.close = function() {
@@ -786,7 +828,21 @@ MessageHintDialogMorph.prototype.destroy = function() {
     MessageHintDialogMorph.showing = null;
 }
 
+MessageHintDialogMorph.prototype.fixExtent = function() {
+    var th = fontHeight(this.titleFontSize) + this.titlePadding * 2,
+		w = 0,
+		h = 0;
 
+    this.buttons.fixLayout();
+    this.buttons.fixLayout(); //doesn't know why it needs two times but it works
+
+	w = Math.max(this.body.width(),this.buttons.width())+2*this.padding;
+
+	h = this.body.height(); // final height of a single scriptFrame
+
+	this.setExtent(new Point(w,th+this.buttons.height()+h+3*this.padding));
+
+}
 
 /********************************
  * Hint Button

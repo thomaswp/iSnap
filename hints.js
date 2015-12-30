@@ -66,7 +66,7 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
 		myself.loadCode();
 	}
 	
-	if (displays.length == 0 || !window.assignments) return;
+	if (displays.length == 0) return;
 	var assignment = window.assignments[window.assignmentID];
 	if (!assignment || !assignment.hints) return;
 	
@@ -271,43 +271,37 @@ SnapDisplay.prototype = Object.create(HintDisplay.prototype);
 SnapDisplay.prototype.initDisplay = function() {
 	this.enabled = false;
 	
-	var createButton = function(ide) {
-		var hintButton = new PushButtonMorph(
-			ide,
-			'getHint',
-			'  ' + localize('Help') + '  '
-		);
-		ide.spriteBar.hintButton = hintButton;
-		hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
-		hintButton.corner = DialogBoxMorph.prototype.buttonCorner;
-		hintButton.edge = DialogBoxMorph.prototype.buttonEdge;
-		hintButton.outline = DialogBoxMorph.prototype.buttonOutline;
-		hintButton.outlineColor = ide.spriteBar.color;
-		hintButton.outlineGradient = false;
-		hintButton.padding = DialogBoxMorph.prototype.buttonPadding;
-		hintButton.contrast = DialogBoxMorph.prototype.buttonContrast;
-		hintButton.drawNew();
-		hintButton.fixLayout();
-		hintButton.setPosition(new Point(
-			ide.stage.left() - hintButton.width() - 20, 
-			ide.spriteBar.hintButton.top() + 50));
-	
-		ide.spriteBar.hintButton = hintButton;
-		ide.spriteBar.add(ide.spriteBar.hintButton);
-	}   
+	var ide = window.ide;
+    var hintButton = new PushButtonMorph(
+        ide,
+        'getHint',
+        '  ' + localize('Hint') + '  '
+    );
+	ide.spriteBar.hintButton = hintButton;
+    hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
+    hintButton.corner = DialogBoxMorph.prototype.buttonCorner;
+    hintButton.edge = DialogBoxMorph.prototype.buttonEdge;
+    hintButton.outline = DialogBoxMorph.prototype.buttonOutline;
+    hintButton.outlineColor = ide.spriteBar.color;
+    hintButton.outlineGradient = false;
+    hintButton.padding = DialogBoxMorph.prototype.buttonPadding;
+    hintButton.contrast = DialogBoxMorph.prototype.buttonContrast;
+    hintButton.drawNew();
+    hintButton.fixLayout();
+    hintButton.setPosition(new Point(
+		ide.stage.left() - hintButton.width() - 20, 
+		ide.spriteBar.hintButton.top() + 50));
+
+    ide.spriteBar.hintButton = hintButton;
+    ide.spriteBar.add(ide.spriteBar.hintButton);
 	
 	var oldFixLayout = IDE_Morph.prototype.fixLayout;
 	IDE_Morph.prototype.fixLayout = function() {
 		oldFixLayout.call(this, arguments);
-		if (!this.spriteBar.hintButton) {
-			createButton(this);
-		};
         this.spriteBar.hintButton.setPosition(new Point(
 			this.stage.left() - this.spriteBar.hintButton.width() - 20,
 			this.spriteBar.hintButton.top()));
-	}
-	
-	window.ide.fixLayout();
+	} 
 }
 
 SnapDisplay.prototype.getCode = function(ref) {
@@ -353,26 +347,23 @@ SnapDisplay.prototype.getCode = function(ref) {
 	}
 }
 
-SnapDisplay.prototype.clear = function() {
-    
+SnapDisplay.prototype.clear = function() { 
+	// this.buttons.forEach(function(b) {
+	// 	b.hide();
+	// 	b.fullChanged();
+	// });
+	// this.buttons = [];
+	
 	this.hintBars.forEach(function(bar) {
 		var parent = bar.parent;
 		parent.hintBar = null;
 		bar.destroy();
-        if (!parent) return;
-		if (parent.getShadow) {
+		if (parent && parent.getShadow) {
 			if (parent.getShadow()) {
 				parent.removeShadow();
 				parent.addShadow();
 			}
 		}
-        if (parent.cachedFullBounds) {
-            parent.cachedFullBounds = parent.fullBounds();
-        }
-        if (parent.cachedFullImage) {
-            parent.cachedFullImage = null;
-            parent.cachedFullImage = parent.fullImageClassic();
-        }
 	});
 	
 	this.hintBars = [];
@@ -389,37 +380,16 @@ SnapDisplay.prototype.showHint = function(hint) {
 	f.call(this, root, hint.data.from, hint.data.to);
 }
 
-SnapDisplay.prototype.showStructureHint = function(from, to, scripts, map, postfix) {
-	var myself = this;
-	if (!postfix) postfix = "";
-	for (var key in map) {
-		if (!map.hasOwnProperty(key)) continue;
-		
-		var fromItems = this.countWhere(from, key);
-		var toItems = this.countWhere(to, key);
-		
-		var message = null;
-		if (fromItems > toItems) {
-			message = "You may have too many " + map[key] + "s" + postfix + ".";
-		} else if (fromItems < toItems) {
-			message = "You may need another " + map[key] + postfix + ".";
-		}
-		
-		if (message == null) continue;
-		
-		(function(message) {	
-			myself.createHintButton(scripts, new Color(163, 73, 164), false, function() {
-				myself.showMessageDialog(message, "Suggestion");
-			});
-		})(message);
-	}
-}
-
 SnapDisplay.prototype.showSnapshotHint = function(root, from , to) {
-	this.showStructureHint(from, to, window.ide.currentSprite.scripts, {
-		"var": "global variable",
-		"customBlock": "custom block"
-	});
+	var myself = this;
+	var message = from.length > to.length ?
+					"You may have too many global variables." :
+					"You may need another global variable.";
+	var showHint = function() {
+		myself.showMessageDialog(message, "Hint");
+	};
+	
+	this.createHintButton(window.ide.currentSprite.scripts, new Color(163, 73, 164), false, showHint)
 }
 
 SnapDisplay.prototype.showCustomBlockHint = function(root, from , to) {
@@ -427,17 +397,35 @@ SnapDisplay.prototype.showCustomBlockHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.showStageHint = function(root, from , to) {
-	this.showStructureHint(from, to, window.ide.currentSprite.scripts, {
-		"sprite": "sprite"
-	});
+	
 }
 
 SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
-	this.showStructureHint(from, to, root.scripts, {
-		"var": "variable",
-		"script": "script",
-		"customBlock": "custom block"
-	}, " in this sprite");
+	var fromVars = this.countWhere(from, 'var'), 
+		fromScripts = this.countWhere(from, 'script'), 
+		toVars = this.countWhere(to, 'var'), 
+		toScripts = this.countWhere(to, 'script');
+	
+	var messages = [];
+	if (fromScripts > toScripts) {
+		messages.push("You may have too many scripts in this sprite.");
+	} else if (fromScripts < toScripts) {
+		messages.push("You may need another script in this sprite.")
+	}
+	
+	if (fromVars > toVars) {
+		messages.push("You may have too many local variables in this sprite.");
+	} else if (fromVars < toVars) {
+		messages.push("You may need another  local variable in this sprite.")
+	}
+	
+	var myself = this;
+	for (var i = 0; i < messages.length; i++) {
+		var message = messages[i];
+		this.createHintButton(root.scripts, new Color(163, 73, 164), false, function() {
+			myself.showMessageDialog(message, "Hint");
+		});
+	}
 }
 
 SnapDisplay.prototype.countWhere = function(array, item) {
@@ -486,34 +474,33 @@ SnapDisplay.prototype.showBlockHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.showMessageDialog = function(message, title) {
-	var dialog = new DialogBoxMorph(window.ide);
-    var txt = new TextMorph(
-        localize(message),
-        dialog.fontSize,
-        dialog.fontStyle,
-        true,
-        false,
-        'center',
-        null,
-        null,
-        new Point(1, 1),
-        new Color(255, 255, 255)
-    );
+	// var dialog = new DialogBoxMorph(window.ide);
+    // var txt = new TextMorph(
+    //     localize(message),
+    //     dialog.fontSize,
+    //     dialog.fontStyle,
+    //     true,
+    //     false,
+    //     'center',
+    //     null,
+    //     null,
+    //     new Point(1, 1),
+    //     new Color(255, 255, 255)
+    // );
 
-    dialog.labelString = title
-    dialog.createLabel();
-    dialog.addBody(txt);
-    dialog.addButton('ok', 'Ok');
-    dialog.addButton('cancel', 'Cancel');
-    dialog.fixLayout();
-    dialog.drawNew();
-    dialog.fixLayout();
-    dialog.popUp(window.world);
+    // dialog.labelString = title
+    // dialog.createLabel();
+    // dialog.addBody(txt);
+    // dialog.addButton('ok', 'Ok');
+    // dialog.addButton('cancel', 'Cancel');
+    // dialog.fixLayout();
+    // dialog.drawNew();
+    // dialog.fixLayout();
+    // dialog.popUp(window.world);
+    new MessageHintDialogMorph(message, title, window.ide).popUp();
 }
 
 SnapDisplay.prototype.createHintButton = function(parent, color, script, callback) {
-	if (parent == null) return;
-	
 	var hintBar;
 	if (parent instanceof SyntaxElementMorph) {
 		var topBlock = parent.topBlock();
@@ -523,20 +510,20 @@ SnapDisplay.prototype.createHintButton = function(parent, color, script, callbac
 		if (hintBar == null) {
 			hintBar = new HintBarMorph(topBlock);
 			topBlock.hintBar = hintBar;
-			this.hintBars.push(hintBar);
 		}
 		hintBar.setRight(topBlock.left() - 5);
 		hintBar.setTop(topBlock.top());
+		this.hintBars.push(hintBar);
 	} else {
 		var scripts = parent;
 		hintBar = scripts.hintBar;
 		if (hintBar == null) {
 			hintBar = new HintBarMorph(scripts);
 			scripts.hintBar = hintBar;
-			this.hintBars.push(hintBar);
 		}
 		hintBar.setLeft(scripts.left() + 10);
 		hintBar.setTop(scripts.top() + 20);
+		this.hintBars.push(hintBar);
 	}
 	
 	var button = new PushButtonMorph(hintBar, callback, new SymbolMorph("speechBubble", 14));
@@ -643,6 +630,12 @@ BlockHighlightMorph.prototype.topMorphAt = function(point) {
 // 	}
 // }
 
+function HintButtonMorph() {
+	this.idealY = 0;
+}
+
+HintButtonMorph.prototype = Object.create(PushButtonMorph.prototype);
+
 function HintBarMorph(parent) {
 	this.init(parent);
 }
@@ -672,7 +665,7 @@ HintBarMorph.prototype.addButton = function(button, parent, script) {
 	this.add(button);
 	
 	if (!(parent instanceof SyntaxElementMorph)) {
-		// button.idealY = this.children.length * 20;
+		button.ideaY = this.children.length * 20;
 		this.layout();
 		return;
 	}

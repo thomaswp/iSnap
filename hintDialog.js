@@ -27,6 +27,7 @@ HintDialogBoxMorph.prototype.destroy = function() {
 	HintDialogBoxMorph.showing = null;
 }
 
+// Initialize Hint Dialogue Box
 HintDialogBoxMorph.prototype.init = function(target) {
 	var scripts,  
 		scriptsFrame;
@@ -46,7 +47,7 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	
 	// override inherited properties
 	this.key = 'hintDialog';
-	this.labelString = 'Suggestion';
+	this.labelString = 'Hint';
 	this.createLabel();
 	
 	// create labels for scripts frame
@@ -79,13 +80,18 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	this.addScriptsFrame(scriptsFrame);
 	this.addScriptsFrame(scriptsFrame.fullCopy());
 	
-	// add accept and decline button
-	this.addButton('rate','Done');
-	this.addButton('otherHints','Other Suggestions...');
+    // add buttons to the dialogue
+	this.initButtons();
 	
 	// set layout
 	this.fixLayout();
 	Trace.log("HintDialogBox.init");
+}
+
+HintDialogBoxMorph.prototype.initButtons = function() {
+    // add accept and decline button
+	this.addButton('rate','Done');
+	this.addButton('otherHints','Other Hints...');
 }
 
 // interface for showing hint for a single block
@@ -399,7 +405,7 @@ HintDialogBoxMorph.prototype.popUp = function () {
     var minWidth = 0,
 		minHeight = 0,
 		world = this.target.world();
-	
+    
 	// The minimum width and minimum height when adjusting dialogue scale
 	minWidth = this.width();
 	minHeight = this.height();
@@ -564,7 +570,7 @@ IntentionDialogMorph.prototype.init = function (target) {
 	this.addBody(txt);
 	
 	// add accept and decline button
-	this.addButton('showHintBubbles','Show Suggestions');
+	this.addButton('showHintBubbles','Show Available Hints');
 	this.addButton('cancel','Cancel');
 	
 	// set layout
@@ -609,7 +615,6 @@ IntentionDialogMorph.prototype.createLabels = function() {
 IntentionDialogMorph.prototype.showHintBubbles = function() {
 	Trace.log("IntentionDialog.showAvailableHintsClicked",this.body.contents().text.text);
 	
-	window.hintProvider.clearDisplays();
 	window.hintProvider.setDisplayEnabled(SnapDisplay, true);
 	
 	this.close();
@@ -690,6 +695,102 @@ IntentionDialogMorph.prototype.fixLayout = function() {
 	}
 }
 
+
+// MessageHintDialogMorph ////////////////////////////////////////
+
+// MessageHintDialogMorph inherits from DialogBoxMorph
+
+MessageHintDialogMorph.prototype = new DialogBoxMorph();
+MessageHintDialogMorph.prototype.constructor = MessageHintDialogMorph;
+MessageHintDialogMorph.uber = DialogBoxMorph.prototype;
+
+// Keep track of the currently showing dialogue box
+MessageHintDialogMorph.showing = null;
+
+function MessageHintDialogMorph(message, title, target) {
+	this.init(message, title, target);
+}
+
+// initialize Message Hint Dialogue box
+MessageHintDialogMorph.prototype.init = function(message, title, target) {
+    var txt;
+    
+    // Set currently showing dialogue to this;
+    MessageHintDialogMorph.showing = this;
+    
+    this.handle = null;
+    
+    MessageHintDialogMorph.uber.init.call(
+        this,
+        target,
+        null,
+        target
+    );
+    
+    this.key = 'messageHintDialog';
+    this.labelString = title;
+    this.createLabel();
+    
+    txt = new TextMorph(
+        localize(message),
+        this.fontSize,
+        this.fontStyle,
+        true,
+        false,
+        'center',
+        null,
+        null,
+        new Point(1, 1),
+        new Color(255, 255, 255)
+    );
+    
+    this.addBody(txt);
+    
+    this.initButtons();
+    
+    this.fixLayout();
+    Trace.log("MessageHintDialog.init");
+}
+
+MessageHintDialogMorph.prototype.initButtons = function() {
+    HintDialogBoxMorph.prototype.initButtons.call(this);
+}
+
+MessageHintDialogMorph.prototype.rate = function() {
+    HintDialogBoxMorph.prototype.rate.call(this);
+}
+
+MessageHintDialogMorph.prototype.otherHints = function() {
+    HintDialogBoxMorph.prototype.otherHints.call(this);
+}
+
+MessageHintDialogMorph.prototype.popUp = function() {
+    this.fixLayout();
+    this.drawNew();
+    this.fixLayout();
+    HintDialogBoxMorph.prototype.popUp.call(this);
+}
+
+MessageHintDialogMorph.prototype.fixLayout = function() {
+    DialogBoxMorph.prototype.fixLayout.call(this);
+}
+
+MessageHintDialogMorph.prototype.close = function() {
+    this.destroy();
+}
+
+MessageHintDialogMorph.prototype.destroy = function() {
+    MessageHintDialogMorph.uber.destroy.apply(this, arguments);
+    if (MessageHintDialogMorph.showing != this)
+        return;
+    MessageHintDialogMorph.showing = null;
+}
+
+
+
+/********************************
+ * Hint Button
+ ********************************/
 // Hint Button Action
 IDE_Morph.prototype.getHint = function() {
 	if (IntentionDialogMorph.showing) {
@@ -697,3 +798,5 @@ IDE_Morph.prototype.getHint = function() {
 	}
 	new IntentionDialogMorph(this).popUp();
 }
+
+

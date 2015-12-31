@@ -47,7 +47,7 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	
 	// override inherited properties
 	this.key = 'hintDialog';
-	this.labelString = 'Hint';
+	this.labelString = 'Suggestion';
 	this.createLabel();
 	
 	// create labels for scripts frame
@@ -90,8 +90,8 @@ HintDialogBoxMorph.prototype.init = function(target) {
 
 HintDialogBoxMorph.prototype.initButtons = function() {
     // add accept and decline button
-	this.addButton('good','Helpful!');
-	this.addButton('otherHints','Another...');
+	this.addButton('good','Done');
+	this.addButton('otherHints','Other Suggestions...');
     this.addButton('cancel','Cancel');
 }
 
@@ -583,7 +583,7 @@ IntentionDialogMorph.prototype.init = function (target) {
     this.addOptions();
 	
 	// add accept and decline button
-	this.addButton('showHintBubbles','Show Available Hints');
+	this.addButton('showHintBubbles','Show Suggestions');
 	this.addButton('cancel','Cancel');
 	
 	// set layout
@@ -685,6 +685,7 @@ IntentionDialogMorph.prototype.showHintBubbles = function() {
         return;
     }
     
+    window.hintProvider.clearDisplays();
 	window.hintProvider.setDisplayEnabled(SnapDisplay, true);
 	
 	this.close();

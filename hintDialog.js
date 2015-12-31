@@ -593,29 +593,33 @@ IntentionDialogMorph.prototype.init = function (target) {
 }
 
 IntentionDialogMorph.prototype.addOptions = function() {
-    this.addOption("Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 ");
-    this.addOption("Option 2");
-    this.addOption("Option 3");
-    this.addOption("Option 4");
+    this.addOption("I'm not sure. Just show some suggestions.");
+    this.addOption("I don't know what to do next.");
+    this.addOption("Something is wrong with my program.");
+    this.addOption("I don't know how to make Snap do what I want.");
+    this.addOption("Other...");
 }
 
 IntentionDialogMorph.prototype.addOption = function(text) {
     var option, myself = this;
     
+    var selected = this.body.children.length == 0;
     option = new ToggleMorph(
         'radiobutton',
         null,
-        function () {
-            myself.clearOptions();
-            if (!this.state) {
-                this.state = true;
-            }
-        },
+        null,
         localize(text),
         function () {
-            return this.state;
+            return selected;
         }
     );
+    option.query = function() {
+        return option.selected;
+    }
+    option.action = function () {
+        myself.selectOption(option);
+    };
+    option.selected = selected;
     
     option.drawNew();
     option.fixLayout();
@@ -623,11 +627,11 @@ IntentionDialogMorph.prototype.addOption = function(text) {
     this.body.add(option);
 }
 
-IntentionDialogMorph.prototype.clearOptions = function() {
+IntentionDialogMorph.prototype.selectOption = function(selected) {
     if (this.body) {
         this.body.children.forEach(function (child) {
-            child.state = false; 
-            child.tick.drawNew();
+            child.selected = (child == selected);
+            child.refresh();
         });
     }
 }
@@ -671,19 +675,13 @@ IntentionDialogMorph.prototype.createLabels = function() {
 
 // define function when Show Available Hints button is clicked
 IntentionDialogMorph.prototype.showHintBubbles = function() {
-    var flag = false;
-    
+    var option = null;
     this.body.children.forEach(function(child) {
-       if (child.state) {
-           Trace.log("IntentionDialog.showAvailableHintClicked", child.captionString);
-           flag = true;
+       if (child.selected) {
+           option = child.captionString;
        } 
     });
-	
-    if (!flag) {
-        window.alert("You need to select one option.");
-        return;
-    }
+    Trace.log("IntentionDialog.showAvailableHintClicked", option);
     
     window.hintProvider.clearDisplays();
 	window.hintProvider.setDisplayEnabled(SnapDisplay, true);

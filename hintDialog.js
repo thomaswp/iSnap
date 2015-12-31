@@ -547,7 +547,7 @@ IntentionDialogMorph.prototype.destroy = function() {
 
 IntentionDialogMorph.prototype.init = function (target) {
 	// declare local variables
-	var txt;
+	var options;
 	
 	IntentionDialogMorph.showing = this;
 	
@@ -569,14 +569,18 @@ IntentionDialogMorph.prototype.init = function (target) {
 	this.createLabel();
 	
 	// add text field to body of dialog box
-	txt = new InputFieldMorph(
-            '',
-            false, // numeric?
-            null, // drop-down dict, optional
-            false
-        );
-    txt.setWidth(250);
-	this.addBody(txt);
+	// txt = new InputFieldMorph(
+    //         '',
+    //         false, // numeric?
+    //         null, // drop-down dict, optional
+    //         false
+    //     );
+    // txt.setWidth(250);
+    options = new AlignmentMorph('col',this.padding);  
+    options.alignment = 'left';
+	this.addBody(options);
+    
+    this.addOptions();
 	
 	// add accept and decline button
 	this.addButton('showHintBubbles','Show Available Hints');
@@ -588,14 +592,59 @@ IntentionDialogMorph.prototype.init = function (target) {
 	Trace.log('IntentionDialog.init');
 }
 
+IntentionDialogMorph.prototype.addOptions = function() {
+    this.addOption("Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 Option 1 ");
+    this.addOption("Option 2");
+    this.addOption("Option 3");
+    this.addOption("Option 4");
+}
+
+IntentionDialogMorph.prototype.addOption = function(text) {
+    var option, myself = this;
+    
+    option = new ToggleMorph(
+        'radiobutton',
+        null,
+        function () {
+            myself.clearOptions();
+            if (!this.state) {
+                this.state = true;
+            }
+        },
+        localize(text),
+        function () {
+            return this.state;
+        }
+    );
+    
+    option.drawNew();
+    option.fixLayout();
+    
+    this.body.add(option);
+}
+
+IntentionDialogMorph.prototype.clearOptions = function() {
+    if (this.body) {
+        this.body.children.forEach(function (child) {
+            child.state = false; 
+            child.tick.drawNew();
+        });
+    }
+}
+
 IntentionDialogMorph.prototype.fixExtent = function() {
 	var minWidth = 0,
 		minHeight = 0,
 		th = fontHeight(this.titleFontSize) + this.titlePadding * 2;
 	
+    this.buttons.fixLayout();
+    this.buttons.fixLayout();
+    this.body.fixLayout();
+    this.body.fixLayout();
+    
 	minHeight = th + this.body.height() + 3*this.padding + this.buttons.height() + this.labels.height();
 	minWidth = Math.max(minWidth,this.body.width(),this.buttons.width())+2*this.padding;
-	
+    
 	this.setExtent(new Point(minWidth,minHeight));
 }
 
@@ -622,8 +671,20 @@ IntentionDialogMorph.prototype.createLabels = function() {
 
 // define function when Show Available Hints button is clicked
 IntentionDialogMorph.prototype.showHintBubbles = function() {
-	Trace.log("IntentionDialog.showAvailableHintsClicked",this.body.contents().text.text);
+    var flag = false;
+    
+    this.body.children.forEach(function(child) {
+       if (child.state) {
+           Trace.log("IntentionDialog.showAvailableHintClicked", child.captionString);
+           flag = true;
+       } 
+    });
 	
+    if (!flag) {
+        window.alert("You need to select one option.");
+        return;
+    }
+    
 	window.hintProvider.setDisplayEnabled(SnapDisplay, true);
 	
 	this.close();
@@ -652,7 +713,7 @@ IntentionDialogMorph.prototype.popUp = function() {
 	
 	minHeight = th + this.body.height() + 3*this.padding + this.buttons.height() + this.labels.height();
 	minWidth = Math.max(minWidth,this.body.width(),this.buttons.width())+2*this.padding;
-	
+    
 	if (world) {
         HintDialogBoxMorph.uber.popUp.call(this, world);
         this.handle = new HandleMorph(
@@ -683,7 +744,7 @@ IntentionDialogMorph.prototype.fixLayout = function() {
             this.width() - this.padding * 2,
            this.height() - this.padding * 3 - th - this.buttons.height()
         ));
-		this.body.setCenter(this.center());
+		this.body.setLeft(this.left()+this.padding);
 		this.body.setTop(this.top()+this.padding+th+this.labels.height());
 		
     }

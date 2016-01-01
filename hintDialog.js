@@ -300,9 +300,10 @@ HintDialogBoxMorph.prototype.fixExtent = function() {
 			w = Math.max(child.contents.children[0].fullImage().width,w);
 			h = Math.max(child.contents.children[0].fullImage().height,h);
 		}
+
 	});
 	
-	w = Math.max(w,this.buttons.width()) + 2*this.padding; // final width of a single scriptFrame
+	w = w + 2*this.padding; // final width of a single scriptFrame
 	h = h + 2*this.padding; // final height of a single scriptFrame
 	
 	this.body.children.forEach(function(child) {
@@ -393,6 +394,7 @@ HintDialogBoxMorph.prototype.good = function () {
 	//TODO log accept
 
 	this.close();
+    ide.spriteBar.hintButton.show();
 }
 
 // define function when decline button is clicked
@@ -407,6 +409,7 @@ HintDialogBoxMorph.prototype.cancel = function () {
     Trace.log("HintDialogBox.cancelClicked");
     
     this.close();
+    ide.spriteBar.hintButton.show();
 }
 
 // define popUp function
@@ -568,14 +571,6 @@ IntentionDialogMorph.prototype.init = function (target) {
 	this.labelString = 'Help';
 	this.createLabel();
 	
-	// add text field to body of dialog box
-	// txt = new InputFieldMorph(
-    //         '',
-    //         false, // numeric?
-    //         null, // drop-down dict, optional
-    //         false
-    //     );
-    // txt.setWidth(250);
     options = new AlignmentMorph('col',this.padding);  
     options.alignment = 'left';
 	this.addBody(options);
@@ -597,7 +592,7 @@ IntentionDialogMorph.prototype.addOptions = function() {
     this.addOption("I don't know what to do next.");
     this.addOption("Something is wrong with my program.");
     this.addOption("I don't know how to make Snap do what I want.");
-    this.addOption("Other...");
+    this.addOtherOption();
 }
 
 IntentionDialogMorph.prototype.addOption = function(text) {
@@ -627,11 +622,68 @@ IntentionDialogMorph.prototype.addOption = function(text) {
     this.body.add(option);
 }
 
+
+IntentionDialogMorph.prototype.addOtherOption = function() {
+    var alignment,
+        option, 
+        txt,
+        myself = this,
+        selected = this.body.children.length == 0;
+    
+    // alignment = new AlignmentMorph('row',this.padding);
+    
+    option = new ToggleMorph(
+        'radiobutton',
+        null,
+        null,
+        localize('Other'),
+        function () {
+            return selected;
+        }
+    );
+    option.query = function() {
+        return option.selected;
+    }
+    option.action = function () {
+        myself.selectOption(option);
+    };
+    option.selected = selected;
+    
+    option.drawNew();
+    option.fixLayout();
+    
+    this.body.add(option);
+    this.body.fixLayout();
+    
+	txt = new InputFieldMorph(
+            '',
+            false, // numeric?
+            null, // drop-down dict, optional
+            false
+        );
+    txt.setWidth(200);
+
+    this.textBox = txt;
+    this.add(txt);
+    // alignment.add(option);
+    // alignment.add(txt);
+    // alignment.fixLayout();
+    
+    // this.body.add(alignment);
+}
+
+
 IntentionDialogMorph.prototype.selectOption = function(selected) {
     if (this.body) {
         this.body.children.forEach(function (child) {
-            child.selected = (child == selected);
-            child.refresh();
+            if (child instanceof ToggleMorph) {
+                child.selected = (child == selected);
+                child.refresh();
+            } else {
+                child.children[0].selected = (child.children[0] == selected);
+                child.children[0].refresh();
+            }
+            
         });
     }
 }
@@ -647,7 +699,7 @@ IntentionDialogMorph.prototype.fixExtent = function() {
     this.body.fixLayout();
     
 	minHeight = th + this.body.height() + 3*this.padding + this.buttons.height() + this.labels.height();
-	minWidth = Math.max(minWidth,this.body.width(),this.buttons.width())+2*this.padding;
+	minWidth = Math.max(minWidth,this.body.width(),this.buttons.width(),this.body.children[this.body.children.length-1].width()+3*this.padding+this.textBox.width())+2*this.padding;
     
 	this.setExtent(new Point(minWidth,minHeight));
 }
@@ -675,11 +727,16 @@ IntentionDialogMorph.prototype.createLabels = function() {
 
 // define function when Show Available Hints button is clicked
 IntentionDialogMorph.prototype.showHintBubbles = function() {
-    var option = null;
+    var option = null,myself = this;
     this.body.children.forEach(function(child) {
-       if (child.selected) {
-           option = child.captionString;
-       } 
+        if (child.captionString !== 'Other') {
+            if (child.selected) {
+                option = child.captionString;
+            } 
+        } else {
+            option = myself.textBox.getValue();
+        }
+        
     });
     Trace.log("IntentionDialog.showAvailableHintClicked", option);
     
@@ -696,6 +753,7 @@ IntentionDialogMorph.prototype.cancel = function() {
 	//TODO: 
 	
 	this.close();
+    ide.spriteBar.hintButton.show();
 }
 
 IntentionDialogMorph.prototype.close = function() {
@@ -711,7 +769,7 @@ IntentionDialogMorph.prototype.popUp = function() {
 		world = this.target.world();
 	
 	minHeight = th + this.body.height() + 3*this.padding + this.buttons.height() + this.labels.height();
-	minWidth = Math.max(minWidth,this.body.width(),this.buttons.width())+2*this.padding;
+	minWidth = Math.max(minWidth,this.body.width(),this.buttons.width(),this.body.children[this.body.children.length-1].width()+3*this.padding+this.textBox.width())+2*this.padding;
     
 	if (world) {
         HintDialogBoxMorph.uber.popUp.call(this, world);
@@ -762,6 +820,11 @@ IntentionDialogMorph.prototype.fixLayout = function() {
 		this.labels.setTop(this.body.top() - this.labels.height()-4);
 		this.labels.setLeft(this.body.left());
 	}
+    
+    if (this.textBox) {
+        this.textBox.setLeft(this.body.children[this.body.children.length-1].right()+3*this.padding);
+        this.textBox.setTop(this.body.children[this.body.children.length-1].top());
+    }
 }
 
 
@@ -913,6 +976,7 @@ IDE_Morph.prototype.getHint = function() {
 		return;
 	}
 	new IntentionDialogMorph(this).popUp();
+    ide.spriteBar.hintButton.hide();
 }
 
 

@@ -255,9 +255,14 @@ body{
    width: 100%;
 }
 
-#Congratulations{
+#Congratulations {
    color: rgb(150,174,58);
    display: none;
+   font-size: 14px;
+}
+
+#Congratulations a {
+    color: inherit;
 }
 
 /* start of modal dialog box styling ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/

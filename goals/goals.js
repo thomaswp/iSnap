@@ -48,7 +48,7 @@ function GoalBar(assignment) {
       var chooseButtons = document.querySelectorAll(".switchButtons");
       /* the congratulations text */
       var congratulations = document.getElementById("Congratulations");
-      congratulations.innerHTML = "Congratulations, you have completed " + assignment.name + ".";
+      congratulations.innerHTML = "Objectives complete! When you're finished, export your project. Click <a href='logging/assignment.html' target='_blank'>here</a> to select a new assignment.";
       /* all the buttons including objectives, finished objective, and choose different objective buttons*/
       var theButtons = document.querySelector(".theButtons");
       /* array of objective buttons*/

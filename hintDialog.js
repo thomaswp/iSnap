@@ -92,7 +92,7 @@ HintDialogBoxMorph.prototype.initButtons = function() {
     // add accept and decline button
 	this.addButton('good','Done');
 	this.addButton('otherHints','Other Suggestions...');
-    this.addButton('cancel','Cancel');
+    // this.addButton('cancel','Cancel'); // How is this different than good?
 }
 
 // interface for showing hint for a single block
@@ -620,56 +620,37 @@ IntentionDialogMorph.prototype.addOption = function(text) {
     option.fixLayout();
     
     this.body.add(option);
+    
+    return option;
 }
 
 
 IntentionDialogMorph.prototype.addOtherOption = function() {
-    var alignment,
-        option, 
-        txt,
-        myself = this,
-        selected = this.body.children.length == 0;
+    var option = this.addOption("Other...");
+    var myself = this;
     
-    // alignment = new AlignmentMorph('row',this.padding);
-    
-    option = new ToggleMorph(
-        'radiobutton',
-        null,
-        null,
-        localize('Other'),
-        function () {
-            return selected;
-        }
-    );
-    option.query = function() {
-        return option.selected;
-    }
-    option.action = function () {
-        myself.selectOption(option);
-    };
-    option.selected = selected;
-    
-    option.drawNew();
-    option.fixLayout();
-    
-    this.body.add(option);
-    this.body.fixLayout();
-    
-	txt = new InputFieldMorph(
+	var txt = new InputFieldMorph(
             '',
             false, // numeric?
             null, // drop-down dict, optional
             false
         );
     txt.setWidth(200);
+    
+    var text = txt.children[0];
+    setTimeout(function() {
+        if (window.world.cursor) {
+            window.world.cursor.destroy();
+        }
+    }, 1);
+    var oldClick = text.mouseClickLeft;
+    text.mouseClickLeft = function(pos) {
+        oldClick.call(text, pos);
+        myself.selectOption(option);
+    }
 
     this.textBox = txt;
     this.add(txt);
-    // alignment.add(option);
-    // alignment.add(txt);
-    // alignment.fixLayout();
-    
-    // this.body.add(alignment);
 }
 
 
@@ -727,18 +708,17 @@ IntentionDialogMorph.prototype.createLabels = function() {
 
 // define function when Show Available Hints button is clicked
 IntentionDialogMorph.prototype.showHintBubbles = function() {
-    var option = null,myself = this;
+    var option = null, otherText = null, myself = this;
     this.body.children.forEach(function(child) {
-        if (child.captionString !== 'Other') {
-            if (child.selected) {
-                option = child.captionString;
-            } 
-        } else {
-            option = myself.textBox.getValue();
+        if (child.selected) {
+            option = child.captionString;
         }
-        
     });
-    Trace.log("IntentionDialog.showAvailableHintClicked", option);
+    otherText = myself.textBox.getValue();
+    Trace.log("IntentionDialog.showAvailableHintClicked", {
+        "option": option,
+        "otherText": otherText,
+    });
     
     window.hintProvider.clearDisplays();
 	window.hintProvider.setDisplayEnabled(SnapDisplay, true);

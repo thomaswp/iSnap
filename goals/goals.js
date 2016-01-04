@@ -103,7 +103,7 @@ function GoalBar(assignment) {
                         }
                   }
                   /** if objective has not been completed and prerequisites have been met, then show the objective and increase count*/
-                  buttonsHide[count].style.display = "initial";
+                  buttonsHide[count].style.display = "";
                   objectiveButtons[count++].value = objective.title;
             }
       
@@ -148,7 +148,7 @@ function GoalBar(assignment) {
                   for (var i = 0; i < 5; i++) {
                         buttonsHide[i].style.display = "none";
                   }
-                  buttonsHide[5].style.display = "initial";
+                  buttonsHide[5].style.display = "";
             }
       }      
    
@@ -242,7 +242,7 @@ function GoalBar(assignment) {
                               buttonsHide[i].style.display = "none";
                         }    
                         /* unhide the button that was selected */
-                        parentEl.style.display = "initial";
+                        parentEl.style.display = "";
                         for (var q = 0; q < objectiveButtons2.length; q++) {
                               objectiveButtons2[q].className = "aButtonAlternative";
                         }
@@ -250,8 +250,8 @@ function GoalBar(assignment) {
                               objectiveButtons3[y].className = "widthAdjust";
                         }
                         /* unhide the choose different objective and finished objective buttons*/
-                        chooseButtons[0].style.display = "initial";
-                        chooseButtons[1].style.display = "initial";
+                        chooseButtons[0].style.display = "";
+                        chooseButtons[1].style.display = "";
                         /* do not need to iterate through the rest of the array */
                         break;
                   }

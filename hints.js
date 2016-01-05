@@ -262,7 +262,6 @@ DebugDisplay.prototype.createDiff = function(from, to) {
 }
 
 function SnapDisplay() {
-	this.buttons = [];
 	this.hintBars = [];
 }
 
@@ -667,6 +666,18 @@ HintBarMorph.prototype.destroy = function() {
 	if (this.highlightBlock) {
 		this.highlightBlock.removeHighlight();
 	}
+}
+
+HintBarMorph.prototype.copy = function() {
+    var copy = HintBarMorph.uber.copy.call(this);
+    if (window.hintProvider) {
+        window.hintProvider.displays.forEach(function(display) {
+          if (display instanceof SnapDisplay) {
+              display.hintBars.push(copy);
+          }  
+        });
+    }
+    return copy;
 }
 
 HintBarMorph.prototype.addButton = function(button, parent, script) {

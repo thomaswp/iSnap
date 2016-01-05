@@ -3237,9 +3237,14 @@ BlockMorph.prototype.setCategory = function (aString) {
 
 // BlockMorph copying
 
+BlockMorph.prototype.copy = function() {
+    var copy = BlockMorph.uber.copy.call(this);
+    copy.id = BlockMorph.nextId++;
+    return copy;
+};
+
 BlockMorph.prototype.fullCopy = function () {
     var ans = BlockMorph.uber.fullCopy.call(this);
-    ans.id = BlockMorph.nextId++;
     ans.removeHighlight();
     ans.isDraggable = true;
     if (this.instantiationSpec) {

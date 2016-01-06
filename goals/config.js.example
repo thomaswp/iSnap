@@ -24,7 +24,7 @@ function addObjectives(assignmentID, objectives) {
     var end = new AssignmentObjective("End", "Create the end of your story.", [middle]);
 	var newBlock = new AssignmentObjective("New Block", "Make sure to use at least one new block you didn't use in the lab.", [beginning]);
     var twoSprites = new AssignmentObjective("Two Sprites", "Make sure to have at least two unique and different sprites that interact with each other.", [beginning]);
-    var broadcasts = new AssignmentObjective("Ten Broadcasts", "Make sure to have at least 10 broadcasts of messags betwen the sprites.", [twoSprites]);
+    var broadcasts = new AssignmentObjective("Ten Broadcasts", "Make sure to have at least 10 broadcasts of messages between the sprites.", [twoSprites]);
 
 	var objectives = [beginning, middle, end, newBlock, twoSprites, broadcasts];
 	

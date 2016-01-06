@@ -32,7 +32,7 @@ function addObjectives(assignmentID, objectives) {
 })();
 
 (function() {
-	var createBlock = new AssignmentObjective("Deinfe Block", "Define a custom polygon drawing block with three parameters: size, number of sizes and pen thickness.", []);
+	var createBlock = new AssignmentObjective("Deinfe Block", "Define a custom polygon drawing block with three parameters: side length, number of sides and pen thickness.", []);
 	var implementBlock = new AssignmentObjective("Implement Block", "Add code to your block to make it draw the polygon.", [createBlock]);
 	var squareTest = new AssignmentObjective("Square Test", "Test your block by drawing a polygon with 4 sides, 100 length and 5 thickness.", [implementBlock]);
 	var decagonTest = new AssignmentObjective("Decagon Test", "Test your block by drawing a polygon with 10 sides, 50 length and 6 thickness.", [implementBlock]);
@@ -46,7 +46,7 @@ function addObjectives(assignmentID, objectives) {
 
 
 (function() {
-	var createBlock = new AssignmentObjective("Denife Block", "Define a custom \"squiral\" block with a parameter for the number of rotations.", []);
+	var createBlock = new AssignmentObjective("Define Block", "Define a custom \"squiral\" block with a parameter for the number of rotations.", []);
 	var square = new AssignmentObjective("Draw a Square", "Have your squiral block draw a square", [createBlock]);
 	var length = new AssignmentObjective("Longer Sides", "Make each side of your squiral longer than the previous.", [square]);
 	var repeat = new AssignmentObjective("Repeat", "Have the squiral repeat until you have drawn the requested number of rotations.", [square]);

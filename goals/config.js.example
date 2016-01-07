@@ -47,7 +47,7 @@ function addObjectives(assignmentID, objectives) {
 
 (function() {
 	var createBlock = new AssignmentObjective("Define Block", "Define a custom \"squiral\" block with a parameter for the number of rotations.", []);
-	var square = new AssignmentObjective("Draw a Square", "Have your squiral block draw a square", [createBlock]);
+	var square = new AssignmentObjective("Draw a Square", "Have your squiral block draw a square.", [createBlock]);
 	var length = new AssignmentObjective("Longer Sides", "Make each side of your squiral longer than the previous.", [square]);
 	var repeat = new AssignmentObjective("Repeat", "Have the squiral repeat until you have drawn the requested number of rotations.", [square]);
 	
@@ -88,7 +88,7 @@ function addObjectives(assignmentID, objectives) {
 	var pickNumber = new AssignmentObjective("Player Picks a Number", "Ask the player to pick and remember a secret number.", []);
 	var guess = new AssignmentObjective("Guess the Number", "The sprite should guess numbers until they player says it's correct.", [pickNumber,  minMax]);
 	var keepTrack = new AssignmentObjective("Keep Track of Guesses", "Store all guesses made by the sprite in a list. It should reset after the game.", [guess]);
-	var dontRepeat = new AssignmentObjective("Don't Repeat Guesses", "Make sure the sprite never guesss a number it's already guessed.", [keepTrack]);
+	var dontRepeat = new AssignmentObjective("Don't Repeat Guesses", "Make sure the sprite never guesses a number it's already guessed.", [keepTrack]);
 
 	var objectives = [minMax, pickNumber, guess, keepTrack, dontRepeat];
 	

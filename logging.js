@@ -323,11 +323,13 @@ function setupLogging() {
         }, 2000);
     }
     
-    window.onerror = function(msg, url, line) {
+    window.onerror = function(msg, url, line, column, error) {
         Trace.log("Error", {
             "message": msg,
             "url": url,
-            "line": line 
+            "line": line,
+            "column": column,
+            "stack": error ? error.stack : null,
         });
     };
 }

@@ -388,7 +388,7 @@ SnapDisplay.prototype.showHint = function(hint) {
 	f.call(this, root, hint.data.from, hint.data.to);
 }
 
-SnapDisplay.prototype.showStructureHint = function(from, to, scripts, map, postfix) {
+SnapDisplay.prototype.showStructureHint = function(root, from, to, scripts, map, postfix) {
 	var myself = this;
 	if (!postfix) postfix = "";
 	for (var key in map) {
@@ -406,8 +406,26 @@ SnapDisplay.prototype.showStructureHint = function(from, to, scripts, map, postf
 		
 		if (message == null) continue;
 		
+        var rootType = null;
+        var rootID = null;
+        if (root instanceof SpriteMorph) {
+            rootType = "sprite";
+            rootID = root.name;
+        } else if (root instanceof IDE_Morph) {
+            rootType = "snapshot";
+        } else if (root instanceof StageMorph) {
+            rootType = "stage";
+        }
+        
 		(function(message) {	
 			myself.createHintButton(scripts, new Color(163, 73, 164), false, function() {
+                Trace.log("SnapDisplay.showStructureHint", {
+                    "rootType": rootType,
+                    "rootID": rootID,
+                    "message": message,
+                    "from": from,
+                    "to": to
+                });
 				myself.showMessageDialog(message, "Suggestion");
 			});
 		})(message);
@@ -415,7 +433,7 @@ SnapDisplay.prototype.showStructureHint = function(from, to, scripts, map, postf
 }
 
 SnapDisplay.prototype.showSnapshotHint = function(root, from , to) {
-	this.showStructureHint(from, to, window.ide.currentSprite.scripts, {
+	this.showStructureHint(root, from, to, window.ide.currentSprite.scripts, {
 		"var": "global variable",
 		"customBlock": "custom block"
 	});
@@ -426,13 +444,13 @@ SnapDisplay.prototype.showCustomBlockHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.showStageHint = function(root, from , to) {
-	this.showStructureHint(from, to, window.ide.currentSprite.scripts, {
+	this.showStructureHint(root, from, to, window.ide.currentSprite.scripts, {
 		"sprite": "sprite"
 	});
 }
 
 SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
-	this.showStructureHint(from, to, root.scripts, {
+	this.showStructureHint(root, from, to, root.scripts, {
 		"var": "variable",
 		"script": "script",
 		"customBlock": "custom block"
@@ -447,7 +465,7 @@ SnapDisplay.prototype.countWhere = function(array, item) {
 	return count;
 }
 
-SnapDisplay.prototype.showScriptHint = function(root, from , to) {
+SnapDisplay.prototype.showScriptHint = function(root, from, to) {
 	var block = root.parent;
 	if (block.enclosingBlock) block = block.enclosingBlock();
 	else block = null;
@@ -459,7 +477,17 @@ SnapDisplay.prototype.showScriptHint = function(root, from , to) {
 	}
 	
 	var showHint = function() {
+        var rootID = root ? root.id : null;
 		var selector = block ? block.selector : null;
+        var blockID = block ? block.id : null;
+        Trace.log("SnapDisplay.showScriptHint", {
+            "rootID": rootID,
+            "parentSelector": selector,
+            "parentID": blockID,
+            "index": index,
+            "from": from,
+            "to": to
+        });
 		new HintDialogBoxMorph(window.ide).showScriptHint(selector, index, from, to);
 	};
 	
@@ -470,44 +498,24 @@ SnapDisplay.prototype.showScriptHint = function(root, from , to) {
 	this.createHintButton(root, new Color(255, 127, 29), true, showHint);
 }
 
-SnapDisplay.prototype.showBlockHint = function(root, from , to) {
+SnapDisplay.prototype.showBlockHint = function(root, from, to) {
 	var block = root.enclosingBlock();
 	var showHint = function() {
 		var selector = block ? block.selector : null;
+        var blockID = block ? block.id : null;
+        Trace.log("SnapDisplay.showBlockHint", {
+            "parentSelector": selector,
+            "parentID": blockID,
+            "from": from,
+            "to": to
+        });
 		new HintDialogBoxMorph(window.ide).showBlockHint(selector, from, to);
 	};
-	
-	// root.blockHintCallback = function() {
-	// 	showHint();
-	// }
 	
 	this.createHintButton(root, new Color(34, 174, 76), false, showHint);
 }
 
 SnapDisplay.prototype.showMessageDialog = function(message, title) {
-	// var dialog = new DialogBoxMorph(window.ide);
-    // var txt = new TextMorph(
-    //     localize(message),
-    //     dialog.fontSize,
-    //     dialog.fontStyle,
-    //     true,
-    //     false,
-    //     'center',
-    //     null,
-    //     null,
-    //     new Point(1, 1),
-    //     new Color(255, 255, 255)
-    // );
-
-    // dialog.labelString = title
-    // dialog.createLabel();
-    // dialog.addBody(txt);
-    // dialog.addButton('ok', 'Ok');
-    // dialog.addButton('cancel', 'Cancel');
-    // dialog.fixLayout();
-    // dialog.drawNew();
-    // dialog.fixLayout();
-    // dialog.popUp(window.world);
     new MessageHintDialogMorph(message, title, window.ide).popUp();
 }
 

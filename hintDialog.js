@@ -142,11 +142,6 @@ HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, from, to)
 	this.adjustScroll(); // adjust v and h scroll bars to original position and hide them
 	
 	this.popUp();
-	Trace.log("HintDialogBox.showBlockHint", {
-		"parentSelector": parentSelector,
-		"from": from,
-		"to": to
-	});
 }
 
 HintDialogBoxMorph.prototype.createBlockWithParams = function(selector, params) {
@@ -250,13 +245,6 @@ HintDialogBoxMorph.prototype.showScriptHint = function (parentSelector, index, f
 	this.adjustScroll(); // adjust v and h scroll bars to original position and hide them
 	
 	this.popUp();
-	
-	Trace.log("HintDialogBox.showScriptHint",{
-		"parentSelector": parentSelector,
-		"index": index,
-		"from": from,
-		"to": to
-	});
 }
 
 // add scriptsFrame to AlignmentMorph in body

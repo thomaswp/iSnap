@@ -300,7 +300,9 @@ HintDialogBoxMorph.prototype.fixExtent = function() {
 	
 	// decide the extent of HintDialogBox based on body orientation
 	if (this.body.orientation === 'row') {
-		this.setExtent(new Point(2*w+3*this.padding,th+this.buttons.height()+h+3*this.padding+this.labels[0].height()));
+        this.buttons.fixLayout();
+        w = Math.max(2*w + this.padding, this.buttons.width(), this.label.width(),this.labels[0].width()+this.labels[1].width()+ 5*this.padding);
+		this.setExtent(new Point(w+2*this.padding,th+this.buttons.height()+h+3*this.padding+this.labels[0].height()));
 	} else {
 		this.buttons.fixLayout(); //fix button layout before calculating width
 		w = Math.max(w,this.label.width(),this.buttons.width());

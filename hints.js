@@ -138,24 +138,26 @@ HintProvider.prototype.getHintsFromServer = function() {
 }
 
 HintProvider.prototype.processHints = function(json) {
-	//try {
-	var hints = JSON.parse(json);
-    Trace.log("HintProvider.processHints", hints);
-	for (var i = 0; i < hints.length; i++) {
-		var hint = hints[i];
-		// console.log(hint.from);
-		// console.log(this.getCode(hint.data));
-		this.displays.forEach(function(display) {
-			if (display.enabled) {
-				display.showHint(hint);
-			}
-		});
+	try {
+        var hints = JSON.parse(json);
+        Trace.log("HintProvider.processHints", hints);
+        for (var i = 0; i < hints.length; i++) {
+            var hint = hints[i];
+            this.displays.forEach(function(display) {
+                if (display.enabled) {
+                    try {
+                        display.showHint(hint);
+                    } catch (e2) {
+                        Trace.logError(e2);
+                    }
+                }
+            });
+        }
+        this.lastHints = hints;
+	} catch (e) {
+	   Trace.logError(e);
+       return;
 	}
-	this.lastHints = hints;
-	//} catch (e) {
-	//  display.showError("Error parsing hint!");
-	//	display.showError(e);
-	//}
 }
 
 HintProvider.prototype.saveCode = function() {

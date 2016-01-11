@@ -142,6 +142,17 @@ Logger.prototype.log = function(message, data, saveImmediately) {
     this.queue.push(log);
 }
 
+Logger.prototype.logError = function(error) {
+    if (!error) return;
+    this.log("Error", {
+        "message": error.message,
+        "url": error.fileName,
+        "line": error.lineNumber,
+        "column": error.columnNumber,
+        "stack": error.stack,
+    });
+}
+
 Logger.prototype.addCode = function(log) {
     if (typeof(ide) == 'undefined' || !ide.stage) return;
     log.projectID = ide.stage.guid;

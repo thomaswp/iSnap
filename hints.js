@@ -96,6 +96,10 @@ HintProvider.prototype.clearDisplays = function() {
 HintProvider.prototype.getHintsFromServer = function() {
 	if (!this.code) return;
 	
+    if (!this.displays.some(function(display) {
+        return display.enabled;
+    })) return;
+    
 	var myself = this;
 	
 	if (this.lastXHR) {
@@ -136,6 +140,7 @@ HintProvider.prototype.getHintsFromServer = function() {
 HintProvider.prototype.processHints = function(json) {
 	//try {
 	var hints = JSON.parse(json);
+    Trace.log("HintProvider.processHints", hints);
 	for (var i = 0; i < hints.length; i++) {
 		var hint = hints[i];
 		// console.log(hint.from);
@@ -176,19 +181,15 @@ HintProvider.prototype.loadCode = function() {
 }
 
 HintProvider.prototype.setDisplayEnabled = function(displayType, enabled) {
-	var myself = this;
 	this.displays.forEach(function(display) {
 		if (display instanceof displayType) {
 			display.enabled = enabled;
-			if (enabled) {
-				myself.lastHints.forEach(function(hint) {
-					display.showHint(hint);
-				});
-			}  else {
+			if (!enabled) {
 				display.clear();
 			}
 		}
 	});
+    if (enabled) this.getHintsFromServer();
 }
 
 // HintDisplay: outputs hitns to the console
@@ -307,6 +308,10 @@ SnapDisplay.prototype.initDisplay = function() {
 	}
 	
 	window.ide.fixLayout();
+}
+
+SnapDisplay.prototype.logHints = function() {
+    return this.enabled;
 }
 
 SnapDisplay.prototype.getCode = function(ref) {

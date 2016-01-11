@@ -112,11 +112,7 @@ HintProvider.prototype.getHintsFromServer = function() {
 	
 	var xhr = createCORSRequest('POST', this.url + "?assignmentID=" + window.assignmentID);
 	if (!xhr) {
-		myself.displays.forEach(function(display) {
-			if (display.enabled) {
-				display.showError("CORS not supported on this browser.");
-			}
-		});
+        myself.showError("CORS not supported on this browser.");
 		return;
 	}
 	this.lastXHR = xhr;
@@ -127,14 +123,19 @@ HintProvider.prototype.getHintsFromServer = function() {
 	};
 	
 	xhr.onerror = function(e) {
-		myself.displays.forEach(function(display) {
-			if (display.enabled) {
-				display.showError("Error contacting hint server!");
-			}
-		});
+		myself.showError("Error contacting hint server!");
 	};
 	
 	xhr.send(this.code);
+}
+
+HintProvider.prototype.showError = function(error) {
+    Trace.log("Error", error)
+    this.displays.forEach(function(display) {
+        if (display.enabled) {
+            display.showError(error);
+        }
+    });
 }
 
 HintProvider.prototype.processHints = function(json) {

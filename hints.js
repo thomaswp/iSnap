@@ -233,6 +233,9 @@ DebugDisplay.prototype.initDisplay = function() {
 }
 
 DebugDisplay.prototype.showHint = function(hint) {
+    if (hint.data && hint.data.caution) {
+        this.div.innerHTML += "*";
+    }
 	this.div.innerHTML += this.createDiff(hint.from, hint.to) + "<br />";
 }
 

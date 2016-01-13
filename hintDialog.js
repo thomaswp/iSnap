@@ -85,7 +85,7 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	
 	// set layout
 	this.fixLayout();
-	Trace.log("HintDialogBox.init");
+	// Trace.log("HintDialogBox.init");
 }
 
 HintDialogBoxMorph.prototype.initButtons = function() {
@@ -379,7 +379,7 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 
 // define function when accept button is clicked
 HintDialogBoxMorph.prototype.good = function () {
-	Trace.log("HintDialogBox.goodClicked");
+	Trace.log("HintDialogBox.done");
 	
 	//TODO log accept
 
@@ -428,8 +428,7 @@ HintDialogBoxMorph.prototype.popUp = function () {
 
 // define close function
 HintDialogBoxMorph.prototype.close = function() {
-	Trace.log("HintDialogBox.closed");
-
+	// Trace.log("HintDialogBox.closed");
 	this.destroy();
 }
 
@@ -574,23 +573,22 @@ IntentionDialogMorph.prototype.init = function (target) {
 	// set layout
 	this.fixExtent();
 	this.fixLayout();
-	Trace.log('IntentionDialog.init');
+	// Trace.log('IntentionDialog.init');
 }
 
 IntentionDialogMorph.prototype.addOptions = function() {
-    this.addOption("I'm not sure. Just show some suggestions.");
     this.addOption("I don't know what to do next.");
-    this.addOption("Something is wrong with my program.");
-    this.addOption("I don't know how to make Snap do what I want.");
+    this.addOption("There's an error in my code.");
     this.addOtherOption();
 }
 
 IntentionDialogMorph.prototype.addOption = function(text) {
     var option, myself = this;
     
-    var selected = this.body.children.length == 0;
+    // var selected = this.body.children.length == 0;
+    var selected = false;
     option = new ToggleMorph(
-        'radiobutton',
+        'checkbox',
         null,
         null,
         localize(text),
@@ -648,13 +646,13 @@ IntentionDialogMorph.prototype.selectOption = function(selected) {
     if (this.body) {
         this.body.children.forEach(function (child) {
             if (child instanceof ToggleMorph) {
-                child.selected = (child == selected);
+                // child.selected = (child == selected);
+                if (child == selected) child.selected = !child.selected;
                 child.refresh();
             } else {
                 child.children[0].selected = (child.children[0] == selected);
                 child.children[0].refresh();
             }
-            
         });
     }
 }
@@ -698,15 +696,15 @@ IntentionDialogMorph.prototype.createLabels = function() {
 
 // define function when Show Available Hints button is clicked
 IntentionDialogMorph.prototype.showHintBubbles = function() {
-    var option = null, otherText = null, myself = this;
+    var options = [], otherText = null, myself = this;
     this.body.children.forEach(function(child) {
         if (child.selected) {
-            option = child.captionString;
+            options.push(child.captionString);
         }
     });
     otherText = myself.textBox.getValue();
     Trace.log("IntentionDialog.showAvailableHintClicked", {
-        "option": option,
+        "options": options,
         "otherText": otherText,
     });
     
@@ -719,16 +717,12 @@ IntentionDialogMorph.prototype.showHintBubbles = function() {
 // define function when cancel button is clicked
 IntentionDialogMorph.prototype.cancel = function() {
 	Trace.log("IntentionDialog.cancelClicked");
-	
-	//TODO: 
-	
 	this.close();
     ide.spriteBar.hintButton.show();
 }
 
 IntentionDialogMorph.prototype.close = function() {
-	Trace.log("IntentionDialog.closed");
-
+	// Trace.log("IntentionDialog.closed");
 	this.destroy();
 }
 
@@ -852,7 +846,7 @@ MessageHintDialogMorph.prototype.init = function(message, title, target) {
     
     this.fixExtent();
     this.fixLayout();
-    Trace.log("MessageHintDialog.init");
+    // Trace.log("MessageHintDialog.init");
 }
 
 MessageHintDialogMorph.prototype.initButtons = function() {

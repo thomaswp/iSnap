@@ -233,7 +233,7 @@ DebugDisplay.prototype.initDisplay = function() {
 }
 
 DebugDisplay.prototype.showHint = function(hint) {
-    if (hint.data && hint.data.caution) {
+    if (hint.data.caution) {
         this.div.innerHTML += "*";
     }
 	this.div.innerHTML += this.createDiff(hint.from, hint.to) + "<br />";
@@ -391,6 +391,7 @@ SnapDisplay.prototype.clear = function() {
 
 SnapDisplay.prototype.showHint = function(hint) {
 	// console.log(hint);
+    if (hint.data.caution) return;
 	var root = this.getCode(hint.data.root);
 	if (!root) return;
 	var label = hint.data.root.label;

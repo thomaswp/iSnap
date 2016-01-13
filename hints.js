@@ -142,6 +142,17 @@ HintProvider.prototype.processHints = function(json) {
 	try {
         var hints = JSON.parse(json);
         Trace.log("HintProvider.processHints", hints);
+        if (hints.length == 0) {
+            this.displays.forEach(function(display) {
+                if (display.enabled) {
+                    try {
+                        display.showNoHints();
+                    } catch (e2) {
+                        Trace.logError(e2);
+                    }
+                }
+            });
+        }
         for (var i = 0; i < hints.length; i++) {
             var hint = hints[i];
             this.displays.forEach(function(display) {
@@ -209,6 +220,10 @@ HintDisplay.prototype.showError = function(error) {
 
 HintDisplay.prototype.clear = function() {
 	console.log("-----------------------------------------");
+}
+
+HintDisplay.prototype.showNoHints = function() {
+    
 }
 
 // DebugDisplay: outputs hints to a div
@@ -398,6 +413,14 @@ SnapDisplay.prototype.showHint = function(hint) {
 	var f = this["show" + label.charAt(0).toUpperCase() + label.slice(1) + "Hint"];
 	if (!f) f = this.showBlockHint;
 	f.call(this, root, hint.data.from, hint.data.to);
+}
+
+SnapDisplay.prototype.showNoHints = function() {
+    var myself = this;
+    this.createHintButton(window.ide.currentSprite.scripts, new Color(163, 73, 164), false, function() {
+        Trace.log("SnapDisplay.showNoHints");
+        myself.showMessageDialog("Everything looks good. No suggestions to report.", "No Suggestions");
+    });
 }
 
 SnapDisplay.prototype.showStructureHint = function(root, from, to, scripts, map, postfix) {

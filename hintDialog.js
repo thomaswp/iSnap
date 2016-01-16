@@ -939,8 +939,22 @@ IDE_Morph.prototype.getHint = function() {
 	if (IntentionDialogMorph.showing) {
 		return;
 	}
-	new IntentionDialogMorph(this).popUp();
-    ide.spriteBar.hintButton.hide();
+    
+    var elapseThreshold = 60*1000,
+        currentTime = this.spriteBar.hintButton.lastTime;
+    
+    if (this.spriteBar.hintButton.firstClick) {
+        this.spriteBar.hintButton.firstClick = false;
+        window.hintProvider.clearDisplays();
+	    window.hintProvider.setDisplayEnabled(SnapDisplay, true);
+    } else if (currentTime - this.spriteBar.hintButton.lastClickTime < elapseThreshold) {
+        window.hintProvider.clearDisplays();
+	    window.hintProvider.setDisplayEnabled(SnapDisplay, true);
+    } else {
+        new IntentionDialogMorph(this).popUp();
+    }
+    this.spriteBar.hintButton.lastClickTime = currentTime;
+    this.spriteBar.hintButton.hide();
 }
 
 

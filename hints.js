@@ -299,6 +299,8 @@ SnapDisplay.prototype.initDisplay = function() {
 			'  ' + localize('Help') + '  '
 		);
 		ide.spriteBar.hintButton = hintButton;
+        hintButton.firstClick = true;
+        hintButton.lastClickTime = 0;
 		hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
 		hintButton.corner = DialogBoxMorph.prototype.buttonCorner;
 		hintButton.edge = DialogBoxMorph.prototype.buttonEdge;

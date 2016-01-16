@@ -24,7 +24,7 @@ include '../config.php';
 					die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
 				}
 				
-				$query = "SELECT projectID, assignmentID, min(time) as start, max(time) as end, count(*) as logs FROM `trace` " .
+				$query = "SELECT projectID, assignmentID, min(time) as start, max(time) as end, count(*) as logs FROM `$table` " .
 					"WHERE projectID <> '' GROUP BY concat(projectID,assignmentID) HAVING count(*) > 1 ORDER BY end DESC";
 				$result = $mysqli->query($query); 
 				if (!$result) {

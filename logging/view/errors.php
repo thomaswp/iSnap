@@ -9,7 +9,7 @@ include '../config.php';
 <html>
     <head>
         <meta charset="UTF-8">
-		<title>Recent errors</title>
+		<title>Javascript Errors</title>
 		<link rel="stylesheet" type="text/css" href="table.css">
     </head>
     
@@ -36,6 +36,10 @@ include '../config.php';
                             $value = htmlentities($value);
 							$link = "<td><a target='_blank' href='$link' title='$value'>$value</a></td>";
                             echo $link;
+                        } else if ($key == "projectID") {
+                            $projectID = $row["projectID"];
+                            $assignmentID = $row["assignmentID"];
+                            echo "<td><a target='_blank' href='display.php?id=$projectID&assignment=$assignmentID'>$projectID</a></td>"; 
                         } else {
                             $value = htmlentities($value);
                             echo "<td>$value</td>";

@@ -80,6 +80,9 @@ HintDialogBoxMorph.prototype.init = function(target) {
 	this.addScriptsFrame(scriptsFrame);
 	this.addScriptsFrame(scriptsFrame.fullCopy());
 	
+    // add Thumb Buttons
+    this.createThumbButtons();
+    
     // add buttons to the dialogue
 	this.initButtons();
 	
@@ -94,6 +97,74 @@ HintDialogBoxMorph.prototype.initButtons = function() {
 	this.addButton('otherHints','Other Suggestions...');
     // this.addButton('cancel','Cancel'); // How is this different than good?
 }
+
+HintDialogBoxMorph.prototype.createThumbButtons = function () {
+     var ThumbButtons, txt;
+     
+     ThumbButtons = new AlignmentMorph('row',this.padding);
+     
+     this.add(ThumbButtons);
+     this.thumbButtons = ThumbButtons;
+
+     this.addThumbButton('up');
+     this.addThumbButton('down');
+     
+     txt = new StringMorph(
+            localize("Please rate suggestion"),
+            this.titleFontSize,
+            this.fontStyle,
+            true,
+            false,
+            false,
+            null,
+            this.titleBarColor.darker(this.contrast)
+     );
+     txt.color = new Color(0, 0, 0);
+	 txt.drawNew();
+     ThumbButtons.add(txt);
+     
+     ThumbButtons.fixLayout();
+     ThumbButtons.fixLayout();
+ }
+ 
+ HintDialogBoxMorph.prototype.addThumbButton = function (thumbType) {
+     var selected = false, myself = this;
+     
+     var thumbButton = new ThumbMorph(
+        thumbType,
+        'radiobutton',
+        null,
+        null,
+        null,
+        function () {
+            return selected;
+        }
+     );
+     thumbButton.action = function() {
+        myself.selectThumbButton(thumbButton);
+     }
+     thumbButton.query = function() {
+         return thumbButton.state;
+     }
+     thumbButton.selected = selected;
+          
+     this.thumbButtons.add(thumbButton);
+ }
+ 
+ HintDialogBoxMorph.prototype.selectThumbButton = function (thumbButton) {
+     if (this.thumbButtons) {
+         this.thumbButtons.children.forEach(function (child) {
+            if (child instanceof ThumbMorph) {
+                if (child === thumbButton) {
+                    child.state = true;
+                } else {
+                    child.state = false;
+                }
+                child.refresh();
+            }
+         });
+     }
+ }
 
 // interface for showing hint for a single block
 HintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, from, to) {
@@ -288,7 +359,6 @@ HintDialogBoxMorph.prototype.fixExtent = function() {
 			w = Math.max(child.contents.children[0].fullImage().width,w);
 			h = Math.max(child.contents.children[0].fullImage().height,h);
 		}
-
 	});
 	
 	w = w + 2*this.padding; // final width of a single scriptFrame
@@ -301,12 +371,25 @@ HintDialogBoxMorph.prototype.fixExtent = function() {
 	// decide the extent of HintDialogBox based on body orientation
 	if (this.body.orientation === 'row') {
         this.buttons.fixLayout();
-        w = Math.max(2*w + this.padding, this.buttons.width(), this.label.width(),this.labels[0].width()+this.labels[1].width()+ 5*this.padding);
-		this.setExtent(new Point(w+2*this.padding,th+this.buttons.height()+h+3*this.padding+this.labels[0].height()));
+        
+        w = Math.max(2*w + this.padding, 
+                    this.thumbButtons.width(), 
+                    this.buttons.width(), 
+                    this.label.width(),
+                    this.labels[0].width()+this.labels[1].width()+ 5*this.padding
+        );
+        
+		this.setExtent(new Point(w+2*this.padding,th+this.buttons.height()+h+4*this.padding+this.labels[0].height()+this.thumbButtons.height()));
 	} else {
 		this.buttons.fixLayout(); //fix button layout before calculating width
-		w = Math.max(w,this.label.width(),this.buttons.width());
-		this.setExtent(new Point(w+2*this.padding,th+this.buttons.height()+2*h+4*this.padding+2*this.labels[0].height()));
+        
+		w = Math.max(w,
+                    this.label.width(),
+                    this.buttons.width(),
+                    this.thumbButtons.width()
+        );
+        
+		this.setExtent(new Point(w+2*this.padding,th+this.buttons.height()+2*h+5*this.padding+2*this.labels[0].height()+this.thumbButtons.height()));
 	}
 }
 
@@ -508,6 +591,14 @@ HintDialogBoxMorph.prototype.fixLayout = function() {
 		this.labels[1].setTop(this.body.children[1].top() - this.labels[0].height()-4);
 		this.labels[1].setLeft(this.body.children[1].left());
 	}
+    
+    if (this.thumbButtons) {
+        this.thumbButtons.setCenter(this.center());
+        this.thumbButtons.setBottom(this.bottom() - 2*this.padding - this.buttons.height());
+        console.log(this.thumbButtons.center());
+        console.log(this.center());
+        console.log(this.buttons.width());
+    }
 }
 
 
@@ -829,7 +920,7 @@ MessageHintDialogMorph.prototype.init = function(message, title, target) {
     
     txt = new TextMorph(
         localize(message),
-        this.fontSize,
+        16,
         this.fontStyle,
         true,
         false,
@@ -842,11 +933,25 @@ MessageHintDialogMorph.prototype.init = function(message, title, target) {
     
     this.addBody(txt);
     
+    this.createThumbButtons();
+    
     this.initButtons();
     
     this.fixExtent();
     this.fixLayout();
     // Trace.log("MessageHintDialog.init");
+}
+
+MessageHintDialogMorph.prototype.createThumbButtons = function () {
+    HintDialogBoxMorph.prototype.createThumbButtons.call(this);
+}
+
+MessageHintDialogMorph.prototype.addThumbButton = function (thumbType) {
+    HintDialogBoxMorph.prototype.addThumbButton.call(this, thumbType);
+}
+
+MessageHintDialogMorph.prototype.selectThumbButton = function (thumbButton) {
+    HintDialogBoxMorph.prototype.selectThumbButton.call(this, thumbButton);
 }
 
 MessageHintDialogMorph.prototype.initButtons = function() {
@@ -902,6 +1007,11 @@ MessageHintDialogMorph.prototype.fixLayout = function() {
         this.buttons.setCenter(this.center());
         this.buttons.setBottom(this.bottom() - this.padding);
     }
+    
+    if (this.thumbButtons) {
+        this.thumbButtons.setCenter(this.center());
+        this.thumbButtons.setBottom(this.bottom() - 2*this.padding - this.buttons.height());
+    }
 }
 
 MessageHintDialogMorph.prototype.close = function() {
@@ -923,11 +1033,11 @@ MessageHintDialogMorph.prototype.fixExtent = function() {
     this.buttons.fixLayout();
     this.buttons.fixLayout(); //doesn't know why it needs two times but it works
 
-	w = Math.max(this.body.width(),this.buttons.width())+2*this.padding;
+	w = Math.max(this.body.width(),this.buttons.width(),this.thumbButtons.width())+2*this.padding;
 
 	h = this.body.height(); // final height of a single scriptFrame
 
-	this.setExtent(new Point(w,th+this.buttons.height()+h+3*this.padding));
+	this.setExtent(new Point(w,th+this.buttons.height()+h+4*this.padding+this.thumbButtons.height()));
 
 }
 
@@ -939,8 +1049,394 @@ IDE_Morph.prototype.getHint = function() {
 	if (IntentionDialogMorph.showing) {
 		return;
 	}
-	new IntentionDialogMorph(this).popUp();
-    ide.spriteBar.hintButton.hide();
+    
+    var elapseThreshold = 60*1000,
+        currentTime = this.spriteBar.hintButton.lastTime;
+    
+    if (this.spriteBar.hintButton.firstClick) {
+        this.spriteBar.hintButton.firstClick = false;
+        window.hintProvider.clearDisplays();
+	    window.hintProvider.setDisplayEnabled(SnapDisplay, true);
+    } else if (currentTime - this.spriteBar.hintButton.lastClickTime < elapseThreshold) {
+        window.hintProvider.clearDisplays();
+	    window.hintProvider.setDisplayEnabled(SnapDisplay, true);
+    } else {
+        new IntentionDialogMorph(this).popUp();
+    }
+    this.spriteBar.hintButton.lastClickTime = currentTime;
+    this.spriteBar.hintButton.hide();
 }
 
 
+/*******************************************
+ * ThumbMorph
+ ******************************************/
+
+ThumbMorph.prototype = new PushButtonMorph();
+ThumbMorph.prototype.constructor = ThumbMorph;
+ThumbMorph.uber = PushButtonMorph.prototype;
+
+function ThumbMorph(
+    thumbType, //"up" or "down"
+    style, // 'checkbox' or 'radiobutton'
+    target,
+    action, // a toggle function
+    labelString,
+    query, // predicate/selector
+    environment,
+    hint,
+    template,
+    element, // optional Morph or Canvas to display
+    builder // method which constructs the element (only for Morphs)
+) {
+    this.init(
+        thumbType,
+        style,
+        target,
+        action,
+        labelString,
+        query,
+        environment,
+        hint,
+        template,
+        element,
+        builder
+    );
+}
+
+ThumbMorph.prototype.init = function (
+    thumbType,
+    style,
+    target,
+    action,
+    labelString,
+    query,
+    environment,
+    hint,
+    template,
+    element,
+    builder
+) {
+    this.thumbType = thumbType;
+    this.thumbSize = new Point(35,35);
+    this.padding = 1;
+    style = style || 'checkbox';
+    this.corner = (style === 'checkbox' ?
+            0 : fontHeight(this.fontSize) / 2 + this.outline + this.padding);
+    this.state = false;
+    this.query = query || function () {return true; };
+    this.tick = null;
+    this.captionString = labelString || null;
+    this.labelAlignment = 'right';
+    this.element = element || null;
+    this.builder = builder || null;
+    this.toggleElement = null;
+
+    // initialize inherited properties:
+    ToggleMorph.uber.init.call(
+        this,
+        target,
+        action,
+        (style === 'checkbox' ? '\u2713' : '\u25CF'),
+        environment,
+        hint,
+        template
+    );
+    this.refresh();
+
+    this.drawNew();
+    this.fixLayout();
+    this.drawNew();
+}
+
+ThumbMorph.prototype.fixLayout = function () {
+    var padding = this.padding * 2 + this.outline * 2,
+        y;
+    if (this.tick !== null) {
+        this.setExtent(this.thumbSize);
+        this.tick.setCenter(this.center());
+    }
+    if (this.toggleElement && (this.labelAlignment === 'right')) {
+        y = this.top() + (this.height() - this.toggleElement.height()) / 2;
+        this.toggleElement.setPosition(new Point(
+            this.right() + padding,
+            y
+        ));
+    }
+    if (this.label !== null) {
+        y = this.top() + (this.height() - this.label.height()) / 2;
+        if (this.labelAlignment === 'right') {
+            this.label.setPosition(new Point(
+                this.toggleElement ?
+                        this.toggleElement instanceof ToggleElementMorph ?
+                                this.toggleElement.right()
+                                : this.toggleElement.right() + padding
+                        : this.right() + padding,
+                y
+            ));
+        } else {
+            this.label.setPosition(new Point(
+                this.left() - this.label.width() - padding,
+                y
+            ));
+        }
+    }
+};
+
+ThumbMorph.prototype.createLabel = function () {
+    if (this.label === null) {
+        if (this.captionString) {
+            this.label = new TextMorph(
+                localize(this.captionString),
+                this.fontSize,
+                this.fontStyle,
+                true
+            );
+            this.add(this.label);
+        }
+    }
+    if (this.tick === null) {
+        this.createTick();
+    }
+    if (this.toggleElement === null) {
+        if (this.element) {
+            if (this.element instanceof Morph) {
+                this.toggleElement = new ToggleElementMorph(
+                    this.target,
+                    this.action,
+                    this.element,
+                    this.query,
+                    this.environment,
+                    this.hint,
+                    this.builder
+                );
+            } else if (this.element instanceof HTMLCanvasElement) {
+                this.toggleElement = new Morph();
+                this.toggleElement.silentSetExtent(new Point(
+                    this.element.width,
+                    this.element.height
+                ));
+                this.toggleElement.image = this.element;
+            }
+            this.add(this.toggleElement);
+        }
+    }
+};
+
+ThumbMorph.prototype.createTick = function () {
+    var myself = this;
+    
+    this.tick = new Morph();
+
+    this.tick.setTexture = function (state) {
+        if (myself.thumbType === 'up')
+        {
+            if (state) {
+                this.texture = "thumb_up_selected.png";
+            } else {
+                this.texture = "thumb_up_unselected.png";
+            }
+        } else {
+            if (state) {
+                this.texture = "thumb_down_selected.png";
+            } else {
+                this.texture = "thumb_down_unselected.png";
+            }
+        }
+    }
+
+    this.tick.drawNew = function () {
+        this.image = newCanvas(this.extent());
+        var context = this.image.getContext('2d'),
+            isFlat = MorphicPreferences.isFlat && !this.is3D;
+
+        context.fillStyle = myself.color.toString();
+        context.beginPath();
+        BoxMorph.prototype.outlinePath.call(
+            this,
+            context,
+            isFlat ? 0 : Math.max(this.corner - this.outline, 0),
+            this.outline
+            );
+        context.closePath();
+        context.fill();
+        context.lineWidth = this.outline;
+        if (this.texture) {
+            this.drawTexture(this.texture);
+        }
+    };
+
+    this.tick.setTexture(this.state);
+    this.tick.drawNew();
+    this.tick.setExtent(new Point(25, 25));
+    this.tick.setCenter(this.center());
+
+    this.add(this.tick);
+}
+
+// ToggleMorph action:
+
+ThumbMorph.prototype.trigger = function () {
+    ToggleMorph.uber.trigger.call(this);
+    this.refresh();
+};
+
+ThumbMorph.prototype.refresh = function () {
+    /*
+    if query is a function:
+    execute the query with target as environment (can be null)
+    for lambdafied (inline) actions
+
+    else if query is a String:
+    treat it as function property of target and execute it
+    for selector-like queries
+    */
+    if (typeof this.query === 'function') {
+        this.state = this.query.call(this.target);
+    } else { // assume it's a String
+        this.state = this.target[this.query]();
+    }
+
+    this.tick.setTexture(this.state);
+    this.tick.drawNew();
+
+    if (this.toggleElement && this.toggleElement.refresh) {
+        this.toggleElement.refresh();
+    }
+};
+
+// ToggleMorph events
+
+ThumbMorph.prototype.mouseDownLeft = function () {
+    PushButtonMorph.uber.mouseDownLeft.call(this);
+    if (this.tick) {
+        this.tick.setCenter(this.center().add(1));
+    }
+};
+
+ThumbMorph.prototype.mouseClickLeft = function () {
+    PushButtonMorph.uber.mouseClickLeft.call(this);
+    if (this.tick) {
+        this.tick.setCenter(this.center());
+    }
+};
+
+ThumbMorph.prototype.mouseLeave = function () {
+    PushButtonMorph.uber.mouseLeave.call(this);
+    if (this.tick) {
+        this.tick.setCenter(this.center());
+    }
+};
+
+// ThumbMorph hiding and showing:
+
+/*
+    override the inherited behavior to recursively hide/show all
+    children, so that my instances get restored correctly when
+    hiding/showing my parent.
+*/
+
+ThumbMorph.prototype.hide = ToggleButtonMorph.prototype.hide;
+
+ThumbMorph.prototype.show = ToggleButtonMorph.prototype.show;
+
+
+/*****************************************
+ *  Testing Dialog Morph
+ *****************************************/
+ 
+ TestingDialogMorph.prototype = new DialogBoxMorph();
+ TestingDialogMorph.prototype.constructor = TestingDialogMorph;
+ TestingDialogMorph.uber = DialogBoxMorph.prototype;
+ 
+ TestingDialogMorph.showing = null;
+ 
+ function TestingDialogMorph(target) {
+     TestingDialogMorph.showing = this;
+     
+     TestingDialogMorph.uber.init.call(
+         this,
+         target,
+         null,
+         target
+     );
+
+     this.createThumbButtons();
+     
+     this.addButton('ok','Yes');
+     this.fixLayout();
+     this.drawNew();
+     this.fixLayout();
+     this.popUp(target);
+ }
+ 
+ TestingDialogMorph.prototype.createThumbButtons = function () {
+     var ThumbButtons, txt;
+     
+     ThumbButtons = new AlignmentMorph('row',this.padding);
+     
+     this.add(ThumbButtons);
+     this.thumbButtons = ThumbButtons;
+
+     this.addThumbButton('up');
+     this.addThumbButton('down');
+     
+     txt = new StringMorph(
+            localize("Please rate suggestion"),
+            this.titleFontSize,
+            this.fontStyle,
+            true,
+            false,
+            false,
+            null,
+            this.titleBarColor.darker(this.contrast)
+     );
+     txt.color = new Color(0, 0, 0);
+	 txt.drawNew();
+     ThumbButtons.add(txt);
+     
+     ThumbButtons.fixLayout();
+ }
+ 
+ TestingDialogMorph.prototype.addThumbButton = function (thumbType) {
+     var selected = false, myself = this;
+     
+     var thumbButton = new ThumbMorph(
+        thumbType,
+        'radiobutton',
+        null,
+        null,
+        null,
+        function () {
+            return selected;
+        }
+     );
+     thumbButton.action = function() {
+        myself.selectThumbButton(thumbButton);
+     }
+     thumbButton.query = function() {
+         return thumbButton.state;
+     }
+     thumbButton.selected = selected;
+          
+     this.thumbButtons.add(thumbButton);
+ }
+ 
+ TestingDialogMorph.prototype.selectThumbButton = function (thumbButton) {
+     if (this.thumbButtons) {
+         this.thumbButtons.children.forEach(function (child) {
+            if (child instanceof ThumbMorph) {
+                if (child === thumbButton) {
+                    child.state = true;
+                } else {
+                    child.state = false;
+                }
+                child.refresh();
+            }
+         });
+     }
+ }
+ 
+ 
+ 
+ 

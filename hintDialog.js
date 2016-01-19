@@ -462,16 +462,7 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 
 // define function when accept button is clicked
 HintDialogBoxMorph.prototype.good = function () {
-    var feedback = [];
-    this.thumbButtons.children.forEach(function(child) {
-        if (child instanceof ThumbMorph) {
-            if (child.state) {
-                feedback.push(child.name);
-            }
-        }
-    });
-    
-	Trace.log("HintDialogBox.done", feedback);
+	Trace.log("HintDialogBox.done", this.getFeedback());
 	
 	//TODO log accept
 
@@ -479,16 +470,28 @@ HintDialogBoxMorph.prototype.good = function () {
     ide.spriteBar.hintButton.show();
 }
 
+HintDialogBoxMorph.prototype.getFeedback = function() {
+    var feedback = [];
+    this.thumbButtons.children.forEach(function(child) {
+        if (child instanceof ThumbMorph) {
+            if (child.state) {
+                feedback.push(child.thumbType);
+            }
+        }
+    });
+    return feedback;
+}
+
 // define function when decline button is clicked
 HintDialogBoxMorph.prototype.otherHints = function () {
-	Trace.log("HintDialogBox.otherHintsClicked");
+	Trace.log("HintDialogBox.otherHints", this.getFeedback());
 	
 	window.hintProvider.setDisplayEnabled(SnapDisplay, true);
 	this.close();
 }
 
 HintDialogBoxMorph.prototype.cancel = function () {
-    Trace.log("HintDialogBox.cancelClicked");
+    Trace.log("HintDialogBox.cancel");
     
     this.close();
     ide.spriteBar.hintButton.show();
@@ -604,9 +607,6 @@ HintDialogBoxMorph.prototype.fixLayout = function() {
     if (this.thumbButtons) {
         this.thumbButtons.setCenter(this.center());
         this.thumbButtons.setBottom(this.bottom() - 2*this.padding - this.buttons.height());
-        // console.log(this.thumbButtons.center());
-        // console.log(this.center());
-        // console.log(this.buttons.width());
     }
 }
 
@@ -803,7 +803,7 @@ IntentionDialogMorph.prototype.showHintBubbles = function() {
         }
     });
     otherText = myself.textBox.getValue();
-    Trace.log("IntentionDialog.showAvailableHintClicked", {
+    Trace.log("IntentionDialog.showAvailableHint", {
         "options": options,
         "otherText": otherText,
     });
@@ -816,7 +816,7 @@ IntentionDialogMorph.prototype.showHintBubbles = function() {
 
 // define function when cancel button is clicked
 IntentionDialogMorph.prototype.cancel = function() {
-	Trace.log("IntentionDialog.cancelClicked");
+	Trace.log("IntentionDialog.cancel");
 	this.close();
     ide.spriteBar.hintButton.show();
 }
@@ -1245,18 +1245,19 @@ ThumbMorph.prototype.createTick = function () {
     this.tick = new Morph();
 
     this.tick.setTexture = function (state) {
+        var dir = "hints/img/";
         if (myself.thumbType === 'up')
         {
             if (state) {
-                this.texture = "thumb_up_selected.png";
+                this.texture = dir + "thumb_up_selected.png";
             } else {
-                this.texture = "thumb_up_unselected.png";
+                this.texture = dir + "thumb_up_unselected.png";
             }
         } else {
             if (state) {
-                this.texture = "thumb_down_selected.png";
+                this.texture = dir + "thumb_down_selected.png";
             } else {
-                this.texture = "thumb_down_unselected.png";
+                this.texture = dir + "thumb_down_unselected.png";
             }
         }
     }

@@ -600,35 +600,35 @@ SyntaxElementMorph.prototype.enclosingBlock = function() {
 	return block;
 }
 
-BlockMorph.prototype.basicUserMenu = BlockMorph.prototype.userMenu;
-BlockMorph.prototype.userMenu = function() {
-	var menu = this.basicUserMenu();
-	var callback = this.topBlockInScript().scriptHintCallback; 
-	if (callback) {
-		menu.addItem(
-			"Get Script Hint!",
-			callback
-		);
-	}
-	var inputs = this.inputs();
-	for (var i = 0; i < inputs.length; i++) {
-		callback = inputs[i].scriptHintCallback;
-		if (callback) {
-			menu.addItem(
-				"Get Body Hint! (" + i + ")",
-				callback
-			);
-		}
-	}
-	callback = this.blockHintCallback;
-	if (callback) {
-		menu.addItem(
-			"Get Argument Hint!",
-			callback
-		);
-	}
-	return menu;
-}
+// BlockMorph.prototype.basicUserMenu = BlockMorph.prototype.userMenu;
+// BlockMorph.prototype.userMenu = function() {
+// 	var menu = this.basicUserMenu();
+// 	var callback = this.topBlockInScript().scriptHintCallback; 
+// 	if (callback) {
+// 		menu.addItem(
+// 			"Get Script Hint!",
+// 			callback
+// 		);
+// 	}
+// 	var inputs = this.inputs();
+// 	for (var i = 0; i < inputs.length; i++) {
+// 		callback = inputs[i].scriptHintCallback;
+// 		if (callback) {
+// 			menu.addItem(
+// 				"Get Body Hint! (" + i + ")",
+// 				callback
+// 			);
+// 		}
+// 	}
+// 	callback = this.blockHintCallback;
+// 	if (callback) {
+// 		menu.addItem(
+// 			"Get Argument Hint!",
+// 			callback
+// 		);
+// 	}
+// 	return menu;
+// }
 
 BlockMorph.prototype.topBlockInScript = function() {
 	if (this.parent.nextBlock && this.parent.nextBlock() == this) {

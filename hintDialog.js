@@ -595,9 +595,9 @@ HintDialogBoxMorph.prototype.fixLayout = function() {
     if (this.thumbButtons) {
         this.thumbButtons.setCenter(this.center());
         this.thumbButtons.setBottom(this.bottom() - 2*this.padding - this.buttons.height());
-        console.log(this.thumbButtons.center());
-        console.log(this.center());
-        console.log(this.buttons.width());
+        // console.log(this.thumbButtons.center());
+        // console.log(this.center());
+        // console.log(this.buttons.width());
     }
 }
 
@@ -1050,19 +1050,26 @@ IDE_Morph.prototype.getHint = function() {
 		return;
 	}
     
+    if (!this.spriteBar || !this.spriteBar.hintButton) return;
+    
     var elapseThreshold = 60*1000,
         currentTime = this.spriteBar.hintButton.lastTime;
     
+    var showIntentionDialog = false;
+    
     if (this.spriteBar.hintButton.firstClick) {
         this.spriteBar.hintButton.firstClick = false;
-        window.hintProvider.clearDisplays();
-	    window.hintProvider.setDisplayEnabled(SnapDisplay, true);
-    } else if (currentTime - this.spriteBar.hintButton.lastClickTime < elapseThreshold) {
-        window.hintProvider.clearDisplays();
-	    window.hintProvider.setDisplayEnabled(SnapDisplay, true);
-    } else {
-        new IntentionDialogMorph(this).popUp();
+    } else if (currentTime - this.spriteBar.hintButton.lastClickTime >= elapseThreshold) {
+        showIntentionDialog = true;
     }
+    
+    if (showIntentionDialog) {
+        new IntentionDialogMorph(this).popUp();
+    } else {
+        window.hintProvider.clearDisplays();
+	    window.hintProvider.setDisplayEnabled(SnapDisplay, true);
+    }
+    
     this.spriteBar.hintButton.lastClickTime = currentTime;
     this.spriteBar.hintButton.hide();
 }

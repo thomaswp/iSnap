@@ -16,7 +16,7 @@ include '../config.php';
 	
 	<body>
 		<h1>Projects</h1>
-		
+		<p>Please select a project to view:</p>
 		<?php
 			if ($enble_viewer) {
 				$mysqli = new mysqli($host, $user, $password, $db);

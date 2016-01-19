@@ -65,6 +65,7 @@ include '../config.php';
 						$assignment = mysql_real_escape_string($_GET['assignment']);
 						
 						echo "<h3>Project: $id</h3>";
+                        echo "<p>This lists all logs for this project. Click on a date to see the code at that time.</p>";
 						
 						$mysqli = new mysqli($host, $user, $password, $db);
 						if ($mysqli->connect_errno) {

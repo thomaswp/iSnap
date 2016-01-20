@@ -462,7 +462,16 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 
 // define function when accept button is clicked
 HintDialogBoxMorph.prototype.good = function () {
-	Trace.log("HintDialogBox.done");
+    var feedback = [];
+    this.thumbButtons.children.forEach(function(child) {
+        if (child instanceof ThumbMorph) {
+            if (child.state) {
+                feedback.push(child.name);
+            }
+        }
+    });
+    
+	Trace.log("HintDialogBox.done", feedback);
 	
 	//TODO log accept
 

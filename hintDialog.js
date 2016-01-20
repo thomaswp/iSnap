@@ -111,15 +111,15 @@ HintDialogBoxMorph.prototype.createThumbButtons = function () {
      
      txt = new StringMorph(
             localize("Please rate suggestion"),
-            this.titleFontSize,
+            this.fontSize,
             this.fontStyle,
-            true,
+            false,
             false,
             false,
             null,
-            this.titleBarColor.darker(this.contrast)
+            this.titleBarColor.darker(this.contrast),
+            new Color(0, 0, 0)
      );
-     txt.color = new Color(0, 0, 0);
 	 txt.drawNew();
      ThumbButtons.add(txt);
      
@@ -156,7 +156,7 @@ HintDialogBoxMorph.prototype.createThumbButtons = function () {
          this.thumbButtons.children.forEach(function (child) {
             if (child instanceof ThumbMorph) {
                 if (child === thumbButton) {
-                    child.state = true;
+                    child.state = !child.state;
                 } else {
                     child.state = false;
                 }
@@ -462,6 +462,7 @@ HintDialogBoxMorph.prototype.clearParameter = function (blck,num) {
 
 // define function when accept button is clicked
 HintDialogBoxMorph.prototype.good = function () {
+    
 	Trace.log("HintDialogBox.done", this.getFeedback());
 	
 	//TODO log accept
@@ -959,6 +960,10 @@ MessageHintDialogMorph.prototype.addThumbButton = function (thumbType) {
     HintDialogBoxMorph.prototype.addThumbButton.call(this, thumbType);
 }
 
+MessageHintDialogMorph.prototype.getFeedback = function () {
+    HintDialogBoxMorph.prototype.getFeedback.call(this);
+}
+
 MessageHintDialogMorph.prototype.selectThumbButton = function (thumbButton) {
     HintDialogBoxMorph.prototype.selectThumbButton.call(this, thumbButton);
 }
@@ -1134,7 +1139,7 @@ ThumbMorph.prototype.init = function (
     builder
 ) {
     this.thumbType = thumbType;
-    this.thumbSize = new Point(35,35);
+    this.thumbSize = new Point(25,25);
     this.padding = 1;
     style = style || 'checkbox';
     this.corner = (style === 'checkbox' ?
@@ -1285,7 +1290,7 @@ ThumbMorph.prototype.createTick = function () {
 
     this.tick.setTexture(this.state);
     this.tick.drawNew();
-    this.tick.setExtent(new Point(25, 25));
+    this.tick.setExtent(new Point(18, 18));
     this.tick.setCenter(this.center());
 
     this.add(this.tick);
@@ -1400,7 +1405,7 @@ ThumbMorph.prototype.show = ToggleButtonMorph.prototype.show;
      
      txt = new StringMorph(
             localize("Please rate suggestion"),
-            this.titleFontSize,
+            this.fontSize,
             this.fontStyle,
             true,
             false,

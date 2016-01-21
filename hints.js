@@ -525,7 +525,7 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to) {
             "from": from,
             "to": to
         });
-		new HintDialogBoxMorph(window.ide).showScriptHint(selector, index, from, to);
+		new CodeHintDialogBoxMorph(window.ide).showScriptHint(selector, index, from, to);
 	};
 	
 	// root.scriptHintCallback = function() {
@@ -546,14 +546,14 @@ SnapDisplay.prototype.showBlockHint = function(root, from, to) {
             "from": from,
             "to": to
         });
-		new HintDialogBoxMorph(window.ide).showBlockHint(selector, from, to);
+		new CodeHintDialogBoxMorph(window.ide).showBlockHint(selector, from, to);
 	};
 	
 	this.createHintButton(root, new Color(34, 174, 76), false, showHint);
 }
 
 SnapDisplay.prototype.showMessageDialog = function(message, title) {
-    new MessageHintDialogMorph(message, title, window.ide).popUp();
+    new MessageHintDialogBoxMorph(message, title, window.ide).popUp();
 }
 
 SnapDisplay.prototype.createHintButton = function(parent, color, script, callback) {

@@ -961,7 +961,7 @@ MessageHintDialogMorph.prototype.addThumbButton = function (thumbType) {
 }
 
 MessageHintDialogMorph.prototype.getFeedback = function () {
-    HintDialogBoxMorph.prototype.getFeedback.call(this);
+    return HintDialogBoxMorph.prototype.getFeedback.call(this);
 }
 
 MessageHintDialogMorph.prototype.selectThumbButton = function (thumbButton) {

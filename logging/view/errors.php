@@ -21,7 +21,7 @@ include '../config.php';
     <body>
         <h1>Recent Errors</h1>
         <table>
-            <tr><th>Count</th><th>Time</th><th>Message</th><th>Stack</th><th>Assignment</th><th>Project ID</th></tr>
+            <tr><th>Count</th><th>Time</th><th>Message</th><th>Stack</th><th>Browser</th><th>Assignment</th><th>Project ID</th></tr>
             <?php
                 if (!$enble_viewer) return;
                 $mysqli = new mysqli($host, $user, $password, $db);
@@ -52,9 +52,14 @@ include '../config.php';
                             }
                             echo "</pre></td>";
                         }
+                        if (array_key_exists("browser", $json)) {
+                            echo "<td>" . $json["browser"] . "</td>";
+                        } else {
+                            echo "<td></td>";
+                        }
                     } else {
                         echo "<td>" . htmlentities($json) . "</td>";
-                        echo "<td></td>";
+                        echo "<td></td><td></td>";
                     }
                     
                     $assignmentID = $row["assignmentID"];

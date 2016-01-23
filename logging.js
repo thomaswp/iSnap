@@ -150,7 +150,23 @@ Logger.prototype.logError = function(error) {
         "line": error.lineNumber,
         "column": error.columnNumber,
         "stack": error.stack,
+        "browser": this.getBrowser(),
     });
+}
+
+// Credit: http://stackoverflow.com/a/9851769/816458
+Logger.prototype.getBrowser = function() {
+    try {
+        if (!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) return "Opera";
+        // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
+        if (typeof InstallTrigger !== 'undefined') return "Firefox";
+        if (Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) return "Safari";
+            // At least Safari 3+: "[object HTMLElementConstructor]"
+        if (!!window.chrome) return "Chrome";              // Chrome 1+
+        if (/*@cc_on!@*/false || !!document.documentMode) return "IE"; // At least IE6
+    } catch (e) {
+    }
+    return null;
 }
 
 Logger.prototype.addCode = function(log) {
@@ -335,11 +351,11 @@ function setupLogging() {
     }
     
     window.onerror = function(msg, url, line, column, error) {
-        Trace.log("Error", {
+        Trace.logError({
             "message": msg,
-            "url": url,
-            "line": line,
-            "column": column,
+            "fileName": url,
+            "lineNumber": line,
+            "columnNumber": column,
             "stack": error ? error.stack : null,
         });
     };

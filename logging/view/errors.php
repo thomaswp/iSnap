@@ -11,13 +11,18 @@ include '../config.php';
         <meta charset="UTF-8">
 		<title>Javascript Errors</title>
 		<link rel="stylesheet" type="text/css" href="table.css">
+        <style>
+            table tr {
+                text-align: left;
+            }
+        </style>
     </head>
     
     <body>
         <h1>Recent Errors</h1>
         <a href="http://www.freeformatter.com/javascript-escape.html" target="_blank">JSON Escaper</a>
         <table>
-            <tr><th>Count</th><th>Time</th><th>Data</th><th>Assignment</th><th>Project ID</th></tr>
+            <tr><th>Count</th><th>Time</th><th>Message</th><th>Stack</th><th>Assignment</th><th>Project ID</th></tr>
             <?php
                 if (!$enble_viewer) return;
                 $mysqli = new mysqli($host, $user, $password, $db);
@@ -31,21 +36,33 @@ include '../config.php';
                 }
                 while($row = mysqli_fetch_assoc($result)) {
                     echo "<tr>";
-                    foreach($row as $key => $value) {
-                        if ($key == "data") {
-							$link = "http://www.bodurov.com/JsonFormatter/view.aspx?json=" . urlencode($value);
-                            $value = htmlentities($value);
-							$link = "<td><a target='_blank' href='$link' title='$value'>$value</a></td>";
-                            echo $link;
-                        } else if ($key == "projectID") {
-                            $projectID = $row["projectID"];
-                            $assignmentID = $row["assignmentID"];
-                            echo "<td><a target='_blank' href='display.php?id=$projectID&assignment=$assignmentID'>$projectID</a></td>"; 
+                    echo "<td>" . $row["count"] . "</td>";
+                    echo "<td>" . $row["time"] . "</td>";
+                    
+                    $data = $row["data"];
+                    $json = json_decode($data, true);
+                    if (is_array($json) && array_key_exists("message", $json)) {
+                        echo "<td>" . htmlentities($json["message"]) . "</td>";
+                        if (array_key_exists("stack", $json)) {
+                            echo "<td><pre>" . $json["stack"] . "</pre></td>";
                         } else {
-                            $value = htmlentities($value);
-                            echo "<td>$value</td>";
+                            echo "<td><pre>";
+                            foreach ($json as $key => $value) {
+                                if ($key == "message") continue;
+                                echo "$key: $value\n";
+                            }
+                            echo "</pre></td>";
                         }
+                    } else {
+                        echo "<td>" . htmlentities($json) . "</td>";
+                        echo "<td></td>";
                     }
+                    
+                    $assignmentID = $row["assignmentID"];
+                    $projectID = $row["projectID"];
+                    echo "<td>$assignmentID</td>";
+                    echo "<td><a target='_blank' href='display.php?id=$projectID&assignment=$assignmentID'>$projectID</a></td>"; 
+                    
                     echo "</tr>\n";   
                 }
             ?>

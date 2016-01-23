@@ -20,7 +20,6 @@ include '../config.php';
     
     <body>
         <h1>Recent Errors</h1>
-        <a href="http://www.freeformatter.com/javascript-escape.html" target="_blank">JSON Escaper</a>
         <table>
             <tr><th>Count</th><th>Time</th><th>Message</th><th>Stack</th><th>Assignment</th><th>Project ID</th></tr>
             <?php

@@ -130,7 +130,7 @@ HintProvider.prototype.getHintsFromServer = function() {
 }
 
 HintProvider.prototype.showError = function(error) {
-    Trace.log("Error", error)
+    Trace.logErrorMessage(error)
     this.displays.forEach(function(display) {
         if (display.enabled) {
             display.showError(error);

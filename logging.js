@@ -142,6 +142,12 @@ Logger.prototype.log = function(message, data, saveImmediately) {
     this.queue.push(log);
 }
 
+Logger.prototype.logErrorMessage = function(error) {
+    this.logError({
+        "message": error 
+    });
+}
+
 Logger.prototype.logError = function(error) {
     if (!error) return;
     this.log("Error", {

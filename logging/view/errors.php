@@ -47,7 +47,7 @@ include '../config.php';
                         } else {
                             echo "<td><pre>";
                             foreach ($json as $key => $value) {
-                                if ($key == "message") continue;
+                                if ($key == "message" || $key == "browser") continue;
                                 echo "$key: $value\n";
                             }
                             echo "</pre></td>";

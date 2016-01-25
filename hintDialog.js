@@ -31,7 +31,7 @@ HintDialogBoxMorph.prototype.createThumbButtons = function () {
      this.addThumbButton('down');
      
      txt = new StringMorph(
-            localize("Please rate suggestion"),
+            localize("Please rate this suggestion."),
             this.fontSize,
             this.fontStyle,
             false,

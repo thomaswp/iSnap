@@ -142,17 +142,6 @@ HintProvider.prototype.processHints = function(json) {
 	try {
         var hints = JSON.parse(json);
         Trace.log("HintProvider.processHints", hints);
-        if (hints.length == 0) {
-            this.displays.forEach(function(display) {
-                if (display.enabled) {
-                    try {
-                        display.showNoHints();
-                    } catch (e2) {
-                        Trace.logError(e2);
-                    }
-                }
-            });
-        }
         for (var i = 0; i < hints.length; i++) {
             var hint = hints[i];
             this.displays.forEach(function(display) {
@@ -165,6 +154,15 @@ HintProvider.prototype.processHints = function(json) {
                 }
             });
         }
+        this.displays.forEach(function(display) {
+            if (display.enabled) {
+                try {
+                    display.finishedHints();
+                } catch (e2) {
+                    Trace.logError(e2);
+                }
+            }
+        });
         this.lastHints = hints;
 	} catch (e) {
 	   Trace.logError(e);
@@ -222,7 +220,7 @@ HintDisplay.prototype.clear = function() {
 	console.log("-----------------------------------------");
 }
 
-HintDisplay.prototype.showNoHints = function() {
+HintDisplay.prototype.finishedHints = function() {
     
 }
 
@@ -291,6 +289,7 @@ SnapDisplay.prototype = Object.create(HintDisplay.prototype);
 
 SnapDisplay.prototype.initDisplay = function() {
 	this.enabled = false;
+    this.hintsShown = 0;
 	
 	var createButton = function(ide) {
 		var hintButton = new PushButtonMorph(
@@ -381,6 +380,7 @@ SnapDisplay.prototype.getCode = function(ref) {
 }
 
 SnapDisplay.prototype.clear = function() {
+    this.hintsShown = 0;
     
 	this.hintBars.forEach(function(bar) {
 		var parent = bar.parent;
@@ -409,6 +409,7 @@ SnapDisplay.prototype.clear = function() {
 SnapDisplay.prototype.showHint = function(hint) {
 	// console.log(hint);
     if (hint.data.caution) return;
+    this.hintsShown++;
 	var root = this.getCode(hint.data.root);
 	if (!root) return;
 	var label = hint.data.root.label;
@@ -417,12 +418,15 @@ SnapDisplay.prototype.showHint = function(hint) {
 	f.call(this, root, hint.data.from, hint.data.to);
 }
 
-SnapDisplay.prototype.showNoHints = function() {
-    var myself = this;
-    this.createHintButton(window.ide.currentSprite.scripts, new Color(163, 73, 164), false, function() {
-        Trace.log("SnapDisplay.showNoHints");
-        myself.showMessageDialog("Everything looks good. No suggestions to report.", "No Suggestions");
-    });
+SnapDisplay.prototype.finishedHints = function() {
+    if (this.hintsShown == 0) {
+       var myself = this;
+        this.createHintButton(window.ide.currentSprite.scripts, new Color(163, 73, 164), false, function() {
+            Trace.log("SnapDisplay.showNoHints");
+            myself.showMessageDialog("Everything looks good. No suggestions to report.", "No Suggestions");
+        });
+    }
+    this.hintsShown = 0;
 }
 
 SnapDisplay.prototype.showStructureHint = function(root, from, to, scripts, map, postfix) {

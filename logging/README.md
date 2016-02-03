@@ -38,3 +38,9 @@ Where message is a string describing the type of event and data is a JSON object
 ## Viewing the data
 
 The view folder contains a few utilities for viewing the logged data stored in a MySQL database. This can be disabled in the config.php file for privacy/security. The view/display.php page will display all assignment/project combinations, along with their start and end times and a link to the logs for that project in more detail. There you can view the logs on the right side of the screen. If a timestamp displays as a link (in purple), you can click it to view that code snapshot.
+
+### Security
+
+When collecting data it is a good practice to add security to the viewer files. You can disable viewing entirely by editing the [config.php](config.php) file and set the `$enable_viewer` variable to `false`.
+If you want to enable viewing but secure it, use the example .htaccess file in the view directory (copy view/.htaccess.example to view/.htaccess) and modify it to point to your .htpasswd file. This path should be relative to the document root or an abolute path on the filesystem.
+You then must create a .htpasswd file (see the example [.htpasswd.example](../.htpasswd.example) file and add credentials.

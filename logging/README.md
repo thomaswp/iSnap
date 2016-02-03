@@ -41,6 +41,6 @@ The view folder contains a few utilities for viewing the logged data stored in a
 
 ### Security
 
-When collecting data it is a good practice to add security to the viewer files. You can disable viewing entirely by editing the [config.php](config.php) file and set the `$enable_viewer` variable to `false`.
-If you want to enable viewing but secure it, use the example .htaccess file in the view directory (copy view/.htaccess.example to view/.htaccess) and modify it to point to your .htpasswd file. This path should be relative to the document root or an abolute path on the filesystem.
-You then must create a .htpasswd file (see the example [.htpasswd.example](../.htpasswd.example) file and add credentials.
+When collecting data it is a good practice to add security to the viewer files. You can disable viewing entirely by editing the [config.php](config.php.example) file and set the `$enable_viewer` variable to `false`.
+If you want to enable viewing but secure it, create a .htpasswd file (see the example [.htpasswd.example](../.htpasswd.example) file) and add credentials.
+Then use the example .htaccess file in the view directory (copy [view/.htaccess.example](view/.htaccess.example) to view/.htaccess) and modify it to point to your .htpasswd file. This path should be relative to the document root or an abolute path on the filesystem.

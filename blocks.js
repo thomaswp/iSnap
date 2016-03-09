@@ -2092,13 +2092,6 @@ BlockMorph.prototype.blockId = function() {
     };
 }
 
-BlockMorph.prototype.reactToTemplateCopy = function() {
-    Trace.log("Block.created", this.blockId());
-    if (BlockMorph.uber.reactToTemplateCopy) {
-        BlockMorph.uber.reactToTemplateCopy.call(this);
-    }
-}
-
 BlockMorph.prototype.userDestroy = function() {
     Trace.log("Block.userDestroy", this.blockId());
 }
@@ -3273,6 +3266,7 @@ BlockMorph.prototype.fullCopy = function () {
 };
 
 BlockMorph.prototype.reactToTemplateCopy = function () {
+    Trace.log("Block.created", this.blockId());
     this.forceNormalColoring();
 };
 

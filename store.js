@@ -809,6 +809,9 @@ SnapSerializer.prototype.loadCustomBlocks = function (
         );
         definition.category = child.attributes.category || 'other';
         definition.type = child.attributes.type || 'command';
+        if (child.attributes.guid) {
+            definition.guid = child.attributes.guid;
+        }
         definition.isGlobal = (isGlobal === true);
         if (definition.isGlobal) {
             object.globalBlocks.push(definition);
@@ -1459,17 +1462,29 @@ StageMorph.prototype.toXML = function (serializer) {
 
     // If the user is currently editing a custom block, we add it to the XML.
     // This is just for logging - it is not used when importing from XML.
-    var editingBlock = '';
-    if (BlockEditorMorph.showing) {
-        var children = BlockEditorMorph.showing.allChildren().filter(function (child) {
-            return child instanceof ScriptsMorph;
-        });
-        if (children.length > 0) {
-            editingBlock = '<scripts>' +
-                children[0].toXML(serializer) +
-                '</scripts>';
+    
+    var makeEditingBlock = function() {
+        var editingBlock = '';
+        var editingBlockGuid = '';
+        if (BlockEditorMorph.showing) {
+            var children = BlockEditorMorph.showing.allChildren().filter(function (child) {
+                return child instanceof ScriptsMorph;
+            });
+            if (children.length > 0) {
+                editingBlock = '<scripts>' +
+                    children[0].toXML(serializer) +
+                    '</scripts>';
+                if (BlockEditorMorph.showing.definition) {
+                    editingBlockGuid = BlockEditorMorph.showing.definition.guid;
+                }
+            }
         }
-    }
+        return serializer.format(
+            '<editing guid="@">%</editing>',
+            editingBlockGuid,
+            editingBlock
+        );
+    };
 
     var projectData = ide ? JSON.stringify(ide.getProjectData()) : '';
     return serializer.format(
@@ -1495,7 +1510,7 @@ StageMorph.prototype.toXML = function (serializer) {
             '<code>%</code>' +
             '<blocks>%</blocks>' +
             '<variables>%</variables>' +
-            '<editing>%</editing>' +
+            '%' +
             '</project>',
         (ide && ide.projectName) ? ide.projectName : localize('Untitled'),
         serializer.app,
@@ -1530,7 +1545,7 @@ StageMorph.prototype.toXML = function (serializer) {
         serializer.store(this.globalBlocks),
         (ide && ide.globalVariables) ?
                     serializer.store(ide.globalVariables) : '',
-        editingBlock
+        makeEditingBlock()
     );
 };
 
@@ -1818,7 +1833,7 @@ CustomBlockDefinition.prototype.toXML = function (serializer) {
     }
 
     return serializer.format(
-        '<block-definition s="@" type="@" category="@">' +
+        '<block-definition s="@" type="@" category="@" guid="@">' +
             '%' +
             (this.variableNames.length ? '<variables>%</variables>' : '@') +
             '<header>@</header>' +
@@ -1828,6 +1843,7 @@ CustomBlockDefinition.prototype.toXML = function (serializer) {
         this.spec,
         this.type,
         this.category || 'other',
+        this.guid,
         this.comment ? this.comment.toXML(serializer) : '',
         (this.variableNames.length ?
                 serializer.store(new List(this.variableNames)) : ''),

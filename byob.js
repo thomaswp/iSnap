@@ -150,6 +150,8 @@ function CustomBlockDefinition(spec, receiver) {
     // don't serialize (not needed for functionality):
     this.receiver = receiver || null; // for serialization only (pointer)
     this.editorDimensions = null; // a rectangle, last bounds of the editor
+    
+    this.guid = newGuid();
 }
 
 // CustomBlockDefinition instantiating blocks
@@ -894,6 +896,7 @@ CustomCommandBlockMorph.prototype.deleteBlockDefinition = function () {
                 "spec": myself.definition.spec,
                 "category": myself.definition.category,
                 "type": myself.definition.type,
+                "guid": myself.definition.guid,
             } : null);
             rcvr = myself.receiver();
             rcvr.deleteAllBlockInstances(myself.definition);
@@ -1795,6 +1798,7 @@ BlockEditorMorph.prototype.init = function (definition, target) {
         "spec": definition.spec,
         "category": definition.category,
         "type": definition.type,
+        "guid": definition.guid,
     } : null);
 
     BlockEditorMorph.showing = this;

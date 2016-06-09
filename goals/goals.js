@@ -4,7 +4,7 @@
       if (!assignment) return;
       var goals = assignment.goals;
       if (!goals || !goals.length) return;
-      
+
       var xhr = new XMLHttpRequest();
       xhr.open('GET', 'goals/goals.html', true);
       xhr.onreadystatechange = function () {
@@ -19,14 +19,14 @@
 })();
 
 function GoalBar(assignment) {
-      
+
       function copy(obj) {
             return JSON.parse(JSON.stringify(obj));
       }
-      
+
       var assignmentObjectives = assignment.goals;
       document.getElementById("assignmentChosen").innerHTML = assignment.name;
-           
+
       /* Trace logger for database*/
       function log(message, data) {
             Trace.log(message, data);
@@ -34,10 +34,10 @@ function GoalBar(assignment) {
       /* when the page first loads, want to record that a Subgoal has been started*/
       log("Subgoal.started");
       /* end Logger setup ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
-      
+
       /* start Assignment setup /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
       /* constructing objectives */
-   
+
       /* the current objective that the player is trying to complete */
       var currentObjective;
       /* variables related to progress bar */
@@ -57,11 +57,11 @@ function GoalBar(assignment) {
       var objectiveButtons2 = document.querySelectorAll(".theInput");
       /* the div element of the objective buttons*/
       var objectiveButtons3 = document.querySelectorAll(".aButton");
-      
+
       var instructions = document.getElementById("instructions");
-   
+
       /* end Assignment setup /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
-      
+
       /* fill the progress bar when objective has been completed */
       function fillProgressBar() {
             var countCompleted = assignmentObjectives.filter(function (objective) {
@@ -72,10 +72,10 @@ function GoalBar(assignment) {
             bar.style.width = percent + "%";
 
       }
-      
+
       /* traverses the assignmentObjectives array and determines which objectives to show and not show based on whether assignment has been completed and prerequisites have been met */
       function toUpdateObjectives() {
-            var count = 0; 
+            var count = 0;
             /** while count is less than the amount of objectives and the objective buttons of which 4 can be shown at at time */
             for (var arrayCount = 0; arrayCount < assignmentObjectives.length && count < objectiveButtons.length; arrayCount++) {
                   var objective = assignmentObjectives[arrayCount];
@@ -92,12 +92,12 @@ function GoalBar(assignment) {
                                     return prereqObjective.isCompleted && prereqObjective.title == objective.prerequisites[i];
 
                               })) {
-                                    
+
                                     met = false;
                                     break;
                               }
                         }
-                        // if prerequisites have not been met, check next objective because objectives can only be shown if prerequisites have been met. 
+                        // if prerequisites have not been met, check next objective because objectives can only be shown if prerequisites have been met.
                         if (!met) {
                               continue;
                         }
@@ -106,12 +106,12 @@ function GoalBar(assignment) {
                   buttonsHide[count].style.display = "";
                   objectiveButtons[count++].value = objective.title;
             }
-      
+
             // hide the remaining objectives
             for (; count < objectiveButtons.length; count++) {
                   buttonsHide[count].style.display = "none";
             }
-      
+
             /* hide the choose different objective and finished objective buttons*/
             for (var k = 0; k < chooseButtons.length; k++) {
                   chooseButtons[k].style.display = "none";
@@ -134,7 +134,7 @@ function GoalBar(assignment) {
             updateChecks();
             fillProgressBar();
       }
-      
+
 
       /* used only in the special case when there is only 1 objective left, this function is called in chooseObjective */
       function updateButtons2() {
@@ -150,8 +150,8 @@ function GoalBar(assignment) {
                   }
                   buttonsHide[5].style.display = "";
             }
-      }      
-   
+      }
+
    function updateChecks(){
       var metPrerequisites = true;
       document.getElementById("assignmentTitle").innerHTML = assignment.name;
@@ -164,12 +164,12 @@ function GoalBar(assignment) {
             if (parent) parent.appendChild(element);
             return element;
       };
-      
+
       var header = createChild(table, "tr");
       createChild(header, "th", "Objective");
       createChild(header, "th", "Description");
       createChild(header, "th", "Complete", "progressCheck");
-      
+
       /** update available objectives*/
       for (var i = 0; i < assignmentObjectives.length; i++){
          var objective = assignmentObjectives[i];
@@ -182,23 +182,23 @@ function GoalBar(assignment) {
                break;
             }
          }
-         
+
          var row = createChild(table, "tr");
          var textColor = metPrerequisites ? "black" : "#E4E1E2";
-         var checkColor = objective.isCompleted ? "rgb(150,174,58)" : "#E4E1E2";  
-         
+         var checkColor = objective.isCompleted ? "rgb(150,174,58)" : "#E4E1E2";
+
          createChild(row, "td", objective.title).style.color = textColor;
          createChild(row, "td", objective.description).style.color = textColor;
          createChild(row, "td", "<i class=\"fa fa-check fa-2x\"></i>", "progressCheck").style.color = checkColor;
       }
    }
-      
+
       /** for loading and saving the state of the nav bar */
       this.saveState = function () {
             var currentState = {
                   allObjectives: assignmentObjectives
             }
-            var state = copy(currentState); 
+            var state = copy(currentState);
             return state;
       }
 
@@ -209,20 +209,27 @@ function GoalBar(assignment) {
             assignmentObjectives = state.allObjectives;
             toUpdateObjectives();
       }
-      
+
       /* user has choosen to go back to list of objectives and select a new objective*/
       this.chooseDifferentObjective = function() {
             log("Subgoal.chooseDifferentObjective", currentObjective.title);
             toUpdateObjectives();
+            for(var i = 0; i < objectiveButtons2.length; i++){
+              objectiveButtons2[i].style.pointerEvents = 'auto';
+            }
+
       }
-      
+
       /* attached to the Finished Objective button, sets current objective to completed and pushes objective to the completedAssignmentObjectives array, updates progress bar, calls the toUpdateObjectives function */
       this.finishedObjective = function() {
             log("Subgoal.finished", currentObjective.title);
             currentObjective.isCompleted = true;
             toUpdateObjectives();
+            for(var i = 0; i < objectiveButtons2.length; i++){
+              objectiveButtons2[i].style.pointerEvents = 'auto';
+            }
       }
-      
+
       /* function for the objective buttons: hides objective buttons, displays the FINISHED OBJECTIVE button and the CHOOSE OBJECTIVE button, and displays description text */
       this.chooseObjective = function(ele) {
             var id = ele.id;
@@ -231,6 +238,7 @@ function GoalBar(assignment) {
             var description = document.getElementById(id);
             var parentEl = document.getElementById(id).parentElement;
             var theButtonSelected = document.getElementById(id);
+            document.getElementById(id).style.pointerEvents = 'none';
             for (var i = 0; i < assignmentObjectives.length; i++) {
                   if (assignmentObjectives[i].title == title) {
                         /* set the currentObjective variable to the objective the user selected */
@@ -240,7 +248,7 @@ function GoalBar(assignment) {
                         /* hide objective buttons and display the FINISHED OBJECTIVE button and the CHOOSE OBJECTIVE button*/
                         for (var i = 0; i < 4; i++) {
                               buttonsHide[i].style.display = "none";
-                        }    
+                        }
                         /* unhide the button that was selected */
                         parentEl.style.display = "";
                         for (var q = 0; q < objectiveButtons2.length; q++) {
@@ -257,9 +265,9 @@ function GoalBar(assignment) {
                   }
             }
       }
-      
+
       this.assignmentObjectives = assignmentObjectives;
-      
+
       // Project Data saving / loading
       var myself = this;
       var originalState = this.saveState();
@@ -270,8 +278,8 @@ function GoalBar(assignment) {
             data.goals = myself.saveState();
             return data;
       };
-      
-      var oldSet = IDE_Morph.prototype.setProjectData; 
+
+      var oldSet = IDE_Morph.prototype.setProjectData;
       IDE_Morph.prototype.setProjectData = function(data) {
             oldSet.call(this, data);
             if (!this.projectData) return;
@@ -282,7 +290,7 @@ function GoalBar(assignment) {
             }
             myself.loadState(goals);
       }
-      
+
       var oldCodeChanged = Trace.onCodeChanged;
       var objectivesFlashing = false;
       Trace.onCodeChanged = function(code) {
@@ -297,23 +305,23 @@ function GoalBar(assignment) {
                         objectivesFlashing = false;
                         for (var i = 0; i < objectiveButtons.length; i++) {
                               objectiveButtons[i].classList.remove("highlight");
-                              instructions.classList.remove("highlight");      
+                              instructions.classList.remove("highlight");
                         }
                   }, 500);
             }
 	  }
-      
+
       var checkButton = document.getElementById("button6");
       setInterval(function() {
             if (!currentObjective) return;
             checkButton.classList.add("highlight");
             setTimeout(function() {
-                  checkButton.classList.remove("highlight");  
+                  checkButton.classList.remove("highlight");
             }, 800);
       }, 4000)
 
       toUpdateObjectives();
-      
+
       if (window.world && window.world.useFillPage) {
             window.world.fillPage();
       }

@@ -121,6 +121,7 @@ function GoalBar(assignment) {
             theButtons.className = "theButtons";
             for (var q = 0; q < objectiveButtons2.length; q++) {
                   objectiveButtons2[q].className = "theInput";
+                  objectiveButtons2[q].style.pointerEvents = 'auto';
             }
             for (var y = 0; y < objectiveButtons3.length; y++) {
                   objectiveButtons3[y].className = "aButton";
@@ -214,9 +215,6 @@ function GoalBar(assignment) {
       this.chooseDifferentObjective = function() {
             log("Subgoal.chooseDifferentObjective", currentObjective.title);
             toUpdateObjectives();
-            for(var i = 0; i < objectiveButtons2.length; i++){
-              objectiveButtons2[i].style.pointerEvents = 'auto';
-            }
 
       }
 
@@ -225,9 +223,6 @@ function GoalBar(assignment) {
             log("Subgoal.finished", currentObjective.title);
             currentObjective.isCompleted = true;
             toUpdateObjectives();
-            for(var i = 0; i < objectiveButtons2.length; i++){
-              objectiveButtons2[i].style.pointerEvents = 'auto';
-            }
       }
 
       /* function for the objective buttons: hides objective buttons, displays the FINISHED OBJECTIVE button and the CHOOSE OBJECTIVE button, and displays description text */
@@ -325,4 +320,14 @@ function GoalBar(assignment) {
       if (window.world && window.world.useFillPage) {
             window.world.fillPage();
       }
+}
+
+function showModal() {
+      document.getElementById('openModal').classList.add('showing');
+      Trace.log("Subgoal.showModal");
+}
+
+function hideModal() {
+      document.getElementById('openModal').classList.remove('showing');
+      Trace.log("Subgoal.hideModal");
 }

@@ -20,10 +20,10 @@
 	 <div id = "end">
 		<div id = "progressBarRow">
 		   <div class="progressRowItem" id = "bar"> <span class="bar-fill"> </span> </div>
-		   <div class="progressRowItem"><a onclick="document.getElementById('openModal').classList.add('showing')" href="javascript:void(0);"> <i class="button fa fa-list-alt" title = "progress summary"></i> </a> </div>
+		   <div class="progressRowItem"><a onclick="showModal()" href="javascript:void(0);"> <i class="button fa fa-list-alt" title = "progress summary"></i> </a> </div>
 		   <div id = "openModal" class="modalDialog"> 
 			  <div> 
-				 <a onclick="document.getElementById('openModal').classList.remove('showing')" href="javascript:void(0);" title="Close" class="close">X</a>
+				 <a onclick="hideModal()" href="javascript:void(0);" title="Close" class="close">X</a>
 				 <h2>Assignment:    <span id="assignmentTitle"><span></h2>
 				 <hr> </hr>
 				 <table id="objectivesTable" style="width: 100%">

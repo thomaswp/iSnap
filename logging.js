@@ -150,6 +150,7 @@ Logger.prototype.logErrorMessage = function(error) {
 
 Logger.prototype.logError = function(error) {
     if (!error) return;
+    console.error(error);
     this.log("Error", {
         "message": error.message,
         "url": error.fileName,

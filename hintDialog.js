@@ -444,7 +444,9 @@ CodeHintDialogBoxMorph.prototype.createBlock = function(selector) {
 	if (selector === 'var') {
 		param = SpriteMorph.prototype.variableBlock(selector, true);
 		param.isDraggable = false;
-	} else {
+	} else if (selector == 'doCustomBlock') {
+	    // TODO: instantiate a fake custom block
+    } else {
 		param = SpriteMorph.prototype.blockForSelector(selector, true);
 	}
 	return param;

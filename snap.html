@@ -6,6 +6,12 @@
 		<link rel="shortcut icon" href="favicon.ico">
 		<link rel="stylesheet" href="hints/hints.css">
 		<link rel="stylesheet" href="goals/goals.css">
+		<script type="text/javascript" >
+			// Helps to debug object types. Must come before other scripts.
+			Object.prototype.getDebugType = function() {
+				return /function (.{1,})\(/.exec(this.constructor.toString())[1];
+			}
+		</script>
 		<script type="text/javascript" src="morphic.js"></script>
 		<script type="text/javascript" src="widgets.js"></script>
 		<script type="text/javascript" src="blocks.js"></script>

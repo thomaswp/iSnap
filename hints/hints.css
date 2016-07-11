@@ -10,7 +10,7 @@ code.equals {
 
 div.debug {
 	bottom: 0px;
-    height: 100px;
+    height: 120px;
     width: 100%;
     overflow: auto;
     position: fixed;
@@ -19,6 +19,16 @@ div.debug {
 	transition: opacity .15s ease-in-out;
 }
 
-div.debug:hover {
+div.hidden {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+button.debugToggle {
+	float: right;
+	pointer-events: all;
+	padding: 4px 10px;
 	opacity: 1;
+	margin-top: 10px;
+	margin-right: 10px;
 }

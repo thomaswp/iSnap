@@ -2214,7 +2214,7 @@ function Morph() {
 Morph.prototype.init = function (noDraw) {
     Morph.uber.init.call(this);
     
-    this._debugType = /function (.{1,})\(/.exec(this.constructor.toString())[1];
+    this._debugType = this.getDebugType();
     this.isMorph = true;
     this.image = null;
     this.bounds = new Rectangle(0, 0, 50, 40);

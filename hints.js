@@ -227,9 +227,27 @@ HintDisplay.prototype.finishedHints = function() {
 // DebugDisplay: outputs hints to a div
 
 function DebugDisplay() { 
-	var div = document.createElement("div");
-	div.classList.add("debug");
-	this.div = div;
+	var outer = document.createElement("div");
+	outer.classList.add("debug");
+	this.outer = outer;
+
+	var button = document.createElement("button");
+	button.classList.add("debugToggle");
+	button.innerHTML = "Hide";
+	var hidden = false;
+	button.onclick = function() {
+		hidden = !hidden;
+		if (hidden) {
+			outer.classList.add("hidden");
+		} else {
+			outer.classList.remove("hidden");
+		}
+		button.innerHTML = hidden ? "Show" : "Hide";
+	};
+	outer.appendChild(button);
+
+	this.div = document.createElement("div");
+	outer.appendChild(this.div);
 	
 	// Add simplediff
 	var head = document.getElementsByTagName('head')[0];
@@ -242,7 +260,7 @@ function DebugDisplay() {
 DebugDisplay.prototype = Object.create(HintDisplay.prototype);
 
 DebugDisplay.prototype.initDisplay = function() {
-	document.body.appendChild(this.div);
+	document.body.appendChild(this.outer);
 }
 
 DebugDisplay.prototype.showHint = function(hint) {
@@ -336,12 +354,35 @@ SnapDisplay.prototype.logHints = function() {
     return this.enabled;
 }
 
+SnapDisplay.prototype.hasCustomBlock = function(ref) {
+	if (!ref) return false;
+	return ref.label == "customBlock" || this.hasCustomBlock(ref.parent);
+}
+
+// Gets the showing/editing version of a customBlock, or returns null if
+// it is not currently being edited, since we can only generate hints for a 
+// showing/editing custom block
+SnapDisplay.prototype.editingCustomBlock = function(storedBlock) {
+	var showing = BlockEditorMorph.showing;
+	if (storedBlock && showing && showing.definition && 
+			showing.definition.guid == storedBlock.guid) {
+		var scriptsMorph = BlockEditorMorph.showing.allChildren().filter(function (child) {
+			return child instanceof ScriptsMorph;
+		})[0];
+		return scriptsMorph;
+	}
+	storedBlock._debugType = storedBlock.getDebugType()
+	return storedBlock;
+}
+
 SnapDisplay.prototype.getCode = function(ref) {
 	if (ref.parent == null) {
 		return window.ide;
 	}
 	
 	var parent = this.getCode(ref.parent);
+	// If this is a non-showing custom block, we should just return it to show a special hint
+	if (parent == null || parent._debugType == "CustomBlockDefinition") return parent;
 		
 	var label = ref.label;
 	var index = ref.index;
@@ -351,7 +392,7 @@ SnapDisplay.prototype.getCode = function(ref) {
 			if (label == "stage")
 				return parent.stage;
 			else if (label == "customBlock")
-				return parent.stage.globalBlocks[index - 1];
+				return this.editingCustomBlock(parent.stage.globalBlocks[index - 1]);
 			else if (label == "var") 
 				return parent.globalVariables.vars;
 			break;
@@ -365,15 +406,23 @@ SnapDisplay.prototype.getCode = function(ref) {
 			else if (label == "script")
 				return parent.scripts.children[index - nVars];
 			else if (label == "customBlock")
-				return parent.customBlocks[index - nVars - nScripts];
+				return this.editingCustomBlock(parent.customBlocks[index - nVars - nScripts]);
 			break;
 		case "script":
 			var block = parent;
 			if (block._debugType == "CSlotMorph") block = block.children[0];
+			if (ref.parent.parent && ref.parent.parent.label == "customBlock") {
+				// Scripts in a custom block must skip one extra because the first
+				// block is the header CustomHatBlock.
+				block = block.nextBlock();
+			}
 			for (var i = 0; i < index; i++) block = block.nextBlock();
 			return block;
 		case "customBlock":
-			return parent.scripts[index];
+			// We should only generate hints for the primary script in a custom block
+			if (ref.index > 0 || label != "script" || !parent.children.length) return null;
+			// If we manage to get a hold of it, we return the first script
+			return parent.children[0];
 		default:
 			return parent.inputs()[index];
 	}
@@ -381,6 +430,7 @@ SnapDisplay.prototype.getCode = function(ref) {
 
 SnapDisplay.prototype.clear = function() {
     this.hintsShown = 0;
+	this.customBlockHints = []
     
 	this.hintBars.forEach(function(bar) {
 		var parent = bar.parent;
@@ -407,15 +457,27 @@ SnapDisplay.prototype.clear = function() {
 }
 
 SnapDisplay.prototype.showHint = function(hint) {
-	// console.log(hint);
     if (hint.data.caution) return;
-    this.hintsShown++;
+
+	var hasCustom = this.hasCustomBlock(hint.data.root);
 	var root = this.getCode(hint.data.root);
-	if (!root) return;
+	if (!root) { 
+		console.error("Null hint:", hint)
+		return;
+	}
+    this.hintsShown++;
 	var label = hint.data.root.label;
+
+	// If this is a hint for a custom block that isn't showing, display
+	// a special hint to indicate that
+	if (hasCustom && root._debugType == "CustomBlockDefinition") {
+		this.showNotEditingCustomBlockHint(root);
+		return;
+	}
+
 	var f = this["show" + label.charAt(0).toUpperCase() + label.slice(1) + "Hint"];
 	if (!f) f = this.showBlockHint;
-	f.call(this, root, hint.data.from, hint.data.to);
+	f.call(this, root, hint.data.from, hint.data.to, hasCustom);
 }
 
 SnapDisplay.prototype.finishedHints = function() {
@@ -427,6 +489,23 @@ SnapDisplay.prototype.finishedHints = function() {
         });
     }
     this.hintsShown = 0;
+}
+
+SnapDisplay.prototype.showNotEditingCustomBlockHint = function(root) {
+	if (this.customBlockHints.includes(root.guid)) return;
+
+	var myself = this;
+	this.customBlockHints.push(root.guid);
+	this.createHintButton(window.ide.currentSprite.scripts, new Color(0, 162, 232), false, function() {
+		Trace.log("SnapDisplay.showNotEditingCustomBlockHint", {
+			"blockGUID": root.guid,
+		});
+		console.log(root.spec);
+		var name = root.spec.replace(/%'([^']*)'/g, "($1)");
+		myself.showMessageDialog(
+			"There are additional suggestions for the custom block '" + name + "'.", 
+			"Check Custom Block");
+	});
 }
 
 SnapDisplay.prototype.showStructureHint = function(root, from, to, scripts, map, postfix) {
@@ -480,10 +559,6 @@ SnapDisplay.prototype.showSnapshotHint = function(root, from , to) {
 	});
 }
 
-SnapDisplay.prototype.showCustomBlockHint = function(root, from , to) {
-	
-}
-
 SnapDisplay.prototype.showStageHint = function(root, from , to) {
 	this.showStructureHint(root, from, to, window.ide.currentSprite.scripts, {
 		"sprite": "sprite"
@@ -498,23 +573,21 @@ SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
 	}, " in this sprite");
 }
 
-SnapDisplay.prototype.countWhere = function(array, item) {
-	var count = 0;
-	for (var i = 0; i < array.length; i++) {
-		if (array[i] == item) count++;
-	}
-	return count;
+SnapDisplay.prototype.showCustomBlockHint = function(root, from , to, hasCustom) {
+	console.log("CBH:", root, from, to, hasCustom);
 }
 
-SnapDisplay.prototype.showScriptHint = function(root, from, to) {
+SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
+	// For logging, we find the parent block this script is inside of, or null
 	var block = root.parent;
 	if (block.enclosingBlock) block = block.enclosingBlock();
 	else block = null;
 	
+	// If applicable, find the index of this script in it's parent (e.g. IfElse)
 	var index = 0;
 	if (block && block != root && block.inputs) {
 		index = block.inputs().indexOf(root);
-		if (index == -1) console.writeln("Bad index!");
+		if (index == -1) console.error("Bad index!");
 	}
 	
 	var showHint = function() {
@@ -531,15 +604,11 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to) {
         });
 		new CodeHintDialogBoxMorph(window.ide).showScriptHint(selector, index, from, to);
 	};
-	
-	// root.scriptHintCallback = function() {
-	// 	showHint();
-	// }
-	
+
 	this.createHintButton(root, new Color(255, 127, 29), true, showHint);
 }
 
-SnapDisplay.prototype.showBlockHint = function(root, from, to) {
+SnapDisplay.prototype.showBlockHint = function(root, from, to, hasCustom) {
 	var block = root.enclosingBlock();
 	var showHint = function() {
 		var selector = block ? block.selector : null;
@@ -554,6 +623,14 @@ SnapDisplay.prototype.showBlockHint = function(root, from, to) {
 	};
 	
 	this.createHintButton(root, new Color(34, 174, 76), false, showHint);
+}
+
+SnapDisplay.prototype.countWhere = function(array, item) {
+	var count = 0;
+	for (var i = 0; i < array.length; i++) {
+		if (array[i] == item) count++;
+	}
+	return count;
 }
 
 SnapDisplay.prototype.showMessageDialog = function(message, title) {

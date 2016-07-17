@@ -1791,6 +1791,8 @@ BlockEditorMorph.prototype.destroy = function() {
     BlockEditorMorph.showing = null;
 }
 
+BlockEditorMorph.defaultHatBlockMargin = new Point(10, 10);
+
 BlockEditorMorph.prototype.init = function (definition, target) {
     var scripts, proto, scriptsFrame, block, comment, myself = this;
 
@@ -1828,7 +1830,8 @@ BlockEditorMorph.prototype.init = function (definition, target) {
     scripts.cleanUpMargin = 10;
 
     proto = new PrototypeHatBlockMorph(this.definition);
-    proto.setPosition(scripts.position().add(10));
+    proto.setPosition(scripts.position().add(
+        BlockEditorMorph.defaultHatBlockMargin));
 
     if (definition.comment !== null) {
         comment = definition.comment.fullCopy();

@@ -235,7 +235,7 @@ function DebugDisplay() {
 	button.classList.add("debugToggle");
 	button.innerHTML = "Hide";
 	var hidden = false;
-	button.onclick = function() {
+	button.onclick = outer.ondblclick = function() {
 		hidden = !hidden;
 		if (hidden) {
 			outer.classList.add("hidden");
@@ -348,6 +348,7 @@ SnapDisplay.prototype.initDisplay = function() {
 	}
 	
 	window.ide.fixLayout();
+	BlockEditorMorph.defaultHatBlockMargin = new Point(45, 10);
 }
 
 SnapDisplay.prototype.logHints = function() {
@@ -882,7 +883,7 @@ HintBarMorph.prototype.layout = function(now) {
 	this.children.sort(function(a, b) {
 		return (a.idealY || 0) - (b.idealY || 0);
 	});
-	var bottom = 0, left = this.right();
+	var bottom = 0, left = this.right(), right = this.right();
 	for (var i = 0; i < this.children.length; i++) {
 		var child = this.children[i];
 		var idealY = this.top() + (child.idealY || 0);
@@ -905,9 +906,10 @@ HintBarMorph.prototype.layout = function(now) {
 		bottom = Math.max(bottom, child.bottom());
 		left = Math.min(left, child.left());
 	}
-	// this.setLeft(left);
-	// var right = this.right();
-	// this.setExtent(new Point(right - left, bottom - this.top()));
-	// this.setRight(right);
-	// this.fullChanged();
+	var deltaX = this.left() - left;
+	this.setLeft(left);
+	this.children.forEach(function(child) {
+		child.setRight(child.right() + deltaX);
+	});
+	this.setExtent(new Point(right - left, bottom - this.top()));
 }

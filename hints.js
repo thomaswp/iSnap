@@ -348,7 +348,7 @@ SnapDisplay.prototype.initDisplay = function() {
 	}
 	
 	window.ide.fixLayout();
-	BlockEditorMorph.defaultHatBlockMargin = new Point(45, 10);
+	BlockEditorMorph.defaultHatBlockMargin = new Point(75, 20);
 }
 
 SnapDisplay.prototype.logHints = function() {
@@ -606,7 +606,7 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
 		new CodeHintDialogBoxMorph(window.ide).showScriptHint(selector, index, from, to);
 	};
 
-	this.createHintButton(root, new Color(255, 127, 29), true, showHint);
+	this.createHintButton(root, new Color(255, 127, 29), true, showHint, hasCustom);
 }
 
 SnapDisplay.prototype.showBlockHint = function(root, from, to, hasCustom) {
@@ -623,7 +623,7 @@ SnapDisplay.prototype.showBlockHint = function(root, from, to, hasCustom) {
 		new CodeHintDialogBoxMorph(window.ide).showBlockHint(selector, from, to);
 	};
 	
-	this.createHintButton(root, new Color(34, 174, 76), false, showHint);
+	this.createHintButton(root, new Color(34, 174, 76), false, showHint, hasCustom);
 }
 
 SnapDisplay.prototype.countWhere = function(array, item) {
@@ -638,7 +638,7 @@ SnapDisplay.prototype.showMessageDialog = function(message, title) {
     new MessageHintDialogBoxMorph(message, title, window.ide).popUp();
 }
 
-SnapDisplay.prototype.createHintButton = function(parent, color, script, callback) {
+SnapDisplay.prototype.createHintButton = function(parent, color, script, callback, hasCustom) {
 	if (parent == null) return;
 	
 	var hintBar;
@@ -648,7 +648,7 @@ SnapDisplay.prototype.createHintButton = function(parent, color, script, callbac
 		
 		hintBar = topBlock.hintBar;
 		if (hintBar == null) {
-			hintBar = new HintBarMorph(topBlock);
+			hintBar = new HintBarMorph(topBlock, hasCustom ? 2 : 3);
 			topBlock.hintBar = hintBar;
 			this.hintBars.push(hintBar);
 		}
@@ -770,17 +770,18 @@ BlockHighlightMorph.prototype.topMorphAt = function(point) {
 // 	}
 // }
 
-function HintBarMorph(parent) {
-	this.init(parent);
+function HintBarMorph(parent, maxAdjacent = 3) {
+	this.init(parent, maxAdjacent);
 }
 
 HintBarMorph.prototype = Object.create(Morph.prototype);
 HintBarMorph.prototype.constructor = HintBarMorph;
 HintBarMorph.uber = Morph.prototype;
 
-HintBarMorph.prototype.init = function(parent) {
+HintBarMorph.prototype.init = function(parent, maxAdjacent) {
 	HintBarMorph.uber.init.call(this);
 	this.color = new Color(0, 0, 0, 0);
+	this.maxAdjacent = maxAdjacent;
 	if (parent) parent.add(this);
 }
 
@@ -883,23 +884,28 @@ HintBarMorph.prototype.layout = function(now) {
 	this.children.sort(function(a, b) {
 		return (a.idealY || 0) - (b.idealY || 0);
 	});
-	var bottom = 0, left = this.right(), right = this.right();
+	var bottom = 0, left = this.right(), right = this.right(), adjacent = 1;
 	for (var i = 0; i < this.children.length; i++) {
 		var child = this.children[i];
 		var idealY = this.top() + (child.idealY || 0);
 		child.setRight(this.right());
 		child.setTop(idealY);
+		// loop currenty executes only once, but we keep it in case we want a
+		// more comprehensive layout algorithm (note break at the bottom)
 		for (var j = i - 1; j >= 0; j--) {
 			var lastChild = this.children[i - 1];
 			var minY = lastChild.bottom() + 3;
 			var minX = lastChild.left() - 3;
-			if (Math.abs(child.idealY - lastChild.idealY) < 15) {
+			if (Math.abs(child.idealY - lastChild.idealY) < 15 &&
+				(!this.maxAdjacent || adjacent < this.maxAdjacent)) {
 				child.setRight(minX);
 				child.setTop(lastChild.top());
-				// console.log(i + " right: " + minX);
-			} else if (idealY < minY) {
-				child.setTop(minY);
-				// console.log(i + " top: " + minY);
+				adjacent++;
+			} else {
+				if (idealY < minY) {
+					child.setTop(minY);
+				}
+				adjacent = 1;
 			}
 			break;
 		}

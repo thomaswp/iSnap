@@ -1,4 +1,3 @@
-* Shift custom block editor to make hints visible
 * Make custom blocks show up properly for block *and* script hints
 * Implement showCustomBlockHint()
 * No ratings for non-suggestion popups

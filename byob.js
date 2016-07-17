@@ -1874,7 +1874,8 @@ BlockEditorMorph.prototype.init = function (definition, target) {
     this.addButton('updateDefinition', 'Apply');
     this.addButton('cancel', 'Cancel');
 
-    this.setExtent(new Point(375, 300)); // normal initial extent
+    this.setExtent(new Point(400, 350).add(
+        BlockEditorMorph.defaultHatBlockMargin)); // normal initial extent
     this.fixLayout();
     proto.parts()[0].fixLayout();
     scripts.fixMultiArgs();

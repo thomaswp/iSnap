@@ -334,6 +334,7 @@ CodeHintDialogBoxMorph.prototype.init = function (target) {
     scripts.color = IDE_Morph.prototype.groupColor;
     scripts.cachedTexture = IDE_Morph.prototype.scriptsPaneTexture;
     scripts.cleanUpMargin = 10; //No idea what this does?
+    scripts.userMenu = function() { return null; }
 	
     // create scripts frame for scripts
     scriptsFrame = new ScrollFrameMorph(scripts);
@@ -416,7 +417,7 @@ CodeHintDialogBoxMorph.prototype.showBlockHint = function (parentSelector, from,
 }
 
 CodeHintDialogBoxMorph.prototype.createBlockWithParams = function(selector, params) {
-	var block = SpriteMorph.prototype.blockForSelector(selector, true);
+	var block = this.createBlock(selector, null, params.length);
 	var inputs = block.inputs();
 	if (inputs.length == 1 && inputs[0] instanceof MultiArgMorph) {
 		var multiArg = inputs[0];
@@ -431,7 +432,7 @@ CodeHintDialogBoxMorph.prototype.createBlockWithParams = function(selector, para
 	this.clearParameter(block);
 	for (var i = 0; i < params.length; i++) {
 		if (params[i] === 'script' || params[i] === 'literal') continue;
-		var param = this.createBlock(params[i]);
+		var param = this.createBlock(params[i], inputs[i]);
 		this.clearParameter(param); 
 		var input = inputs[i];
 		input.parent.silentReplaceInput(input,param);
@@ -439,16 +440,44 @@ CodeHintDialogBoxMorph.prototype.createBlockWithParams = function(selector, para
 	return block;
 }
 
-CodeHintDialogBoxMorph.prototype.createBlock = function(selector) {
+
+CodeHintDialogBoxMorph.prototype.fakeCustomBlock = function (type, category, spec) {
+    inputs = new Array((spec.match(/%/g) || []).length);
+    var definition = {
+        type: type,
+        category: category,
+        blockSpec: function() { return spec; },
+        variableNames: [],
+        inputOptionsOfIdx: function() { return inputs; }
+    }
+    if (type === 'command') {
+        return new CustomCommandBlockMorph(definition);
+    } else if (type === 'reporter' || type === 'predicate')  {
+        return new CustomReporterBlockMorph(definition, type === 'predicate');
+    }
+};
+
+CodeHintDialogBoxMorph.prototype.createBlock = function(selector, parent = null, numArgs = 0) {
 	var param;
 	if (selector === 'var') {
-		param = SpriteMorph.prototype.variableBlock(selector, true);
+		param = SpriteMorph.prototype.variableBlock(selector);
 		param.isDraggable = false;
-	} else if (selector == 'doCustomBlock') {
-	    // TODO: instantiate a fake custom block
+	} else if (selector == 'doCustomBlock' || selector == 'evaluateCustomBlock') {
+        type = 'command'
+        if (parent) {
+            type = parent._debugType == "BooleanSlotMorph" ? 'predicate' : 'reporter';
+        }
+        spec = 'customBlock';
+        if (numArgs) {
+            spec += ':' ;
+            for (var i = 0; i < numArgs; i++) spec += ' %s';
+        }
+	    param = this.fakeCustomBlock(type, 'other', spec);
+		param.isDraggable = false;
     } else {
 		param = SpriteMorph.prototype.blockForSelector(selector, true);
 	}
+    param.userMenu = function() { return null; }
 	return param;
 }
 
@@ -623,7 +652,7 @@ CodeHintDialogBoxMorph.prototype.readBlocks = function (list) {
 				this.clearParameter(blck);
 			} else {
 				var secondBlock = blck;
-				blck = this.createBlock(list[i]);;
+				blck = this.createBlock(list[i]);
 				this.clearParameter(blck);
 				blck.nextBlock(secondBlock);
 			}

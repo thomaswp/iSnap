@@ -305,6 +305,11 @@ function SnapDisplay() {
 
 SnapDisplay.prototype = Object.create(HintDisplay.prototype);
 
+SnapDisplay.prototype.hintColorBlock = new Color(34, 174, 76);
+SnapDisplay.prototype.hintColorScript = new Color(255, 127, 29); 
+SnapDisplay.prototype.hintColorStructure = new Color(163, 73, 164);
+SnapDisplay.prototype.hintColorCustomBlock = new Color(0, 162, 232);
+
 SnapDisplay.prototype.initDisplay = function() {
 	this.enabled = false;
     this.hintsShown = 0;
@@ -463,7 +468,8 @@ SnapDisplay.prototype.showHint = function(hint) {
 	var hasCustom = this.hasCustomBlock(hint.data.root);
 	var root = this.getCode(hint.data.root);
 	if (!root) { 
-		console.error("Null hint:", hint)
+		// Null roots should be ok and indicate that this is a hints for a
+		// non-primary custom block hint, which we can ignore.
 		return;
 	}
     this.hintsShown++;
@@ -484,7 +490,7 @@ SnapDisplay.prototype.showHint = function(hint) {
 SnapDisplay.prototype.finishedHints = function() {
     if (this.hintsShown == 0) {
        var myself = this;
-        this.createHintButton(window.ide.currentSprite.scripts, new Color(163, 73, 164), false, function() {
+        this.createHintButton(window.ide.currentSprite.scripts, this.hintColorStructure, false, function() {
             Trace.log("SnapDisplay.showNoHints");
             myself.showMessageDialog("Everything looks good. No suggestions to report.", "No Suggestions");
         });
@@ -497,11 +503,11 @@ SnapDisplay.prototype.showNotEditingCustomBlockHint = function(root) {
 
 	var myself = this;
 	this.customBlockHints.push(root.guid);
-	this.createHintButton(window.ide.currentSprite.scripts, new Color(0, 162, 232), false, function() {
+	this.createHintButton(window.ide.currentSprite.scripts, 
+					      this.hintColorCustomBlock, false, function() {
 		Trace.log("SnapDisplay.showNotEditingCustomBlockHint", {
 			"blockGUID": root.guid,
 		});
-		console.log(root.spec);
 		var name = root.spec.replace(/%'([^']*)'/g, "($1)");
 		myself.showMessageDialog(
 			"There are additional suggestions for the custom block '" + name + "'.", 
@@ -539,7 +545,7 @@ SnapDisplay.prototype.showStructureHint = function(root, from, to, scripts, map,
         }
         
 		(function(message) {	
-			myself.createHintButton(scripts, new Color(163, 73, 164), false, function() {
+			myself.createHintButton(scripts, this.hintColorStructure, false, function() {
                 Trace.log("SnapDisplay.showStructureHint", {
                     "rootType": rootType,
                     "rootID": rootID,
@@ -575,7 +581,32 @@ SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
 }
 
 SnapDisplay.prototype.showCustomBlockHint = function(root, from , to, hasCustom) {
-	console.log("CBH:", root, from, to, hasCustom);
+	var message;
+	if (from.length > to.length) {
+		message = "This block may have too many inputs.";
+	} else if (from.length < to.length) {
+		message = "This block may not have enough inputs.";
+	} else {
+		Trace.logErrorMessage("Unknown custom block hint: " + from + " to " + to);
+	}
+
+	root = root.children[0];
+	if (!root) {
+		Trace.logErrorMessage("Custom block ScriptsMorph with no scripts!");
+		return;
+	}
+
+	var myself = this;
+	var showHint = function() {
+		Trace.log("SnapDisplay.showScriptHint", {
+            "rootID": root.id,
+            "from": from,
+            "to": to
+        });
+		myself.showMessageDialog(message, "Suggestion");
+	};
+
+	this.createHintButton(root, this.hintColorCustomBlock, false, showHint, true);
 }
 
 SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
@@ -606,7 +637,13 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
 		new CodeHintDialogBoxMorph(window.ide).showScriptHint(selector, index, from, to);
 	};
 
-	this.createHintButton(root, new Color(255, 127, 29), true, showHint, hasCustom);
+	// Custom blocks have a header block on top, which we may want to skip for displaying
+	// hints if there's another block underneath. But right now we're not.
+	// if (root._debugType == "PrototypeHatBlockMorph" && root.nextBlock()) {
+	// 	root = root.nextBlock();
+	// }
+
+	this.createHintButton(root, this.hintColorScript, true, showHint, hasCustom);
 }
 
 SnapDisplay.prototype.showBlockHint = function(root, from, to, hasCustom) {
@@ -623,7 +660,7 @@ SnapDisplay.prototype.showBlockHint = function(root, from, to, hasCustom) {
 		new CodeHintDialogBoxMorph(window.ide).showBlockHint(selector, from, to);
 	};
 	
-	this.createHintButton(root, new Color(34, 174, 76), false, showHint, hasCustom);
+	this.createHintButton(root, this.hintColorBlock, false, showHint, hasCustom);
 }
 
 SnapDisplay.prototype.countWhere = function(array, item) {
@@ -638,7 +675,7 @@ SnapDisplay.prototype.showMessageDialog = function(message, title) {
     new MessageHintDialogBoxMorph(message, title, window.ide).popUp();
 }
 
-SnapDisplay.prototype.createHintButton = function(parent, color, script, callback, hasCustom) {
+SnapDisplay.prototype.createHintButton = function(parent, color, scriptHighlight, callback, hasCustom) {
 	if (parent == null) return;
 	
 	var hintBar;
@@ -669,7 +706,7 @@ SnapDisplay.prototype.createHintButton = function(parent, color, script, callbac
 	var button = new PushButtonMorph(hintBar, callback, new SymbolMorph("speechBubble", 14));
 	button.labelColor = color;
 	button.fixLayout();
-	hintBar.addButton(button, parent, script);
+	hintBar.addButton(button, parent, scriptHighlight);
 }
 
 if (window.getHintProvider && window.assignmentID) {
@@ -812,7 +849,6 @@ HintBarMorph.prototype.addButton = function(button, parent, script) {
 	this.add(button);
 	
 	if (!(parent instanceof SyntaxElementMorph)) {
-		// button.idealY = this.children.length * 20;
 		this.layout();
 		return;
 	}
@@ -825,7 +861,6 @@ HintBarMorph.prototype.addButton = function(button, parent, script) {
 	this.layout();
 	
 	if (!parent.addHighlight) {
-		console.log(parent);
 		return;
 	}
 	
@@ -878,8 +913,6 @@ HintBarMorph.prototype.layout = function(now) {
 		}
 		return;
 	}
-	
-	// console.log("layout");
 	
 	this.children.sort(function(a, b) {
 		return (a.idealY || 0) - (b.idealY || 0);

@@ -1,7 +1,10 @@
-* Make custom blocks show up properly for block *and* script hints
-* Implement showCustomBlockHint()
+* Look through JS errors from prod
+* Issues from GitHub 
+* Merge in Berkeley?
 * No ratings for non-suggestion popups
 * Refresh Script bounds when hints are displayed
+* Right clicking on some input types inside hints causes errors (NBD)
 
 Stretch:
 * Open custom block editor automatically when refreshing/viewing logs
+* Have custom blocks in BlockHints show up as they do on screen (since you actually know the spec for those)

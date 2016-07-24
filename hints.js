@@ -500,7 +500,7 @@ SnapDisplay.prototype.finishedHints = function() {
                 Trace.log('SnapDisplay.showNoHints');
                 myself.showMessageDialog(
                     'Everything looks good. No suggestions to report.',
-                    'No Suggestions', false);
+                    'No Suggestions', true);
             });
     }
     this.hintsShown = 0;
@@ -517,9 +517,9 @@ SnapDisplay.prototype.showNotEditingCustomBlockHint = function(root) {
                 'blockGUID': root.guid,
             });
             var name = root.spec.replace(/%'([^']*)'/g, '($1)');
-            var msg = 'There are additional suggestions for the custom block' +
-                "'" + name + "'.";
-            myself.showMessageDialog(msg, 'Check Custom Block', false);
+            var msg = 'There are additional suggestions for the custom block ' +
+                '"' + name + '".';
+            myself.showMessageDialog(msg, 'Check Custom Block', true);
         });
 };
 
@@ -569,20 +569,20 @@ function(root, from, to, scripts, map, postfix) {
     }
 };
 
-SnapDisplay.prototype.showSnapshotHint = function(root, from , to) {
+SnapDisplay.prototype.showSnapshotHint = function(root, from, to) {
     this.showStructureHint(root, from, to, window.ide.currentSprite.scripts, {
         'var': 'global variable',
         'customBlock': 'custom block'
     });
 };
 
-SnapDisplay.prototype.showStageHint = function(root, from , to) {
+SnapDisplay.prototype.showStageHint = function(root, from, to) {
     this.showStructureHint(root, from, to, window.ide.currentSprite.scripts, {
         'sprite': 'sprite'
     });
 };
 
-SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
+SnapDisplay.prototype.showSpriteHint = function(root, from, to) {
     this.showStructureHint(root, from, to, root.scripts, {
         'var': 'variable',
         'script': 'script',
@@ -591,7 +591,7 @@ SnapDisplay.prototype.showSpriteHint = function(root, from , to) {
 };
 
 SnapDisplay.prototype.showCustomBlockHint =
-function(root, from , to, hasCustom) {
+function(root, from, to, hasCustom) {
     var message;
     if (from.length > to.length) {
         message = 'This block may have too many inputs.';
@@ -689,8 +689,8 @@ SnapDisplay.prototype.countWhere = function(array, item) {
     return count;
 };
 
-SnapDisplay.prototype.showMessageDialog = function(message, title, showRating) {
-    new MessageHintDialogBoxMorph(message, title, showRating, window.ide)
+SnapDisplay.prototype.showMessageDialog = function(message, title, hideRating) {
+    new MessageHintDialogBoxMorph(message, title, !hideRating, window.ide)
         .popUp();
 };
 

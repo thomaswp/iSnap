@@ -415,7 +415,7 @@ function (parentSelector, from, to) {
         return;
     }
 
-    // get blck1, blck2 with arg1, arg3 from blockForSelector
+    // get blck1, blck2 with arg1, arg3
     block1 = this.createBlockWithParams(parentSelector, from);
     block2 = this.createBlockWithParams(parentSelector, to);
 
@@ -514,7 +514,17 @@ function(selector, parent, numArgs) {
     } else {
         param = SpriteMorph.prototype.blockForSelector(selector, true);
     }
-    param.userMenu = function() { return null; };
+
+    // Make sure the block doesn't respond to menus and clicks
+    noop = function() { return null; };
+    param.userMenu = noop;
+    param.allChildren().filter(
+        function (child) {
+            return child instanceof InputSlotMorph;
+        }).forEach(function(child) {
+            child.mouseClickLeft = noop;
+        });
+
     return param;
 };
 
@@ -546,10 +556,8 @@ function (parentSelector, index, from, to) {
     // if arg1 is not null, there is nesting
     } else {
         // get corresponding blck1 from arg1
-        block1 = SpriteMorph.prototype.blockForSelector(
-            parentSelector, true);
-        block2 = SpriteMorph.prototype.blockForSelector(
-            parentSelector, true);
+        block1 = this.createBlock(parentSelector);
+        block2 = this.createBlock(parentSelector);
 
         // get corresponding blck2 from arg3
         var block1Body = this.readBlocks(from);

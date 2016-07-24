@@ -4,12 +4,16 @@
     },
     "extends": "eslint:recommended",
     "rules": {
-        "indent": [
+        "semi": [
             "error",
+            "always"
+        ],
+        "indent": [
+            "warn",
             4
         ],
         "linebreak-style": [
-            "error",
+            "warn",
             "windows"
         ],
         "quotes": [
@@ -17,12 +21,8 @@
             "single",
             "avoid-escape"
         ],
-        "semi": [
-            "error",
-            "always"
-        ],
         "max-len": [
-            "error",
+            "warn",
             80
         ],
         "no-trailing-spaces": [

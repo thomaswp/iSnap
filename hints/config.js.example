@@ -1,8 +1,8 @@
 
 function getHintProvider() {
-	var url = 'http://' + location.hostname + ':8080/HintServer/hints';
-	// Options: HintDisplay, DebugDisplay, SnapDisplay
-	var displays = [new SnapDisplay()];
-	var reloadCode = false; // automatically reloads last code
-	return new HintProvider(url, displays, reloadCode);
+    var url = 'http://' + location.hostname + ':8080/HintServer/hints';
+    // Options: HintDisplay, DebugDisplay, SnapDisplay
+    var displays = [new SnapDisplay()];
+    var reloadCode = false; // automatically reloads last code
+    return new HintProvider(url, displays, reloadCode);
 }

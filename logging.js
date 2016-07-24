@@ -10,30 +10,31 @@ var Trace;
 // Credit: http://stackoverflow.com/a/8809472/816458
 function newGuid() {
     var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (d + Math.random()*16)%16 | 0;
-        d = Math.floor(d/16);
-        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
-    });
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
+        function(c) {
+            var r = (d + Math.random() * 16) % 16 | 0;
+            d = Math.floor(d / 16);
+            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
     return uuid;
-};
+}
 
 if (!Date.now) {
-    Date.now = function() { return new Date().getTime(); }
+    Date.now = function() { return new Date().getTime(); };
 }
 
 // Gets a map of the GET parameters in the URL
 // Credit: http://stackoverflow.com/a/5448635/816458
 function getSearchParameters() {
-      var prmstr = window.location.search.substr(1);
-      return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+    var prmstr = window.location.search.substr(1);
+    return prmstr != null && prmstr != '' ? transformToAssocArray(prmstr) : { };
 }
 
 function transformToAssocArray( prmstr ) {
     var params = {};
-    var prmarr = prmstr.split("&");
+    var prmarr = prmstr.split('&');
     for ( var i = 0; i < prmarr.length; i++) {
-        var tmparr = prmarr[i].split("=");
+        var tmparr = prmarr[i].split('=');
         params[tmparr[0]] = tmparr[1];
     }
     return params;
@@ -46,7 +47,7 @@ function checkAssignment() {
     if (!window.assignments || !window.requireAssignment) return;
     if (!window.assignments[assignmentID]) {
         // redirect if no assignment is listed
-        window.location.replace("logging/assignment.html");
+        window.location.replace('logging/assignment.html');
     }
 }
 
@@ -62,27 +63,27 @@ Logger.prototype.serializer = new SnapSerializer();
 Logger.prototype.init = function(interval) {
     this.queue = [];
     this.onCodeChanged = null;
-    this.log("Logger.started");
+    this.log('Logger.started');
     this.start(interval);
-}
+};
 
 // Get user identifying user info and bundle it as an object
 Logger.prototype.userInfo = function() {
     var browserID = null;
     // browser ID stored in cache or local storage
-    if (typeof(Storage) !== "undefined" && localStorage) {
-        browserID = localStorage.getItem("browserID");
+    if (typeof(Storage) !== 'undefined' && localStorage) {
+        browserID = localStorage.getItem('browserID');
         if (!browserID) {
             browserID = newGuid();
-            localStorage.setItem("browserID", browserID);
+            localStorage.setItem('browserID', browserID);
         }
     }
     return {
-        "sessionID": Logger.sessionID,
-        "browserID": browserID,
-        "assignmentID": assignmentID,
+        'sessionID': Logger.sessionID,
+        'browserID': browserID,
+        'assignmentID': assignmentID,
     };
-}
+};
 
 Logger.prototype.flushSaveCode = function() {
     // If we have a pending saveCode function, run it and cancel the callback
@@ -93,7 +94,7 @@ Logger.prototype.flushSaveCode = function() {
             this.saveCodeTimeout = null;
         }
     }
-}
+};
 
 /**
  * Logs a message. Depending on the logger being used, the message
@@ -101,8 +102,8 @@ Logger.prototype.flushSaveCode = function() {
  *
  * @this {Logger}
  * @param {string} message The message to be logged. This is usually
- * of the form "[Class].[action]", e.g. "Logger.started", "IDE.selectSprite"
- * or "Block.snapped"
+ * of the form '[Class].[action]', e.g. 'Logger.started', 'IDE.selectSprite'
+ * or 'Block.snapped'
  * @param {object} data A javascript object to be logged in its entirety. Be
  * careful not to pass large objects here.
  * @param {boolean} saveImmediately If true, the code state will be saved
@@ -118,9 +119,9 @@ Logger.prototype.log = function(message, data, saveImmediately) {
     this.flushSaveCode();
 
     var log = {
-        "message": message,
-        "data": data,
-        "time": Date.now(),
+        'message': message,
+        'data': data,
+        'time': Date.now(),
     };
 
     // Set a callback to save the code state in 1ms
@@ -131,7 +132,7 @@ Logger.prototype.log = function(message, data, saveImmediately) {
     this.saveCode = function() {
         myself.saveCode = null;
         myself.addCode(log);
-    }
+    };
     // If saveImmediately is true, we just run it now
     if (saveImmediately) {
         this.saveCode();
@@ -140,7 +141,7 @@ Logger.prototype.log = function(message, data, saveImmediately) {
     }
 
     this.queue.push(log);
-}
+};
 
 Logger.prototype.logErrorMessage = function(error) {
     try {
@@ -153,31 +154,40 @@ Logger.prototype.logErrorMessage = function(error) {
 
 Logger.prototype.logError = function(error) {
     if (!error) return;
+    // eslint-disable-next-line no-console
     console.error(error);
-    this.log("Error", {
-        "message": error.message,
-        "url": error.fileName,
-        "line": error.lineNumber,
-        "column": error.columnNumber,
-        "stack": error.stack,
-        "browser": this.getBrowser(),
+    this.log('Error', {
+        'message': error.message,
+        'url': error.fileName,
+        'line': error.lineNumber,
+        'column': error.columnNumber,
+        'stack': error.stack,
+        'browser': this.getBrowser(),
     });
-}
+};
 
 // Credit: http://stackoverflow.com/a/9851769/816458
 Logger.prototype.getBrowser = function() {
     try {
-        if (!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) return "Opera";
+        if (!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
+            return 'Opera';
+        }
         // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
-        if (typeof InstallTrigger !== 'undefined') return "Firefox";
-        if (Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) return "Safari";
-            // At least Safari 3+: "[object HTMLElementConstructor]"
-        if (!!window.chrome) return "Chrome";              // Chrome 1+
-        if (/*@cc_on!@*/false || !!document.documentMode) return "IE"; // At least IE6
+        if (typeof InstallTrigger !== 'undefined') return 'Firefox';
+        // At least Safari 3+: '[object HTMLElementConstructor]'
+        if (Object.prototype.toString.call(window.HTMLElement)
+                .indexOf('Constructor') > 0) {
+            return 'Safari';
+        }
+        // Chrome 1+
+        if (window.chrome) return 'Chrome';
+        // At least IE6
+        if (/*@cc_on!@*/false || !!document.documentMode) return 'IE';
     } catch (e) {
+        // empty
     }
     return null;
-}
+};
 
 Logger.prototype.addCode = function(log) {
     if (typeof(ide) == 'undefined' || !ide.stage) return;
@@ -189,21 +199,21 @@ Logger.prototype.addCode = function(log) {
         this.lastCode = code;
         if (this.onCodeChanged) this.onCodeChanged(code);
     }
-}
+};
 
 Logger.prototype.addXmlNewlines = function(xml) {
     // Add newlines at the end of each tag
     // TODO: there's probably a better regex way to do this
     if (!xml) return xml;
-    xml = xml.replace(/(<[^<>]*>)/g, "$1\n");
-    xml = xml.replace(/(.)(<[^<>]*>)/g, "$1\n$2");
+    xml = xml.replace(/(<[^<>]*>)/g, '$1\n');
+    xml = xml.replace(/(.)(<[^<>]*>)/g, '$1\n$2');
     xml = xml.trim();
     return xml;
-}
+};
 
 Logger.prototype.storeMessages = function(logs) {
 
-}
+};
 
 /**
  * Stops the logger from posting messages.
@@ -214,7 +224,7 @@ Logger.prototype.storeMessages = function(logs) {
  */
 Logger.prototype.stop = function() {
     clearInterval(this.storeCallback);
-}
+};
 
 /**
  * Starts the logger. Messages will be posted
@@ -229,15 +239,15 @@ Logger.prototype.start = function(interval) {
     this.storeCallback = setInterval(function() {
         if (myself.queue.length == 0) return;
         myself.flushSaveCode();
-        myself.storeMessages(myself.queue)
+        myself.storeMessages(myself.queue);
         myself.queue = [];
     }, interval);
-}
+};
 
 Logger.prototype.removeImages = function(xml) {
     if (!xml) return xml;
-    return xml.replace(/data:image\/png;base64[^<\"]*/g, "");
-}
+    return xml.replace(/data:image\/png;base64[^<\"]*/g, '');
+};
 
 
 
@@ -256,8 +266,8 @@ DiffLogger.prototype.codeDiff = function(a, b, addNewLines) {
         b = this.addXmlNewlines(b);
     }
 
-    var aArray = a.split("\n");
-    var bArray = b.split("\n");
+    var aArray = a.split('\n');
+    var bArray = b.split('\n');
 
     var difference = window.diff(aArray, bArray);
     var out = [];
@@ -265,29 +275,29 @@ DiffLogger.prototype.codeDiff = function(a, b, addNewLines) {
     for (var i = 0; i < difference.length; i++) {
         var op = difference[i][0];
         var values = difference[i][1];
-        if (op === "+") {
-            out.push([line, "+", values.join("\n")]);
+        if (op === '+') {
+            out.push([line, '+', values.join('\n')]);
             line += values.length;
-        } else if (op == "-") {
-            out.push([line, "-", values.length]);
+        } else if (op == '-') {
+            out.push([line, '-', values.length]);
         } else {
             line += values.length;
         }
     }
     return out;
-}
+};
 
 DiffLogger.prototype.addCode = function(log) {
     Logger.prototype.addCode.call(this, log);
     if (!log.code) return;
 
-    if (!this.lastCode || this.lastProject != log.projectID) this.lastCode = "";
+    if (!this.lastCode || this.lastProject != log.projectID) this.lastCode = '';
     var code = this.addXmlNewlines(log.code);
     log.code = this.codeDiff(this.lastCode, code);
 
     this.lastCode = code;
     this.lastProject = log.projectID;
-}
+};
 
 
 // DBLogger logs to a the logging/mysql.php page,
@@ -301,15 +311,15 @@ DBLogger.prototype = Object.create(Logger.prototype);
 
 DBLogger.prototype.storeMessages = function(logs) {
     var data = {
-        "userInfo": this.userInfo(),
-        "logs": logs,
+        'userInfo': this.userInfo(),
+        'logs': logs,
     };
     this.sendToServer(JSON.stringify(data), 0);
 };
 
 DBLogger.prototype.sendToServer = function(data, attempts) {
     if (attempts >= 3) {
-        // Trace.log("Log.failure"); // creates a loop, probably not good
+        // Trace.log('Log.failure'); // creates a loop, probably not good
         return; // max retries if the logging fails
     }
 
@@ -324,7 +334,7 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
             }, 1000);
         }
     };
-    xhr.open("POST", "logging/mysql.php", true);
+    xhr.open('POST', 'logging/mysql.php', true);
     xhr.send(data);
 };
 
@@ -340,6 +350,7 @@ ConsoleLogger.prototype.storeMessages = function(logs) {
     var myself = this;
     logs.forEach(function(log) {
         log.userInfo = myself.userInfo();
+        // eslint-disable-next-line no-console
         console.log(log);
     });
 };
@@ -362,11 +373,11 @@ function setupLogging() {
 
     window.onerror = function(msg, url, line, column, error) {
         Trace.logError({
-            "message": msg,
-            "fileName": url,
-            "lineNumber": line,
-            "columnNumber": column,
-            "stack": error ? error.stack : null,
+            'message': msg,
+            'fileName': url,
+            'lineNumber': line,
+            'columnNumber': column,
+            'stack': error ? error.stack : null,
         });
     };
 }

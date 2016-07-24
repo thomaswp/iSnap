@@ -1,40 +1,44 @@
 
 // A list of assignments that users can select from when using Snap
 // The assignmentID will be logged with each statement
-// "test" and "view" will not show up on the selection menu
+// 'test' and 'view' will not show up on the selection menu
 window.assignments = {
-	"none": {
-		name: "None (just using Snap)",
-	},
-	"lightsCameraActionHW": {
-		name: "Lights, Camera, Action! (Homework 1)"	
-	},
-	"polygonMakerLab": {
-		name: "Polygon Maker (In Lab Activity 2)"	
-	},
-	"squiralHW": {
-		name: "Squiral (Homework 2)"
-	},
-	"guess1Lab": {
-		name: "Guessing Game Part 1 (In Lab Activity 3)",
-		hints: true,
-	},
-	"guess2HW": {
-		name: "Guessing Game Part 2 (Homework 3)", 
-	},
-	"guess3Lab": {
-		name: "Guessing Game Part 3 (In Lab Activity 4)",
-	},
-	"project": {
-		name: "SNAP Project (Project Deliverable 1)",
-	},
-	"test": {
-		name: "Testing",	
-	},
-	"view": {
-		name: "Viewing",
-	},
-}
+    'none': {
+        name: 'None (just using Snap)',
+    },
+    'lightsCameraActionHW': {
+        name: 'Lights, Camera, Action! (Homework 1)'
+    },
+    'polygonMakerLab': {
+        name: 'Polygon Maker (In Lab Activity 2)',
+        hints: true,
+    },
+    'squiralHW': {
+        name: 'Squiral (Homework 2)',
+        hints: true,
+    },
+    'guess1Lab': {
+        name: 'Guessing Game Part 1 (In Lab Activity 3)',
+        hints: true,
+    },
+    'guess2HW': {
+        name: 'Guessing Game Part 2 (Homework 3)',,
+        hints: true,
+    },
+    'guess3Lab': {
+        name: 'Guessing Game Part 3 (In Lab Activity 4)',
+        hints: true,
+    },
+    'project': {
+        name: 'SNAP Project (Project Deliverable 1)',
+    },
+    'test': {
+        name: 'Testing',
+    },
+    'view': {
+        name: 'Viewing',
+    },
+};
 
 // If true, requires the Snap users to select an assignment before
 // proceeding. Assignments can be pre-specified by using the url
@@ -43,17 +47,17 @@ window.requireAssignment = true;
 
 // Create the logger you want to use on this snap deployment
 window.createLogger = function(assignmentID) {
-    if (assignmentID == "view") {
-		// Logs to the console
+    if (assignmentID == 'view') {
+        // Logs to the console
         return new window.ConsoleLogger(50);
     } else {
-		// Logs to a MySQL database
+        // Logs to a MySQL database
         return new window.DBLogger(3000);
     }
-}
+};
 
 // If this function returns true, Snap will not confirm before
 // you leave the page. This is handy for debugging.
 window.easyReload = function(assignmentID) {
-    return (assignmentID == "test" || assignmentID == "view");
-}
+    return (assignmentID == 'test' || assignmentID == 'view');
+};

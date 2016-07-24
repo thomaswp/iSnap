@@ -9,3 +9,9 @@ Stretch:
 * Merge in Berkeley
 * Open custom block editor automatically when refreshing/viewing logs
 * Have custom blocks in BlockHints show up as they do on screen (since you actually know the spec for those)
+
+From logging:
+* loading projects: update projectID quicker
+* possible duplicate projectIDs?
+* log sprite movements in the stage
+* issues in tracker

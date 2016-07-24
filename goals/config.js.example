@@ -1,4 +1,11 @@
-/* assignments consist of objectives; this is the constructor for an individual objective. each objective has a description which tells more about the objective than the title, each objective has a boolean to indicate completion, each objective has a title, and each objective has prerequisites - meaning that before this objective can be shown other objectives have to be completed first */
+/*
+ * Assignments consist of objectives; this is the constructor for an individual
+ * objective. each objective has a description which tells more about the
+ * objective than the title, each objective has a boolean to indicate
+ * completion, each objective has a title, and each objective has prerequisites
+ * - meaning that before this objective can be shown other objectives have to be
+ * completed first
+ */
 function AssignmentObjective(title, description, prerequisites) {
 	this.description = description;
 	this.isCompleted = false;
@@ -27,7 +34,7 @@ function addObjectives(assignmentID, objectives) {
     var broadcasts = new AssignmentObjective("Ten Broadcasts", "Make sure to have at least 10 broadcasts of messages between the sprites.", [twoSprites]);
 
 	var objectives = [beginning, middle, end, newBlock, twoSprites, broadcasts];
-	
+
 	addObjectives("lightsCameraActionHW", objectives);
 })();
 
@@ -39,7 +46,7 @@ function addObjectives(assignmentID, objectives) {
 	var mysteryTest = new AssignmentObjective("Mystery Test", "Test your block by drawing a polygon with 50 sides, 7 length and 2 thickness. What do you think it will draw?", [implementBlock]);
 
 	var objectives = [createBlock, implementBlock, squareTest, decagonTest, mysteryTest];
-	
+
 	addObjectives("polygonMakerLab", objectives);
 })();
 
@@ -50,10 +57,10 @@ function addObjectives(assignmentID, objectives) {
 	var square = new AssignmentObjective("Draw a Square", "Have your squiral block draw a square.", [createBlock]);
 	var length = new AssignmentObjective("Longer Sides", "Make each side of your squiral longer than the previous.", [square]);
 	var repeat = new AssignmentObjective("Repeat", "Have the squiral repeat until you have drawn the requested number of rotations.", [square]);
-	
+
 
 	var objectives = [createBlock, square, length, repeat];
-	
+
 	addObjectives("squiralHW", objectives);
 })();
 
@@ -67,7 +74,7 @@ function addObjectives(assignmentID, objectives) {
 	var repeat = new AssignmentObjective("Repeat", "Make the player guess until they guess the secret number.", [getAGuess, storeNumber]);
 
 	var objectives = [welcome, greetByName, storeNumber, getAGuess, sayIfCorrect, sayIfTooHighOrLow, repeat];
-	
+
 	addObjectives("guess1Lab", objectives);
 })();
 
@@ -78,7 +85,7 @@ function addObjectives(assignmentID, objectives) {
 	var reportGuesses = new AssignmentObjective("Report Guesses", "When the player wins, tell them how many guesses they took.", [guesses]);
 
 	var objectives = [part1, minMax, guesses, reportGuesses];
-	
+
 	addObjectives("guess2HW", objectives);
 })();
 
@@ -91,6 +98,6 @@ function addObjectives(assignmentID, objectives) {
 	var dontRepeat = new AssignmentObjective("Don't Repeat Guesses", "Make sure the sprite never guesses a number it's already guessed.", [keepTrack]);
 
 	var objectives = [minMax, pickNumber, guess, keepTrack, dontRepeat];
-	
+
 	addObjectives("guess3Lab", objectives);
 })();

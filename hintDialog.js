@@ -398,13 +398,14 @@ function (parentSelector, from, to) {
 
     // check if arg1 is valid
     if (parentSelector === null || typeof parentSelector === 'undefined') {
-        console.log('bad parentSelector in ' +
+        Trace.logErrorMessage('bad parentSelector in ' +
             'HintDialogBoxMorph.prototype.showBlockHint: 1');
         return;
     }
     // check if arg3 is valid
     if (to === null || typeof to === 'undefined') {
-        console.log('bad to in HintDialogBoxMorph.prototype.showBlockHint: 1');
+        Trace.logErrorMessage(
+            'bad to in HintDialogBoxMorph.prototype.showBlockHint: 1');
         return;
     }
 
@@ -414,14 +415,14 @@ function (parentSelector, from, to) {
 
     // blck1 is null means arg1 is incorrect
     if (block1 === null) {
-        console.log('bad parentSelector and from in ' +
+        Trace.logErrorMessage('bad parentSelector and from in ' +
             'HintDialogBoxMorph.prototype.showBlockHint: 2');
         return;
     }
 
     // blck2 is null means arg3 is incorrect
     if (block2 === null) {
-        console.log('bad parentSelector and to in ' +
+        Trace.logErrorMessage('bad parentSelector and to in ' +
             'HintDialogBoxMorph.prototype.showBlockHint: 2');
         return;
     }
@@ -528,7 +529,7 @@ function (parentSelector, index, from, to) {
 
         // check if get blck2 correctly
         if (block2 === null) {
-            console.log(
+            Trace.logErrorMessage(
                 'bad arg3 in HintDialogBoxMorph.prototype.loadScriptHint: 1');
             return;
         }
@@ -549,14 +550,14 @@ function (parentSelector, index, from, to) {
 
         // check if get blck1 correctly
         if (block1 === null) {
-            console.log(
+            Trace.logErrorMessage(
                 'bad arg1 in HintDialogBoxMorph.prototype.loadScriptHint: 1');
             return;
         }
 
         //check if get blck2 correctly
         if (block2 === null) {
-            console.log(
+            Trace.logErrorMessage(
                 'bad arg2 in HintDialogBoxMorph.prototype.loadScriptHint: 2');
             return;
         }
@@ -599,12 +600,14 @@ CodeHintDialogBoxMorph.prototype.addScriptsFrame = function (scriptsFrame) {
 CodeHintDialogBoxMorph.prototype.addBlock = function(blck, num) {
     // check if blck exists
     if (blck === null) {
-        console.log('blck is null in HintDialogBoxMorph.prototype.addBlock: 1');
+        Trace.logErrorMessage(
+            'blck is null in HintDialogBoxMorph.prototype.addBlock: 1');
         return;
     }
     // check if specified scriptsFrame exists
     if (typeof this.body.children[num] === 'undefined') {
-        console.log('bad num in HintDialogBoxMorph.prototype.addBlock: 1');
+        Trace.logErrorMessage(
+            'bad num in HintDialogBoxMorph.prototype.addBlock: 1');
         return;
     }
 

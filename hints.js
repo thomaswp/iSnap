@@ -44,6 +44,7 @@ function HintProvider(url, displays, reloadCode) {
 HintProvider.prototype.init = function(url, displays, reloadCode) {
     this.url = url;
     this.lastHints = [];
+    this.ignoredHints = [];
 
     if (!displays) displays = [];
     if (!displays.length) displays = [displays];
@@ -138,6 +139,7 @@ HintProvider.prototype.processHints = function(json) {
         Trace.log('HintProvider.processHints', hints);
         for (var i = 0; i < hints.length; i++) {
             var hint = hints[i];
+            if (this.shouldIgnoreHint(hint)) continue;
             this.displays.forEach(function(display) {
                 if (display.enabled) {
                     try {
@@ -162,6 +164,14 @@ HintProvider.prototype.processHints = function(json) {
         Trace.logError(e);
         return;
     }
+};
+
+HintProvider.prototype.shouldIgnoreHint = function(hint) {
+
+};
+
+HintProvider.prototype.ignoreHint = function(hint) {
+    this.ignoredHints.push(hint);
 };
 
 HintProvider.prototype.saveCode = function() {
@@ -203,14 +213,17 @@ HintProvider.prototype.setDisplayEnabled = function(displayType, enabled) {
 function HintDisplay() { }
 
 HintDisplay.prototype.showHint = function(hint) {
+    // eslint-disable-next-line no-console
     console.log(hint.from + ' -> ' + hint.to);
 };
 
 HintDisplay.prototype.showError = function(error) {
+    // eslint-disable-next-line no-console
     console.error(error);
 };
 
 HintDisplay.prototype.clear = function() {
+    // eslint-disable-next-line no-console
     console.log('-----------------------------------------');
 };
 
@@ -632,7 +645,9 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
     var index = 0;
     if (block && block != root && block.inputs) {
         index = block.inputs().indexOf(root);
-        if (index == -1) console.error('Bad index!');
+        if (index == -1) {
+            Trace.logErrorMessage('Bad hint index!');
+        }
     }
 
     var showHint = function() {

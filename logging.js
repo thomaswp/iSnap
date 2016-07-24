@@ -39,15 +39,15 @@ function transformToAssocArray( prmstr ) {
     return params;
 }
 
-// Get the assignment passed via GET parameter 
+// Get the assignment passed via GET parameter
 function checkAssignment() {
     assignmentID = getSearchParameters()['assignment'];
-    
+
     if (!window.assignments || !window.requireAssignment) return;
     if (!window.assignments[assignmentID]) {
         // redirect if no assignment is listed
         window.location.replace("logging/assignment.html");
-    } 
+    }
 }
 
 // Logger classes
@@ -98,7 +98,7 @@ Logger.prototype.flushSaveCode = function() {
 /**
  * Logs a message. Depending on the logger being used, the message
  * may be output to the console or sent to be stored in a database.
- * 
+ *
  * @this {Logger}
  * @param {string} message The message to be logged. This is usually
  * of the form "[Class].[action]", e.g. "Logger.started", "IDE.selectSprite"
@@ -143,10 +143,13 @@ Logger.prototype.log = function(message, data, saveImmediately) {
 }
 
 Logger.prototype.logErrorMessage = function(error) {
-    this.logError({
-        "message": error 
-    });
-}
+    try {
+        // Have to actually throw the error for .stack to show up on IE
+        throw new Error(error);
+    } catch (e) {
+        this.logError(e);
+    }
+};
 
 Logger.prototype.logError = function(error) {
     if (!error) return;
@@ -184,7 +187,7 @@ Logger.prototype.addCode = function(log) {
     if (code != this.lastCode) {
         log.code = code;
         this.lastCode = code;
-        if (this.onCodeChanged) this.onCodeChanged(code); 
+        if (this.onCodeChanged) this.onCodeChanged(code);
     }
 }
 
@@ -199,14 +202,14 @@ Logger.prototype.addXmlNewlines = function(xml) {
 }
 
 Logger.prototype.storeMessages = function(logs) {
-    
+
 }
 
 /**
  * Stops the logger from posting messages.
  * Messages can still be logged and will post
  * when the logger is started.
- * 
+ *
  * @this {Logger}
  */
 Logger.prototype.stop = function() {
@@ -216,9 +219,9 @@ Logger.prototype.stop = function() {
 /**
  * Starts the logger. Messages will be posted
  * at the provided interval.
- * 
+ *
  * @param {int} interval The interval at which to post
- * logged messages. 
+ * logged messages.
  */
 Logger.prototype.start = function(interval) {
     if (!interval) return;
@@ -288,7 +291,7 @@ DiffLogger.prototype.addCode = function(log) {
 
 
 // DBLogger logs to a the logging/mysql.php page,
-// which saves to a MySQL database. See more in 
+// which saves to a MySQL database. See more in
 // logging/README.md
 function DBLogger(interval) {
     Logger.call(this, interval);
@@ -333,7 +336,7 @@ function ConsoleLogger(interval) {
     Logger.call(this, interval);
 }
 
-ConsoleLogger.prototype.storeMessages = function(logs) { 
+ConsoleLogger.prototype.storeMessages = function(logs) {
     var myself = this;
     logs.forEach(function(log) {
         log.userInfo = myself.userInfo();
@@ -350,13 +353,13 @@ function setupLogging() {
     } else {
         Trace = new Logger(50);
     }
-    
+
     if (window.easyReload && window.easyReload(assignmentID)) {
         setTimeout(function() {
             window.onbeforeunload = null;
         }, 2000);
     }
-    
+
     window.onerror = function(msg, url, line, column, error) {
         Trace.logError({
             "message": msg,

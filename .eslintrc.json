@@ -1,0 +1,46 @@
+{
+    "env": {
+        "browser": true
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "indent": [
+            "error",
+            4
+        ],
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
+        "quotes": [
+            "error",
+            "single",
+            "avoid-escape"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "max-len": [
+            "error",
+            80
+        ],
+        "no-trailing-spaces": [
+            "error"
+        ],
+        "no-unused-vars": [
+            "error",
+            { "args": "none" }
+        ],
+        "comma-spacing": [
+            "warn",
+            { "before": false, "after": true }
+        ],
+        "space-infix-ops": [
+            "warn"
+        ],
+        "no-undef": "off",
+        "no-console": "off",
+        "no-fallthrough": "off"
+    }
+}

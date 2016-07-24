@@ -44,7 +44,6 @@ function HintProvider(url, displays, reloadCode) {
 HintProvider.prototype.init = function(url, displays, reloadCode) {
     this.url = url;
     this.lastHints = [];
-    this.ignoredHints = [];
 
     if (!displays) displays = [];
     if (!displays.length) displays = [displays];
@@ -139,7 +138,6 @@ HintProvider.prototype.processHints = function(json) {
         Trace.log('HintProvider.processHints', hints);
         for (var i = 0; i < hints.length; i++) {
             var hint = hints[i];
-            if (this.shouldIgnoreHint(hint)) continue;
             this.displays.forEach(function(display) {
                 if (display.enabled) {
                     try {
@@ -164,14 +162,6 @@ HintProvider.prototype.processHints = function(json) {
         Trace.logError(e);
         return;
     }
-};
-
-HintProvider.prototype.shouldIgnoreHint = function(hint) {
-
-};
-
-HintProvider.prototype.ignoreHint = function(hint) {
-    this.ignoredHints.push(hint);
 };
 
 HintProvider.prototype.saveCode = function() {
@@ -320,6 +310,7 @@ SnapDisplay.prototype.hintColorCustomBlock = new Color(0, 162, 232);
 SnapDisplay.prototype.initDisplay = function() {
     this.enabled = false;
     this.hintsShown = 0;
+    this.hiddenHints = [];
 
     var createButton = function(ide) {
         var hintButton = new PushButtonMorph(
@@ -501,7 +492,15 @@ SnapDisplay.prototype.showHint = function(hint) {
     var functionName = 'show' + label.charAt(0).toUpperCase() +
         label.slice(1) + 'Hint';
     var f = this[functionName];
-    if (!f) f = this.showBlockHint;
+    if (!f) {
+        // Block hint roots will be individual block names
+        label = 'block';
+        f = this.showBlockHint;
+    }
+
+    // Ignore hints that have been thumbs'd down
+    if (this.shouldHideHint(root, hint.data.to, label)) return;
+
     f.call(this, root, hint.data.from, hint.data.to, hasCustom);
 };
 
@@ -513,7 +512,7 @@ SnapDisplay.prototype.finishedHints = function() {
                 Trace.log('SnapDisplay.showNoHints');
                 myself.showMessageDialog(
                     'Everything looks good. No suggestions to report.',
-                    'No Suggestions', true);
+                    'No Suggestions', false);
             });
     }
     this.hintsShown = 0;
@@ -532,7 +531,7 @@ SnapDisplay.prototype.showNotEditingCustomBlockHint = function(root) {
             var name = root.spec.replace(/%'([^']*)'/g, '($1)');
             var msg = 'There are additional suggestions for the custom block ' +
                 '"' + name + '".';
-            myself.showMessageDialog(msg, 'Check Custom Block', true);
+            myself.showMessageDialog(msg, 'Check Custom Block', false);
         });
 };
 
@@ -567,7 +566,7 @@ function(root, from, to, scripts, map, postfix) {
         }
 
         (function(message) {
-            myself.createHintButton(scripts, this.hintColorStructure, false,
+            myself.createHintButton(scripts, myself.hintColorStructure, false,
                 function() {
                     Trace.log('SnapDisplay.showStructureHint', {
                         'rootType': rootType,
@@ -576,7 +575,8 @@ function(root, from, to, scripts, map, postfix) {
                         'from': from,
                         'to': to
                     });
-                    myself.showMessageDialog(message, 'Suggestion');
+                    myself.showMessageDialog(message, 'Suggestion', true, root,
+                        to, null);
                 });
         })(message);
     }
@@ -606,17 +606,19 @@ SnapDisplay.prototype.showSpriteHint = function(root, from, to) {
 SnapDisplay.prototype.showCustomBlockHint =
 function(root, from, to, hasCustom) {
     var message;
-    if (from.length > to.length) {
+    var fromInputs = this.countWhere(from, 'var');
+    var toInputs = this.countWhere(to, 'var');
+    if (fromInputs > toInputs) {
         message = 'This block may have too many inputs.';
-    } else if (from.length < to.length) {
+    } else if (fromInputs < toInputs) {
         message = 'This block may not have enough inputs.';
     } else {
-        Trace.logErrorMessage(
-            'Unknown custom block hint: ' + from + ' to ' + to);
+        // We only give hints about number of inputs, not number of scripts
+        return;
     }
 
-    root = root.children[0];
-    if (!root) {
+    var realRoot = root.children[0];
+    if (!realRoot) {
         Trace.logErrorMessage('Custom block ScriptsMorph with no scripts!');
         return;
     }
@@ -624,14 +626,15 @@ function(root, from, to, hasCustom) {
     var myself = this;
     var showHint = function() {
         Trace.log('SnapDisplay.showScriptHint', {
-            'rootID': root.id,
+            'rootID': realRoot.id,
             'from': from,
             'to': to
         });
-        myself.showMessageDialog(message, 'Suggestion');
+        myself.showMessageDialog(message, 'Suggestion', true, root, to,
+            'customBlock');
     };
 
-    this.createHintButton(root, this.hintColorCustomBlock, false, showHint,
+    this.createHintButton(realRoot, this.hintColorCustomBlock, false, showHint,
         true);
 };
 
@@ -650,6 +653,7 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
         }
     }
 
+    var myself = this;
     var showHint = function() {
         var rootID = root ? root.id : null;
         var selector = block ? block.selector : null;
@@ -662,8 +666,11 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
             'from': from,
             'to': to
         });
-        new CodeHintDialogBoxMorph(window.ide).
-            showScriptHint(selector, index, from, to);
+        new CodeHintDialogBoxMorph(window.ide)
+            .showScriptHint(selector, index, from, to)
+            .onThumbsDown(function() {
+                myself.hideHint(root, to, 'script');
+            });
     };
 
     // Custom blocks have a header block on top, which we may want to skip for
@@ -679,6 +686,7 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
 
 SnapDisplay.prototype.showBlockHint = function(root, from, to, hasCustom) {
     var block = root.enclosingBlock();
+    var myself = this;
     var showHint = function() {
         var selector = block ? block.selector : null;
         var blockID = block ? block.id : null;
@@ -689,7 +697,10 @@ SnapDisplay.prototype.showBlockHint = function(root, from, to, hasCustom) {
             'to': to
         });
         new CodeHintDialogBoxMorph(window.ide)
-            .showBlockHint(selector, from, to);
+            .showBlockHint(selector, from, to)
+            .onThumbsDown(function() {
+                myself.hideHint(root, to, 'block');
+            });
     };
 
     this.createHintButton(root, this.hintColorBlock, false, showHint,
@@ -704,9 +715,36 @@ SnapDisplay.prototype.countWhere = function(array, item) {
     return count;
 };
 
-SnapDisplay.prototype.showMessageDialog = function(message, title, hideRating) {
-    new MessageHintDialogBoxMorph(message, title, !hideRating, window.ide)
-        .popUp();
+SnapDisplay.prototype.showMessageDialog =
+function(message, title, showRating, root, to, type) {
+    var myself = this;
+    var dialog = new MessageHintDialogBoxMorph(message, title, showRating,
+        window.ide);
+    dialog.onThumbsDown(function() {
+        myself.hideHint(root, to, type);
+    });
+    dialog.popUp();
+};
+
+SnapDisplay.prototype.hideHint = function(root, to, type) {
+    to = to.join(',');
+    this.hiddenHints.push({
+        'root': root,
+        'to': to,
+        'type': type,
+    });
+};
+
+SnapDisplay.prototype.shouldHideHint = function(root, to, type) {
+    to = to.join(',');
+    for (var i = 0; i < this.hiddenHints.length; i++) {
+        hint = this.hiddenHints[i];
+        if (hint.root == root && hint.to === to &&
+                (hint.type || type) === type) {
+            return true;
+        }
+    }
+    return false;
 };
 
 SnapDisplay.prototype.createHintButton =

@@ -48,6 +48,10 @@ HintDialogBoxMorph.prototype.createThumbButtons = function () {
     ThumbButtons.fixLayout();
 };
 
+HintDialogBoxMorph.prototype.onThumbsDown = function(handler) {
+    this.onThumbsDownHandler = handler;
+};
+
 // define popUp function
 HintDialogBoxMorph.prototype.popUp = function () {
     var minWidth = 0,
@@ -120,9 +124,11 @@ HintDialogBoxMorph.prototype.good = function () {
 
 HintDialogBoxMorph.prototype.logFeedback = function() {
     var feedback = this.getFeedback();
-    if (this.feedback) {
-        Trace.log('HintDialogBox.done', feedback);
+    if (this.onThumbsDownHandler && feedback && feedback.length == 1 &&
+            feedback[0] === 'down') {
+        this.onThumbsDownHandler();
     }
+    Trace.log('HintDialogBox.done', feedback);
 };
 
 HintDialogBoxMorph.prototype.getFeedback = function() {
@@ -438,6 +444,7 @@ function (parentSelector, from, to) {
     this.adjustScroll();
 
     this.popUp();
+    return this;
 };
 
 CodeHintDialogBoxMorph.prototype.createBlockWithParams =
@@ -587,6 +594,7 @@ function (parentSelector, index, from, to) {
     this.adjustScroll();
 
     this.popUp();
+    return this;
 };
 
 // add scriptsFrame to AlignmentMorph in body

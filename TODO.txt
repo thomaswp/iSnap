@@ -2,7 +2,6 @@
 * Issues from GitHub
 * Refresh Script bounds when hints are displayed
 * Right clicking on some input types inside hints causes errors (NBD)
-* Thumbsed down hints should not reshow
 
 Algorithmic:
 * [This doc](https://docs.google.com/document/d/1_t-jeOH34-yaK4aXZpbNDNnAvZt5m4d-1ZY2gTcSQ6o/edit)

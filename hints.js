@@ -366,7 +366,11 @@ SnapDisplay.prototype.hasCustomBlock = function(ref) {
 // Gets the showing/editing version of a customBlock, or returns null if
 // it is not currently being edited, since we can only generate hints for a
 // showing/editing custom block
-SnapDisplay.prototype.editingCustomBlock = function(storedBlock) {
+SnapDisplay.prototype.editingCustomBlock = function(storedBlocks, index) {
+    var storedBlock = storedBlocks.filter(function(block) {
+        return !block.isImported;
+    })[index];
+    if (!storedBlock) return null;
     var showing = BlockEditorMorph.showing;
     if (storedBlock && showing && showing.definition &&
             showing.definition.guid == storedBlock.guid) {
@@ -400,8 +404,8 @@ SnapDisplay.prototype.getCode = function(ref) {
         if (label == 'stage')
             return parent.stage;
         else if (label == 'customBlock')
-            return this.editingCustomBlock(
-                parent.stage.globalBlocks[index - 1]);
+            return this.editingCustomBlock(parent.stage.globalBlocks,
+                index - 1);
         else if (label == 'var')
             return parent.globalVariables.vars;
         break;
@@ -415,8 +419,8 @@ SnapDisplay.prototype.getCode = function(ref) {
         else if (label == 'script')
             return parent.scripts.children[index - nVars];
         else if (label == 'customBlock')
-            return this.editingCustomBlock(
-                parent.customBlocks[index - nVars - nScripts]);
+            return this.editingCustomBlock(parent.customBlocks,
+                index - nVars - nScripts);
         break;
     case 'script':
         var block = parent;

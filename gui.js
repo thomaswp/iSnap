@@ -3626,6 +3626,7 @@ IDE_Morph.prototype.rawOpenBlocksString = function (str, name, silently) {
     if (silently) {
         blocks.forEach(function (def) {
             def.receiver = myself.stage;
+            def.isImported = true;
             myself.stage.globalBlocks.push(def);
             myself.stage.replaceDoubleDefinitionsFor(def);
         });

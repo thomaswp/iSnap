@@ -150,8 +150,9 @@ function CustomBlockDefinition(spec, receiver) {
     // don't serialize (not needed for functionality):
     this.receiver = receiver || null; // for serialization only (pointer)
     this.editorDimensions = null; // a rectangle, last bounds of the editor
-    
+
     this.guid = newGuid();
+    this.isImported = false;
 }
 
 // CustomBlockDefinition instantiating blocks

@@ -812,6 +812,9 @@ SnapSerializer.prototype.loadCustomBlocks = function (
         if (child.attributes.guid) {
             definition.guid = child.attributes.guid;
         }
+        if (child.attributes.isImported) {
+            definition.isImported = child.attributes.isImported === 'true';
+        }
         definition.isGlobal = (isGlobal === true);
         if (definition.isGlobal) {
             object.globalBlocks.push(definition);
@@ -1462,7 +1465,7 @@ StageMorph.prototype.toXML = function (serializer) {
 
     // If the user is currently editing a custom block, we add it to the XML.
     // This is just for logging - it is not used when importing from XML.
-    
+
     var makeEditingBlock = function() {
         var editingBlock = '';
         var editingBlockGuid = '';
@@ -1833,7 +1836,7 @@ CustomBlockDefinition.prototype.toXML = function (serializer) {
     }
 
     return serializer.format(
-        '<block-definition s="@" type="@" category="@" guid="@">' +
+        '<block-definition s="@" type="@" category="@" guid="@" isImported="@">' +
             '%' +
             (this.variableNames.length ? '<variables>%</variables>' : '@') +
             '<header>@</header>' +
@@ -1844,6 +1847,7 @@ CustomBlockDefinition.prototype.toXML = function (serializer) {
         this.type,
         this.category || 'other',
         this.guid,
+        this.isImported,
         this.comment ? this.comment.toXML(serializer) : '',
         (this.variableNames.length ?
                 serializer.store(new List(this.variableNames)) : ''),

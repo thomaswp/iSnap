@@ -1,9 +1,14 @@
 UI:
-* Look through JS errors from prod
-* Issues from GitHub
+* Error on empty custom block script hint
+* Make assignment selection prettier
+* "Not enough"/"Too much" -> "You should have N"
 
 Algorithmic:
 * [This doc](https://docs.google.com/document/d/1_t-jeOH34-yaK4aXZpbNDNnAvZt5m4d-1ZY2gTcSQ6o/edit)
+
+Continuing:
+* Look through JS errors from prod
+* Issues from GitHub
 
 Stretch:
 * Merge in Berkeley

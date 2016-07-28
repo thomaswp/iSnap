@@ -6,6 +6,9 @@
  * - meaning that before this objective can be shown other objectives have to be
  * completed first
  */
+
+var useGoals = true;
+
 function AssignmentObjective(title, description, prerequisites) {
 	this.description = description;
 	this.isCompleted = false;

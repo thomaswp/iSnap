@@ -1,5 +1,6 @@
 (function () {
       if (!window.assignments) return;
+      if (!window.useGoals) return;
       var assignment = window.assignments[window.assignmentID];
       if (!assignment) return;
       var goals = assignment.goals;

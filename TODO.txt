@@ -1,5 +1,6 @@
 UI:
 * Error on empty custom block script hint
+* Fix parent.adjustBoutns bug in HintBar
 * Make assignment selection prettier
 * "Not enough"/"Too much" -> "You should have N"
 

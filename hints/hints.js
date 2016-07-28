@@ -1029,5 +1029,5 @@ HintBarMorph.prototype.layout = function(now) {
         child.setRight(child.right() + deltaX);
     });
     this.setExtent(new Point(right - left, bottom - this.top()));
-    if (this.parent.adjustBounds) this.parent.adjustBounds();
+    // TODO: if (this.parent.adjustBounds) this.parent.adjustBounds();
 };

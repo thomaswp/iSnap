@@ -20,4 +20,3 @@ From logging:
 * loading projects: update projectID quicker
 * possible duplicate projectIDs?
 * log sprite movements in the stage
-* issues in tracker

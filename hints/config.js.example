@@ -1,4 +1,9 @@
 
+window.assignments.polygonMakerLab.hints = true;
+window.assignments.squiralHW.hints = true;
+window.assignments.guess1Lab.hints = true;
+window.assignments.guess2HW.hints = true;
+
 function getHintProvider() {
     var url = 'http://' + location.hostname + ':8080/HintServer/hints';
     // Options: HintDisplay, DebugDisplay, SnapDisplay

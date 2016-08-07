@@ -11,23 +11,18 @@ window.assignments = {
     },
     'polygonMakerLab': {
         name: 'Polygon Maker (In Lab Activity 2)',
-        hints: true,
     },
     'squiralHW': {
         name: 'Squiral (Homework 2)',
-        hints: true,
     },
     'guess1Lab': {
         name: 'Guessing Game Part 1 (In Lab Activity 3)',
-        hints: true,
     },
     'guess2HW': {
-        name: 'Guessing Game Part 2 (Homework 3)',,
-        hints: true,
+        name: 'Guessing Game Part 2 (Homework 3)',
     },
     'guess3Lab': {
         name: 'Guessing Game Part 3 (In Lab Activity 4)',
-        hints: true,
     },
     'project': {
         name: 'SNAP Project (Project Deliverable 1)',

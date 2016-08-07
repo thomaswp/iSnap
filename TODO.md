@@ -1,8 +1,9 @@
 UI:
 * Error on empty custom block script hint
-* Fix parent.adjustBoutns bug in HintBar
+* Fix parent.adjustBounds bug in HintBar
 * Make assignment selection prettier
 * "Not enough"/"Too much" -> "You should have N"
+* Custom block hints should include the header block
 
 Algorithmic:
 * [This doc](https://docs.google.com/document/d/1_t-jeOH34-yaK4aXZpbNDNnAvZt5m4d-1ZY2gTcSQ6o/edit)

@@ -473,6 +473,13 @@ SnapDisplay.prototype.clear = function() {
     window.ide.changed();
 };
 
+function Hint(root, from, to, hasCustom) {
+    this.root = root;
+    this.from = from;
+    this.to = to;
+    this.hasCustom = hasCustom;
+}
+
 SnapDisplay.prototype.showHint = function(hint) {
     if (hint.data.caution) return;
 
@@ -494,7 +501,7 @@ SnapDisplay.prototype.showHint = function(hint) {
     }
 
     var functionName = 'show' + label.charAt(0).toUpperCase() +
-        label.slice(1) + 'Hint';
+            label.slice(1) + 'Hint';
     var f = this[functionName];
     if (!f) {
         // Block hint roots will be individual block names
@@ -505,7 +512,16 @@ SnapDisplay.prototype.showHint = function(hint) {
     // Ignore hints that have been thumbs'd down
     if (this.shouldHideHint(root, hint.data.to, label)) return;
 
-    f.call(this, root, hint.data.from, hint.data.to, hasCustom);
+    var displayHint = new Hint(root, hint.data.from, hint.data.to, hasCustom);
+    var oldHint = null;
+    if (hint.data.oldRoot) {
+        var oldHasCustom = this.hasCustomBlock(hint.data.oldRoot);
+        var oldRoot = this.getCode(hint.data.oldRoot);
+        oldHint = new Hint(oldRoot, hint.data.oldFrom, hint.data.oldTo,
+                oldHasCustom);
+    }
+
+    f.call(this, displayHint, oldHint);
 };
 
 SnapDisplay.prototype.finishedHints = function() {
@@ -540,7 +556,8 @@ SnapDisplay.prototype.showNotEditingCustomBlockHint = function(root) {
 };
 
 SnapDisplay.prototype.showStructureHint =
-function(root, from, to, scripts, map, postfix) {
+function(hint, scripts, map, postfix) {
+    var root = hint.root, from = hint.from, to = hint.to;
     var myself = this;
     if (!postfix) postfix = '';
     for (var key in map) {
@@ -586,29 +603,29 @@ function(root, from, to, scripts, map, postfix) {
     }
 };
 
-SnapDisplay.prototype.showSnapshotHint = function(root, from, to) {
-    this.showStructureHint(root, from, to, window.ide.currentSprite.scripts, {
+SnapDisplay.prototype.showSnapshotHint = function(hint) {
+    this.showStructureHint(hint, window.ide.currentSprite.scripts, {
         'var': 'global variable',
         'customBlock': 'custom block'
     });
 };
 
-SnapDisplay.prototype.showStageHint = function(root, from, to) {
-    this.showStructureHint(root, from, to, window.ide.currentSprite.scripts, {
+SnapDisplay.prototype.showStageHint = function(hint) {
+    this.showStructureHint(hint, window.ide.currentSprite.scripts, {
         'sprite': 'sprite'
     });
 };
 
-SnapDisplay.prototype.showSpriteHint = function(root, from, to) {
-    this.showStructureHint(root, from, to, root.scripts, {
+SnapDisplay.prototype.showSpriteHint = function(hint) {
+    this.showStructureHint(hint, hint.root.scripts, {
         'var': 'variable',
         'script': 'script',
         'customBlock': 'custom block'
     }, ' in this sprite');
 };
 
-SnapDisplay.prototype.showCustomBlockHint =
-function(root, from, to, hasCustom) {
+SnapDisplay.prototype.showCustomBlockHint = function(hint) {
+    var root = hint.root, from = hint.from, to = hint.to;
     var message;
     var fromInputs = this.countWhere(from, 'var');
     var toInputs = this.countWhere(to, 'var');
@@ -642,7 +659,9 @@ function(root, from, to, hasCustom) {
         true);
 };
 
-SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
+SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {
+    var root = hint.root, from = hint.from, to = hint.to;
+
     // For logging, we find the parent block this script is inside of, or null
     var block = root.parent;
     if (block.enclosingBlock) block = block.enclosingBlock();
@@ -657,13 +676,18 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
         }
     }
 
+    var displayRoot = oldHint ? oldHint.root : root;
+    var fromList = oldHint ? [from, oldHint.from] : [from];
+
     var myself = this;
     var showHint = function() {
         var rootID = root ? root.id : null;
+        var displayRootID = displayRoot ? displayRoot.id : null;
         var selector = block ? block.selector : null;
         var blockID = block ? block.id : null;
         Trace.log('SnapDisplay.showScriptHint', {
             'rootID': rootID,
+            'displayRootID': displayRootID,
             'parentSelector': selector,
             'parentID': blockID,
             'index': index,
@@ -671,7 +695,7 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
             'to': to
         });
         new CodeHintDialogBoxMorph(window.ide)
-            .showScriptHint(selector, index, from, to)
+            .showScriptHint(selector, index, fromList, to)
             .onThumbsDown(function() {
                 myself.hideHint(root, to, 'script');
             });
@@ -684,11 +708,13 @@ SnapDisplay.prototype.showScriptHint = function(root, from, to, hasCustom) {
     //     root = root.nextBlock();
     // }
 
-    this.createHintButton(root, this.hintColorScript, true, showHint,
-        hasCustom);
+
+    this.createHintButton(displayRoot, this.hintColorScript, true, showHint,
+        hint.hasCustom);
 };
 
-SnapDisplay.prototype.showBlockHint = function(root, from, to, hasCustom) {
+SnapDisplay.prototype.showBlockHint = function(hint) {
+    var root = hint.root, from = hint.from, to = hint.to;
     var block = root.enclosingBlock();
     var myself = this;
     var showHint = function() {
@@ -708,7 +734,7 @@ SnapDisplay.prototype.showBlockHint = function(root, from, to, hasCustom) {
     };
 
     this.createHintButton(root, this.hintColorBlock, false, showHint,
-        hasCustom);
+        hint.hasCustom);
 };
 
 SnapDisplay.prototype.countWhere = function(array, item) {

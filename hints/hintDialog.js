@@ -535,64 +535,15 @@ function (parentSelector, index, from, to) {
     this.body.orientation = 'row'; //set alignment to horizontal
     this.body.drawNew(); //re-draw alignmentMorph
 
-    var block1, block2;
+    // Create the from and to blocks and put them in the ScriptMorphs
+    var fromBlock = this.createBlockFromList(from[0], parentSelector, index);
+    this.addBlock(fromBlock, 0);
+    var toBlock = this.createBlockFromList(to, parentSelector, index);
+    this.addBlock(toBlock, 1);
 
-    // if arg1 is null, it means no nesting, e.g. doUntil
-    if (parentSelector === null) {
-        // get corresponding blck2 from arg3
-        block1 = this.readBlocks(from);
-        //readBlocks can read a sequence of block and return the top one.
-        block2 = this.readBlocks(to);
-
-        // check if get blck2 correctly
-        if (block2 === null) {
-            Trace.logErrorMessage(
-                'bad arg3 in HintDialogBoxMorph.prototype.loadScriptHint: 1');
-            return;
-        }
-
-        this.addBlock(block1, 0);
-        this.addBlock(block2, 1);
-    // if arg1 is not null, there is nesting
-    } else {
-        // get corresponding blck1 from arg1
-        block1 = this.createBlock(parentSelector);
-        block2 = this.createBlock(parentSelector);
-
-        // get corresponding blck2 from arg3
-        var block1Body = this.readBlocks(from);
-        var block2Body = this.readBlocks(to);
-
-        // check if get blck1 correctly
-        if (block1 === null) {
-            Trace.logErrorMessage(
-                'bad arg1 in HintDialogBoxMorph.prototype.loadScriptHint: 1');
-            return;
-        }
-
-        //check if get blck2 correctly
-        if (block2 === null) {
-            Trace.logErrorMessage(
-                'bad arg2 in HintDialogBoxMorph.prototype.loadScriptHint: 2');
-            return;
-        }
-
-        var input1 = block1.inputs()[index];
-        var input2 = block2.inputs()[index];
-
-        // if the arg2 child is a CSlotMorph, then it is a nested structure
-        if (input1 instanceof CSlotMorph) {
-            input1.nestedBlock(block1Body);
-            input2.nestedBlock(block2Body);
-
-        // else, it is parameter input
-        } else {
-            input1.parent.silentReplaceInput(input1, block1Body);
-            input2.parent.silentReplaceInput(input2, block2Body);
-        }
-
-        this.addBlock(block1, 0);
-        this.addBlock(block2, 1);
+    // Add any additional from blocks (which won't have the same parent)
+    for (var i = 1; i < from.length; i++) {
+        this.addBlock(this.createBlockFromList(from[i]), 0);
     }
 
     // refresh layout
@@ -603,6 +554,26 @@ function (parentSelector, index, from, to) {
 
     this.popUp();
     return this;
+};
+
+CodeHintDialogBoxMorph.prototype.createBlockFromList =
+function(list, parentSelector, index) {
+    var block = this.readBlocks(list);
+    if (parentSelector != null) {
+        var parent = this.createBlock(parentSelector);
+        var input = parent.inputs()[index];
+        if (input instanceof CSlotMorph) {
+            // If the input is a CSlotMorph, then it is a nested structure
+            input.nestedBlock(block);
+        } else {
+            // Else, it is parameter input
+            // eslint-disable-next-line no-console
+            console.log('DOES THIS EVER HAPPEN?');
+            input.parent.silentReplaceInput(input, block);
+        }
+        return parent;
+    }
+    return block;
 };
 
 // add scriptsFrame to AlignmentMorph in body
@@ -628,6 +599,7 @@ CodeHintDialogBoxMorph.prototype.addBlock = function(blck, num) {
     }
 
     this.body.children[num].contents.add(blck);
+    this.body.children[num].contents.cleanUp();
     this.body.children[num].contents.changed();
 };
 
@@ -643,11 +615,11 @@ CodeHintDialogBoxMorph.prototype.fixExtent = function() {
 
     // calculate the size of scriptsFrame
     this.body.children.forEach(function(child) {
-        //child.children[0].setExtent(new Point(250,h));
-        if (child.contents.children[0]) {
-            w = Math.max(child.contents.children[0].fullImage().width, w);
-            h = Math.max(child.contents.children[0].fullImage().height, h);
-        }
+        var fullBounds = child.contents.children.reduce(function(a, b) {
+            return a ? a.merge(b.fullBounds()) : b.fullBounds();
+        }, null) || new Rectangle();
+        w = Math.max(w, fullBounds.width());
+        h = Math.max(h, fullBounds.height());
     });
 
     w = w + 2 * this.padding; // final width of a single scriptFrame

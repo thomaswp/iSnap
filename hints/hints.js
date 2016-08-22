@@ -166,13 +166,13 @@ HintProvider.prototype.processHints = function(json) {
 
 HintProvider.prototype.saveCode = function() {
     if (typeof(Storage) !== 'undefined' && localStorage) {
-        localStorage.setItem('lastCode', this.code);
+        localStorage.setItem('lastCode-' + window.assignmentID, this.code);
     }
 };
 
 HintProvider.prototype.loadCode = function() {
     if (typeof(Storage) !== 'undefined' && localStorage) {
-        var code = localStorage.getItem('lastCode');
+        var code = localStorage.getItem('lastCode-' + window.assignmentID);
         if (code) {
             if (window.ide) {
                 window.ide.droppedText(code);
@@ -713,27 +713,33 @@ SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {
         hint.hasCustom);
 };
 
-SnapDisplay.prototype.showBlockHint = function(hint) {
+SnapDisplay.prototype.showBlockHint = function(hint, oldHint) {
     var root = hint.root, from = hint.from, to = hint.to;
     var block = root.enclosingBlock();
+
+    var displayRoot = oldHint ? oldHint.root : root;
+    var otherBlocks = oldHint ? [oldHint.from] : [];
+
     var myself = this;
     var showHint = function() {
         var selector = block ? block.selector : null;
         var blockID = block ? block.id : null;
+        var displayRootID = displayRoot ? displayRoot.id : null;
         Trace.log('SnapDisplay.showBlockHint', {
             'parentSelector': selector,
             'parentID': blockID,
+            'displayRootID': displayRootID,
             'from': from,
             'to': to
         });
         new CodeHintDialogBoxMorph(window.ide)
-            .showBlockHint(selector, from, to)
+            .showBlockHint(selector, from, to, otherBlocks)
             .onThumbsDown(function() {
                 myself.hideHint(root, to, 'block');
             });
     };
 
-    this.createHintButton(root, this.hintColorBlock, false, showHint,
+    this.createHintButton(displayRoot, this.hintColorBlock, false, showHint,
         hint.hasCustom);
 };
 
@@ -825,36 +831,6 @@ SyntaxElementMorph.prototype.enclosingBlock = function() {
     return block;
 };
 
-// BlockMorph.prototype.basicUserMenu = BlockMorph.prototype.userMenu;
-// BlockMorph.prototype.userMenu = function() {
-//     var menu = this.basicUserMenu();
-//     var callback = this.topBlockInScript().scriptHintCallback;
-//     if (callback) {
-//         menu.addItem(
-//             'Get Script Hint!',
-//             callback
-//         );
-//     }
-//     var inputs = this.inputs();
-//     for (var i = 0; i < inputs.length; i++) {
-//         callback = inputs[i].scriptHintCallback;
-//         if (callback) {
-//             menu.addItem(
-//                 'Get Body Hint! (' + i + ')',
-//                 callback
-//             );
-//         }
-//     }
-//     callback = this.blockHintCallback;
-//     if (callback) {
-//         menu.addItem(
-//             'Get Argument Hint!',
-//             callback
-//         );
-//     }
-//     return menu;
-// }
-
 BlockMorph.prototype.topBlockInScript = function() {
     if (this.parent.nextBlock && this.parent.nextBlock() == this) {
         return this.parent.topBlockInScript();
@@ -890,26 +866,6 @@ BlockMorph.prototype.addSingleHighlight = function() {
 BlockHighlightMorph.prototype.topMorphAt = function(point) {
     return null;
 };
-
-// BlockMorph.prototype.mouseEnter = function() {
-//     if (this.blockHintCallback != null) {
-//         if (this.hintHighlight == null) {
-//             this.hintHighlight = this.addHighlight();
-//             this.fullChanged();
-//             console.log('Added highlight');
-//         }
-//     }
-// }
-
-// BlockMorph.prototype.mouseLeave = function() {
-//     if (this.hintHighlight) {
-//         this.removeChild(this.hintHighlight);
-//         this.hintHighlight.fullChanged();
-//         this.hintHighlight = null;
-//         this.fullChanged();
-//         console.log('Removed highlight');
-//     }
-// }
 
 function HintBarMorph(parent, maxAdjacent) {
     this.init(parent, maxAdjacent | 3);

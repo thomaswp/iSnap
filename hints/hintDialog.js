@@ -392,9 +392,8 @@ CodeHintDialogBoxMorph.prototype.init = function (target) {
 
 // interface for showing hint for a single block
 CodeHintDialogBoxMorph.prototype.showBlockHint =
-function (parentSelector, from, to) {
-    var block1,    //corresponding to arg1
-        block2;    //corresponding to arg3
+function (parentSelector, from, to, otherFromBlocks) {
+    var block1, block2;
 
     //set HintDialogBox body alignment to vertical alignment
     this.body.orientation = 'col'; //set alignment to vertical
@@ -402,20 +401,18 @@ function (parentSelector, from, to) {
     this.body.padding = 2 * this.padding;
     this.body.drawNew(); //re-draw alignmentMorph
 
-    // check if arg1 is valid
-    if (parentSelector === null || typeof parentSelector === 'undefined') {
+    if (!parentSelector) {
         Trace.logErrorMessage('bad parentSelector in ' +
             'HintDialogBoxMorph.prototype.showBlockHint: 1');
         return;
     }
-    // check if arg3 is valid
-    if (to === null || typeof to === 'undefined') {
+    if (!to) {
         Trace.logErrorMessage(
             'bad to in HintDialogBoxMorph.prototype.showBlockHint: 1');
         return;
     }
 
-    // get blck1, blck2 with arg1, arg3
+    // Create parent block with the two sets of parameters
     block1 = this.createBlockWithParams(parentSelector, from);
     block2 = this.createBlockWithParams(parentSelector, to);
 
@@ -433,9 +430,12 @@ function (parentSelector, from, to) {
         return;
     }
 
-    //add suggested block to second scriptsFrame
+    // Add blocks to the scriptsFrame
     this.addBlock(block1, 0);
     this.addBlock(block2, 1);
+    otherFromBlocks.forEach(function(block) {
+       this.addBlock(this.createBlock(block), 0); 
+    }, this);
 
     // refresh layout
     this.fixExtent(); // fix Extent to fit the hints

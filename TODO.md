@@ -1,8 +1,8 @@
 Bugs:
-* Hints disappear from main custom block script when others are added
+* A LinkHint to an empty custom block will look odd
+* Custom block told not to have parameters on PolygonMaker
 
 UI:
-* Error on empty custom block script hint
 * Fix parent.adjustBounds bug in HintBar
 * Make assignment selection prettier
 * "Not enough"/"Too much" -> "You should have N"

@@ -537,7 +537,10 @@ function (parentSelector, index, from, to) {
 
     // Create the from and to blocks and put them in the ScriptMorphs
     var fromBlock = this.createBlockFromList(from[0], parentSelector, index);
-    this.addBlock(fromBlock, 0);
+    if (fromBlock) {
+        // Only the fromBlock can be null (for custom blocks with no body)
+        this.addBlock(fromBlock, 0);
+    }
     var toBlock = this.createBlockFromList(to, parentSelector, index);
     this.addBlock(toBlock, 1);
 

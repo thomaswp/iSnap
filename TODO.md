@@ -1,3 +1,6 @@
+Bugs:
+* Hints disappear from main custom block script when others are added
+
 UI:
 * Error on empty custom block script hint
 * Fix parent.adjustBounds bug in HintBar
@@ -6,6 +9,7 @@ UI:
 * Custom block hints should include the header block
 
 Algorithmic:
+* GG1 bad first hints?
 * [This doc](https://docs.google.com/document/d/1_t-jeOH34-yaK4aXZpbNDNnAvZt5m4d-1ZY2gTcSQ6o/edit)
 
 Continuing:

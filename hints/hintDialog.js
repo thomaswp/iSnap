@@ -39,6 +39,7 @@ HintDialogBoxMorph.prototype.createThumbButtons = function () {
     this.thumbButtons = thumbButtons;
 
     this.addThumbButton('up');
+    this.addThumbButton('neutral');
     this.addThumbButton('down');
 
     // This is in fact required twice. Not sure why...
@@ -1141,7 +1142,7 @@ IDE_Morph.prototype.getHint = function() {
  ******************************************/
 
 function ThumbMorph(
-    thumbType, //'up' or 'down'
+    thumbType, //'up' or 'down' or 'neutral'
     style, // 'checkbox' or 'radiobutton'
     target,
     action, // a toggle function
@@ -1305,6 +1306,12 @@ ThumbMorph.prototype.createTick = function () {
             } else {
                 this.texture = dir + 'thumb_up_unselected.png';
             }
+        } else if (myself.thumbType === 'neutral') {
+            if (state) {
+                this.texture = dir + 'thumb_neutral_selected.png';
+            } else {
+                this.texture = dir + 'thumb_neutral_unselected.png';
+            }
         } else {
             if (state) {
                 this.texture = dir + 'thumb_down_selected.png';
@@ -1346,6 +1353,8 @@ ThumbMorph.prototype.createTick = function () {
 // ToggleMorph action:
 
 ThumbMorph.prototype.trigger = function () {
+    // Don't toggle, just stay pressed
+    if (this.state) return;
     ToggleMorph.uber.trigger.call(this);
     this.refresh();
 };

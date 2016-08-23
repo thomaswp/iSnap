@@ -2213,7 +2213,7 @@ function Morph() {
 
 Morph.prototype.init = function (noDraw) {
     Morph.uber.init.call(this);
-    
+
     this._debugType = this.getDebugType();
     this.isMorph = true;
     this.image = null;
@@ -4536,7 +4536,7 @@ CursorMorph.prototype.initializeClipboardHandler = function () {
             myself.processKeyDown(event);
             this.value = myself.target.selection();
             this.select();
-            
+
             // Make sure tab prevents default
             if (event.keyIdentifier === 'U+0009' ||
                     event.keyIdentifier === 'Tab') {
@@ -4546,7 +4546,7 @@ CursorMorph.prototype.initializeClipboardHandler = function () {
         },
         false
     );
-    
+
     this.clipboardHandler.addEventListener(
         'input',
         function (event) {
@@ -8250,9 +8250,11 @@ TriggerMorph.prototype.init = function (
     this.fontStyle = fontStyle || 'sans-serif';
     this.highlightColor = new Color(192, 192, 192);
     this.pressColor = new Color(128, 128, 128);
+    this.disabledColor = new Color(192, 192, 192);
     this.labelColor = labelColor || new Color(0, 0, 0);
     this.labelBold = labelBold || false;
     this.labelItalic = labelItalic || false;
+    this.disabled = false;
 
     // initialize inherited properties:
     TriggerMorph.uber.init.call(this);
@@ -8288,6 +8290,11 @@ TriggerMorph.prototype.createBackgrounds = function () {
     this.pressImage = newCanvas(ext);
     context = this.pressImage.getContext('2d');
     context.fillStyle = this.pressColor.toString();
+    context.fillRect(0, 0, ext.x, ext.y);
+
+    this.disabledImage = newCanvas(ext);
+    context = this.disabledImage.getContext('2d');
+    context.fillStyle = this.disabledColor.toString();
     context.fillRect(0, 0, ext.x, ext.y);
 
     this.image = this.normalImage;
@@ -8377,9 +8384,16 @@ TriggerMorph.prototype.triggerDoubleClick = function () {
     }
 };
 
+TriggerMorph.prototype.setEnabled = function (enabled) {
+    this.disabled = !enabled;
+    this.image = enabled ? this.normalImage : this.disabledImage;
+    this.changed();
+};
+
 // TriggerMorph events:
 
 TriggerMorph.prototype.mouseEnter = function () {
+    if (this.disabled) return;
     var contents = this.hint instanceof Function ? this.hint() : this.hint;
     this.image = this.highlightImage;
     this.changed();
@@ -8389,6 +8403,7 @@ TriggerMorph.prototype.mouseEnter = function () {
 };
 
 TriggerMorph.prototype.mouseLeave = function () {
+    if (this.disabled) return;
     this.image = this.normalImage;
     this.changed();
     if (this.hint) {
@@ -8397,21 +8412,25 @@ TriggerMorph.prototype.mouseLeave = function () {
 };
 
 TriggerMorph.prototype.mouseDownLeft = function () {
+    if (this.disabled) return;
     this.image = this.pressImage;
     this.changed();
 };
 
 TriggerMorph.prototype.mouseClickLeft = function () {
+    if (this.disabled) return;
     this.image = this.highlightImage;
     this.changed();
     this.trigger();
 };
 
 TriggerMorph.prototype.mouseDoubleClick = function () {
+    if (this.disabled) return;
     this.triggerDoubleClick();
 };
 
 TriggerMorph.prototype.rootForGrab = function () {
+    if (this.disabled) return null;
     return this.isDraggable ? TriggerMorph.uber.rootForGrab.call(this) : null;
 };
 
@@ -10182,7 +10201,7 @@ WorldMorph.prototype.doOneCycle = function () {
 
 WorldMorph.prototype.fillPage = function () {
     var fillParent = this.fillParent;
-    
+
     var pos = getDocumentPositionOf(this.worldCanvas),
         clientHeight = fillParent ? this.worldCanvas.offsetHeight : window.innerHeight,
         clientWidth = fillParent ? this.worldCanvas.offsetWidth : window.innerWidth,

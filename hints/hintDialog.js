@@ -13,58 +13,41 @@ HintDialogBoxMorph.prototype.constructor = HintDialogBoxMorph;
 HintDialogBoxMorph.uber = DialogBoxMorph.prototype;
 
 HintDialogBoxMorph.prototype.initButtons = function() {
-    // TODO: Add rating label:
-    // this.addBody(new TextMorph(
-    //     localize('Rate and dismiss:'),
-    //     14,
-    //     this.fontStyle,
-    //     true,
-    //     false,
-    //     'left',
-    //     null,
-    //     null,
-    //     new Point(1, 1),
-    //     new Color(255, 255, 255)
-    // ));
-
-    // add dismiss buttons
-    function dismiss(rating) {
-        return function() {
-            this.dismiss(rating);
-        };
-    }
-    this.addButton(dismiss('good'), 'Good Suggestion');
-    this.addButton(dismiss('neutral'), 'Neutral');
-    this.addButton(dismiss('bad'), 'Not Helpful');
+    this.okButton = this.addButton('accept', localize('OK'));
 };
 
 HintDialogBoxMorph.prototype.createThumbButtons = function () {
-    var ThumbButtons, txt;
+    var thumbButtons, txt;
 
-    ThumbButtons = new AlignmentMorph('row', this.padding);
+    // Vertically aligned container to hold instructions and buttons
+    container = new AlignmentMorph('column', this.padding / 2);
+    this.thumbContainer = container;
+    this.add(container);
 
-    this.add(ThumbButtons);
-    this.thumbButtons = ThumbButtons;
+    // Instruction text
+    txt = new StringMorph(
+        localize('Please rate the hint to dismiss.'),
+        14,
+        this.fontStyle
+    );
+    txt.drawNew();
+    container.add(txt);
+
+    // Button container
+    thumbButtons = new AlignmentMorph('row', this.padding);
+    container.add(thumbButtons);
+    this.thumbButtons = thumbButtons;
 
     this.addThumbButton('up');
     this.addThumbButton('down');
 
-    txt = new StringMorph(
-        localize('Please rate this suggestion.'),
-        this.fontSize,
-        this.fontStyle,
-        false,
-        false,
-        false,
-        null,
-        this.titleBarColor.darker(this.contrast),
-        new Color(0, 0, 0)
-    );
-    txt.drawNew();
-    ThumbButtons.add(txt);
+    // This is in fact required twice. Not sure why...
+    thumbButtons.fixLayout();
+    thumbButtons.fixLayout();
+    container.fixLayout();
+    container.fixLayout();
 
-    ThumbButtons.fixLayout();
-    ThumbButtons.fixLayout();
+    this.okButton.setEnabled(false);
 };
 
 HintDialogBoxMorph.prototype.onThumbsDown = function(handler) {
@@ -101,7 +84,9 @@ HintDialogBoxMorph.prototype.addThumbButton = function (thumbType) {
     var thumbButton = new ThumbMorph(
         thumbType,
         'radiobutton',
-        null,
+        function() {
+            myself.okButton.setEnabled(true);
+        },
         null,
         null,
         function () {
@@ -134,25 +119,6 @@ HintDialogBoxMorph.prototype.selectThumbButton = function (thumbButton) {
     }
 };
 
-HintDialogBoxMorph.prototype.dismiss = function (rating) {
-    Trace.log('HintDialogBox.dismiss', rating);
-    if (ide.spriteBar.hintButton) {
-        window.hintProvider.setDisplayEnabled(SnapDisplay,
-                ide.spriteBar.hintButton.active);
-    }
-    if (rating === 'bad') {
-        this.onThumbsDownHandler();
-    }
-    this.close();
-};
-
-// define function when accept button is clicked
-HintDialogBoxMorph.prototype.good = function () {
-    this.logFeedback();
-    this.close();
-    ide.spriteBar.hintButton.show();
-};
-
 HintDialogBoxMorph.prototype.logFeedback = function() {
     var feedback = this.getFeedback();
     if (this.onThumbsDownHandler && feedback && feedback.length == 1 &&
@@ -175,19 +141,15 @@ HintDialogBoxMorph.prototype.getFeedback = function() {
     return feedback;
 };
 
-// define function when decline button is clicked
-HintDialogBoxMorph.prototype.otherHints = function () {
-    this.logFeedback();
-    window.hintProvider.setDisplayEnabled(SnapDisplay, true);
-    this.close();
-};
-
 // define close function
-HintDialogBoxMorph.prototype.close = function() {
-    // Trace.log('HintDialogBox.closed');
-    this.destroy();
+HintDialogBoxMorph.prototype.destroy = function() {
+    this.logFeedback();
+    if (ide.spriteBar.hintButton) {
+        window.hintProvider.setDisplayEnabled(SnapDisplay,
+                ide.spriteBar.hintButton.active);
+    }
+    HintDialogBoxMorph.uber.destroy.call(this);
 };
-
 
 
 // MessageHintDialogMorph ////////////////////////////////////////
@@ -242,9 +204,12 @@ function (message, title, showRating, target) {
 
     this.initButtons();
 
+    if (showRating) {
+        this.createThumbButtons();
+    }
+
     this.fixExtent();
     this.fixLayout();
-    // Trace.log('MessageHintDialog.init');
 };
 
 MessageHintDialogBoxMorph.prototype.popUp = function() {
@@ -285,9 +250,9 @@ MessageHintDialogBoxMorph.prototype.fixLayout = function() {
         this.buttons.setBottom(this.bottom() - this.padding);
     }
 
-    if (this.thumbButtons) {
-        this.thumbButtons.setCenter(this.center());
-        this.thumbButtons.setBottom(
+    if (this.thumbContainer) {
+        this.thumbContainer.setCenter(this.center());
+        this.thumbContainer.setBottom(
             this.bottom() - 2 * this.padding - this.buttons.height());
     }
 };
@@ -308,14 +273,14 @@ MessageHintDialogBoxMorph.prototype.fixExtent = function() {
     this.buttons.fixLayout(); //doesn't know why it needs two times but it works
 
     w = Math.max(this.body.width(), this.buttons.width());
-    if (this.thumbButtons) {
-        w = Math.max(w, this.thumbButtons.width());
+    if (this.thumbContainer) {
+        w = Math.max(w, this.thumbContainer.width());
     }
     w += 2 * this.padding;
 
     h = this.body.height() + th + this.buttons.height() + 4 * this.padding;
-    if (this.thumbButtons) {
-        h += this.thumbButtons.height();
+    if (this.thumbContainer) {
+        h += this.thumbContainer.height();
     }
 
     this.setExtent(new Point(w, h));
@@ -401,9 +366,10 @@ CodeHintDialogBoxMorph.prototype.init = function (target) {
     // add buttons to the dialogue
     this.initButtons();
 
+    this.createThumbButtons();
+
     // set layout
     this.fixLayout();
-    // Trace.log('HintDialogBox.init');
 };
 
 // interface for showing hint for a single block
@@ -450,7 +416,7 @@ function (parentSelector, from, to, otherFromBlocks) {
     this.addBlock(block1, 0);
     this.addBlock(block2, 1);
     otherFromBlocks.forEach(function(block) {
-       this.addBlock(this.createBlock(block), 0);
+        this.addBlock(this.createBlock(block), 0);
     }, this);
 
     // refresh layout
@@ -637,6 +603,7 @@ CodeHintDialogBoxMorph.prototype.fixExtent = function() {
 
     // calculate the size of scriptsFrame
     this.body.children.forEach(function(child) {
+        if (!child.contents) return;
         var fullBounds = child.contents.children.reduce(function(a, b) {
             return a ? a.merge(b.fullBounds()) : b.fullBounds();
         }, null) || new Rectangle();
@@ -651,8 +618,9 @@ CodeHintDialogBoxMorph.prototype.fixExtent = function() {
         child.setExtent(new Point(w, h));
     });
 
-    var thumbSize = this.thumbButton ?
-            new Point(this.thumbButton.width(), this.thumbButton.height()) :
+    var thumbSize = this.thumbContainer ?
+            new Point(this.thumbContainer.width(),
+                    this.thumbContainer.height()) :
             new Point(0, 0);
 
     // decide the extent of HintDialogBox based on body orientation
@@ -689,6 +657,7 @@ CodeHintDialogBoxMorph.prototype.fixExtent = function() {
 // adjust v and h scroll bars to original position and hide them
 CodeHintDialogBoxMorph.prototype.adjustScroll = function() {
     this.body.children.forEach(function(child) {
+        if (!child.contents) return;
         child.scrollX(child.contents.width());
         child.scrollY(child.contents.height());
         child.hBar.destroy(); // hide horizontal scroll bar
@@ -831,9 +800,9 @@ CodeHintDialogBoxMorph.prototype.fixLayout = function() {
         this.labels[1].setLeft(this.body.children[1].left());
     }
 
-    if (this.thumbButtons) {
-        this.thumbButtons.setCenter(this.center());
-        this.thumbButtons.setBottom(this.bottom() -
+    if (this.thumbContainer) {
+        this.thumbContainer.setCenter(this.center());
+        this.thumbContainer.setBottom(this.bottom() -
             2 * this.padding - this.buttons.height());
     }
 };
@@ -1439,103 +1408,4 @@ ThumbMorph.prototype.mouseLeave = function () {
 ThumbMorph.prototype.hide = ToggleButtonMorph.prototype.hide;
 
 ThumbMorph.prototype.show = ToggleButtonMorph.prototype.show;
-
-
-/*****************************************
- *  Testing Dialog Morph
- *****************************************/
-
-TestingDialogMorph.prototype = new DialogBoxMorph();
-TestingDialogMorph.prototype.constructor = TestingDialogMorph;
-TestingDialogMorph.uber = DialogBoxMorph.prototype;
-
-TestingDialogMorph.showing = null;
-
-function TestingDialogMorph(target) {
-    TestingDialogMorph.showing = this;
-
-    TestingDialogMorph.uber.init.call(
-        this,
-        target,
-        null,
-        target
-    );
-
-    this.createThumbButtons();
-
-    this.addButton('ok', 'Yes');
-    this.fixLayout();
-    this.drawNew();
-    this.fixLayout();
-    this.popUp(target);
-}
-
-TestingDialogMorph.prototype.createThumbButtons = function () {
-    var thumbButtons, txt;
-
-    thumbButtons = new AlignmentMorph('row', this.padding);
-
-    this.add(thumbButtons);
-    this.thumbButtons = thumbButtons;
-
-    this.addThumbButton('up');
-    this.addThumbButton('down');
-
-    txt = new StringMorph(
-        localize('Please rate the suggestion'),
-        this.fontSize,
-        this.fontStyle,
-        true,
-        false,
-        false,
-        null,
-        this.titleBarColor.darker(this.contrast)
-    );
-    txt.color = new Color(0, 0, 0);
-    txt.drawNew();
-    thumbButtons.add(txt);
-
-    thumbButtons.fixLayout();
-};
-
-TestingDialogMorph.prototype.addThumbButton = function (thumbType) {
-    var selected = false, myself = this;
-
-    var thumbButton = new ThumbMorph(
-        thumbType,
-        'radiobutton',
-        null,
-        null,
-        null,
-        function () {
-            return selected;
-        }
-    );
-    thumbButton.action = function() {
-        myself.selectThumbButton(thumbButton);
-    };
-    thumbButton.query = function() {
-        return thumbButton.state;
-    };
-    thumbButton.selected = selected;
-
-    this.thumbButtons.add(thumbButton);
-};
-
-TestingDialogMorph.prototype.selectThumbButton = function (thumbButton) {
-    if (this.thumbButtons) {
-        this.thumbButtons.children.forEach(function (child) {
-            if (child instanceof ThumbMorph) {
-                if (child === thumbButton) {
-                    child.state = true;
-                } else {
-                    child.state = false;
-                }
-                child.refresh();
-            }
-        });
-    }
-};
-
-
 

@@ -165,7 +165,7 @@ HintProvider.prototype.processHints = function(json) {
 };
 
 HintProvider.prototype.saveCode = function() {
-    if (typeof(Storage) !== 'undefined' && localStorage) {
+    if (typeof(Storage) !== 'undefined' && localStorage && this.code) {
         localStorage.setItem('lastCode-' + window.assignmentID, this.code);
     }
 };
@@ -718,7 +718,7 @@ SnapDisplay.prototype.showBlockHint = function(hint, oldHint) {
     var block = root.enclosingBlock();
 
     var displayRoot = oldHint ? oldHint.root : root;
-    var otherBlocks = oldHint ? [oldHint.from] : [];
+    var otherBlocks = oldHint ? oldHint.from : [];
 
     var myself = this;
     var showHint = function() {

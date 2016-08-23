@@ -434,7 +434,7 @@ function (parentSelector, from, to, otherFromBlocks) {
     this.addBlock(block1, 0);
     this.addBlock(block2, 1);
     otherFromBlocks.forEach(function(block) {
-       this.addBlock(this.createBlock(block), 0); 
+       this.addBlock(this.createBlock(block), 0);
     }, this);
 
     // refresh layout
@@ -513,6 +513,9 @@ function(selector, parent, numArgs) {
         param.isDraggable = false;
     } else {
         param = SpriteMorph.prototype.blockForSelector(selector, true);
+    }
+    if (param == null) {
+        Trace.logErrorMessage('Cannot initialize selector: ' + selector);
     }
 
     // Make sure the block doesn't respond to menus and clicks

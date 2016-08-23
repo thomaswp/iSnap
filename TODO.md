@@ -1,6 +1,6 @@
 Bugs:
 * A LinkHint to an empty custom block will look odd
-* Custom block told not to have parameters on PolygonMaker
+* When first creating a custom block it gets double hints
 
 UI:
 * Fix parent.adjustBounds bug in HintBar

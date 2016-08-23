@@ -44,6 +44,7 @@ function HintProvider(url, displays, reloadCode) {
 HintProvider.prototype.init = function(url, displays, reloadCode) {
     this.url = url;
     this.lastHints = [];
+    this.requestNumber = 0;
 
     if (!displays) displays = [];
     if (!displays.length) displays = [displays];
@@ -112,8 +113,9 @@ HintProvider.prototype.getHintsFromServer = function() {
     this.lastXHR = xhr;
 
     // Response handlers.
+    var requestNumber = ++this.requestNumber;
     xhr.onload = function() {
-        myself.processHints(xhr.responseText);
+        myself.processHints(xhr.responseText, requestNumber);
     };
 
     xhr.onerror = function(e) {
@@ -132,10 +134,15 @@ HintProvider.prototype.showError = function(error) {
     });
 };
 
-HintProvider.prototype.processHints = function(json) {
+HintProvider.prototype.processHints = function(json, requestNumber) {
     try {
         var hints = JSON.parse(json);
         Trace.log('HintProvider.processHints', hints);
+        // If a more recent request has been fired, wait on that one
+        // This is below the log statement because if we have pending code
+        // changes to log, they'll flush and call a new request, and this one
+        // should then be ignored.
+        if (this.requestNumber != requestNumber) return;
         for (var i = 0; i < hints.length; i++) {
             var hint = hints[i];
             this.displays.forEach(function(display) {
@@ -160,7 +167,6 @@ HintProvider.prototype.processHints = function(json) {
         this.lastHints = hints;
     } catch (e) {
         Trace.logError(e);
-        return;
     }
 };
 

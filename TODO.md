@@ -1,6 +1,5 @@
 Bugs:
 * A LinkHint to an empty custom block will look odd
-* When first creating a custom block it gets double hints
 
 UI:
 * Fix parent.adjustBounds bug in HintBar

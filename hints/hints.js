@@ -352,7 +352,7 @@ SnapDisplay.prototype.initDisplay = function() {
             createButton(this);
         }
         this.spriteBar.hintButton.setPosition(new Point(
-            this.stage.left() - this.spriteBar.hintButton.width() - 20,
+            this.stage.left() - this.spriteBar.hintButton.width() / 2 - 60,
             this.spriteBar.hintButton.top()));
     };
 
@@ -769,6 +769,11 @@ function(message, title, showRating, root, to, type) {
 };
 
 SnapDisplay.prototype.hideHint = function(root, to, type) {
+    if (!to || !to.join) return;
+    Trace.log('SnapDisplay.hideHint', {
+        'to': to,
+        'type': type,
+    });
     to = to.join(',');
     this.hiddenHints.push({
         'root': root,

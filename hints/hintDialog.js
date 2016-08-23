@@ -13,10 +13,29 @@ HintDialogBoxMorph.prototype.constructor = HintDialogBoxMorph;
 HintDialogBoxMorph.uber = DialogBoxMorph.prototype;
 
 HintDialogBoxMorph.prototype.initButtons = function() {
-    // add accept and decline button
-    this.addButton('good', 'Done');
-    this.addButton('otherHints', 'Other Suggestions...');
-    // this.addButton('cancel','Cancel'); // How is this different than good?
+    // TODO: Add rating label:
+    // this.addBody(new TextMorph(
+    //     localize('Rate and dismiss:'),
+    //     14,
+    //     this.fontStyle,
+    //     true,
+    //     false,
+    //     'left',
+    //     null,
+    //     null,
+    //     new Point(1, 1),
+    //     new Color(255, 255, 255)
+    // ));
+
+    // add dismiss buttons
+    function dismiss(rating) {
+        return function() {
+            this.dismiss(rating);
+        };
+    }
+    this.addButton(dismiss('good'), 'Good Suggestion');
+    this.addButton(dismiss('neutral'), 'Neutral');
+    this.addButton(dismiss('bad'), 'Not Helpful');
 };
 
 HintDialogBoxMorph.prototype.createThumbButtons = function () {
@@ -115,6 +134,18 @@ HintDialogBoxMorph.prototype.selectThumbButton = function (thumbButton) {
     }
 };
 
+HintDialogBoxMorph.prototype.dismiss = function (rating) {
+    Trace.log('HintDialogBox.dismiss', rating);
+    if (ide.spriteBar.hintButton) {
+        window.hintProvider.setDisplayEnabled(SnapDisplay,
+                ide.spriteBar.hintButton.active);
+    }
+    if (rating === 'bad') {
+        this.onThumbsDownHandler();
+    }
+    this.close();
+};
+
 // define function when accept button is clicked
 HintDialogBoxMorph.prototype.good = function () {
     this.logFeedback();
@@ -149,13 +180,6 @@ HintDialogBoxMorph.prototype.otherHints = function () {
     this.logFeedback();
     window.hintProvider.setDisplayEnabled(SnapDisplay, true);
     this.close();
-};
-
-HintDialogBoxMorph.prototype.cancel = function () {
-    Trace.log('HintDialogBox.cancel');
-
-    this.close();
-    ide.spriteBar.hintButton.show();
 };
 
 // define close function
@@ -213,13 +237,8 @@ function (message, title, showRating, target) {
         null,
         new Point(1, 1),
         new Color(255, 255, 255)
-        );
-
+    );
     this.addBody(txt);
-
-    if (this.showRating) {
-        this.createThumbButtons();
-    }
 
     this.initButtons();
 
@@ -379,9 +398,6 @@ CodeHintDialogBoxMorph.prototype.init = function (target) {
     this.addScriptsFrame(scriptsFrame);
     this.addScriptsFrame(scriptsFrame.fullCopy());
 
-    // add Thumb Buttons
-    this.createThumbButtons();
-
     // add buttons to the dialogue
     this.initButtons();
 
@@ -504,7 +520,7 @@ function(selector, parent, numArgs) {
             type = parent._debugType == 'BooleanSlotMorph' ?
                 'predicate' : 'reporter';
         }
-        spec = 'customBlock';
+        spec = 'Custom Block';
         if (numArgs) {
             spec += ':' ;
             for (var i = 0; i < numArgs; i++) spec += ' %s';
@@ -635,12 +651,16 @@ CodeHintDialogBoxMorph.prototype.fixExtent = function() {
         child.setExtent(new Point(w, h));
     });
 
+    var thumbSize = this.thumbButton ?
+            new Point(this.thumbButton.width(), this.thumbButton.height()) :
+            new Point(0, 0);
+
     // decide the extent of HintDialogBox based on body orientation
     if (this.body.orientation === 'row') {
         this.buttons.fixLayout();
 
         w = Math.max(2 * w + this.padding,
-                    this.thumbButtons.width(),
+                    thumbSize.x,
                     this.buttons.width(),
                     this.label.width(),
                     this.labels[0].width() + this.labels[1].width() +
@@ -649,19 +669,19 @@ CodeHintDialogBoxMorph.prototype.fixExtent = function() {
 
         this.setExtent(new Point(w + 2 * this.padding,
             th + this.buttons.height() + h + 4 * this.padding +
-            this.labels[0].height() + this.thumbButtons.height()));
+            this.labels[0].height() + thumbSize.y));
     } else {
         this.buttons.fixLayout(); //fix button layout before calculating width
 
         w = Math.max(w,
                     this.label.width(),
                     this.buttons.width(),
-                    this.thumbButtons.width()
+                    thumbSize.x
         );
 
         this.setExtent(new Point(w + 2 * this.padding,
             th + this.buttons.height() + 2 * h + 5 * this.padding +
-            2 * this.labels[0].height() + this.thumbButtons.height()));
+            2 * this.labels[0].height() + thumbSize.y));
     }
 };
 
@@ -1116,28 +1136,34 @@ IDE_Morph.prototype.getHint = function() {
     }
 
     if (!this.spriteBar || !this.spriteBar.hintButton) return;
+    var hintButton = this.spriteBar.hintButton;
 
-    var elapseThreshold = 60 * 1000,
-        currentTime = this.spriteBar.hintButton.lastTime;
+    window.hintProvider.clearDisplays();
+    var active = !hintButton.active;
 
-    var showIntentionDialog = false;
+    Trace.log('HelpButton.toggled', active);
 
-    if (this.spriteBar.hintButton.firstClick) {
-        this.spriteBar.hintButton.firstClick = false;
-    } else if (currentTime - this.spriteBar.hintButton.lastClickTime >=
-            elapseThreshold) {
-        showIntentionDialog = true;
-    }
+    window.hintProvider.setDisplayEnabled(SnapDisplay, active);
+    hintButton.active = active;
+    hintButton.labelString = active ? 'Hide Help' : 'Help';
+    hintButton.drawNew();
+    hintButton.fixLayout();
+    ide.fixLayout();
 
-    if (showIntentionDialog) {
-        new IntentionDialogMorph(this).popUp();
-    } else {
-        window.hintProvider.clearDisplays();
-        window.hintProvider.setDisplayEnabled(SnapDisplay, true);
-    }
+    // Currently we don't show the intent dialog, but this is how it's been
+    // calculated in the past'
+    // var elapseThreshold = 60 * 1000,
+    //     currentTime = hintButton.lastTime;
 
-    this.spriteBar.hintButton.lastClickTime = currentTime;
-    this.spriteBar.hintButton.hide();
+    // var showIntentionDialog = false;
+
+    // if (hintButton.firstClick) {
+    //     hintButton.firstClick = false;
+    // } else if (currentTime - hintButton.lastClickTime >=
+    //         elapseThreshold) {
+    //     showIntentionDialog = true;
+    // }
+    // hintButton.lastClickTime = currentTime;
 };
 
 

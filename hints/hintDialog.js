@@ -13,11 +13,20 @@ HintDialogBoxMorph.prototype.constructor = HintDialogBoxMorph;
 HintDialogBoxMorph.uber = DialogBoxMorph.prototype;
 
 HintDialogBoxMorph.prototype.initButtons = function() {
-    this.okButton = this.addButton('accept', localize('OK'));
+    this.acceptButtons = [
+        this.addButton('finished', localize('Done with Help')),
+        this.addButton('moreHints', localize('More Help')),
+    ];
+};
+
+HintDialogBoxMorph.prototype.setButtonsEnabled = function(enabled) {
+    this.acceptButtons.forEach(function(button) {
+        button.setEnabled(enabled);
+    });
 };
 
 HintDialogBoxMorph.prototype.createThumbButtons = function () {
-    var thumbButtons, txt;
+    var thumbButtons, txt, myself = this;
 
     // Vertically aligned container to hold instructions and buttons
     container = new AlignmentMorph('column', this.padding / 2);
@@ -39,8 +48,16 @@ HintDialogBoxMorph.prototype.createThumbButtons = function () {
     this.thumbButtons = thumbButtons;
 
     this.addThumbButton('up');
-    this.addThumbButton('neutral');
     this.addThumbButton('down');
+
+    var button = new PushButtonMorph(
+        this,
+        myself.newHint,
+        localize('Pick Another')
+    );
+    button.drawNew();
+    button.fixLayout();
+    this.thumbButtons.add(button);
 
     // This is in fact required twice. Not sure why...
     thumbButtons.fixLayout();
@@ -48,7 +65,7 @@ HintDialogBoxMorph.prototype.createThumbButtons = function () {
     container.fixLayout();
     container.fixLayout();
 
-    this.okButton.setEnabled(false);
+    this.setButtonsEnabled(false);
 };
 
 HintDialogBoxMorph.prototype.onThumbsDown = function(handler) {
@@ -86,7 +103,7 @@ HintDialogBoxMorph.prototype.addThumbButton = function (thumbType) {
         thumbType,
         'radiobutton',
         function() {
-            myself.okButton.setEnabled(true);
+            myself.setButtonsEnabled(true);
         },
         null,
         null,
@@ -126,7 +143,7 @@ HintDialogBoxMorph.prototype.logFeedback = function() {
             feedback[0] === 'down') {
         this.onThumbsDownHandler();
     }
-    Trace.log('HintDialogBox.done', feedback);
+    Trace.log('HintDialogBox.logFeedback', feedback);
 };
 
 HintDialogBoxMorph.prototype.getFeedback = function() {
@@ -140,6 +157,24 @@ HintDialogBoxMorph.prototype.getFeedback = function() {
         }
     });
     return feedback;
+};
+
+HintDialogBoxMorph.prototype.finished = function() {
+    Trace.log('HintDialogBox.finished');
+    setHintsActive(false);
+    this.destroy();
+};
+
+HintDialogBoxMorph.prototype.moreHints = function() {
+    Trace.log('HintDialogBox.moreHints');
+    setHintsActive(true);
+    this.destroy();
+};
+
+HintDialogBoxMorph.prototype.newHint = function() {
+    Trace.log('HintDialogBox.newHint');
+    setHintsActive(true);
+    this.destroy();
 };
 
 // define close function
@@ -1110,15 +1145,8 @@ IDE_Morph.prototype.getHint = function() {
 
     window.hintProvider.clearDisplays();
     var active = !hintButton.active;
-
-    Trace.log('HelpButton.toggled', active);
-
+    setHintsActive(active);
     window.hintProvider.setDisplayEnabled(SnapDisplay, active);
-    hintButton.active = active;
-    hintButton.labelString = active ? 'Hide Help' : 'Help';
-    hintButton.drawNew();
-    hintButton.fixLayout();
-    ide.fixLayout();
 
     // Currently we don't show the intent dialog, but this is how it's been
     // calculated in the past'
@@ -1135,6 +1163,19 @@ IDE_Morph.prototype.getHint = function() {
     // }
     // hintButton.lastClickTime = currentTime;
 };
+
+function setHintsActive(active) {
+    if (!ide.spriteBar || !ide.spriteBar.hintButton) return;
+    var hintButton = ide.spriteBar.hintButton;
+    if (hintButton.active === active) return;
+    Trace.log('HelpButton.toggled', active);
+    hintButton.active = active;
+    hintButton.labelString =
+        ' ' + localize(active ? 'Hide Help' : 'Get Help') + ' ';
+    hintButton.drawNew();
+    hintButton.fixLayout();
+    ide.fixLayout();
+}
 
 
 /*******************************************

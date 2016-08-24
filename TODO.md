@@ -3,9 +3,9 @@ Bugs:
 
 UI:
 * Fix parent.adjustBounds bug in HintBar
-* Make assignment selection prettier
-* "Not enough"/"Too much" -> "You should have N"
 * Custom block hints should include the header block
+* There's some weirdness when switching between sprites (since spriteBar is
+actually sprite-specific, go figure)
 
 Algorithmic:
 * GG1 bad first hints?
@@ -18,7 +18,9 @@ Continuing:
 Stretch:
 * Merge in Berkeley
 * Open custom block editor automatically when refreshing/viewing logs
-* Have custom blocks in BlockHints show up as they do on screen (since you actually know the spec for those)
+* Have custom blocks in BlockHints show up as they do on screen (since you
+actually know the spec for those)
+* Make assignment selection prettier
 
 From logging:
 * loading projects: update projectID quicker

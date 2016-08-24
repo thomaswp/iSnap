@@ -562,7 +562,7 @@ SnapDisplay.prototype.showNotEditingCustomBlockHint = function(root) {
 };
 
 SnapDisplay.prototype.showStructureHint =
-function(hint, scripts, map, postfix) {
+function(hint, scripts, map, postfix, color) {
     var root = hint.root, from = hint.from, to = hint.to;
     var myself = this;
     if (!postfix) postfix = '';
@@ -571,15 +571,20 @@ function(hint, scripts, map, postfix) {
 
         var fromItems = this.countWhere(from, key);
         var toItems = this.countWhere(to, key);
+        if (fromItems == toItems) continue;
 
         var message = null;
-        if (fromItems > toItems) {
-            message = 'You may have too many ' + map[key] + 's' + postfix + '.';
-        } else if (fromItems < toItems) {
-            message = 'You may need another ' + map[key] + postfix + '.';
+        if (toItems === 0) {
+            message = "You probably don't need any " + map[key] + 's';
+        } else {
+            message = fromItems > toItems ? 'You probably only need ' :
+                'You probably need ';
+            message += toItems > 1 ?
+                toItems + ' ' + map[key] + 's' :
+                (fromItems > toItems ? 'one ' : 'a ') + map[key];
         }
-
-        if (message == null) continue;
+        message += postfix + '.';
+        message = localize(message);
 
         var rootType = null;
         var rootID = null;
@@ -592,8 +597,9 @@ function(hint, scripts, map, postfix) {
             rootType = 'stage';
         }
 
+        color = color || this.hintColorStructure;
         (function(message) {
-            myself.createHintButton(scripts, myself.hintColorStructure, false,
+            myself.createHintButton(scripts, color, false,
                 function() {
                     Trace.log('SnapDisplay.showStructureHint', {
                         'rootType': rootType,
@@ -602,7 +608,7 @@ function(hint, scripts, map, postfix) {
                         'from': from,
                         'to': to
                     });
-                    myself.showMessageDialog(message, 'Suggestion', true, root,
+                    myself.showMessageDialog(message, 'Suggestion', false, root,
                         to, null);
                 });
         })(message);
@@ -611,7 +617,7 @@ function(hint, scripts, map, postfix) {
 
 SnapDisplay.prototype.showSnapshotHint = function(hint) {
     this.showStructureHint(hint, window.ide.currentSprite.scripts, {
-        'var': 'global variable',
+        'var': 'variable',
         'customBlock': 'custom block'
     });
 };
@@ -625,44 +631,21 @@ SnapDisplay.prototype.showStageHint = function(hint) {
 SnapDisplay.prototype.showSpriteHint = function(hint) {
     this.showStructureHint(hint, hint.root.scripts, {
         'var': 'variable',
-        'script': 'script',
+        // 'script': 'script',
         'customBlock': 'custom block'
     }, ' in this sprite');
 };
 
 SnapDisplay.prototype.showCustomBlockHint = function(hint) {
-    var root = hint.root, from = hint.from, to = hint.to;
-    var message;
-    var fromInputs = this.countWhere(from, 'var');
-    var toInputs = this.countWhere(to, 'var');
-    if (fromInputs > toInputs) {
-        message = 'This block may have too many inputs.';
-    } else if (fromInputs < toInputs) {
-        message = 'This block may not have enough inputs.';
-    } else {
-        // We only give hints about number of inputs, not number of scripts
-        return;
-    }
-
+    var root = hint.root; //, from = hint.from, to = hint.to;
     var realRoot = root.children[0];
     if (!realRoot) {
         Trace.logErrorMessage('Custom block ScriptsMorph with no scripts!');
         return;
     }
-
-    var myself = this;
-    var showHint = function() {
-        Trace.log('SnapDisplay.showScriptHint', {
-            'rootID': realRoot.id,
-            'from': from,
-            'to': to
-        });
-        myself.showMessageDialog(message, 'Suggestion', true, root, to,
-            'customBlock');
-    };
-
-    this.createHintButton(realRoot, this.hintColorCustomBlock, false, showHint,
-        true);
+    this.showStructureHint(hint, realRoot, {
+        'var': 'input'
+    }, ' in this block', this.hintColorCustomBlock);
 };
 
 SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {

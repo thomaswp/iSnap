@@ -26,7 +26,7 @@ HintDialogBoxMorph.prototype.createThumbButtons = function () {
 
     // Instruction text
     txt = new StringMorph(
-        localize('Please rate the hint to dismiss.'),
+        localize('Please rate the suggestion to dismiss.'),
         14,
         this.fontStyle
     );

@@ -5543,8 +5543,9 @@ ScriptsMorph.prototype.cleanUp = function (silently) {
         // make sure the prototype hat block always stays on top
         return a instanceof PrototypeHatBlockMorph ? 0 : a.top() - b.top();
     }).forEach(function (child) {
-        if (child instanceof CommentMorph && child.block) {
-            return; // skip anchored comments
+        if ((child instanceof CommentMorph && child.block) ||
+                !child.stackHeight) {
+            return; // skip anchored comments (and hint bubbles)
         }
         child.setPosition(origin.add(new Point(myself.cleanUpMargin, y)));
         if (child instanceof BlockMorph) {

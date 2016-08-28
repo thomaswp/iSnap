@@ -554,9 +554,9 @@ SnapDisplay.prototype.showNotEditingCustomBlockHint = function(root) {
             Trace.log('SnapDisplay.showNotEditingCustomBlockHint', {
                 'blockGUID': root.guid,
             });
-            var name = root.spec.replace(/%'([^']*)'/g, '($1)');
-            var msg = 'There are additional suggestions for the custom block ' +
-                '"' + name + '".';
+            var name = root.spec.replace(/%'([^']*)'/g, '[$1]');
+            var msg = 'Open the custom block ' +
+                '"' + name + '" for more suggestions.';
             myself.showMessageDialog(msg, 'Check Custom Block', false);
         });
 };
@@ -581,7 +581,7 @@ function(hint, scripts, map, postfix, color) {
                 'You probably need ';
             message += toItems > 1 ?
                 toItems + ' ' + map[key] + 's' :
-                (fromItems > toItems ? 'one ' : 'a ') + map[key];
+                'one ' + map[key];
         }
         message += postfix + '.';
         message = localize(message);
@@ -619,7 +619,7 @@ SnapDisplay.prototype.showSnapshotHint = function(hint) {
     this.showStructureHint(hint, window.ide.currentSprite.scripts, {
         'var': 'variable',
         'customBlock': 'custom block'
-    });
+    }, ' (for all sprites)');
 };
 
 SnapDisplay.prototype.showStageHint = function(hint) {
@@ -633,7 +633,7 @@ SnapDisplay.prototype.showSpriteHint = function(hint) {
         'var': 'variable',
         // 'script': 'script',
         'customBlock': 'custom block'
-    }, ' in this sprite');
+    }, ' (in this sprite)');
 };
 
 SnapDisplay.prototype.showCustomBlockHint = function(hint) {

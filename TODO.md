@@ -1,6 +1,4 @@
 UI:
-* Change text for "More Help" button
-* Change text for "There are additional suggestions for..."
 * Fix parent.adjustBounds bug in HintBar
 * There's some weirdness when switching between sprites (since spriteBar is
 actually sprite-specific, go figure)

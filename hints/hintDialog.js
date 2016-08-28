@@ -15,7 +15,7 @@ HintDialogBoxMorph.uber = DialogBoxMorph.prototype;
 HintDialogBoxMorph.prototype.initButtons = function() {
     this.acceptButtons = [
         this.addButton('finished', localize('Done with Help')),
-        this.addButton('moreHints', localize('More Help')),
+        this.addButton('moreHints', localize('Other Suggestions')),
     ];
 };
 

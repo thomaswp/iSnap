@@ -1,9 +1,7 @@
-Bugs:
-* A LinkHint to an empty custom block will look odd
-
 UI:
+* Change text for "More Help" button
+* Change text for "There are additional suggestions for..."
 * Fix parent.adjustBounds bug in HintBar
-* Custom block hints should include the header block
 * There's some weirdness when switching between sprites (since spriteBar is
 actually sprite-specific, go figure)
 
@@ -21,8 +19,4 @@ Stretch:
 * Have custom blocks in BlockHints show up as they do on screen (since you
 actually know the spec for those)
 * Make assignment selection prettier
-
-From logging:
-* loading projects: update projectID quicker
-* possible duplicate projectIDs?
-* log sprite movements in the stage
+* Log sprite movements in the stage

@@ -665,6 +665,11 @@ SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {
         }
     }
 
+    if (root instanceof PrototypeHatBlockMorph) {
+        from.unshift('prototypeHatBlock');
+        to.unshift('prototypeHatBlock');
+    }
+
     var displayRoot = oldHint ? oldHint.root : root;
     var fromList = oldHint ? [from, oldHint.from] : [from];
 
@@ -680,7 +685,7 @@ SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {
             'parentSelector': selector,
             'parentID': blockID,
             'index': index,
-            'from': from,
+            'fromList': fromList,
             'to': to
         });
         new CodeHintDialogBoxMorph(window.ide)
@@ -719,7 +724,8 @@ SnapDisplay.prototype.showBlockHint = function(hint, oldHint) {
             'parentID': blockID,
             'displayRootID': displayRootID,
             'from': from,
-            'to': to
+            'to': to,
+            'otherBlocks': otherBlocks,
         });
         new CodeHintDialogBoxMorph(window.ide)
             .showBlockHint(selector, from, to, otherBlocks)

@@ -508,15 +508,27 @@ function (type, category, spec) {
     }
 };
 
+CodeHintDialogBoxMorph.prototype.fakeHatBlock = function () {
+    var hat = new HatBlockMorph();
+    hat.setCategory('control');
+    hat.setSpec('Custom Block');
+    return hat;
+};
+
 CodeHintDialogBoxMorph.prototype.createBlock =
 function(selector, parent, numArgs) {
     numArgs = numArgs | 0;
     var param;
     if (selector === 'var') {
+        // Create variable (getter) blocks
         param = SpriteMorph.prototype.variableBlock(selector);
         param.isDraggable = false;
+    } else if (selector == 'prototypeHatBlock') {
+        // Create custom block header blocks
+        param = this.fakeHatBlock();
     } else if (selector == 'doCustomBlock' ||
                selector == 'evaluateCustomBlock') {
+        // Create custom blocks
         type = 'command';
         if (parent) {
             type = parent._debugType == 'BooleanSlotMorph' ?
@@ -530,6 +542,7 @@ function(selector, parent, numArgs) {
         param = this.fakeCustomBlock(type, 'other', spec);
         param.isDraggable = false;
     } else {
+        // Create everything else
         param = SpriteMorph.prototype.blockForSelector(selector, true);
     }
     if (param == null) {
@@ -561,8 +574,10 @@ function (parentSelector, index, from, to) {
     if (fromBlock) {
         // Only the fromBlock can be null (for custom blocks with no body)
         this.addBlock(fromBlock, 0);
+        this.clearParameter(fromBlock);
     }
     var toBlock = this.createBlockFromList(to, parentSelector, index);
+    this.clearParameter(toBlock);
     this.addBlock(toBlock, 1);
 
     // Add any additional from blocks (which won't have the same parent)

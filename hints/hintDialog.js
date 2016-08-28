@@ -14,8 +14,8 @@ HintDialogBoxMorph.uber = DialogBoxMorph.prototype;
 
 HintDialogBoxMorph.prototype.initButtons = function() {
     this.acceptButtons = [
-        this.addButton('finished', localize('Done with Help')),
-        this.addButton('moreHints', localize('Other Suggestions')),
+        this.addButton('done', localize('Done with Help')),
+        this.addButton('otherHints', localize('Other Suggestions')),
     ];
 };
 
@@ -138,6 +138,7 @@ HintDialogBoxMorph.prototype.selectThumbButton = function (thumbButton) {
 };
 
 HintDialogBoxMorph.prototype.logFeedback = function() {
+    if (!this.thumbButtons) return;
     var feedback = this.getFeedback();
     if (this.onThumbsDownHandler && feedback && feedback.length == 1 &&
             feedback[0] === 'down') {
@@ -159,14 +160,16 @@ HintDialogBoxMorph.prototype.getFeedback = function() {
     return feedback;
 };
 
-HintDialogBoxMorph.prototype.finished = function() {
-    Trace.log('HintDialogBox.finished');
+HintDialogBoxMorph.prototype.done = function() {
+    Trace.log('HintDialogBox.done');
+    this.logFeedback();
     setHintsActive(false);
     this.destroy();
 };
 
-HintDialogBoxMorph.prototype.moreHints = function() {
-    Trace.log('HintDialogBox.moreHints');
+HintDialogBoxMorph.prototype.otherHints = function() {
+    Trace.log('HintDialogBox.otherHints');
+    this.logFeedback();
     setHintsActive(true);
     this.destroy();
 };
@@ -179,7 +182,11 @@ HintDialogBoxMorph.prototype.newHint = function() {
 
 // define close function
 HintDialogBoxMorph.prototype.destroy = function() {
-    this.logFeedback();
+    if (!this.destroyed) {
+        // Only log destroyed events once (since this can be called repeatedly)
+        Trace.log('HintDialogBox.destroy');
+        this.destroyed = true;
+    }
     if (ide.spriteBar.hintButton) {
         window.hintProvider.setDisplayEnabled(SnapDisplay,
                 ide.spriteBar.hintButton.active);
@@ -638,7 +645,7 @@ CodeHintDialogBoxMorph.prototype.addBlock = function(blck, num) {
     }
 
     this.body.children[num].contents.add(blck);
-    this.body.children[num].contents.cleanUp();
+    this.body.children[num].contents.cleanUp(true);
     this.body.children[num].contents.changed();
 };
 

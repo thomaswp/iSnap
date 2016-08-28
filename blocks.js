@@ -5532,8 +5532,10 @@ ScriptsMorph.prototype.userMenu = function () {
 
 // ScriptsMorph user menu features:
 
-ScriptsMorph.prototype.cleanUp = function () {
-    Trace.log("Scripts.cleanUp");
+ScriptsMorph.prototype.cleanUp = function (silently) {
+    if (!silently) {
+        Trace.log('Scripts.cleanUp');
+    }
     var origin = this.topLeft(),
         y = this.cleanUpMargin,
         myself = this;

@@ -3,6 +3,7 @@ UI:
 * Clean up breaks the hint margin for custom blocks
 * There's some weirdness when switching between sprites (since spriteBar is
 actually sprite-specific, go figure)
+* Need a way to change assignments w/o losing code
 
 Algorithmic:
 * GG1 bad first hints?

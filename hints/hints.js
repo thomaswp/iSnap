@@ -230,6 +230,8 @@ HintDisplay.prototype.finishedHints = function() {
 // DebugDisplay: outputs hints to a div
 
 function DebugDisplay() {
+    this.savedHints = [];
+
     var outer = document.createElement('div');
     outer.classList.add('debug');
     this.outer = outer;
@@ -267,10 +269,59 @@ DebugDisplay.prototype.initDisplay = function() {
 };
 
 DebugDisplay.prototype.showHint = function(hint) {
+    var myself = this;
+    var code = Trace.lastCode;
     if (hint.data.caution) {
         this.div.innerHTML += '*';
     }
-    this.div.innerHTML += this.createDiff(hint.from, hint.to) + '<br />';
+    var hintDiv = document.createElement('div');
+    hintDiv.innerHTML = this.createDiff(hint.from, hint.to) + ' ';
+
+    var hintSaved = this.savedHints.indexOf(this.savedHintKey(hint, code)) >= 0;
+
+    var link = document.createElement('a');
+    link.innerHTML = '<small>' + (hintSaved ? '[Saved]' : 'Save') + '</small>';
+    link.href = '#';
+    hintDiv.appendChild(link);
+    this.div.appendChild(hintDiv);
+    if (!hintSaved) {
+        link.onclick = function(e) {
+            myself.saveHint(hint, code, link);
+            e.preventDefault();
+        };
+    }
+};
+
+DebugDisplay.prototype.savedHintKey = function(hint, code) {
+    return JSON.stringify({
+        'hint': hint,
+        // 'code': code, // Code seems too volatile to use for caching
+    });
+};
+
+DebugDisplay.prototype.saveHint = function(hint, code, link) {
+    var myself = this;
+
+    var xhr = createCORSRequest('POST',
+        window.hintProvider.url + '?assignmentID=' + window.assignmentID +
+        '&save=true');
+
+    if (!xhr) {
+        myself.showError('CORS not supported on this browser.');
+        return;
+    }
+
+    xhr.onload = function() {
+        link.onclick = null;
+        link.innerHTML = '<small>[Saved]</small>';
+        myself.savedHints.push(myself.savedHintKey(hint, code));
+    };
+
+    xhr.onerror = function(e) {
+        myself.showError('Error contacting hint server!');
+    };
+
+    xhr.send(code);
 };
 
 DebugDisplay.prototype.showError = function(error) {

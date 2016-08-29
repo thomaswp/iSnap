@@ -45,6 +45,7 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
     this.url = url;
     this.lastHints = [];
     this.requestNumber = 0;
+    this.reloadCode = reloadCode;
 
     if (!displays) displays = [];
     if (!displays.length) displays = [displays];
@@ -409,6 +410,16 @@ SnapDisplay.prototype.initDisplay = function() {
 
     window.ide.fixLayout();
     BlockEditorMorph.defaultHatBlockMargin = new Point(75, 20);
+
+    var assignment = window.assignments[window.assignmentID];
+    if (assignment.promptHints && !window.hintProvider.reloadCode) {
+        Trace.log('SnapDisplay.promptHints');
+        var message = localize('Welcome to ') + assignment.name + '.';
+        message += ' ' + localize('Remember, if you get stuck, you can use ' +
+            'the "Help" button in the top-right corner to get suggestions.');
+        new DialogBoxMorph().inform(localize('Help Available'), message,
+            ide.world());
+    }
 };
 
 SnapDisplay.prototype.logHints = function() {

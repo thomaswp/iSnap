@@ -305,7 +305,7 @@ DebugDisplay.prototype.saveHint = function(hint, code, link) {
 
     var xhr = createCORSRequest('POST',
         window.hintProvider.url + '?assignmentID=' + window.assignmentID +
-        '&save=true');
+        '&hint=' + encodeURIComponent(JSON.stringify(hint, null, '\t')));
 
     if (!xhr) {
         myself.showError('CORS not supported on this browser.');

@@ -478,7 +478,11 @@ SnapDisplay.prototype.getCode = function(ref) {
             return parent.globalVariables.vars;
         break;
     case 'stage':
-        if (label == 'sprite') return parent.children[index];
+        if (label == 'sprite') {
+            return parent.children.filter(function(child) {
+                return child instanceof SpriteMorph;
+            })[index];
+        }
     case 'sprite':
         var nVars = Object.keys(parent.variables.vars).length;
         var nScripts = parent.scripts.children.length;

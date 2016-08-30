@@ -231,7 +231,7 @@ HintDisplay.prototype.finishedHints = function() {
 // DebugDisplay: outputs hints to a div
 
 function DebugDisplay() {
-    this.savedHints = [];
+    this.savedHints = {};
 
     var outer = document.createElement('div');
     outer.classList.add('debug');
@@ -272,16 +272,18 @@ DebugDisplay.prototype.initDisplay = function() {
 DebugDisplay.prototype.showHint = function(hint) {
     var myself = this;
     var code = Trace.lastCode;
-    if (hint.data.caution) {
-        this.div.innerHTML += '*';
-    }
-    var hintDiv = document.createElement('div');
-    hintDiv.innerHTML = this.createDiff(hint.from, hint.to) + ' ';
 
-    var hintSaved = this.savedHints.indexOf(this.savedHintKey(hint, code)) >= 0;
+    var hintDiv = document.createElement('div');
+    if (hint.data.caution) {
+        hintDiv.innerHTML += '*';
+    }
+    hintDiv.innerHTML += this.createDiff(hint.from, hint.to) + ' ';
+
+    var hintSaved = this.savedHints[this.savedHintKey(hint, code)];
 
     var link = document.createElement('a');
-    link.innerHTML = '<small>' + (hintSaved ? '[Saved]' : 'Save') + '</small>';
+    link.innerHTML = '<small>' + (hintSaved ? '[' + hintSaved + ']' : 'Save') +
+        '</small>';
     link.href = '#';
     hintDiv.appendChild(link);
     this.div.appendChild(hintDiv);
@@ -294,10 +296,7 @@ DebugDisplay.prototype.showHint = function(hint) {
 };
 
 DebugDisplay.prototype.savedHintKey = function(hint, code) {
-    return JSON.stringify({
-        'hint': hint,
-        // 'code': code, // Code seems too volatile to use for caching
-    });
+    return JSON.stringify(hint);
 };
 
 DebugDisplay.prototype.saveHint = function(hint, code, link) {
@@ -313,9 +312,10 @@ DebugDisplay.prototype.saveHint = function(hint, code, link) {
     }
 
     xhr.onload = function() {
+        var id = xhr.responseText;
         link.onclick = null;
-        link.innerHTML = '<small>[Saved]</small>';
-        myself.savedHints.push(myself.savedHintKey(hint, code));
+        link.innerHTML = '<small>[' + id + ']</small>';
+        myself.savedHints[myself.savedHintKey(hint, code)] = id;
     };
 
     xhr.onerror = function(e) {

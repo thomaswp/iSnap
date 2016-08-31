@@ -236,7 +236,12 @@ XML_Serializer.prototype.load = function (xmlString) {
 XML_Serializer.prototype.parse = function (xmlString) {
     // private - answer an XML_Element representing the given XML String
     var element = new XML_Element();
-    element.parseString(xmlString);
+    try {
+        element.parseString(xmlString);
+    } catch (e) {
+        Trace.log('XML.parseFailed', xmlString);
+        throw e;
+    }
     return element;
 };
 

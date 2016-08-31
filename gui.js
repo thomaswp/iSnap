@@ -4866,6 +4866,7 @@ function ProjectDialogMorph(ide, label) {
 }
 
 ProjectDialogMorph.prototype.init = function (ide, task) {
+    Trace.log('ProjectDialog.shown');
     var myself = this;
 
     // additional properties:
@@ -5157,6 +5158,7 @@ ProjectDialogMorph.prototype.fixListFieldItemColors = function () {
 // ProjectDialogMorph ops
 
 ProjectDialogMorph.prototype.setSource = function (source) {
+    Trace.log('ProjectDialog.setSource', source);
     var myself = this,
         msg;
 

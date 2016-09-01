@@ -2235,10 +2235,12 @@ BlockMorph.prototype.userMenu = function () {
         top,
         blck;
 
-    menu.addItem(
-        "help...",
-        'showHelp'
-    );
+    if (!(this.definition instanceof CustomBlockDefinition)) {
+        menu.addItem(
+            "help...",
+            'showHelp'
+        );
+    }
     if (shiftClicked) {
         top = this.topBlock();
         if (top instanceof ReporterBlockMorph) {
@@ -2275,7 +2277,9 @@ BlockMorph.prototype.userMenu = function () {
         }
         return menu;
     }
-    menu.addLine();
+    if (menu.items.length > 0) {
+        menu.addLine();
+    }
     if (this.selector === 'reportGetVar') {
         blck = this.fullCopy();
         blck.addShadow();
@@ -2288,7 +2292,7 @@ BlockMorph.prototype.userMenu = function () {
                         Trace.log("Block.rename", {
                             "id": myself.blockId(),
                             "name": arg,
-                        })
+                        });
                         myself.setSpec(arg);
                     },
                     myself

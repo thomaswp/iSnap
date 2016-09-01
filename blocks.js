@@ -2235,7 +2235,8 @@ BlockMorph.prototype.userMenu = function () {
         top,
         blck;
 
-    if (!(this.definition instanceof CustomBlockDefinition)) {
+    if (!(this.definition instanceof CustomBlockDefinition) ||
+            (this.definition && this.definition.isImported)) {
         menu.addItem(
             "help...",
             'showHelp'

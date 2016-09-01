@@ -9984,6 +9984,10 @@ HandMorph.prototype.processDrop = function (event) {
         var frd = new FileReader();
         while (!target.droppedText) {
             target = target.parent;
+            // If no parent can receive text, default to the IDE
+            if (target === window.world) {
+                target = target.children[0];
+            }
         }
         frd.onloadend = function (e) {
             target.droppedText(e.target.result, aFile.name);

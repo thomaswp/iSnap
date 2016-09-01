@@ -2634,6 +2634,7 @@ BlockMorph.prototype.showHelp = function () {
     Trace.log("Block.showHelp", this.blockId());
     var myself = this,
         ide = this.parentThatIsA(IDE_Morph),
+        blockEditor,
         pic = new Image(),
         help,
         comment,
@@ -2642,6 +2643,15 @@ BlockMorph.prototype.showHelp = function () {
         spec = isCustomBlock ?
                 this.definition.helpSpec() : this.selector,
         ctx;
+
+    if (!ide) {
+        blockEditor = this.parentThatIsA(BlockEditorMorph);
+        if (blockEditor) {
+            ide = blockEditor.target.parentThatIsA(IDE_Morph);
+        } else {
+            return;
+        }
+    }
 
     pic.onload = function () {
         help = newCanvas(new Point(pic.width, pic.height));

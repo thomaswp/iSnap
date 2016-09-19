@@ -46,6 +46,7 @@ include '../config.php';
 				color: black;
 			}
 		</style>
+		<script type="text/javascript" src="../config.js"></script>
 		<script type="text/javascript">
 			function loadSnap(id, project) {
 				var xhr = new XMLHttpRequest();
@@ -59,8 +60,41 @@ include '../config.php';
 			}
 		</script>
 	</head>
-	
 	<body>
+	
+	<?php
+
+
+		if ($enble_viewer) {
+			if (!array_key_exists('assignment', $_GET)) {
+	?>
+			<form method="GET" action="grade.php">
+				Assignment:
+				<select name="assignment" id="assignments">
+				</select>
+				<script>
+					var select = document.getElementById("assignments");
+					for (var key in assignments) {
+					if (assignments.hasOwnProperty(key)) {
+						if (key == "test" || key == "view") continue;
+						var option = document.createElement("option");
+						option.text = assignments[key].name || assignments[key];
+						option.value = key;
+						select.add(option);
+					}
+				}
+				</script>
+				<br />
+				Assignment End Cutoff: <input type="date" name="time" />
+				<br />
+				<input type="submit" value="View Grading" />
+			</form></body></html>
+	<?php
+
+			return;
+		}
+	?>
+
 		<div id="wrapper">
 			<div id="sidebar">
 				 <iframe id="snap" width="100%" height="100%" src="../../snap.html?assignment=view"></iframe> 
@@ -68,10 +102,9 @@ include '../config.php';
 			<div id="content">
 				<div style="overflow: scroll; height: 100%;">
 				<?php
-					if ($enble_viewer) {
 						$assignment = mysql_real_escape_string($_GET['assignment']);
 						$time = mysql_real_escape_string($_GET['time']);
-						
+
 						echo "<h3>Projects: $assignment</h3>";
 						
 						$mysqli = new mysqli($host, $user, $password, $db);

@@ -661,6 +661,13 @@ function(hint, scripts, map, postfix, color) {
             rootType = 'snapshot';
         } else if (root instanceof StageMorph) {
             rootType = 'stage';
+        } else if (root instanceof ScriptsMorph) {
+            // ScriptsMorphs should only be the root for custom block hints
+            rootType = 'customBlock';
+            rootID = root.children[0].definition.guid;
+        } else {
+            // eslint-disable-next-line no-console
+            console.warn('Unknown root type', root);
         }
 
         color = color || this.hintColorStructure;

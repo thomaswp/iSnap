@@ -28,7 +28,7 @@ include '../config.php';
                 if ($mysqli->connect_errno) {
                     die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
                 }
-                $query = "SELECT count(*) as count, time, data, assignmentID, projectID FROM $table WHERE message='Error' GROUP BY projectID, data ORDER BY time DESC";
+                $query = "SELECT count(*) as count, MAX(time) AS time, data, assignmentID, projectID FROM $table WHERE message='Error' GROUP BY data, assignmentID, projectID ORDER BY time DESC";
                 $result = $mysqli->query($query); 
                 if (!$result) {
                     die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);

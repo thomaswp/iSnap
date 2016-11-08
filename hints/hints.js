@@ -369,6 +369,7 @@ SnapDisplay.prototype.initDisplay = function() {
     this.enabled = false;
     this.hintsShown = 0;
     this.hiddenHints = [];
+    this.customBlocksWithHints = [];
 
     var createButton = function(ide) {
         var hintButton = new PushButtonMorph(
@@ -519,7 +520,7 @@ SnapDisplay.prototype.getCode = function(ref) {
 
 SnapDisplay.prototype.clear = function() {
     this.hintsShown = 0;
-    this.customBlockHints = [];
+    this.customBlocksWithHints = [];
 
     this.hintBars.forEach(function(bar) {
         var parent = bar.parent;
@@ -568,7 +569,7 @@ SnapDisplay.prototype.showHint = function(hint) {
     // If this is a hint for a custom block that isn't showing, display
     // a special hint to indicate that
     if (hasCustom && root._debugType == 'CustomBlockDefinition') {
-        this.showNotEditingCustomBlockHint(root);
+        this.customBlocksWithHints.push(root);
         return;
     }
 
@@ -597,6 +598,7 @@ SnapDisplay.prototype.showHint = function(hint) {
 };
 
 SnapDisplay.prototype.finishedHints = function() {
+    this.showNotEditingCustomBlockHint(this.customBlocksWithHints);
     if (this.hintsShown == 0) {
         var myself = this;
         this.createHintButton(window.ide.currentSprite.scripts,
@@ -610,19 +612,32 @@ SnapDisplay.prototype.finishedHints = function() {
     this.hintsShown = 0;
 };
 
-SnapDisplay.prototype.showNotEditingCustomBlockHint = function(root) {
-    if (this.customBlockHints.includes(root.guid)) return;
+SnapDisplay.prototype.showNotEditingCustomBlockHint = function(roots) {
+    if (roots.length === 0) return;
+
+    var guids = [];
+    var names = [];
+    roots.forEach(function(root) {
+        if (guids.includes(root.guid)) return;
+        guids.push(root.guid);
+        names.push(root.spec.replace(/%'([^']*)'/g, '[$1]'));
+    });
 
     var myself = this;
-    this.customBlockHints.push(root.guid);
     this.createHintButton(window.ide.currentSprite.scripts,
         this.hintColorCustomBlock, false, function() {
             Trace.log('SnapDisplay.showNotEditingCustomBlockHint', {
-                'blockGUID': root.guid,
+                'blockGUIDs': guids,
             });
-            var name = root.spec.replace(/%'([^']*)'/g, '[$1]');
-            var msg = 'Open the custom block ' +
-                '"' + name + '" for more suggestions.';
+            var msg;
+            if (names.length === 1) {
+                msg = 'Open the custom block ' +
+                    '"' + name + '" for more suggestions.';
+            } else {
+                msg = 'Open the following custom blocks for more suggestions: "'
+                    + names.join('", "') + '".';
+            }
+
             myself.showMessageDialog(msg, 'Check Custom Block', false);
         });
 };

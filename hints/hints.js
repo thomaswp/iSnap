@@ -632,7 +632,7 @@ SnapDisplay.prototype.showNotEditingCustomBlockHint = function(roots) {
             var msg;
             if (names.length === 1) {
                 msg = 'Open the custom block ' +
-                    '"' + name + '" for more suggestions.';
+                    '"' + names[0] + '" for more suggestions.';
             } else {
                 msg = 'Open the following custom blocks for more suggestions: "'
                     + names.join('", "') + '".';

@@ -278,6 +278,10 @@ DebugDisplay.prototype.showHint = function(hint) {
         hintDiv.innerHTML += '*';
     }
     hintDiv.innerHTML += this.createDiff(hint.from, hint.to) + ' ';
+    if (hint.data && hint.data.goal) {
+        hintDiv.innerHTML += ' <code style="color: #333">| G:[' +
+                hint.data.goal.join(', ') + ']</code> ';
+    }
 
     var hintSaved = this.savedHints[this.savedHintKey(hint, code)];
 

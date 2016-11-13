@@ -334,7 +334,6 @@ DebugDisplay.prototype.saveHint = function(hint, code, links, good) {
     xhr.onload = function() {
         var id = xhr.responseText;
         links.forEach(function(link) {
-            console.log(link);
             link.onclick = null;
             link.innerHTML = '<small>[' + id + ']</small>';
         });
@@ -574,6 +573,13 @@ function Hint(root, from, to, hasCustom) {
     this.from = from;
     this.to = to;
     this.hasCustom = hasCustom;
+
+    this.hidden = function() {
+        // Hidden custom block hints will have roots that are
+        // CustomBlockDefinitions, while non-hidden ones will have
+        // ScriptsMorphs as roots
+        return this.hasCustom && this.root instanceof CustomBlockDefinition;
+    };
 }
 
 SnapDisplay.prototype.showHint = function(hint) {
@@ -588,13 +594,6 @@ SnapDisplay.prototype.showHint = function(hint) {
     }
     this.hintsShown++;
     var label = hint.data.root.label;
-
-    // If this is a hint for a custom block that isn't showing, display
-    // a special hint to indicate that
-    if (hasCustom && root._debugType == 'CustomBlockDefinition') {
-        this.customBlocksWithHints.push(root);
-        return;
-    }
 
     var functionName = 'show' + label.charAt(0).toUpperCase() +
             label.slice(1) + 'Hint';
@@ -615,6 +614,17 @@ SnapDisplay.prototype.showHint = function(hint) {
         var oldRoot = this.getCode(hint.data.oldRoot);
         oldHint = new Hint(oldRoot, hint.data.oldFrom, hint.data.oldTo,
                 oldHasCustom);
+    }
+
+    // If this is a hint for a custom block that isn't showing, display
+    // a special hint to indicate that
+    if (displayHint.hidden()) {
+        this.customBlocksWithHints.push(root);
+        return;
+    }
+    if (oldHint && oldHint.hidden()) {
+        this.customBlocksWithHints.push(oldHint.root);
+        return;
     }
 
     f.call(this, displayHint, oldHint);

@@ -285,17 +285,27 @@ DebugDisplay.prototype.showHint = function(hint) {
 
     var hintSaved = this.savedHints[this.savedHintKey(hint, code)];
 
-    var link = document.createElement('a');
-    link.innerHTML = '<small>' + (hintSaved ? '[' + hintSaved + ']' : 'Save') +
-        '</small>';
-    link.href = '#';
-    hintDiv.appendChild(link);
-    this.div.appendChild(hintDiv);
-    if (!hintSaved) {
-        link.onclick = function(e) {
-            myself.saveHint(hint, code, link);
-            e.preventDefault();
-        };
+    var texts = ['Good', 'Bad'];
+    var links = [];
+    for (var i = 0; i < texts.length; i++) {
+        var link = document.createElement('a');
+        link.innerHTML = '<small>' +
+            (hintSaved ? '[' + hintSaved + ']' : texts[i]) + '</small>';
+        link.href = '#';
+        links.push(link);
+        var space = document.createElement('span');
+        space.innerHTML = ' ';
+        hintDiv.appendChild(space);
+        hintDiv.appendChild(link);
+        this.div.appendChild(hintDiv);
+        if (!hintSaved) {
+            (function (fi) {
+                link.onclick = function(e) {
+                    myself.saveHint(hint, code, links, fi == 0);
+                    e.preventDefault();
+                };
+            })(i);
+        }
     }
 };
 
@@ -303,8 +313,14 @@ DebugDisplay.prototype.savedHintKey = function(hint, code) {
     return JSON.stringify(hint);
 };
 
-DebugDisplay.prototype.saveHint = function(hint, code, link) {
+DebugDisplay.prototype.saveHint = function(hint, code, links, good) {
     var myself = this;
+
+    if (!good) {
+        hint = JSON.parse(JSON.stringify(hint));
+        hint.badHint = true;
+        hint.expectedFailure = true;
+    }
 
     var xhr = createCORSRequest('POST',
         window.hintProvider.url + '?assignmentID=' + window.assignmentID +
@@ -317,8 +333,11 @@ DebugDisplay.prototype.saveHint = function(hint, code, link) {
 
     xhr.onload = function() {
         var id = xhr.responseText;
-        link.onclick = null;
-        link.innerHTML = '<small>[' + id + ']</small>';
+        links.forEach(function(link) {
+            console.log(link);
+            link.onclick = null;
+            link.innerHTML = '<small>[' + id + ']</small>';
+        });
         myself.savedHints[myself.savedHintKey(hint, code)] = id;
     };
 

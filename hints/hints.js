@@ -318,8 +318,8 @@ DebugDisplay.prototype.saveHint = function(hint, code, links, good) {
 
     if (!good) {
         hint = JSON.parse(JSON.stringify(hint));
-        hint.badHint = true;
-        hint.expectedFailure = true;
+        hint.data.badHint = true;
+        hint.data.expectedFailure = true;
     }
 
     var xhr = createCORSRequest('POST',

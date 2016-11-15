@@ -664,11 +664,11 @@ SnapDisplay.prototype.showNotEditingCustomBlockHint = function(roots) {
             });
             var msg;
             if (names.length === 1) {
-                msg = 'Open the custom block ' +
+                msg = 'Edit the custom block ' +
                     '"' + names[0] + '" for more suggestions.';
             } else {
-                msg = 'Open the following custom blocks for more suggestions: "'
-                    + names.join('", "') + '".';
+                msg = 'Edit one of the following custom blocks for more ' +
+                    'suggestions: "' + names.join('", "') + '".';
             }
 
             myself.showMessageDialog(msg, 'Check Custom Block', false);

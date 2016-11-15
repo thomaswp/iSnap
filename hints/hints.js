@@ -686,16 +686,18 @@ function(hint, scripts, map, postfix, color) {
         var fromItems = this.countWhere(from, key);
         var toItems = this.countWhere(to, key);
         if (fromItems == toItems) continue;
+        var diff = toItems - fromItems;
 
         var message = null;
         if (toItems === 0) {
             message = "You probably don't need any " + map[key] + 's';
+        } else if (diff < 0) {
+            message = 'You probably only need ' + toItems + ' ' + map[key];
+            if (toItems > 1) message += 's';
         } else {
-            message = fromItems > toItems ? 'You probably only need ' :
-                'You probably need ';
-            message += toItems > 1 ?
-                toItems + ' ' + map[key] + 's' :
-                'one ' + map[key];
+            message = 'You probably need to create ' + diff + ' more ' +
+                    map[key];
+            if (diff > 1) message += 's';
         }
         message += postfix + '.';
         message = localize(message);

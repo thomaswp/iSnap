@@ -100,7 +100,7 @@ if ($enble_viewer) {
 	}
 
 	echo "<table cellspacing='0'>";
-	echo "<thead><th>Time</th><th>Message</th><th>Data</th><th>Session</th></thead>";
+	echo "<thead><th>Time</th><th>ID</th><th>Message</th><th>Data</th></thead>";
 	while($row = mysqli_fetch_array($result)) {
 
 		$rid = $row['id'];
@@ -110,22 +110,20 @@ if ($enble_viewer) {
 		$link = $row['link'];
 		$sessionID = $row['sessionID'];
 
-		$sessionID = substr($sessionID, 0, 3);
-
 		$first = $time;
 		if ($link) $first = "<a href='#$rid' onclick='loadSnap(\"$rid\", \"$id\")'>$first</a>";
 
 		$link = "http://www.bodurov.com/JsonFormatter/view.aspx?json=" . urlencode($data);
 
 		$link_text = $data;
-		$cutoff = 45;
+		$cutoff = 35;
 		if ($link_text == "\"\"") $link_text = "";
 		if (strlen($link_text) > $cutoff) {
 			$link_text = substr($link_text, 0, $cutoff) . "...";
 		}
 		$link = "<a target='_blank' href='$link' title='$data'>$link_text</a>";
 
-		echo "<tr><td>$first</td><td>$message</td><td>$link</td><td>$sessionID</td></tr>";
+		echo "<tr><td>$first</td><td title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";
 	}
 	echo "</table>";
 } else {

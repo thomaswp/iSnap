@@ -500,6 +500,16 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
         }
     });
 
+    /* Editing custom block */
+
+    model.editing  = model.project.childNamed('editing');
+    if (model.editing) {
+        var editingGUID = model.editing.attributes.guid;
+        if (editingGUID && editingGUID.length > 0) {
+            myself.loadEditing(project, model.editing);
+        }
+    }
+
     /* Global Variables */
 
     if (model.globalVariables) {
@@ -581,6 +591,7 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
             watcher.cellMorph.contentsMorph.handle.drawNew();
         }
     });
+
     this.objects = {};
     return project;
 };
@@ -908,6 +919,84 @@ SnapSerializer.prototype.populateCustomBlocks = function (
         }
 
         delete definition.names;
+    });
+};
+
+
+SnapSerializer.prototype.loadEditing = function (project, model) {
+
+    var stage = project.stage;
+
+    var allBlocks = [];
+    var allSprites = [stage].concat(stage.children);
+    allBlocks[0] = stage.customBlocks.concat(stage.globalBlocks);
+    stage.children.forEach(function(sprite, i) {
+        allBlocks[i + 1] = sprite.customBlocks;
+    });
+
+    var guid = model.attributes.guid;
+    var editingBlock = null, editingSprite = null;
+    Object.keys(allBlocks).forEach(function(sprite, i) {
+        allBlocks[sprite].forEach(function(block) {
+            if (block.guid === guid) {
+                editingBlock = block;
+                editingSprite = allSprites[i];
+            }
+        });
+    });
+
+    if (!editingBlock) return;
+    console.log(editingBlock);
+
+    // TODO: parse block inputs as well (I really should have used the block
+    // definition, rather than the ScriptsMorph for serialization...)
+    var scriptsElement = model.childNamed('scripts');
+    if (!scriptsElement) return;
+    if (scriptsElement.children[0] && scriptsElement.children[0].children) {
+        // Remove the first item in the script, since it's the weird
+        // CustomHatBlockMorph that can't be properly parsed by the
+        // loadScriptsArray method
+        scriptsElement.children[0].children.shift();
+    }
+    var scripts = this.loadScriptsArray(scriptsElement);
+    console.log(scripts);
+
+    var editingCopy;
+    if (scripts.length !== 0) {
+        // Clone the editing block, since we don't want to overwrite the
+        // original block with the editing changes, in case they're canceled
+        editingCopy = editingBlock.copyAndBindTo();
+        if (!editingCopy.body) {
+            editingCopy.body = new Context(
+                null,
+                null,
+                null,
+                editingSprite
+            );
+        }
+        // Set it's experssion to the main script and it's scripts to the rest
+        // of them
+        editingCopy.body.expression = scripts.shift();
+        editingCopy.scripts = scripts;
+    } else {
+        editingCopy = editingBlock;
+    }
+
+    setTimeout(function() {
+        // TODO: Close existing windows
+        Morph.prototype.trackChanges = false;
+        editor = new BlockEditorMorph(editingCopy, editingSprite);
+        editor.popUp();
+        Morph.prototype.trackChanges = true;
+        editor.changed();
+
+        // If the user applied changes, we sawp in the original block definition
+        // for the temp copy we've loaded
+        var oldUpdate = editor.updateDefinition;
+        editor.updateDefinition = function() {
+            editor.definition = editingBlock;
+            oldUpdate.call(editor);
+        };
     });
 };
 

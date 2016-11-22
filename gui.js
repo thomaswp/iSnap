@@ -3528,6 +3528,7 @@ IDE_Morph.prototype.rawOpenProjectString = function (str) {
             );
         } catch (err) {
             this.showMessage('Load failed: ' + err);
+            Trace.logError(err);
         }
     } else {
         this.serializer.openProject(
@@ -3577,6 +3578,7 @@ IDE_Morph.prototype.rawOpenCloudDataString = function (str) {
             );
         } catch (err) {
             this.showMessage('Load failed: ' + err);
+            Trace.logError(err);
         }
     } else {
         model = this.serializer.parse(str);
@@ -3619,6 +3621,7 @@ IDE_Morph.prototype.rawOpenBlocksString = function (str, name, silently) {
             blocks = this.serializer.loadBlocks(str, myself.stage);
         } catch (err) {
             this.showMessage('Load failed: ' + err);
+            Trace.logError(err);
         }
     } else {
         blocks = this.serializer.loadBlocks(str, myself.stage);
@@ -3665,6 +3668,7 @@ IDE_Morph.prototype.rawOpenSpritesString = function (str) {
             this.serializer.loadSprites(str, this);
         } catch (err) {
             this.showMessage('Load failed: ' + err);
+            Trace.logError(err);
         }
     } else {
         this.serializer.loadSprites(str, this);
@@ -3678,6 +3682,7 @@ IDE_Morph.prototype.openMediaString = function (str) {
             this.serializer.loadMedia(str);
         } catch (err) {
             this.showMessage('Load failed: ' + err);
+            Trace.logError(err);
         }
     } else {
         this.serializer.loadMedia(str);

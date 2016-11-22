@@ -1,5 +1,4 @@
 UI:
-* Log bad XML loads
 * Fix parent.adjustBounds bug in HintBar
 * Clean up breaks the hint margin for custom blocks
 * There's some weirdness when switching between sprites (since spriteBar is

@@ -51,6 +51,27 @@ include '../config.php';
 				window.location.hash = id;
 				index = rowIDs.indexOf(id);
 			}
+			function copy(inp) {
+
+				// is element selectable?
+				if (inp) {
+					if (window.getSelection) {
+						window.getSelection().removeAllRanges();
+					}
+					if (document.createRange) {
+						var rangeObj = document.createRange();
+						rangeObj.selectNodeContents(inp);
+						window.getSelection().addRange(rangeObj);
+					}
+					try {
+						// copy text
+						document.execCommand('copy');
+					}
+					catch (err) {
+						alert('please press Ctrl/Cmd+C to copy');
+					}
+				}
+			}
 		</script>
 	</head>
 
@@ -128,7 +149,7 @@ if ($enble_viewer) {
 		}
 		$link = "<a target='_blank' href='$link' title='$data'>$link_text</a>";
 
-		echo "<tr><td>$first</td><td class='rid' title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";
+		echo "<tr><td>$first</td><td class='rid' id='$rid' title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";
 	}
 	echo "</table>";
 } else {
@@ -139,10 +160,6 @@ if ($enble_viewer) {
 			</div>
 			<div id="cleared"></div>
 			<script type="text/javascript">
-				var snap = document.getElementById("snap");
-				snap.onload = function() {
-					snap.contentWindow.ide.toggleStageSize();
-				}
 				var rowIDs = [].slice.call(document.getElementsByClassName("rid"))
 					.map(function(td) { return parseInt(td.innerHTML); })
 				var index = 0;
@@ -150,16 +167,26 @@ if ($enble_viewer) {
 				document.addEventListener('keypress', function(event) {
 					if (event.keyCode === 100 && index < rowIDs.length - 1) {
 						loadSnap(rowIDs[++index], projectID);
-					} else if(event.keyCode === 97 && index > 0) {
+					} else if (event.keyCode === 97 && index > 0) {
 						loadSnap(rowIDs[--index], projectID);
+					} else if (event.keyCode === 99) {
+						var td = document.getElementById("" + rowIDs[index]);
+						console.log(td);
+						copy(td);
+						event.preventDefault();
+						return false;
 					}
 				});
 				var hash = parseInt(window.location.hash.replace("#", ""));
 				if (!isNaN(hash)) {
 					index = rowIDs.indexOf(hash);
 				}
-				if (rowIDs.length > 0) {
-					loadSnap(rowIDs[index], projectID);
+				var snap = document.getElementById("snap");
+				snap.onload = function() {
+					snap.contentWindow.ide.toggleStageSize();
+					if (rowIDs.length > 0) {
+						loadSnap(rowIDs[index], projectID);
+					}
 				}
 			</script>
 		</div>

@@ -94,6 +94,9 @@ if ($enble_viewer) {
 	}
 	if ($snapshots === 'true') {
 		$where .= " AND code <> ''";
+		// If we're viewing snapshots, we probably don't need to view block
+		// grabs
+		$where .= " AND message <> 'Block.grabbed'";
 	}
 	$query = "SELECT id, time, message, data, code <> '' AS link, sessionID FROM $table $where";
 	$result = $mysqli->query($query);

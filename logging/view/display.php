@@ -48,6 +48,8 @@ include '../config.php';
 				};
 				xhr.open("GET", "code.php?id=" + id + "&project=" + project, true);
 				xhr.send();
+				window.location.hash = id;
+				index = rowIDs.indexOf(id);
 			}
 		</script>
 	</head>
@@ -123,7 +125,7 @@ if ($enble_viewer) {
 		}
 		$link = "<a target='_blank' href='$link' title='$data'>$link_text</a>";
 
-		echo "<tr><td>$first</td><td title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";
+		echo "<tr><td>$first</td><td class='rid' title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";
 	}
 	echo "</table>";
 } else {
@@ -137,6 +139,24 @@ if ($enble_viewer) {
 				var snap = document.getElementById("snap");
 				snap.onload = function() {
 					snap.contentWindow.ide.toggleStageSize();
+				}
+				var rowIDs = [].slice.call(document.getElementsByClassName("rid"))
+					.map(function(td) { return parseInt(td.innerHTML); })
+				var index = 0;
+				var projectID = "<?php echo $id; ?>";
+				document.addEventListener('keypress', function(event) {
+					if (event.keyCode === 100 && index < rowIDs.length - 1) {
+						loadSnap(rowIDs[++index], projectID);
+					} else if(event.keyCode === 97 && index > 0) {
+						loadSnap(rowIDs[--index], projectID);
+					}
+				});
+				var hash = parseInt(window.location.hash.replace("#", ""));
+				if (!isNaN(hash)) {
+					index = rowIDs.indexOf(hash);
+				}
+				if (rowIDs.length > 0) {
+					loadSnap(rowIDs[index], projectID);
 				}
 			</script>
 		</div>

@@ -502,6 +502,11 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
 
     /* Editing custom block */
 
+    // Regardless of whether we're showing an editing block, we should close
+    // any open editor window when loading a new project.
+    if (BlockEditorMorph.showing) {
+        BlockEditorMorph.showing.close();
+    }
     model.editing  = model.project.childNamed('editing');
     if (model.editing) {
         var editingGUID = model.editing.attributes.guid;
@@ -946,7 +951,6 @@ SnapSerializer.prototype.loadEditing = function (project, model) {
     });
 
     if (!editingBlock) return;
-    console.log(editingBlock);
 
     // TODO: parse block inputs as well (I really should have used the block
     // definition, rather than the ScriptsMorph for serialization...)
@@ -959,7 +963,6 @@ SnapSerializer.prototype.loadEditing = function (project, model) {
         scriptsElement.children[0].children.shift();
     }
     var scripts = this.loadScriptsArray(scriptsElement);
-    console.log(scripts);
 
     var editingCopy;
     if (scripts.length !== 0) {
@@ -983,7 +986,6 @@ SnapSerializer.prototype.loadEditing = function (project, model) {
     }
 
     setTimeout(function() {
-        // TODO: Close existing windows
         Morph.prototype.trackChanges = false;
         editor = new BlockEditorMorph(editingCopy, editingSprite);
         editor.popUp();

@@ -49,7 +49,7 @@ include '../config.php';
 				xhr.open("GET", "code.php?id=" + id + "&project=" + project, true);
 				xhr.send();
 				window.location.hash = id;
-				index = rowIDs.indexOf(id);
+				window.index = rowIDs.indexOf(parseInt(id));
 			}
 			function copy(inp) {
 
@@ -96,7 +96,7 @@ if ($enble_viewer) {
 	$snapshots = tryGetParam('snapshots');
 
 	echo "<h3>Project: $id</h3>";
-	echo "<p>This lists all logs for this project. Click on a date to see the code at that time.</p>";
+	echo "<p>This lists all logs for this project. Click on a date to see the code at that time, or click here and then use the A and D keys to scroll through snapshots.</p>";
 
 	$mysqli = new mysqli($host, $user, $password, $db);
 	if ($mysqli->connect_errno) {
@@ -137,7 +137,11 @@ if ($enble_viewer) {
 		$sessionID = $row['sessionID'];
 
 		$first = $time;
-		if ($link) $first = "<a href='#$rid' onclick='loadSnap(\"$rid\", \"$id\")'>$first</a>";
+		$class = "";
+		if ($link) {
+			$first = "<a href='#$rid' onclick='loadSnap(\"$rid\", \"$id\")'>$first</a>";
+			$class = "rid";
+		}
 
 		$link = "http://www.bodurov.com/JsonFormatter/view.aspx?json=" . urlencode($data);
 
@@ -149,7 +153,7 @@ if ($enble_viewer) {
 		}
 		$link = "<a target='_blank' href='$link' title='$data'>$link_text</a>";
 
-		echo "<tr><td>$first</td><td class='rid' id='$rid' title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";
+		echo "<tr><td>$first</td><td class='$class' id='$rid' title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";
 	}
 	echo "</table>";
 } else {
@@ -184,7 +188,7 @@ if ($enble_viewer) {
 				var snap = document.getElementById("snap");
 				snap.onload = function() {
 					snap.contentWindow.ide.toggleStageSize();
-					if (rowIDs.length > 0) {
+					if (index > 0 && rowIDs.length > 0) {
 						loadSnap(rowIDs[index], projectID);
 					}
 				}

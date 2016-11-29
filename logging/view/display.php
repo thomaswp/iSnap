@@ -96,7 +96,7 @@ if ($enble_viewer) {
 	$snapshots = tryGetParam('snapshots');
 
 	echo "<h3>Project: $id</h3>";
-	echo "<p>This lists all logs for this project. Click on a date to see the code at that time, or click here and then use the A and D keys to scroll through snapshots.</p>";
+	echo "<p>This lists all logs for this project. Click on a date to see the code at that time, or click here and then use the A and D keys to scroll through snapshots. Loads quickest on Chrome.</p>";
 
 	$mysqli = new mysqli($host, $user, $password, $db);
 	if ($mysqli->connect_errno) {
@@ -169,11 +169,12 @@ if ($enble_viewer) {
 				var index = 0;
 				var projectID = "<?php echo $id; ?>";
 				document.addEventListener('keypress', function(event) {
-					if (event.keyCode === 100 && index < rowIDs.length - 1) {
+					var code = event.which || event.keyCode;
+					if (code === 100 && index < rowIDs.length - 1) {
 						loadSnap(rowIDs[++index], projectID);
-					} else if (event.keyCode === 97 && index > 0) {
+					} else if (code === 97 && index > 0) {
 						loadSnap(rowIDs[--index], projectID);
-					} else if (event.keyCode === 99) {
+					} else if (code === 99) {
 						var td = document.getElementById("" + rowIDs[index]);
 						console.log(td);
 						copy(td);

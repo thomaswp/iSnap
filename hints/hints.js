@@ -63,7 +63,17 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
 
     if (displays.length == 0 || !window.assignments) return;
     var assignment = window.assignments[window.assignmentID];
-    if (!assignment || !assignment.hints) return;
+    if (!assignment) return;
+
+    // First check the parameters for a hints parameter
+    var params = getSearchParameters();
+    if ('hints' in params) {
+        // If it's present, use that value
+        if (params['hints'] !== 'true') return;
+    } else {
+        // If not, check the config
+        if (!assignment.hints) return;
+    }
 
     displays.forEach(function(display) {
         display.enabled = true;
@@ -942,10 +952,6 @@ function(parent, color, scriptHighlight, callback, hasCustom) {
     hintBar.addButton(button, parent, scriptHighlight);
 };
 
-if (window.getHintProvider && window.assignmentID) {
-    window.hintProvider = window.getHintProvider();
-}
-
 SyntaxElementMorph.prototype.enclosingBlock = function() {
     var block = this;
     while (block && !(block instanceof BlockMorph)) {
@@ -1136,3 +1142,7 @@ HintBarMorph.prototype.layout = function(now) {
     this.setExtent(new Point(right - left, bottom - this.top()));
     // TODO: if (this.parent.adjustBounds) this.parent.adjustBounds();
 };
+
+if (window.getHintProvider && window.assignmentID) {
+    window.hintProvider = window.getHintProvider();
+}

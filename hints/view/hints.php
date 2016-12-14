@@ -25,12 +25,12 @@ include '../../logging/config.php';
 			}
 			#content {
 				float: right;
-				width: 650px;
+				width: 550px;
 				display: block;
 				height: 100%;
 			}
 			#sidebar {
-				width: calc(100% - 660px);
+				width: calc(100% - 560px);
 				height: 100%;
 				float: left;
 			}
@@ -55,6 +55,10 @@ include '../../logging/config.php';
 				};
 				xhr.open("GET", "../../logging/view/code.php?id=" + id + "&project=" + project, true);
 				xhr.send();
+				window.location.hash = id;
+				window.index = rows.findIndex(function(a) {
+					return a.dataset.rid == id;
+				});
 			}
 		</script>
 	</head>
@@ -93,8 +97,8 @@ if ($enble_viewer) {
 		$data = json_encode($row['data']);
 		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\", $data, \"$type\")";
 		$onclick = htmlspecialchars($onclick);
-		echo "<tr><td>$assignmentID</td><td>
-			<a href='#' onclick=\"$onclick\">$displayID</a></td>
+		echo "<tr><td id='$id'>$assignmentID</td><td>
+			<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$displayID</a></td>
 			<td>$type</td><td>$time</td></tr>";
 	}
 	echo "</table>";
@@ -107,9 +111,29 @@ if ($enble_viewer) {
 			</div>
 			<div id="cleared"></div>
 			<script type="text/javascript">
+				var rows = [].slice.call(
+					document.getElementsByClassName("rlink"));
+				var index = 0;
+				document.addEventListener('keypress', function(event) {
+					var code = event.which || event.keyCode;
+					if (code === 100 && index < rows.length - 1) {
+						rows[++index].onclick();
+					} else if (code === 97 && index > 0) {
+						rows[--index].onclick();
+					}
+				});
+				var hash = parseInt(window.location.hash.replace("#", ""));
+				if (!isNaN(hash)) {
+					index = rows.findIndex(function(a) {
+						return a.dataset.rid == hash;
+					});
+				}
 				var snap = document.getElementById("snap");
 				snap.onload = function() {
 					snap.contentWindow.ide.toggleStageSize();
+					if (index > 0 && rows.length > 0) {
+						rows[index].onclick();
+					}
 				}
 			</script>
 		</div>

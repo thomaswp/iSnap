@@ -963,7 +963,6 @@ function(parent, color, scriptHighlight, callback, hasCustom) {
 };
 
 SnapDisplay.prototype.showLoggedHint = function(data) {
-    console.log(data);
     var type = data.type;
     var fromList;
     if (type === 'StructureHint') {
@@ -976,6 +975,9 @@ SnapDisplay.prototype.showLoggedHint = function(data) {
             parent = ide.allChildren().filter(function(x) {
                 return x instanceof BlockMorph && x.id === data.parentID;
             })[0] || null;
+            if (parent != null) {
+                parent = parent.selector;
+            }
         }
         new CodeHintDialogBoxMorph(window.ide)
             .showScriptHint(parent, data.index, fromList, data.to);

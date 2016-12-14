@@ -39,13 +39,18 @@ include '../../logging/config.php';
 			}
 		</style>
 		<script type="text/javascript">
-			function loadSnap(id, project, assignment) {
+			function loadSnap(id, project, assignment, data, type) {
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						var contentWindow = document.getElementById('snap').contentWindow;
 						contentWindow.assignmentID = assignment;
 						contentWindow.ide.droppedText(xhr.responseText);
+						data = JSON.parse(data);
+						data.type = type;
+						window.setTimeout(function() {
+							contentWindow.hintProvider.showLoggedHint(data);
+						}, 100);
 					}
 				};
 				xhr.open("GET", "../../logging/view/code.php?id=" + id + "&project=" + project, true);
@@ -85,7 +90,11 @@ if ($enble_viewer) {
 		$type = $row['message'];
 		$type = str_replace('SnapDisplay.show', '', $type);
 		$time = $row['time'];
-		echo "<tr><td>$assignmentID</td><td><a href='#' onclick='loadSnap(\"$id\", \"$projectID\", \"$assignmentID\")'>$displayID</a></td>
+		$data = json_encode($row['data']);
+		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\", $data, \"$type\")";
+		$onclick = htmlspecialchars($onclick);
+		echo "<tr><td>$assignmentID</td><td>
+			<a href='#' onclick=\"$onclick\">$displayID</a></td>
 			<td>$type</td><td>$time</td></tr>";
 	}
 	echo "</table>";

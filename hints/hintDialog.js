@@ -8,9 +8,12 @@ function HintDialogBoxMorph() {
 }
 
 // HintDialogBox inherits from DialogBoxMorph
-HintDialogBoxMorph.prototype = new DialogBoxMorph();
+HintDialogBoxMorph.prototype = Object.create(DialogBoxMorph.prototype);
 HintDialogBoxMorph.prototype.constructor = HintDialogBoxMorph;
 HintDialogBoxMorph.uber = DialogBoxMorph.prototype;
+
+// Keep track of the currently showing dialogue box
+HintDialogBoxMorph.showing = null;
 
 HintDialogBoxMorph.prototype.initButtons = function() {
     this.acceptButtons = [
@@ -74,6 +77,13 @@ HintDialogBoxMorph.prototype.onThumbsDown = function(handler) {
 
 // define popUp function
 HintDialogBoxMorph.prototype.popUp = function () {
+    if (HintDialogBoxMorph.showing) {
+        HintDialogBoxMorph.showing.destroy();
+    }
+
+    // Set currently showing dialogue to this;
+    HintDialogBoxMorph.showing = this;
+
     var minWidth = 0,
         minHeight = 0,
         world = this.target.world();
@@ -182,6 +192,10 @@ HintDialogBoxMorph.prototype.newHint = function() {
 
 // define close function
 HintDialogBoxMorph.prototype.destroy = function() {
+
+    if (HintDialogBoxMorph.showing == this)
+        HintDialogBoxMorph.showing = null;
+
     if (!this.destroyed) {
         // Only log destroyed events once (since this can be called repeatedly)
         Trace.log('HintDialogBox.destroy');
@@ -202,12 +216,10 @@ function MessageHintDialogBoxMorph(message, title, showRating, target) {
 
 // MessageHintDialogMorph inherits from DialogBoxMorph
 
-MessageHintDialogBoxMorph.prototype = new HintDialogBoxMorph();
+MessageHintDialogBoxMorph.prototype =
+    Object.create(HintDialogBoxMorph.prototype);
 MessageHintDialogBoxMorph.prototype.constructor = MessageHintDialogBoxMorph;
 MessageHintDialogBoxMorph.uber = HintDialogBoxMorph.prototype;
-
-// Keep track of the currently showing dialogue box
-MessageHintDialogBoxMorph.showing = null;
 
 // initialize Message Hint Dialogue box
 MessageHintDialogBoxMorph.prototype.init =
@@ -215,8 +227,6 @@ function (message, title, showRating, target) {
     var txt;
 
     this.showRating = showRating;
-    // Set currently showing dialogue to this;
-    MessageHintDialogBoxMorph.showing = this;
 
     this.handle = null;
 
@@ -300,13 +310,6 @@ MessageHintDialogBoxMorph.prototype.fixLayout = function() {
     }
 };
 
-MessageHintDialogBoxMorph.prototype.destroy = function() {
-    MessageHintDialogBoxMorph.uber.destroy.apply(this, arguments);
-    if (MessageHintDialogBoxMorph.showing != this)
-        return;
-    MessageHintDialogBoxMorph.showing = null;
-};
-
 MessageHintDialogBoxMorph.prototype.fixExtent = function() {
     var th = fontHeight(this.titleFontSize) + this.titlePadding * 2,
         w = 0,
@@ -335,26 +338,14 @@ function CodeHintDialogBoxMorph(target) {
 }
 
 // HintDialogBox inherits from DialogBoxMorph
-CodeHintDialogBoxMorph.prototype = new HintDialogBoxMorph();
+CodeHintDialogBoxMorph.prototype = Object.create(HintDialogBoxMorph.prototype);
 CodeHintDialogBoxMorph.prototype.constructor = CodeHintDialogBoxMorph;
 CodeHintDialogBoxMorph.uber = HintDialogBoxMorph.prototype;
-
-// Keep track of the currently showing hint dialogue box
-CodeHintDialogBoxMorph.showing = null;
-
-CodeHintDialogBoxMorph.prototype.destroy = function() {
-    CodeHintDialogBoxMorph.uber.destroy.apply(this, arguments);
-    if (CodeHintDialogBoxMorph.showing != this)
-        return;
-    CodeHintDialogBoxMorph.showing = null;
-};
 
 // Initialize Hint Dialogue Box
 CodeHintDialogBoxMorph.prototype.init = function (target) {
     var scripts,
         scriptsFrame;
-
-    CodeHintDialogBoxMorph.showing = this;
 
     // additional properties:
     this.handle = null; //doesn't know if useful
@@ -876,7 +867,7 @@ function IntentionDialogMorph(target) {
 
 // IntentionDialogMorph inherits from DialogBoxMorph
 
-IntentionDialogMorph.prototype = new DialogBoxMorph();
+IntentionDialogMorph.prototype = Object.create(DialogBoxMorph.prototype);
 IntentionDialogMorph.prototype.constructor = IntentionDialogMorph;
 IntentionDialogMorph.uber = DialogBoxMorph.prototype;
 

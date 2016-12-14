@@ -103,6 +103,17 @@ HintDialogBoxMorph.prototype.popUp = function () {
         );
     }
 
+    // Try not to pop up over a block editor
+    // TODO: could easily add more complex non-collision logic
+    if (BlockEditorMorph.showing) {
+        var left = BlockEditorMorph.showing.bounds.corner.x + 10;
+        // Only position to the right of the editor if it's further right
+        // of our current position and won't go off the screen
+        if (left > this.left() && left + this.width() < world.width()) {
+            this.setLeft(left);
+        }
+    }
+
     window.hintProvider.setDisplayEnabled(SnapDisplay, false);
 };
 

@@ -603,6 +603,7 @@ function Hint(root, from, to, hasCustom) {
 }
 
 SnapDisplay.prototype.showHint = function(hint) {
+    if (hint.type && hint.type !== 'vector') return;
     if (hint.data.caution) return;
 
     var hasCustom = this.hasCustomBlock(hint.data.root);
@@ -982,7 +983,7 @@ SnapDisplay.prototype.showLoggedHint = function(data) {
         new CodeHintDialogBoxMorph(window.ide)
             .showScriptHint(parent, data.index, fromList, data.to);
     } else if (type === 'BlockHint') {
-        fromList = data.fromList || [data.from, []]; 
+        fromList = data.fromList || [data.from, []];
         new CodeHintDialogBoxMorph(window.ide)
             .showBlockHint(data.parentSelector, fromList[0], data.to,
                 fromList[1]);

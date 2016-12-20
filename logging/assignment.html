@@ -1,22 +1,59 @@
 <!doctype html>
 
 <html>
-	
+
 	<head>
 		<meta charset="UTF-8">
 		<title>Select an assignment</title>
+		<style>
+			.hidden {
+				display: none;
+			}
+			.hint {
+				color: #888;
+				font-style: italic;
+			}
+		</style>
 		<script type="text/javascript" src="config.js"></script>
+		<script type="text/javascript" src="jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="jquery.cookie.js"></script>
 	</head>
-	
+
 	<body>
 		<h1>Select the assignment you're working on.</h1>
-		
-		<form action="../snap.html" method="get">
-			Assignment: 
-			<select id="assignment" name="assignment"></select>
-			<button type="submit">Go</button>
-		</form>
-		
+
+		<div id="form-id">
+			<form>
+				Unity ID:
+				<input id="input-id" name="id" placeholder="e.g. jtsmith2"
+					required>
+				<br />
+				<span class="hint">
+					This is the part of your email before @ncsu.
+				</span>
+				<div id="confirm-new" class="hidden">
+					<p class="alert">
+						This is the first time we've seen a user with
+						that ID. If you're a new user, please check the box
+						below. If not, please double-check your ID.
+					</p>
+					<input id="input-new" type="checkbox" name="new"
+						value="true">
+					I'm a new user.
+				</div>
+				<br />
+				<button type="submit">Submit</button>
+			</form>
+		</div>
+
+		<div id="form-assignment" class="hidden">
+			<form action="../snap.html" method="get">
+				Assignment:
+				<select id="assignment" name="assignment"></select>
+				<button type="submit">Go</button>
+			</form>
+		</div>
+
 		<script type="text/javascript">
 			var assignments = window.assignments;
 			var select = document.getElementById("assignment");
@@ -29,6 +66,33 @@
 					select.add(option);
 				}
 			}
+
+			function setUserID(id) {
+				if (!id) return;
+				window.userID = id;
+				$('#form-id').addClass('hidden');
+				$('#form-assignment').removeClass('hidden');
+			}
+
+			// TODO: skip this unless the config says to require a userID
+			setUserID( $.cookie('userID'));
+
+			$('#form-id').submit(function() {
+				$.post('login.php', {
+					'id': $('#input-id').val(),
+					'new': $('#input-new').prop('checked'),
+				}, function(data, status) {
+					var response = JSON.parse(data);
+					if (response.newUser) {
+						$('#confirm-new').removeClass('hidden');
+						return;
+					}
+					setUserID(response.userID);
+				}).fail(function() {
+					// TODO: Handle this error
+				});
+				return false;
+			});
 		</script>
 	</body>
 </html>

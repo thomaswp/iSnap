@@ -76,6 +76,13 @@
 				}
 			}
 
+			if (!navigator.cookieEnabled) {
+				// TODO: handle cookies not available!
+				// There's no other way to pass this information from one page
+				// to another, so we'll need them enabled. Again, maybe
+				// have an emergency option to disable
+			}
+
 			function setUserID(id) {
 				if (!id) return;
 				window.userID = id;

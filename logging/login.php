@@ -30,10 +30,12 @@ include('config.php');
 
         if ($result->num_rows === 0) {
             echo '{"newUser": true}';
+            echo $query;
             return;
         }
     }
 
-    setcookie('userID', $hash, time() + 3600); // Expires in 1 hour
+    // Expires in 1 hour; set the path to be one folder up
+    setcookie('userID', $hash, time() + 3600, '/');
     echo '{"userID": "' . $hash . '"}';
 ?>

@@ -30,6 +30,23 @@ function getSearchParameters() {
     return prmstr != null && prmstr != '' ? transformToAssocArray(prmstr) : { };
 }
 
+// Credit: http://www.w3schools.com/js/js_cookies.asp
+function getCookie(cname) {
+    var name = cname + '=';
+    var cookie = decodeURIComponent(document.cookie);
+    var ca = cookie.split(';');
+    for(var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return null;
+}
+
 function transformToAssocArray( prmstr ) {
     var params = {};
     var prmarr = prmstr.split('&');
@@ -42,12 +59,20 @@ function transformToAssocArray( prmstr ) {
 
 // Get the assignment passed via GET parameter
 function checkAssignment() {
-    assignmentID = getSearchParameters()['assignment'];
+    window.assignmentID = getSearchParameters()['assignment'];
+    window.userID = getCookie('userID');
 
-    if (!window.assignments || !window.requireAssignment) return;
-    if (!window.assignments[assignmentID]) {
+    var redirectURL = 'logging/assignment.html';
+
+    if (window.assignments && window.requireAssignment &&
+            !window.assignments[assignmentID]) {
         // redirect if no assignment is listed
-        window.location.replace('logging/assignment.html');
+        window.location.replace(redirectURL);
+    }
+
+    if (window.requireLogin && !userID) {
+        // redirect if the user isn't logged in
+        window.location.replace(redirectURL);
     }
 }
 
@@ -79,6 +104,7 @@ Logger.prototype.userInfo = function() {
         }
     }
     return {
+        'userID': userID,
         'sessionID': Logger.sessionID,
         'browserID': browserID,
         'assignmentID': assignmentID,

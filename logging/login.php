@@ -30,7 +30,6 @@ include('config.php');
 
         if ($result->num_rows === 0) {
             echo '{"newUser": true}';
-            echo $query;
             return;
         }
     }

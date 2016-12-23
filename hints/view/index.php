@@ -85,7 +85,7 @@ if ($enble_viewer) {
 	}
 
 	echo "<table cellspacing='0'>";
-	echo "<thead><th>Assignment</th><th>Project ID</th><th>Type</th><th>Time</th></thead>";
+	echo "<thead><th>Log ID</th><th>Project ID</th><th>Type</th><th>Time</th></thead>";
 	while($row = mysqli_fetch_array($result)) {
 		$id=$row['id'];
 		$assignmentID = $row['assignmentID'];
@@ -97,8 +97,10 @@ if ($enble_viewer) {
 		$data = json_encode($row['data']);
 		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\", $data, \"$type\")";
 		$onclick = htmlspecialchars($onclick);
-		echo "<tr><td id='$id'>$assignmentID</td><td>
-			<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$displayID</a></td>
+		echo "<tr><td id='$id'>
+			<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$id</a>
+			</td>
+			<td>$assignmentID </br> $displayID</td>
 			<td>$type</td><td>$time</td></tr>";
 	}
 	echo "</table>";

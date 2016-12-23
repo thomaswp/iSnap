@@ -70,6 +70,9 @@ include '../../logging/config.php';
 			</div>
 			<div id="content">
 				<div style="overflow: scroll; height: 100%;">
+				<form action="" method="GET">
+					Filter IDs: <input type="text" name="ids" value="<?php if (array_key_exists('ids', $_GET)) echo $_GET['ids']; ?>">
+				</form>
 				<?php
 if ($enble_viewer) {
 
@@ -78,7 +81,23 @@ if ($enble_viewer) {
 		die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
 	}
 
-	$query = "SELECT * FROM `trace` WHERE message LIKE 'SnapDisplay.show%Hint' ORDER BY assignmentID, projectID, time";
+	// Allow for filtering by a set of space-separated ids
+	$where = "WHERE message LIKE 'SnapDisplay.show%Hint'";
+	if (array_key_exists('ids', $_GET)) {
+		$ids = $_GET['ids'];
+		$ids = explode(' ', $ids);
+		$list = '(';
+		foreach ($ids as $id) {
+			if (strlen($list) > 1) $list .= ', ';
+			$list .= intval($id);
+		}
+		$list .= ')';
+		$where .= " AND id IN $list";
+	}
+
+	$query = "SELECT * FROM `trace` $where
+		ORDER BY assignmentID, projectID, time";
+
 	$result = $mysqli->query($query);
 	if (!$result) {
 		die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);

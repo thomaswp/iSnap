@@ -60,6 +60,10 @@ include '../../logging/config.php';
 					return a.dataset.rid == id;
 				});
 			}
+
+			function resetFilter() {
+				document.location = './';
+			}
 		</script>
 	</head>
 
@@ -71,7 +75,11 @@ include '../../logging/config.php';
 			<div id="content">
 				<div style="overflow: scroll; height: 100%;">
 				<form action="" method="GET">
-					Filter IDs: <input type="text" name="ids" value="<?php if (array_key_exists('ids', $_GET)) echo $_GET['ids']; ?>">
+					Filter IDs:
+					<input id="filter" type="text" name="ids" pattern="([0-9]+ ?)*"
+						placeholder="e.g. 123 888 12345"
+						value="<?php if (array_key_exists('ids', $_GET)) echo $_GET['ids']; ?>">
+					<input type="button" value="Reset" onclick="resetFilter()" >
 				</form>
 				<?php
 if ($enble_viewer) {
@@ -116,10 +124,11 @@ if ($enble_viewer) {
 		$data = json_encode($row['data']);
 		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\", $data, \"$type\")";
 		$onclick = htmlspecialchars($onclick);
+		$contextLink = "../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$id";
 		echo "<tr><td id='$id'>
 			<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$id</a>
 			</td>
-			<td>$assignmentID </br> $displayID</td>
+			<td>$assignmentID </br> <a href='$contextLink' target='_blank'>$displayID</a></td>
 			<td>$type</td><td>$time</td></tr>";
 	}
 	echo "</table>";

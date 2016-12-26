@@ -128,7 +128,8 @@ if ($enble_viewer) {
 		echo "<tr><td id='$id'>
 			<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$id</a>
 			</td>
-			<td>$assignmentID </br> <a href='$contextLink' target='_blank'>$displayID</a></td>
+			<td>$assignmentID </br>
+			<a href='$contextLink' target='_blank' title='See the full logs for this attempt...'>$displayID</a></td>
 			<td>$type</td><td>$time</td></tr>";
 	}
 	echo "</table>";

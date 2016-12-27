@@ -1183,6 +1183,14 @@ HintBarMorph.prototype.layout = function(now) {
     // TODO: if (this.parent.adjustBounds) this.parent.adjustBounds();
 };
 
+(function() {
+    var superIsNonPartMorph = SyntaxElementMorph.prototype.isNonPartMorph;
+    SyntaxElementMorph.prototype.isNonPartMorph = function(block) {
+        return superIsNonPartMorph(block) ||
+                block instanceof HintBarMorph;
+    };
+})();
+
 if (window.getHintProvider && window.assignmentID) {
     window.hintProvider = window.getHintProvider();
 }

@@ -3,8 +3,20 @@ require('hint-display');
 require('hint-bar-morph');
 require('code-hint-dialog-box-morph');
 require('message-hint-dialog-box-morph');
-// TODO: temp
-require('hintDialog');
+
+// Helper function for setting whether or not hints display
+function setHintsActive(active) {
+    if (!ide.spriteBar || !ide.spriteBar.hintButton) return;
+    var hintButton = ide.spriteBar.hintButton;
+    if (hintButton.active === active) return;
+    Trace.log('HelpButton.toggled', active);
+    hintButton.active = active;
+    hintButton.labelString =
+        ' ' + localize(active ? 'Hide Help' : 'Get Help') + ' ';
+    hintButton.drawNew();
+    hintButton.fixLayout();
+    ide.fixLayout();
+}
 
 // TODO: Rename to VectorHintDispplay or something
 function SnapDisplay() {
@@ -25,9 +37,19 @@ SnapDisplay.prototype.initDisplay = function() {
     this.customBlocksWithHints = [];
 
     var createButton = function(ide) {
+        var getHint = function() {
+            if (!this.spriteBar || !this.spriteBar.hintButton) return;
+            var hintButton = this.spriteBar.hintButton;
+
+            window.hintProvider.clearDisplays();
+            var active = !hintButton.active;
+            setHintsActive(active);
+            window.hintProvider.setDisplayEnabled(SnapDisplay, active);
+        };
+
         var hintButton = new PushButtonMorph(
             ide,
-            'getHint',
+            getHint,
             '  ' + localize('Help') + '  '
         );
         ide.spriteBar.hintButton = hintButton;

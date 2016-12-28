@@ -23,17 +23,18 @@ BlockMorph.prototype.topBlockInScript = function() {
     return this;
 };
 
-BlockMorph.prototype.addHighlightBasic = BlockMorph.prototype.addHighlight;
-BlockMorph.prototype.addHighlight = function() {
+BlockMorph.prototype.addActiveHighlightBasic =
+    BlockMorph.prototype.addActiveHighlight;
+BlockMorph.prototype.addActiveHighlight = function(color) {
     var index = this.children.indexOf(this.hintBar);
     if (index >= 0) {
         this.children.splice(index, 1);
-        var highlight = this.addHighlightBasic();
+        var highlight = this.addActiveHighlightBasic(color);
         this.children.splice(index, 0, this.hintBar);
         this.fullChanged();
         return highlight;
     } else {
-        return this.addHighlightBasic();
+        return this.addActiveHighlightBasic(color);
     }
 };
 

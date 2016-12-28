@@ -1,3 +1,5 @@
+// require('config.js');
+
 (function () {
       if (!window.assignments) return;
       if (!window.useGoals) return;

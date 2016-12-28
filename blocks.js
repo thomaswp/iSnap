@@ -2991,29 +2991,22 @@ BlockMorph.prototype.eraseHoles = function (context) {
 // BlockMorph highlighting
 
 BlockMorph.prototype.addHighlight = function (oldHighlight) {
-    var isHidden = !this.isVisible,
-        highlight;
-
-    if (isHidden) {this.show(); }
-    highlight = this.highlight(
-        oldHighlight ? oldHighlight.color : this.activeHighlight,
-        this.activeBlur,
-        this.activeBorder
-    );
-    this.addBack(highlight);
-    this.fullChanged();
-    if (isHidden) {this.hide(); }
-    return highlight;
+    return this.addActiveHighlight(
+        oldHighlight ? oldHighlight.color : this.activeHighlight);
 };
 
 BlockMorph.prototype.addErrorHighlight = function () {
+    this.removeHighlight();
+    return this.addActiveHighlight(this.errorHighlight);
+};
+
+BlockMorph.prototype.addActiveHighlight = function(color) {
     var isHidden = !this.isVisible,
         highlight;
 
     if (isHidden) {this.show(); }
-    this.removeHighlight();
     highlight = this.highlight(
-        this.errorHighlight,
+        color,
         this.activeBlur,
         this.activeBorder
     );

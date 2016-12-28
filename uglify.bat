@@ -1,0 +1,1 @@
+uglifyjs logging/logger.js logging/config.js logging/db-logger.js isnap/lib/simplediff.min.js logging/diff-logger.js logging/console-logger.js logging/main.js -o isnap.min.js

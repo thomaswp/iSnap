@@ -1,3 +1,5 @@
+require('hint-display');
+
 function HighlightDisplay() {
 }
 

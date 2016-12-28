@@ -38,10 +38,11 @@ BlockMorph.prototype.addActiveHighlight = function(color) {
     }
 };
 
-BlockMorph.prototype.addSingleHighlight = function() {
+BlockMorph.prototype.addSingleHighlight = function(color) {
+    color = color || this.activeHighlight;
     var children = this.children;
     this.children = [];
-    var highlight = this.addHighlight();
+    var highlight = this.addActiveHighlight(color);
     children.push(highlight);
     this.children = children;
     this.fullChanged();

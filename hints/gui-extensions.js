@@ -4,7 +4,8 @@ require('hint-bar-morph');
     var superIsNonPartMorph = SyntaxElementMorph.prototype.isNonPartMorph;
     SyntaxElementMorph.prototype.isNonPartMorph = function(block) {
         return superIsNonPartMorph(block) ||
-                block instanceof HintBarMorph;
+                block instanceof HintBarMorph ||
+                block instanceof PushButtonMorph;
     };
 })();
 

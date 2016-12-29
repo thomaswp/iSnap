@@ -7,6 +7,7 @@ HighlightDisplay.prototype = Object.create(HintDisplay.prototype);
 
 HighlightDisplay.prototype.initDisplay = function() {
     this.highlights = [];
+    this.insertButtons = [];
 };
 
 HighlightDisplay.prototype.showHint = function(hint) {
@@ -28,9 +29,23 @@ HighlightDisplay.prototype.clear = function() {
         block.removeHighlight();
     });
     this.highlights = [];
+    this.insertButtons.forEach(function(button) {
+        button.destroy();
+        button.parent.insertButtonBefore = null;
+        button.parent.insertButtonAfter = null;
+    });
+    this.insertButtons = [];
 };
 
 HighlightDisplay.prototype.addHighlight = function(block, color) {
+    if (block instanceof MultiArgMorph) {
+        block = block.parent;
+    }
+    if (!(block.removeHighlight && block.addSingleHighlight)) {
+        console.log('Non-highlightable: ', block);
+        console.trace();
+        return;
+    }
     block.removeHighlight();
     block.addSingleHighlight(color);
     this.highlights.push(block);
@@ -65,15 +80,57 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     // Don't worry about inserting scripts;
     if (data.type === 'script') return;
 
+    if (data.replacement) {
+        // TODO: Highlight input slot, not whole parent block
+        this.addHighlight(parent, new Color(0, 0, 255));
+        return;
+    }
+
+    // console.log(data);
     if (data.candidate) {
         var candidate = this.getCode(data.candidate);
         if (!candidate) {
             Trace.logErrorMessage('Unknown candidate for insert hint');
+            return;
         }
         this.addHighlight(candidate, new Color(255, 255, 0));
     }
 
-    if (data.replacement) {
-        this.addHighlight(parent, new Color(255, 0, 255));
+    if (data.parent.label === 'script') {
+        if (data.index === 0) {
+            this.addInsertButton(parent, true);
+        } else {
+            var precedingBlock = parent;
+            for (var i = 0; i < data.index - 1; i++) {
+                precedingBlock = precedingBlock.nextBlock();
+            }
+            this.addInsertButton(precedingBlock);
+        }
+    } else {
+        // console.log(data.parent.label);
+        // TODO: handle list inserts, which won't be in scripts
+        // along with structure hints like snapshot parents
     }
+};
+
+HighlightDisplay.prototype.addInsertButton = function(block, before) {
+
+    var buttonVar = 'insertButton' + (before ? 'Before' : 'After');
+    console.log(buttonVar);
+    if (block[buttonVar]) return;
+
+    console.log('insert', block);
+
+    var button = block[buttonVar] = new PushButtonMorph(block, null,
+        new SymbolMorph('speechBubble', 11));
+    button.labelColor = new Color(0, 0, 255);
+    this.insertButtons.push(button);
+
+    block.add(button);
+    button.setRight(block.left() - 5);
+    button.setTop((before ? block.top() : block.bottom()) -
+            button.height() / 2);
+    button.fixLayout();
+
+    // TODO: fix dragging blur and layout issues
 };

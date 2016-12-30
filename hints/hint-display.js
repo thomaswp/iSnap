@@ -116,3 +116,20 @@ HintDisplay.prototype.getCode = function(ref) {
         return parent.inputs()[index];
     }
 };
+
+HintDisplay.prototype.redrawBlock = function(block) {
+    if (!block) return;
+    if (block.getShadow) {
+        if (block.getShadow()) {
+            block.removeShadow();
+            block.addShadow();
+        }
+    }
+    if (block.cachedFullBounds) {
+        block.cachedFullBounds = block.fullBounds();
+    }
+    if (block.cachedFullImage) {
+        block.cachedFullImage = null;
+        block.cachedFullImage = block.fullImageClassic();
+    }
+};

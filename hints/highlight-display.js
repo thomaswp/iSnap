@@ -25,15 +25,25 @@ HighlightDisplay.prototype.showError = function(error) {
 };
 
 HighlightDisplay.prototype.clear = function() {
+    var toRedraw = [];
+    function redraw(block) {
+        var topBlock = block.topBlock();
+        if (!toRedraw.includes(topBlock)) toRedraw.push(topBlock);
+    }
     this.highlights.forEach(function(block) {
         block.removeHighlight();
+        redraw(block);
     });
     this.highlights = [];
     this.insertButtons.forEach(function(button) {
         button.destroy();
         button.parent.insertButtonBefore = null;
         button.parent.insertButtonAfter = null;
+        redraw(button.parent);
     });
+    toRedraw.forEach(function(block) {
+        this.redrawBlock(block);
+    }, this);
     this.insertButtons = [];
 };
 
@@ -87,8 +97,9 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     if (data.replacement) {
         var replacement = this.getCode(data.replacement);
         if (replacement) {
-            console.log(replacement);
-            this.addHighlight(replacement, new Color(0, 0, 255));
+            var color = replacement instanceof BlockMorph ?
+                    new Color(255, 0, 0) : new Color(0, 0, 255);
+            this.addHighlight(replacement, color);
         } else {
             Trace.logErrorMessage('Unknown replacement in insert hint');
         }
@@ -124,7 +135,6 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
 };
 
 HighlightDisplay.prototype.addInsertButton = function(block, before) {
-
     if (!(block instanceof BlockMorph || block instanceof CSlotMorph)) {
         Trace.logErrorMessage('Non-insertable morph: ' + block);
         return;
@@ -158,7 +168,10 @@ HighlightDisplay.prototype.addInsertButton = function(block, before) {
     };
 
     block.add(button);
-    block.fixLayout();
 
-    // TODO: fix dragging blur and layout issues
+    // Delay the layout to prevent it from behaving improperly
+    // for reasons I don't fully understand
+    setTimeout(function() {
+        block.fixLayout();
+    });
 };

@@ -15,6 +15,7 @@ HintBarMorph.prototype.init = function(parent, maxAdjacent) {
     if (parent) parent.add(this);
 };
 
+// Makes the morph itself draw transparently
 HintBarMorph.prototype.drawNew = function() {
     this.image = newCanvas(this.extent());
 };
@@ -26,6 +27,7 @@ HintBarMorph.prototype.destroy = function() {
     }
 };
 
+// Happens when the block this is attached to is duplicated
 HintBarMorph.prototype.copy = function() {
     var copy = HintBarMorph.uber.copy.call(this);
     if (window.hintProvider) {

@@ -3450,7 +3450,10 @@ BlockMorph.prototype.situation = function () {
 // BlockMorph sticky comments
 
 BlockMorph.prototype.prepareToBeGrabbed = function (hand) {
-    Trace.log("Block.grabbed", {"id": this.blockId(), "origin": this.bounds.origin});
+    Trace.log('Block.grabbed', {
+        'id': this.blockId(),
+        'origin': this.bounds.origin
+    });
     var myself = this;
     this.allComments().forEach(function (comment) {
         comment.startFollowing(myself, hand.world);

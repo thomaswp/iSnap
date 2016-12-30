@@ -110,21 +110,8 @@ SnapDisplay.prototype.clear = function() {
         var parent = bar.parent;
         parent.hintBar = null;
         bar.destroy();
-        if (!parent) return;
-        if (parent.getShadow) {
-            if (parent.getShadow()) {
-                parent.removeShadow();
-                parent.addShadow();
-            }
-        }
-        if (parent.cachedFullBounds) {
-            parent.cachedFullBounds = parent.fullBounds();
-        }
-        if (parent.cachedFullImage) {
-            parent.cachedFullImage = null;
-            parent.cachedFullImage = parent.fullImageClassic();
-        }
-    });
+        this.redrawBlock(parent);
+    }, this);
 
     this.hintBars = [];
     window.ide.changed();

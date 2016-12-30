@@ -325,10 +325,10 @@ SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {
     var root = hint.root, from = hint.from, to = hint.to;
 
     // For logging, we find the parent block this script is inside of, or null
-    var block = this.getEnclosingBlock(root);
+    var enclosingBlock = this.getEnclosingBlock(root);
 
     // If applicable, find the index of this script in it's parent (e.g. IfElse)
-    var index = this.getScriptIndex(root, block);
+    var index = this.getScriptIndex(root, enclosingBlock);
 
     if (root instanceof PrototypeHatBlockMorph) {
         from.unshift('prototypeHatBlock');
@@ -342,8 +342,8 @@ SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {
     var showHint = function() {
         var rootID = root ? root.id : null;
         var displayRootID = displayRoot ? displayRoot.id : null;
-        var selector = block ? block.selector : null;
-        var blockID = block ? block.id : null;
+        var selector = enclosingBlock ? enclosingBlock.selector : null;
+        var blockID = enclosingBlock ? enclosingBlock.id : null;
         Trace.log('SnapDisplay.showScriptHint', {
             'rootID': rootID,
             'displayRootID': displayRootID,

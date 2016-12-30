@@ -96,7 +96,7 @@ HintDisplay.prototype.getCode = function(ref) {
         break;
     case 'script':
         var block = parent;
-        if (block._debugType == 'CSlotMorph') block = block.children[0];
+        if (block instanceof CSlotMorph) block = block.children[0];
         if (ref.parent.parent && ref.parent.parent.label == 'customBlock') {
             // Scripts in a custom block must skip one extra because the
             // first block is the header CustomHatBlock.

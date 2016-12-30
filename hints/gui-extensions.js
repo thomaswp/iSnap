@@ -27,6 +27,7 @@ BlockMorph.prototype.topBlockInScript = function() {
 BlockMorph.prototype.addActiveHighlightBasic =
     BlockMorph.prototype.addActiveHighlight;
 BlockMorph.prototype.addActiveHighlight = function(color) {
+    // TODO: remove individual hint buttons as well
     var index = this.children.indexOf(this.hintBar);
     if (index >= 0) {
         this.children.splice(index, 1);
@@ -54,3 +55,39 @@ BlockMorph.prototype.addSingleHighlight = function(color) {
 BlockHighlightMorph.prototype.topMorphAt = function(point) {
     return null;
 };
+
+ArgMorph.prototype.addActiveHighlight =
+    BlockMorph.prototype.addActiveHighlight;
+ArgMorph.prototype.addActiveHighlightBasic =
+    BlockMorph.prototype.addActiveHighlightBasic;
+ArgMorph.prototype.removeHighlight =
+    BlockMorph.prototype.removeHighlight;
+ArgMorph.prototype.highlight =
+    BlockMorph.prototype.highlight;
+ArgMorph.prototype.highlightImage =
+    BlockMorph.prototype.highlightImage;
+ArgMorph.prototype.highlightImageBlurred =
+    BlockMorph.prototype.highlightImageBlurred;
+ArgMorph.prototype.getHighlight =
+    BlockMorph.prototype.getHighlight;
+ArgMorph.prototype.addSingleHighlight =
+    ArgMorph.prototype.addActiveHighlight;
+
+// ArgMorph.prototype.highlightImageBlurred = function (color, blur) {
+//     var fb, img, hi, ctx;
+//     fb = this.fullBounds().extent();
+//     img = this.fullImage();
+
+//     hi = newCanvas(fb.add(blur * 2));
+//     ctx = hi.getContext('2d');
+//     ctx.shadowBlur = blur * 2;
+//     ctx.shadowColor = color.toString();
+//     ctx.translate(blur + fb.x / 2, blur + fb.y / 2);
+//     ctx.scale(0.5, 0.5);
+//     ctx.drawImage(img, -fb.x / 2, -fb.y / 2);
+
+//     ctx.shadowBlur = 0;
+//     ctx.globalCompositeOperation = 'destination-out';
+//     ctx.drawImage(img, -fb.x / 2, -fb.y / 2);
+//     return hi;
+// };

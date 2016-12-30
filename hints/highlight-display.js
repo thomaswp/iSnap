@@ -42,12 +42,16 @@ HighlightDisplay.prototype.addHighlight = function(block, color) {
         block = block.parent;
     }
     if (!(block.removeHighlight && block.addSingleHighlight)) {
-        console.log('Non-highlightable: ', block);
-        console.trace();
+        Trace.logErrorMessage('Non-highlightable: ' + block);
         return;
     }
     block.removeHighlight();
+    useBlurredShadows = false;
+    var border = block.activeBorder;
+    block.activeBorder = 2;
     block.addSingleHighlight(color);
+    block.activeBorder = border;
+    useBlurredShadows = true;
     this.highlights.push(block);
 };
 
@@ -81,8 +85,13 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     if (data.type === 'script') return;
 
     if (data.replacement) {
-        // TODO: Highlight input slot, not whole parent block
-        this.addHighlight(parent, new Color(0, 0, 255));
+        var replacement = this.getCode(data.replacement);
+        if (replacement) {
+            console.log(replacement);
+            this.addHighlight(replacement, new Color(0, 0, 255));
+        } else {
+            Trace.logErrorMessage('Unknown replacement in insert hint');
+        }
         return;
     }
 
@@ -100,8 +109,9 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         if (data.index === 0) {
             this.addInsertButton(parent, true);
         } else {
+            if (parent instanceof CSlotMorph) parent = parent.children[0];
             var precedingBlock = parent;
-            for (var i = 0; i < data.index - 1; i++) {
+            for (var i = 0; i < data.index - 1 && precedingBlock != null; i++) {
                 precedingBlock = precedingBlock.nextBlock();
             }
             this.addInsertButton(precedingBlock);
@@ -115,22 +125,40 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
 
 HighlightDisplay.prototype.addInsertButton = function(block, before) {
 
-    var buttonVar = 'insertButton' + (before ? 'Before' : 'After');
-    console.log(buttonVar);
-    if (block[buttonVar]) return;
+    if (!(block instanceof BlockMorph || block instanceof CSlotMorph)) {
+        Trace.logErrorMessage('Non-insertable morph: ' + block);
+        return;
+    }
 
-    console.log('insert', block);
+    var buttonVar = 'insertButton' + (before ? 'Before' : 'After');
+    if (block[buttonVar]) return;
 
     var button = block[buttonVar] = new PushButtonMorph(block, null,
         new SymbolMorph('speechBubble', 11));
     button.labelColor = new Color(0, 0, 255);
     this.insertButtons.push(button);
 
+    layout = function(block, button, before) {
+        // console.log('layout', block, before);
+        button.setRight(block.left() - 5);
+        button.setTop((before ? block.top() : block.bottom()) -
+                button.height() / 2);
+        button.fixLayout();
+    };
+
+    var oldFixLayout = block.fixLayout;
+    block.fixLayout = function() {
+        oldFixLayout.apply(this, arguments);
+        if (this.insertButtonBefore) {
+            layout(this, this.insertButtonBefore, true);
+        }
+        if (this.insertButtonAfter) {
+            layout(this, this.insertButtonAfter, false);
+        }
+    };
+
     block.add(button);
-    button.setRight(block.left() - 5);
-    button.setTop((before ? block.top() : block.bottom()) -
-            button.height() / 2);
-    button.fixLayout();
+    block.fixLayout();
 
     // TODO: fix dragging blur and layout issues
 };

@@ -133,3 +133,23 @@ HintDisplay.prototype.redrawBlock = function(block) {
         block.cachedFullImage = block.fullImageClassic();
     }
 };
+
+// For a script (top block of CSlot), finds the enclosing block, or null
+HintDisplay.prototype.getEnclosingBlock = function(block) {
+    block = block.parent;
+    if (block && block.enclosingBlock) return block.enclosingBlock();
+    else return null;
+};
+
+// For a script, finds the index of the script in the enclosing block
+HintDisplay.prototype.getScriptIndex = function(script, enclosingBlock) {
+    var index = 0;
+    if (enclosingBlock && enclosingBlock != script && enclosingBlock.inputs) {
+        index = enclosingBlock.inputs().indexOf(script);
+        if (index == -1) {
+            Trace.logErrorMessage('Bad hint index!');
+            index = 0;
+        }
+    }
+    return index;
+};

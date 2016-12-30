@@ -1,4 +1,6 @@
 require('hint-display');
+require('code-hint-dialog-box-morph');
+require('message-hint-dialog-box-morph');
 
 function HighlightDisplay() {
 }
@@ -106,7 +108,6 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         return;
     }
 
-    // console.log(data);
     if (data.candidate) {
         var candidate = this.getCode(data.candidate);
         if (!candidate) {
@@ -117,15 +118,26 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     }
 
     if (data.parent.label === 'script') {
+        var enclosingBlock = this.getEnclosingBlock(parent);
+        var selector = enclosingBlock ? enclosingBlock.selector : null;
+        var index = this.getScriptIndex(parent, enclosingBlock);
+        var fromList = [data.from];
+        if (data.candidate) fromList.push([data.candidate.label]);
+        var to = data.to;
+        var callback = function() {
+            new CodeHintDialogBoxMorph(window.ide)
+                .showScriptHint(selector, index, fromList, to);
+        };
+
         if (data.index === 0) {
-            this.addInsertButton(parent, true);
+            this.addInsertButton(parent, true, callback);
         } else {
             if (parent instanceof CSlotMorph) parent = parent.children[0];
             var precedingBlock = parent;
             for (var i = 0; i < data.index - 1 && precedingBlock != null; i++) {
                 precedingBlock = precedingBlock.nextBlock();
             }
-            this.addInsertButton(precedingBlock);
+            this.addInsertButton(precedingBlock, false, callback);
         }
     } else {
         // console.log(data.parent.label);
@@ -134,7 +146,7 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     }
 };
 
-HighlightDisplay.prototype.addInsertButton = function(block, before) {
+HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
     if (!(block instanceof BlockMorph || block instanceof CSlotMorph)) {
         Trace.logErrorMessage('Non-insertable morph: ' + block);
         return;
@@ -143,13 +155,12 @@ HighlightDisplay.prototype.addInsertButton = function(block, before) {
     var buttonVar = 'insertButton' + (before ? 'Before' : 'After');
     if (block[buttonVar]) return;
 
-    var button = block[buttonVar] = new PushButtonMorph(block, null,
+    var button = block[buttonVar] = new PushButtonMorph(block, callback,
         new SymbolMorph('speechBubble', 11));
     button.labelColor = new Color(0, 0, 255);
     this.insertButtons.push(button);
 
     layout = function(block, button, before) {
-        // console.log('layout', block, before);
         button.setRight(block.left() - 5);
         button.setTop((before ? block.top() : block.bottom()) -
                 button.height() / 2);

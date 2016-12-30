@@ -10,6 +10,7 @@ HighlightDisplay.prototype = Object.create(HintDisplay.prototype);
 HighlightDisplay.prototype.initDisplay = function() {
     this.highlights = [];
     this.insertButtons = [];
+    this.hoverHints = [];
 };
 
 HighlightDisplay.prototype.showHint = function(hint) {
@@ -37,6 +38,7 @@ HighlightDisplay.prototype.clear = function() {
         redraw(block);
     });
     this.highlights = [];
+
     this.insertButtons.forEach(function(button) {
         button.destroy();
         button.parent.insertButtonBefore = null;
@@ -47,6 +49,17 @@ HighlightDisplay.prototype.clear = function() {
         this.redrawBlock(block);
     }, this);
     this.insertButtons = [];
+
+    this.hoverHints.forEach(function(argMorph) {
+        if (argMorph.contents) {
+            var contents = argMorph.contents();
+            if (contents instanceof StringMorph) {
+                contents.isEditable = false;
+            }
+        }
+        argMorph.onClick = null;
+    });
+    this.hoverHints = [];
 };
 
 HighlightDisplay.prototype.addHighlight = function(block, color) {
@@ -102,6 +115,7 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
             var color = replacement instanceof BlockMorph ?
                     new Color(255, 0, 0) : new Color(0, 0, 255);
             this.addHighlight(replacement, color);
+            this.addHoverHint(replacement);
         } else {
             Trace.logErrorMessage('Unknown replacement in insert hint');
         }
@@ -146,6 +160,22 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     }
 };
 
+HighlightDisplay.prototype.addHoverHint = function(argMorph) {
+    if (!(argMorph instanceof ArgMorph)) return;
+
+    if (argMorph.contents) {
+        var contents = argMorph.contents();
+        if (contents instanceof StringMorph) {
+            contents.isEditable = false;
+        }
+    }
+    argMorph.onClick = function() {
+        console.log(this);
+    };
+
+    this.hoverHints.push(argMorph);
+};
+
 HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
     if (!(block instanceof BlockMorph || block instanceof CSlotMorph)) {
         Trace.logErrorMessage('Non-insertable morph: ' + block);
@@ -156,7 +186,7 @@ HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
     if (block[buttonVar]) return;
 
     var button = block[buttonVar] = new PushButtonMorph(block, callback,
-        new SymbolMorph('plus', 9));
+        new SymbolMorph('plus', 10));
     button.labelColor = new Color(0, 0, 255);
     this.insertButtons.push(button);
 

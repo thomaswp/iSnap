@@ -70,7 +70,10 @@ HighlightDisplay.prototype.addHighlight = function(block, color) {
         Trace.logErrorMessage('Non-highlightable: ' + block);
         return;
     }
-    block.removeHighlight();
+    if (block.getHighlight()) {
+        // console.log(block, block.getHighlight());
+        return;
+    }
     useBlurredShadows = false;
     var border = block.activeBorder;
     block.activeBorder = 2;
@@ -109,21 +112,9 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     // Don't worry about inserting scripts;
     if (data.type === 'script') return;
 
-    if (data.replacement) {
-        var replacement = this.getCode(data.replacement);
-        if (replacement) {
-            var color = replacement instanceof BlockMorph ?
-                    new Color(255, 0, 0) : new Color(0, 0, 255);
-            this.addHighlight(replacement, color);
-            this.addHoverHint(replacement);
-        } else {
-            Trace.logErrorMessage('Unknown replacement in insert hint');
-        }
-        return;
-    }
-
+    var candidate = null;
     if (data.candidate) {
-        var candidate = this.getCode(data.candidate);
+        candidate = this.getCode(data.candidate);
         if (!candidate) {
             Trace.logErrorMessage('Unknown candidate for insert hint');
             return;
@@ -131,9 +122,31 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         this.addHighlight(candidate, new Color(255, 255, 0));
     }
 
+    var selector;
+    if (data.replacement) {
+        var replacement = this.getCode(data.replacement);
+        if (replacement) {
+            var color = replacement instanceof BlockMorph ?
+                    new Color(255, 0, 0) : new Color(0, 0, 255);
+            this.addHighlight(replacement, color);
+            selector = parent.enclosingBlock().selector;
+            var otherBlocks = [];
+            if (candidate) otherBlocks.push(candidate.selector);
+            var onClick = function() {
+                new CodeHintDialogBoxMorph(window.ide)
+                    .showBlockHint(selector, data.from, data.to, otherBlocks);
+            };
+
+            this.addHoverHint(replacement, onClick);
+        } else {
+            Trace.logErrorMessage('Unknown replacement in insert hint');
+        }
+        return;
+    }
+
     if (data.parent.label === 'script') {
         var enclosingBlock = this.getEnclosingBlock(parent);
-        var selector = enclosingBlock ? enclosingBlock.selector : null;
+        selector = enclosingBlock ? enclosingBlock.selector : null;
         var index = this.getScriptIndex(parent, enclosingBlock);
         var fromList = [data.from];
         if (data.candidate) fromList.push([data.candidate.label]);
@@ -160,7 +173,7 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     }
 };
 
-HighlightDisplay.prototype.addHoverHint = function(argMorph) {
+HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
     if (!(argMorph instanceof ArgMorph)) return;
 
     if (argMorph.contents) {
@@ -169,9 +182,7 @@ HighlightDisplay.prototype.addHoverHint = function(argMorph) {
             contents.isEditable = false;
         }
     }
-    argMorph.onClick = function() {
-        console.log(this);
-    };
+    argMorph.onClick = onClick;
 
     this.hoverHints.push(argMorph);
 };

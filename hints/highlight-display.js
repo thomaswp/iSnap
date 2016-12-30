@@ -156,12 +156,12 @@ HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
     if (block[buttonVar]) return;
 
     var button = block[buttonVar] = new PushButtonMorph(block, callback,
-        new SymbolMorph('speechBubble', 11));
+        new SymbolMorph('plus', 9));
     button.labelColor = new Color(0, 0, 255);
     this.insertButtons.push(button);
 
     layout = function(block, button, before) {
-        button.setRight(block.left() - 5);
+        button.setRight(block.left() - 3);
         button.setTop((before ? block.top() : block.bottom()) -
                 button.height() / 2);
         button.fixLayout();

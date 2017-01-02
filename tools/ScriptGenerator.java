@@ -30,6 +30,7 @@ public class ScriptGenerator {
 		HashMap<String, Graph.Node> map = new LinkedHashMap<>();
 		File htmlFile = new File(htmlPath);
 		if (!htmlFile.exists()) throw new RuntimeException("No such file: " + htmlFile);
+		htmlFile = htmlFile.getCanonicalFile();
 
 		File root = htmlFile.getParentFile();
 		String rootPath = root.getAbsolutePath();
@@ -201,24 +202,24 @@ public class ScriptGenerator {
 			}
 		}
 
-		public static void main(String[] args) {
-			Node seven = new Node("7");
-			Node five = new Node("5");
-			Node three = new Node("3");
-			Node eleven = new Node("11");
-			Node eight = new Node("8");
-			Node two = new Node("2");
-			Node nine = new Node("9");
-			Node ten = new Node("10");
-			seven.addEdge(eleven).addEdge(eight);
-			five.addEdge(eleven);
-			three.addEdge(eight).addEdge(ten);
-			eleven.addEdge(two).addEdge(nine).addEdge(ten);
-			eight.addEdge(nine).addEdge(ten);
-
-			Node[] allNodes = {ten, seven, five, three, eight, two, nine, eleven};
-			topologicalSort(allNodes);
-		}
+//		public static void main(String[] args) {
+//			Node seven = new Node("7");
+//			Node five = new Node("5");
+//			Node three = new Node("3");
+//			Node eleven = new Node("11");
+//			Node eight = new Node("8");
+//			Node two = new Node("2");
+//			Node nine = new Node("9");
+//			Node ten = new Node("10");
+//			seven.addEdge(eleven).addEdge(eight);
+//			five.addEdge(eleven);
+//			three.addEdge(eight).addEdge(ten);
+//			eleven.addEdge(two).addEdge(nine).addEdge(ten);
+//			eight.addEdge(nine).addEdge(ten);
+//
+//			Node[] allNodes = {ten, seven, five, three, eight, two, nine, eleven};
+//			topologicalSort(allNodes);
+//		}
 
 		private static ArrayList<Node> topologicalSort(Node[] allNodes) {
 			//L <- Empty list that will contain the sorted elements

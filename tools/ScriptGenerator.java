@@ -10,8 +10,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -223,7 +225,7 @@ public class ScriptGenerator {
 			ArrayList<Node> L = new ArrayList<Node>();
 
 			//S <- Set of all nodes with no incoming edges
-			HashSet<Node> S = new HashSet<Node>();
+			Set<Node> S = new LinkedHashSet<Node>();
 			for(Node n : allNodes){
 				if(n.inEdges.size() == 0){
 					S.add(n);

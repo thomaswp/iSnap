@@ -2,7 +2,10 @@ Highlight:
 * Bugs:
 * TODO:
   * Add UI for starting/explaining hints
+  * Add UI for move/reorder hints
   * Change hint dialog UI to just have dismiss
+  * Add and test logging
+  * Test on existing hint requests
 
 UI:
 * Fix parent.adjustBounds bug in HintBar

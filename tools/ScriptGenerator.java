@@ -119,10 +119,12 @@ public class ScriptGenerator {
 		for (String path : root.list()) {
 			if (path.equals(outFile)) continue;
 			File file = new File(root, path);
+			if (path.equals(".git")) continue;
 			if (file.isDirectory()) {
 				add(file, outFile, map);
 			}
 			if (path.endsWith(".js")) {
+				System.out.println(path);
 				Scanner sc = new Scanner(new FileInputStream(file));
 				int lineNumber = 0;
 				while (sc.hasNextLine()) {
@@ -159,8 +161,8 @@ public class ScriptGenerator {
 
 			public Node(String name) {
 				this.name = name;
-				inEdges = new HashSet<Edge>();
-				outEdges = new HashSet<Edge>();
+				inEdges = new LinkedHashSet<Edge>();
+				outEdges = new LinkedHashSet<Edge>();
 			}
 
 			public Node addEdge(Node node){

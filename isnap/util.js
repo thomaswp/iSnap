@@ -105,7 +105,7 @@ function extend(clazz, functionName, newFunction) {
     clazz.prototype[functionName] = function() {
         var args = [].slice.call(arguments);
         args.unshift(oldFunction);
-        newFunction.apply(this, args);
+        return newFunction.apply(this, args);
     };
 
     return oldFunction;

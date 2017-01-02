@@ -1,13 +1,10 @@
 require('hint-bar-morph');
 
-(function() {
-    var superIsNonPartMorph = SyntaxElementMorph.prototype.isNonPartMorph;
-    SyntaxElementMorph.prototype.isNonPartMorph = function(block) {
-        return superIsNonPartMorph(block) ||
-                block instanceof HintBarMorph ||
-                block instanceof PushButtonMorph;
-    };
-})();
+extend(SyntaxElementMorph, 'isNonPartMorph', function(base, block) {
+    return base.call(this, block) ||
+        block instanceof HintBarMorph ||
+        block instanceof PushButtonMorph;
+});
 
 SyntaxElementMorph.prototype.enclosingBlock = function() {
     var block = this;

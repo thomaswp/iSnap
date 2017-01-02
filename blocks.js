@@ -2088,16 +2088,16 @@ BlockMorph.prototype.toString = function () {
 
 BlockMorph.prototype.blockId = function() {
     return {
-        "selector": this.selector,
-        "id": this.id,
-        "template": this.isTemplate,
-        "spec": this.blockSpec,
+        'selector': this.selector,
+        'id': this.id,
+        'template': this.isTemplate,
+        'spec': this.blockSpec,
     };
-}
+};
 
 BlockMorph.prototype.userDestroy = function() {
-    Trace.log("Block.userDestroy", this.blockId());
-}
+    Trace.log('Block.userDestroy', this.blockId());
+};
 
 // BlockMorph spec:
 

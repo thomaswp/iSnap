@@ -1,4 +1,5 @@
 require('hint-display');
+require('hint-highlight-morph');
 require('code-hint-dialog-box-morph');
 require('message-hint-dialog-box-morph');
 
@@ -34,7 +35,7 @@ HighlightDisplay.prototype.clear = function() {
         if (!toRedraw.includes(topBlock)) toRedraw.push(topBlock);
     }
     this.highlights.forEach(function(block) {
-        block.removeHighlight();
+        block.removeHintHighlight();
         redraw(block);
     });
     this.highlights = [];
@@ -46,6 +47,7 @@ HighlightDisplay.prototype.clear = function() {
     this.insertButtons = [];
 
     toRedraw.forEach(function(block) {
+        block.removeHighlight();
         this.redrawBlock(block);
     }, this);
 
@@ -65,21 +67,17 @@ HighlightDisplay.prototype.addHighlight = function(block, color) {
     if (block instanceof MultiArgMorph) {
         block = block.parent;
     }
-    if (!(block.removeHighlight && block.addSingleHighlight)) {
+    if (!(block instanceof SyntaxElementMorph)) {
         Trace.logErrorMessage('Non-highlightable: ' + block);
         return;
     }
-    if (block.getHighlight()) {
+    // First come, first highlight
+    if (block.getHintHighlight()) {
         // console.log(block, block.getHighlight());
         return;
     }
-    var useShadows = useBlurredShadows;
-    useBlurredShadows = false;
-    var border = block.activeBorder;
-    block.activeBorder = 2;
-    block.addSingleHighlight(color);
-    block.activeBorder = border;
-    useBlurredShadows = useShadows;
+    // TODO: For scripts, not just a single highlight
+    block.addSingleHintHighlight(color);
     this.highlights.push(block);
 };
 

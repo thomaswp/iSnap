@@ -1,7 +1,8 @@
 Highlight:
-* highlights can't override each other (they just don't go away)
-* sometimes hints still show blurred highlight for unknown reason
-* hint dialog doesn't show all existing code?
+* Bugs:
+* TODO:
+  * Add UI for starting/explaining hints
+  * Change hint dialog UI to just have dismiss
 
 UI:
 * Fix parent.adjustBounds bug in HintBar

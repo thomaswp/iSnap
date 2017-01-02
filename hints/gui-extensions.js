@@ -6,6 +6,18 @@ extend(SyntaxElementMorph, 'isNonPartMorph', function(base, block) {
         block instanceof PushButtonMorph;
 });
 
+extend(Morph, 'fullBounds', function(base) {
+    var result;
+    result = this.bounds;
+    this.children.forEach(function (child) {
+        // Don't use "floating" children in fullBounds calculation
+        if (child.isVisible && !child.float) {
+            result = result.merge(child.fullBounds());
+        }
+    });
+    return result;
+});
+
 SyntaxElementMorph.prototype.enclosingBlock = function() {
     var block = this;
     while (block && !(block instanceof BlockMorph)) {

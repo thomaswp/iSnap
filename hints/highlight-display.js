@@ -41,14 +41,13 @@ HighlightDisplay.prototype.clear = function() {
 
     this.insertButtons.forEach(function(button) {
         button.destroy();
-        button.parent.insertButtonBefore = null;
-        button.parent.insertButtonAfter = null;
         redraw(button.parent);
     });
+    this.insertButtons = [];
+
     toRedraw.forEach(function(block) {
         this.redrawBlock(block);
     }, this);
-    this.insertButtons = [];
 
     this.hoverHints.forEach(function(argMorph) {
         if (argMorph.contents) {
@@ -74,12 +73,13 @@ HighlightDisplay.prototype.addHighlight = function(block, color) {
         // console.log(block, block.getHighlight());
         return;
     }
+    var useShadows = useBlurredShadows;
     useBlurredShadows = false;
     var border = block.activeBorder;
     block.activeBorder = 2;
     block.addSingleHighlight(color);
     block.activeBorder = border;
-    useBlurredShadows = true;
+    useBlurredShadows = useShadows;
     this.highlights.push(block);
 };
 
@@ -193,17 +193,30 @@ HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
         return;
     }
 
-    var buttonVar = 'insertButton' + (before ? 'Before' : 'After');
-    if (block[buttonVar]) return;
+    // We use CSlotMorphs for positioning, but for consistency, we only use
+    // blocks as parents
+    var positionMorph = block;
+    if (block instanceof CSlotMorph) block = block.parent;
 
-    var button = block[buttonVar] = new PushButtonMorph(block, callback,
+    // Don't allow duplicate insert buttons in the same position
+    if (this.insertButtons.some(function(button) {
+        return button.positionMorph == positionMorph && button.before == before;
+    })) {
+        return;
+    }
+
+    var button = new PushButtonMorph(block, callback,
         new SymbolMorph('plus', 10));
     button.labelColor = new Color(0, 0, 255);
+    button.positionMorph = positionMorph;
+    button.before = before;
+    button.float = true;
     this.insertButtons.push(button);
 
-    layout = function(block, button, before) {
+    layout = function(button) {
+        var block = button.positionMorph;
         button.setRight(block.left() - 3);
-        button.setTop((before ? block.top() : block.bottom()) -
+        button.setTop((button.before ? block.top() : block.bottom()) -
                 button.height() / 2);
         button.fixLayout();
     };
@@ -211,19 +224,9 @@ HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
     var oldFixLayout = block.fixLayout;
     block.fixLayout = function() {
         oldFixLayout.apply(this, arguments);
-        if (this.insertButtonBefore) {
-            layout(this, this.insertButtonBefore, true);
-        }
-        if (this.insertButtonAfter) {
-            layout(this, this.insertButtonAfter, false);
-        }
+        layout(button);
     };
 
     block.add(button);
-
-    // Delay the layout to prevent it from behaving improperly
-    // for reasons I don't fully understand
-    setTimeout(function() {
-        block.fixLayout();
-    });
+    block.fixLayout();
 };

@@ -1,3 +1,9 @@
+Highlight:
+* click-run highlighting doesn't disappear
+* highlights can't override each other (they just don't go away)
+* sometimes hints still show blurred highlight for unknown reason
+* hint dialog doesn't show all existing code?
+
 UI:
 * Fix parent.adjustBounds bug in HintBar
 * Clean up breaks the hint margin for custom blocks

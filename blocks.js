@@ -3019,8 +3019,8 @@ BlockMorph.prototype.addActiveHighlight = function(color) {
 BlockMorph.prototype.removeHighlight = function () {
     var highlight = this.getHighlight();
     if (highlight !== null) {
-        this.removeChild(highlight);
         this.fullChanged();
+        this.removeChild(highlight);
     }
     return highlight;
 };

@@ -125,7 +125,6 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         this.addHighlight(candidate, new Color(255, 255, 0), true);
     }
 
-    var selector;
     if (data.replacement) {
         var replacement = this.getCode(data.replacement);
         if (replacement) {
@@ -134,14 +133,11 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
             this.addHighlight(replacement, color, true);
 
             if (replacement instanceof ArgMorph) {
-                selector = parent.enclosingBlock().selector;
                 var otherBlocks = [];
                 if (candidate) otherBlocks.push(candidate.selector);
-                var onClick = function() {
-                    new CodeHintDialogBoxMorph(window.ide, true)
-                        .showBlockHint(selector, data.from, data.to,
-                            otherBlocks);
-                };
+                var onClick = this.createBlockHintCallback(true,
+                    parent.enclosingBlock(), candidate, data.from, data.to,
+                    otherBlocks);
                 this.addHoverHint(replacement, onClick);
             }
         } else {

@@ -134,8 +134,8 @@ HintDisplay.prototype.redrawBlock = function(block) {
     }
 };
 
-// For a script (top block of CSlot), finds the enclosing block, or null
-HintDisplay.prototype.getEnclosingBlock = function(block) {
+// For a script (top block or CSlot), finds the enclosing block, or null
+HintDisplay.prototype.getEnclosingParentBlock = function(block) {
     block = block.parent;
     if (block && block.enclosingBlock) return block.enclosingBlock();
     else return null;
@@ -163,7 +163,7 @@ HintDisplay.prototype.createScriptHintCallback = function(simple, root,
     }
 
     // For logging, we find the parent block this script is inside of, or null
-    var enclosingBlock = this.getEnclosingBlock(root);
+    var enclosingBlock = this.getEnclosingParentBlock(root);
 
     // If applicable, find the index of this script in it's parent (e.g. IfElse)
     var index = this.getScriptIndex(root, enclosingBlock);
@@ -187,6 +187,30 @@ HintDisplay.prototype.createScriptHintCallback = function(simple, root,
         Trace.log('SnapDisplay.showScriptHint', data);
         new CodeHintDialogBoxMorph(window.ide, simple)
             .showScriptHint(parentSelector, index, fromList, to)
+            .onThumbsDown(onThumbsDown);
+    };
+};
+
+HintDisplay.prototype.createBlockHintCallback = function(simple, root,
+        extraRoot, from, to, otherBlocks, onThumbsDown) {
+
+    var enclosingBlock = root.enclosingBlock();
+    var selector = enclosingBlock ? enclosingBlock.selector : null;
+    var parentID = enclosingBlock ? enclosingBlock.id : null;
+    var extraRootID = extraRoot ? extraRoot.id : null;
+    var data = {
+        'parentSelector': selector,
+        'parentID': parentID,
+        'extraRootID': extraRootID,
+        'from': from,
+        'to': to,
+        'otherBlocks': otherBlocks,
+    };
+
+    return function() {
+        Trace.log('SnapDisplay.showBlockHint', data);
+        new CodeHintDialogBoxMorph(window.ide, simple)
+            .showBlockHint(selector, from, to, otherBlocks)
             .onThumbsDown(onThumbsDown);
     };
 };

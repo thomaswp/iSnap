@@ -324,14 +324,14 @@ SnapDisplay.prototype.showCustomBlockHint = function(hint) {
 SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {
     var root = hint.root, from = hint.from, to = hint.to;
 
-    var displayRoot = oldHint ? oldHint.root : root;
     var fromList = oldHint ? [from, oldHint.from] : [from];
 
+    var extraRoot = oldHint ? oldHint.root : null;
     var myself = this;
-    var showHint = this.createScriptHintCallback(false, root, displayRoot,
-            fromList, to, function() {
-                myself.hideHint(root, to, 'script');
-            });
+    var showHint = this.createScriptHintCallback(false, root, extraRoot,
+        fromList, to, function() {
+            myself.hideHint(root, to, 'script');
+        });
 
     // Custom blocks have a header block on top, which we may want to skip for
     // displaying hints if there's another block underneath. But right now we're
@@ -341,37 +341,23 @@ SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {
     // }
 
 
+    var displayRoot = oldHint ? oldHint.root : root;
     this.createHintButton(displayRoot, this.hintColorScript, true, showHint,
         hint.hasCustom);
 };
 
 SnapDisplay.prototype.showBlockHint = function(hint, oldHint) {
     var root = hint.root, from = hint.from, to = hint.to;
-    var block = root.enclosingBlock();
-
-    var displayRoot = oldHint ? oldHint.root : root;
-    var otherBlocks = oldHint ? oldHint.from : [];
 
     var myself = this;
-    var showHint = function() {
-        var selector = block ? block.selector : null;
-        var blockID = block ? block.id : null;
-        var displayRootID = displayRoot ? displayRoot.id : null;
-        Trace.log('SnapDisplay.showBlockHint', {
-            'parentSelector': selector,
-            'parentID': blockID,
-            'displayRootID': displayRootID,
-            'from': from,
-            'to': to,
-            'otherBlocks': otherBlocks,
+    var otherBlocks = oldHint ? oldHint.from : [];
+    var extraRoot = oldHint ? oldHint.root : null;
+    var showHint = this.createBlockHintCallback(false, root, extraRoot, from,
+        to, otherBlocks, function() {
+            myself.hideHint(root, to, 'block');
         });
-        new CodeHintDialogBoxMorph(window.ide)
-            .showBlockHint(selector, from, to, otherBlocks)
-            .onThumbsDown(function() {
-                myself.hideHint(root, to, 'block');
-            });
-    };
 
+    var displayRoot = oldHint ? oldHint.root : root;
     this.createHintButton(displayRoot, this.hintColorBlock, false, showHint,
         hint.hasCustom);
 };

@@ -9,6 +9,7 @@ Highlight:
 * Reach:
   * Show list insert hints as a dialog
   * Find a better way of doing structure hints
+  * Make a more uniform way of logging node IDs
 
 UI:
 * Fix parent.adjustBounds bug in HintBar

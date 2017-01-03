@@ -167,7 +167,7 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         if (parent instanceof PrototypeHatBlockMorph) index++;
 
         if (index === 0) {
-            this.addInsertButton(parent, before, callback);
+            this.addInsertButton(parent, true, callback);
         } else {
             if (parent instanceof CSlotMorph) parent = parent.children[0];
             var precedingBlock = parent;

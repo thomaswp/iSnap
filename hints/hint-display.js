@@ -143,7 +143,7 @@ HintDisplay.prototype.getEnclosingBlock = function(block) {
 
 // For a script, finds the index of the script in the enclosing block
 HintDisplay.prototype.getScriptIndex = function(script, enclosingBlock) {
-    var index = 0;
+    var index = -1;
     if (enclosingBlock && enclosingBlock != script && enclosingBlock.inputs) {
         index = enclosingBlock.inputs().indexOf(script);
         if (index == -1) {
@@ -152,4 +152,41 @@ HintDisplay.prototype.getScriptIndex = function(script, enclosingBlock) {
         }
     }
     return index;
+};
+
+HintDisplay.prototype.createScriptHintCallback = function(simple, root,
+        extraRoot, fromList, to, onThumbsDown) {
+
+    if (root instanceof PrototypeHatBlockMorph) {
+        fromList[0].unshift('prototypeHatBlock');
+        to.unshift('prototypeHatBlock');
+    }
+
+    // For logging, we find the parent block this script is inside of, or null
+    var enclosingBlock = this.getEnclosingBlock(root);
+
+    // If applicable, find the index of this script in it's parent (e.g. IfElse)
+    var index = this.getScriptIndex(root, enclosingBlock);
+
+    var rootID = root ? root.id : null;
+    var extraRootID = extraRoot ? extraRoot.id : null;
+    var parentSelector = enclosingBlock ? enclosingBlock.selector : null;
+    var parentID = enclosingBlock ? enclosingBlock.id : null;
+
+    var data = {
+        'rootID': rootID,
+        'extraRootID': extraRootID,
+        'parentSelector': parentSelector,
+        'parentID': parentID,
+        'index': index,
+        'fromList': fromList,
+        'to': to,
+    };
+
+    return function() {
+        Trace.log('SnapDisplay.showScriptHint', data);
+        new CodeHintDialogBoxMorph(window.ide, simple)
+            .showScriptHint(parentSelector, index, fromList, to)
+            .onThumbsDown(onThumbsDown);
+    };
 };

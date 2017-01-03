@@ -324,41 +324,14 @@ SnapDisplay.prototype.showCustomBlockHint = function(hint) {
 SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {
     var root = hint.root, from = hint.from, to = hint.to;
 
-    // For logging, we find the parent block this script is inside of, or null
-    var enclosingBlock = this.getEnclosingBlock(root);
-
-    // If applicable, find the index of this script in it's parent (e.g. IfElse)
-    var index = this.getScriptIndex(root, enclosingBlock);
-
-    if (root instanceof PrototypeHatBlockMorph) {
-        from.unshift('prototypeHatBlock');
-        to.unshift('prototypeHatBlock');
-    }
-
     var displayRoot = oldHint ? oldHint.root : root;
     var fromList = oldHint ? [from, oldHint.from] : [from];
 
     var myself = this;
-    var showHint = function() {
-        var rootID = root ? root.id : null;
-        var displayRootID = displayRoot ? displayRoot.id : null;
-        var selector = enclosingBlock ? enclosingBlock.selector : null;
-        var blockID = enclosingBlock ? enclosingBlock.id : null;
-        Trace.log('SnapDisplay.showScriptHint', {
-            'rootID': rootID,
-            'displayRootID': displayRootID,
-            'parentSelector': selector,
-            'parentID': blockID,
-            'index': index,
-            'fromList': fromList,
-            'to': to
-        });
-        new CodeHintDialogBoxMorph(window.ide)
-            .showScriptHint(selector, index, fromList, to)
-            .onThumbsDown(function() {
+    var showHint = this.createScriptHintCallback(false, root, displayRoot,
+            fromList, to, function() {
                 myself.hideHint(root, to, 'script');
             });
-    };
 
     // Custom blocks have a header block on top, which we may want to skip for
     // displaying hints if there's another block underneath. But right now we're

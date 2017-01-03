@@ -6,6 +6,9 @@ Highlight:
   * Add and test logging
   * Test on existing hint requests
   * Show that you need more custom block inputs (possibly in calls as well)
+* Reach:
+  * Show list insert hints as a dialog
+  * Find a better way of doing structure hints
 
 UI:
 * Fix parent.adjustBounds bug in HintBar

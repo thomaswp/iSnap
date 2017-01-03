@@ -153,21 +153,10 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
 
     if (data.parent.label === 'script' &&
             !(parent instanceof CustomBlockDefinition)) {
-        var enclosingBlock = this.getEnclosingBlock(parent);
-        selector = enclosingBlock ? enclosingBlock.selector : null;
-        var parentIndex = this.getScriptIndex(parent, enclosingBlock);
         var fromList = [data.from];
         if (data.candidate) fromList.push([data.candidate.label]);
-        var to = data.to;
-        // Add a dummy hat block for custom block script hints
-        if (parent instanceof PrototypeHatBlockMorph) {
-            fromList[0].unshift('prototypeHatBlock');
-            to.unshift('prototypeHatBlock');
-        }
-        var callback = function() {
-            new CodeHintDialogBoxMorph(window.ide, true)
-                .showScriptHint(selector, parentIndex, fromList, to);
-        };
+        var callback = this.createScriptHintCallback(true, parent, candidate,
+            fromList, data.to);
 
         var index = data.index;
         // Increase the hint index by 1 if there's a PrototypeHatBlock

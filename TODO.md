@@ -6,6 +6,7 @@ Highlight:
   * Change hint dialog UI to just have dismiss
   * Add and test logging
   * Test on existing hint requests
+  * Show that you need more custom block inputs (possibly in calls as well)
 
 UI:
 * Fix parent.adjustBounds bug in HintBar

@@ -12,6 +12,7 @@ HighlightDisplay.prototype.initDisplay = function() {
     this.highlights = [];
     this.insertButtons = [];
     this.hoverHints = [];
+    BlockEditorMorph.defaultHatBlockMargin = new Point(35, 20);
 };
 
 HighlightDisplay.prototype.showHint = function(hint) {
@@ -68,7 +69,8 @@ HighlightDisplay.prototype.addHighlight = function(block, color) {
         block = block.parent;
     }
     if (!(block instanceof SyntaxElementMorph)) {
-        Trace.logErrorMessage('Non-highlightable: ' + block);
+        Trace.logErrorMessage('Non-highlightable: ' +
+            (block ? block.getDebugType() : null));
         return;
     }
     // First come, first highlight
@@ -111,7 +113,7 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     if (data.type === 'script') return;
 
     var candidate = null;
-    if (data.candidate) {
+    if (data.candidate && data.candidate.label != 'literal') {
         candidate = this.getCode(data.candidate);
         if (!candidate) {
             Trace.logErrorMessage('Unknown candidate for insert hint');
@@ -142,24 +144,34 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         return;
     }
 
-    if (data.parent.label === 'script') {
+    if (data.parent.label === 'script' &&
+            !(parent instanceof CustomBlockDefinition)) {
         var enclosingBlock = this.getEnclosingBlock(parent);
         selector = enclosingBlock ? enclosingBlock.selector : null;
-        var index = this.getScriptIndex(parent, enclosingBlock);
+        var parentIndex = this.getScriptIndex(parent, enclosingBlock);
         var fromList = [data.from];
         if (data.candidate) fromList.push([data.candidate.label]);
         var to = data.to;
+        // Add a dummy hat block for custom block script hints
+        if (parent instanceof PrototypeHatBlockMorph) {
+            fromList[0].unshift('prototypeHatBlock');
+            to.unshift('prototypeHatBlock');
+        }
         var callback = function() {
             new CodeHintDialogBoxMorph(window.ide)
-                .showScriptHint(selector, index, fromList, to);
+                .showScriptHint(selector, parentIndex, fromList, to);
         };
 
-        if (data.index === 0) {
-            this.addInsertButton(parent, true, callback);
+        var index = data.index;
+        // Increase the hint index by 1 if there's a PrototypeHatBlock
+        if (parent instanceof PrototypeHatBlockMorph) index++;
+
+        if (index === 0) {
+            this.addInsertButton(parent, before, callback);
         } else {
             if (parent instanceof CSlotMorph) parent = parent.children[0];
             var precedingBlock = parent;
-            for (var i = 0; i < data.index - 1 && precedingBlock != null; i++) {
+            for (var i = 0; i < index - 1 && precedingBlock != null; i++) {
                 precedingBlock = precedingBlock.nextBlock();
             }
             this.addInsertButton(precedingBlock, false, callback);
@@ -167,7 +179,8 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     } else {
         // console.log(data.parent.label);
         // TODO: handle list inserts, which won't be in scripts
-        // along with structure hints like snapshot parents
+        // along with structure hints like snapshot parents and hidden
+        // custom block hints
     }
 };
 
@@ -187,7 +200,8 @@ HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
 
 HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
     if (!(block instanceof BlockMorph || block instanceof CSlotMorph)) {
-        Trace.logErrorMessage('Non-insertable morph: ' + block);
+        Trace.logErrorMessage('Non-insertable morph: ' +
+            (block ? block.getDebugType() : null));
         return;
     }
 

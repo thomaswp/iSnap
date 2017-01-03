@@ -60,7 +60,7 @@ HintDisplay.prototype.getCode = function(ref) {
     var parent = this.getCode(ref.parent);
     // If this is a non-showing custom block, we should just return it to show
     // a special hint
-    if (parent == null || parent._debugType == 'CustomBlockDefinition') {
+    if (parent == null || parent instanceof CustomBlockDefinition) {
         return parent;
     }
 

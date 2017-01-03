@@ -77,6 +77,16 @@ extend(SyntaxElementMorph, 'fixHighlight', function(base) {
     if (oldHighlight) this.addHintHighlight(oldHighlight.color);
 });
 
+extend(SyntaxElementMorph, 'copy', function(base) {
+    var copy = base.call(this);
+    setTimeout(function() {
+        copy.removeHintHighlight();
+        copy.cachedFullImage = null;
+        copy.cachedFullBounds = null;
+    });
+    return copy;
+});
+
 ArgMorph.prototype.addFullHintHighlight = function(color) {
     var highlight = new HintHighlightMorph(),
         fb = this.fullBounds();

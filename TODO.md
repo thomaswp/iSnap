@@ -1,9 +1,8 @@
 Highlight:
 * Bugs:
+  * Duplicating a single block with a full-script highlight has a graphical bug
 * TODO:
   * Add UI for starting/explaining hints
-  * Add UI for move/reorder hints
-  * Change hint dialog UI to just have dismiss
   * Add and test logging
   * Test on existing hint requests
   * Show that you need more custom block inputs (possibly in calls as well)

@@ -12,11 +12,17 @@ HintDialogBoxMorph.uber = DialogBoxMorph.prototype;
 // Keep track of the currently showing dialogue box
 HintDialogBoxMorph.showing = null;
 
-HintDialogBoxMorph.prototype.initButtons = function() {
-    this.acceptButtons = [
-        this.addButton('done', localize('Done with Help')),
-        this.addButton('otherHints', localize('Other Suggestions')),
-    ];
+HintDialogBoxMorph.prototype.initButtons = function(simple) {
+    if (simple) {
+        this.acceptButtons = [
+            this.addButton('ok', localize('Ok')),
+        ];
+    } else {
+        this.acceptButtons = [
+            this.addButton('done', localize('Done with Help')),
+            this.addButton('otherHints', localize('Other Suggestions')),
+        ];
+    }
 };
 
 HintDialogBoxMorph.prototype.setButtonsEnabled = function(enabled) {

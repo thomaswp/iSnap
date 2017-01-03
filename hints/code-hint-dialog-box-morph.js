@@ -1,8 +1,8 @@
 require('hint-dialog-box-morph');
 
 // HintDialogBoxMorph instance creation
-function CodeHintDialogBoxMorph(target) {
-    this.init(target);
+function CodeHintDialogBoxMorph(target, simple) {
+    this.init(target, simple);
 }
 
 // HintDialogBox inherits from DialogBoxMorph
@@ -11,7 +11,7 @@ CodeHintDialogBoxMorph.prototype.constructor = CodeHintDialogBoxMorph;
 CodeHintDialogBoxMorph.uber = HintDialogBoxMorph.prototype;
 
 // Initialize Hint Dialogue Box
-CodeHintDialogBoxMorph.prototype.init = function (target) {
+CodeHintDialogBoxMorph.prototype.init = function (target, simple) {
     var scripts,
         scriptsFrame;
 
@@ -66,9 +66,11 @@ CodeHintDialogBoxMorph.prototype.init = function (target) {
     this.addScriptsFrame(scriptsFrame.fullCopy());
 
     // add buttons to the dialogue
-    this.initButtons();
+    this.initButtons(simple);
 
-    this.createThumbButtons();
+    if (!simple) {
+        this.createThumbButtons();
+    }
 
     // set layout
     this.fixLayout();
@@ -337,7 +339,7 @@ CodeHintDialogBoxMorph.prototype.fixExtent = function() {
 
     var thumbSize = this.thumbContainer ?
             new Point(this.thumbContainer.width(),
-                    this.thumbContainer.height()) :
+                    this.thumbContainer.height() + this.padding) :
             new Point(0, 0);
 
     // decide the extent of HintDialogBox based on body orientation
@@ -353,7 +355,7 @@ CodeHintDialogBoxMorph.prototype.fixExtent = function() {
         );
 
         this.setExtent(new Point(w + 2 * this.padding,
-            th + this.buttons.height() + h + 4 * this.padding +
+            th + this.buttons.height() + h + 3 * this.padding +
             this.labels[0].height() + thumbSize.y));
     } else {
         this.buttons.fixLayout(); //fix button layout before calculating width
@@ -365,7 +367,7 @@ CodeHintDialogBoxMorph.prototype.fixExtent = function() {
         );
 
         this.setExtent(new Point(w + 2 * this.padding,
-            th + this.buttons.height() + 2 * h + 5 * this.padding +
+            th + this.buttons.height() + 2 * h + 4 * this.padding +
             2 * this.labels[0].height() + thumbSize.y));
     }
 };

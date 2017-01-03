@@ -64,7 +64,7 @@ HighlightDisplay.prototype.clear = function() {
     this.hoverHints = [];
 };
 
-HighlightDisplay.prototype.addHighlight = function(block, color) {
+HighlightDisplay.prototype.addHighlight = function(block, color, single) {
     if (block instanceof MultiArgMorph) {
         block = block.parent;
     }
@@ -78,8 +78,11 @@ HighlightDisplay.prototype.addHighlight = function(block, color) {
         // console.log(block, block.getHighlight());
         return;
     }
-    // TODO: For scripts, not just a single highlight
-    block.addSingleHintHighlight(color);
+    if (single) {
+        block.addSingleHintHighlight(color);
+    } else {
+        block.addHintHighlight(color);
+    }
     this.highlights.push(block);
 };
 
@@ -89,7 +92,7 @@ HighlightDisplay.prototype.showDeleteHint = function(data) {
         Trace.logErrorMessage('Unknown node in delete hint');
         return;
     }
-    this.addHighlight(node, new Color(255, 0, 0));
+    this.addHighlight(node, new Color(255, 0, 0), data.node.label !== 'script');
 };
 
 HighlightDisplay.prototype.showReorderHint = function(data) {
@@ -100,7 +103,7 @@ HighlightDisplay.prototype.showReorderHint = function(data) {
     }
     // Don't worry about reordering scripts;
     if (data.node.label === 'script') return;
-    this.addHighlight(node, new Color(255, 255, 0));
+    this.addHighlight(node, new Color(255, 255, 0), true);
 };
 
 HighlightDisplay.prototype.showInsertHint = function(data) {
@@ -119,7 +122,7 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
             Trace.logErrorMessage('Unknown candidate for insert hint');
             return;
         }
-        this.addHighlight(candidate, new Color(255, 255, 0));
+        this.addHighlight(candidate, new Color(255, 255, 0), true);
     }
 
     var selector;
@@ -128,18 +131,22 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         if (replacement) {
             var color = replacement instanceof BlockMorph ?
                     new Color(255, 0, 0) : new Color(0, 0, 255);
-            this.addHighlight(replacement, color);
-            selector = parent.enclosingBlock().selector;
-            var otherBlocks = [];
-            if (candidate) otherBlocks.push(candidate.selector);
-            var onClick = function() {
-                new CodeHintDialogBoxMorph(window.ide)
-                    .showBlockHint(selector, data.from, data.to, otherBlocks);
-            };
+            this.addHighlight(replacement, color, true);
 
-            this.addHoverHint(replacement, onClick);
+            if (replacement instanceof ArgMorph) {
+                selector = parent.enclosingBlock().selector;
+                var otherBlocks = [];
+                if (candidate) otherBlocks.push(candidate.selector);
+                var onClick = function() {
+                    new CodeHintDialogBoxMorph(window.ide, true)
+                        .showBlockHint(selector, data.from, data.to,
+                            otherBlocks);
+                };
+                this.addHoverHint(replacement, onClick);
+            }
         } else {
-            Trace.logErrorMessage('Unknown replacement in insert hint');
+            Trace.logErrorMessage('Unknown replacement in insert hint: ' +
+                data.replacement.label);
         }
         return;
     }
@@ -158,7 +165,7 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
             to.unshift('prototypeHatBlock');
         }
         var callback = function() {
-            new CodeHintDialogBoxMorph(window.ide)
+            new CodeHintDialogBoxMorph(window.ide, true)
                 .showScriptHint(selector, parentIndex, fromList, to);
         };
 

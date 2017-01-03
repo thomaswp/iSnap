@@ -1,6 +1,8 @@
 
 // HintDisplay: outputs hitns to the console
 
+require('code-hint-dialog-box-morph');
+
 function HintDisplay() { }
 
 HintDisplay.prototype.showHint = function(hint) {
@@ -154,6 +156,23 @@ HintDisplay.prototype.getScriptIndex = function(script, enclosingBlock) {
     return index;
 };
 
+/**
+ * Creates a function for logging and showing a script hint.
+ *
+ * @this HintDisplay
+ * @param {bool} simple Whether or not the CodeHintDialogBoxMorph should display
+ * simple UI, or display the full rating UI.
+ * @param {SyntaxElementMorph} root The node whose children are being edited
+ * @param {BlockMorph} extraRoot Another block or script which is also being
+ * displayed as part of the hint.
+ * @param {string[][]} fromList An array of string arrays, each of which are
+ * displayed as scripts on the from side of the script hint. The first is
+ * the script to be edited, and an additional array is optional.
+ * @param {string[]} to An array of selectors which are displayed as a script
+ * on the to side of the script hint.
+ * @param {function} onThumbsDown Optional callback to be called if the hint is
+ * rated with a thumbs down.
+ */
 HintDisplay.prototype.createScriptHintCallback = function(simple, root,
         extraRoot, fromList, to, onThumbsDown) {
 
@@ -174,12 +193,22 @@ HintDisplay.prototype.createScriptHintCallback = function(simple, root,
     var parentID = enclosingBlock ? enclosingBlock.id : null;
 
     var data = {
+        // For unnested scripts, the ID of the first block in the edited script
         'rootID': rootID,
+        // The ID of the block or script also being shown with this hint.
+        // In the case of LinkHints, this is the block on which the hint was
+        // displayed.
         'extraRootID': extraRootID,
+        // For nested scripts, the selector of the parent holding the script
         'parentSelector': parentSelector,
+        // For nested scripts, the ID of the parent block holding the script
         'parentID': parentID,
+        // For nested scripts, the index of the root script inside the parent
         'index': index,
+        // An array containing first an array of selectors for the from side
+        // and second an array of selectors from the extraRoot, if any
         'fromList': fromList,
+        // An array containing the selectors on the to side of the hint
         'to': to,
     };
 
@@ -191,6 +220,24 @@ HintDisplay.prototype.createScriptHintCallback = function(simple, root,
     };
 };
 
+/**
+ * Creates a function for logging and showing a block hint.
+ *
+ * @this HintDisplay
+ * @param {bool} simple Whether or not the CodeHintDialogBoxMorph should display
+ * simple UI, or display the full rating UI.
+ * @param {SyntaxElementMorph} root The node whose children are being edited
+ * @param {BlockMorph} extraRoot Another block or script which is also being
+ * displayed as part of the hint.
+ * @param {string[]} from An array of selectors which are displayed as arguments
+ * on the from side of the block hint.
+ * @param {string[]} to An array of selectors which are displayed as arguments
+ * on the to side of the script hint.
+ * @param {string[]} otherBlocks An array of selectors which are also displayed
+ * as a script on the from side of the script.
+ * @param {function} onThumbsDown Optional callback to be called if the hint is
+ * rated with a thumbs down.
+ */
 HintDisplay.prototype.createBlockHintCallback = function(simple, root,
         extraRoot, from, to, otherBlocks, onThumbsDown) {
 
@@ -199,11 +246,20 @@ HintDisplay.prototype.createBlockHintCallback = function(simple, root,
     var parentID = enclosingBlock ? enclosingBlock.id : null;
     var extraRootID = extraRoot ? extraRoot.id : null;
     var data = {
+        // The selector of the block whose arguments are being edited
         'parentSelector': selector,
+        // The ID of the block whose arguments are being edited
         'parentID': parentID,
+        // The ID of any additional script being displayed on the from side.
+        // In the case of LinkHints, this is the block on which the hint was
+        // displayed.
         'extraRootID': extraRootID,
+        // An array of selectors being shown as arguments on the from side
         'from': from,
+        // An array of selectors being shown as arguments on the to side
         'to': to,
+        // An array of selectors from the extraRoot, if any, shown on the from
+        // side as a script
         'otherBlocks': otherBlocks,
     };
 

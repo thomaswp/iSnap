@@ -29,6 +29,10 @@ HighlightDisplay.prototype.showError = function(error) {
 
 };
 
+HighlightDisplay.prototype.getHintType = function() {
+    return 'highlight';
+};
+
 HighlightDisplay.prototype.clear = function() {
     var toRedraw = [];
     function redraw(block) {

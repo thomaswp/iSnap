@@ -78,8 +78,13 @@ HintProvider.prototype.getHintsFromServer = function() {
 
     this.clearDisplays();
 
+    var hintTypes = this.displays.map(function(display) {
+        return display.getHintType();
+    }).join(';');
+
     var xhr = createCORSRequest('POST',
-        this.url + '?assignmentID=' + window.assignmentID);
+        this.url + '?assignmentID=' + window.assignmentID +
+        '&hintTypes=' + encodeURIComponent(hintTypes));
     if (!xhr) {
         myself.showError('CORS not supported on this browser.');
         return;

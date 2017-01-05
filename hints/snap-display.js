@@ -98,6 +98,10 @@ SnapDisplay.prototype.initDisplay = function() {
     }
 };
 
+SnapDisplay.prototype.getHintType = function() {
+    return 'bubble';
+};
+
 SnapDisplay.prototype.logHints = function() {
     return this.enabled;
 };

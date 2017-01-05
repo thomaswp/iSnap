@@ -28,6 +28,10 @@ HintDisplay.prototype.showLoggedHint = function(data) {
 
 };
 
+HintDisplay.prototype.getHintType = function() {
+    return '';
+};
+
 HintDisplay.prototype.hasCustomBlock = function(ref) {
     if (!ref) return false;
     return ref.label == 'customBlock' || this.hasCustomBlock(ref.parent);

@@ -36,55 +36,17 @@ SnapDisplay.prototype.initDisplay = function() {
     this.hiddenHints = [];
     this.customBlocksWithHints = [];
 
-    var createButton = function(ide) {
-        var getHint = function() {
-            if (!this.spriteBar || !this.spriteBar.hintButton) return;
-            var hintButton = this.spriteBar.hintButton;
+    var getHint = function() {
+        if (!this.spriteBar || !this.spriteBar.hintButton) return;
+        var hintButton = this.spriteBar.hintButton;
 
-            window.hintProvider.clearDisplays();
-            var active = !hintButton.active;
-            setHintsActive(active);
-            window.hintProvider.setDisplayEnabled(SnapDisplay, active);
-        };
-
-        var hintButton = new PushButtonMorph(
-            ide,
-            getHint,
-            '  ' + localize('Help') + '  '
-        );
-        ide.spriteBar.hintButton = hintButton;
-        hintButton.firstClick = true;
-        hintButton.lastClickTime = 0;
-        hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
-        hintButton.corner = DialogBoxMorph.prototype.buttonCorner;
-        hintButton.edge = DialogBoxMorph.prototype.buttonEdge;
-        hintButton.outline = DialogBoxMorph.prototype.buttonOutline;
-        hintButton.outlineColor = ide.spriteBar.color;
-        hintButton.outlineGradient = false;
-        hintButton.padding = DialogBoxMorph.prototype.buttonPadding;
-        hintButton.contrast = DialogBoxMorph.prototype.buttonContrast;
-        hintButton.drawNew();
-        hintButton.fixLayout();
-        hintButton.setPosition(new Point(
-            ide.stage.left() - hintButton.width() - 20,
-            ide.spriteBar.hintButton.top() + 50));
-
-        ide.spriteBar.hintButton = hintButton;
-        ide.spriteBar.add(ide.spriteBar.hintButton);
+        window.hintProvider.clearDisplays();
+        var active = !hintButton.active;
+        setHintsActive(active);
+        window.hintProvider.setDisplayEnabled(SnapDisplay, active);
     };
+    this.addHintButton('  ' + localize('Help') + '  ', getHint);
 
-    var oldFixLayout = IDE_Morph.prototype.fixLayout;
-    IDE_Morph.prototype.fixLayout = function() {
-        oldFixLayout.call(this, arguments);
-        if (!this.spriteBar.hintButton) {
-            createButton(this);
-        }
-        this.spriteBar.hintButton.setPosition(new Point(
-            this.stage.left() - this.spriteBar.hintButton.width() / 2 - 60,
-            this.spriteBar.hintButton.top()));
-    };
-
-    window.ide.fixLayout();
     BlockEditorMorph.defaultHatBlockMargin = new Point(75, 20);
 
     var assignment = window.assignments[window.assignmentID];

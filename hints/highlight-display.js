@@ -2,6 +2,7 @@ require('hint-display');
 require('hint-highlight-morph');
 require('code-hint-dialog-box-morph');
 require('message-hint-dialog-box-morph');
+require('highlight-dialog-box-morph');
 
 function HighlightDisplay() {
 }
@@ -12,7 +13,12 @@ HighlightDisplay.prototype.initDisplay = function() {
     this.highlights = [];
     this.insertButtons = [];
     this.hoverHints = [];
+
     BlockEditorMorph.defaultHatBlockMargin = new Point(35, 20);
+
+    this.addHintButton(localize('Check My Work'), function() {
+        new HighlightDialogBoxMorph(window.ide).popUp();
+    });
 };
 
 HighlightDisplay.prototype.showHint = function(hint) {

@@ -124,7 +124,6 @@ public class ScriptGenerator {
 				add(file, outFile, map);
 			}
 			if (path.endsWith(".js")) {
-				System.out.println(path);
 				Scanner sc = new Scanner(new FileInputStream(file));
 				int lineNumber = 0;
 				while (sc.hasNextLine()) {

@@ -274,3 +274,36 @@ HintDisplay.prototype.createBlockHintCallback = function(simple, root,
             .onThumbsDown(onThumbsDown);
     };
 };
+
+HintDisplay.prototype.addHintButton = function(text, onClick) {
+    var createButton = function(ide) {
+        var hintButton = new PushButtonMorph(ide, onClick, text);
+        ide.spriteBar.hintButton = hintButton;
+        hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
+        hintButton.corner = DialogBoxMorph.prototype.buttonCorner;
+        hintButton.edge = DialogBoxMorph.prototype.buttonEdge;
+        hintButton.outline = DialogBoxMorph.prototype.buttonOutline;
+        hintButton.outlineColor = ide.spriteBar.color;
+        hintButton.outlineGradient = false;
+        hintButton.padding = DialogBoxMorph.prototype.buttonPadding;
+        hintButton.contrast = DialogBoxMorph.prototype.buttonContrast;
+        hintButton.drawNew();
+        hintButton.fixLayout();
+
+        ide.spriteBar.hintButton = hintButton;
+        ide.spriteBar.add(ide.spriteBar.hintButton);
+    };
+
+    var oldFixLayout = IDE_Morph.prototype.fixLayout;
+    IDE_Morph.prototype.fixLayout = function() {
+        oldFixLayout.call(this, arguments);
+        if (!this.spriteBar.hintButton) {
+            createButton(this);
+        }
+        this.spriteBar.hintButton.setPosition(new Point(
+            this.stage.left() - this.spriteBar.hintButton.width() / 2 - 60,
+            this.spriteBar.hintButton.top()));
+    };
+
+    window.ide.fixLayout();
+};

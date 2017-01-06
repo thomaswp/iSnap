@@ -3,6 +3,7 @@
 <html>
 
 	<head>
+		<script src="https://use.fontawesome.com/a78350546c.js"></script>
 		<meta charset="UTF-8">
 		<title>Select an assignment</title>
 		<style>
@@ -16,6 +17,272 @@
 			#display-id {
 				font-weight: bold;
 			}
+			body{
+			    margin: 0px;
+				padding: 0px;
+				font-family: 'Open Sans', sans-serif;
+				//-webkit-font-smoothing: antialiased;
+				background: url(loginBackground.png);
+			}
+			#flex-Parent{
+			    display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+			}
+			#blackBar{
+			    width: 100%;
+				background-color: #000000;
+				height: 30px;
+				margin: 0px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			#blackBar img{
+			    width: 190px;
+				height: auto;
+			}
+			#courseName{
+			    color: white;
+				font-weight: 700;
+				font-size: 12px;
+				margin-right: 25px;
+			}
+			#theBox{
+			    display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				position: fixed;
+				text-align: center;
+				top: 0;
+				right: 0;
+				left: 0;
+				bottom: 0;
+				width: 100%;
+				height: 100%;
+				margin-top: -25px;
+			}
+			#theBorder{
+			    box-shadow: 0px 0px 100px rgba(0,0,0,0.3);
+				display: flex;
+				flex-direction: column;
+				background-color: rgb(247, 247, 247);
+				padding-top: 50px;
+				padding-bottom: 30px;
+				border-radius: 6px;
+				border: 7px solid rgb(255, 201, 62);
+				justify-content: center;
+				align-items: center;
+			}
+			#form-flex-Parent{
+			    width: 555px;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+			}
+			#snapLogo{
+			    display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+			}
+			#snapLogo img{
+			    max-width: 50%;
+				max-height: 50%;
+				border-radius: 5px;
+			}
+			h1{
+			    margin: 0px;
+				color: #8F56E3;
+			}
+			#unityID-hint{
+			    font-weight: 200;
+				font-size: 12px;
+				color: #C4C4C4;
+				margin-bottom: 25px;
+			}
+			#input-id{
+			    padding-top: 10px;
+				padding-bottom: 10px;
+				padding-left: 20px;
+				margin-bottom: 25px;
+				border-radius: 3px;
+				min-width: 100px;
+				max-width: 370px;
+				width: 100%;
+				height: 45px;
+				font-size: 27px;
+				outline: none;
+				border: 2px solid rgb(143,86,227);
+				background: url(userIcon.png) no-repeat right 10px center;
+				background-color: rgb(255,255,255);
+				background-size: 45px 45px;
+			}
+			#sign-in-Button{
+			    padding-top: 15px;
+				padding-bottom: 15px;
+				width: 390px;
+				font-size: 20px;
+				font-weight: 600;
+				letter-spacing: 1px;
+				text-decoration: none;
+				background: #4A6BD6;
+				border-radius: 3px;
+				color: white;
+				outline: none;
+			}
+			#sign-in-Button:hover{
+			    box-shadow: 0px 0px 0px 1px #4A6BD6 outset, 0px 0px 0px 1.5px white outset;
+				cursor: pointer;
+			}
+			#needsCookiesEnabled{
+			    margin-bottom: 30px;
+				padding: 14px;
+				background: rgb(255,246,191);
+				max-width: 450px;
+				font-size: 17px;
+				text-align: justify;
+				transition: all 300ms ease-in-out 1s;
+			}
+			.fa-exclamation-circle{
+			    margin-right: 12px;
+			}
+			.hidden{
+			    display: none;
+			}
+			.getFlex{
+			    display: flex;
+			}
+			#confirm-new{
+			    height: 0px;
+				opacity: 0;
+				transition: height 2s;
+				visibility: hidden;
+			}
+			.getFrames{
+			    animation-name: myframes;
+				animation-duration: 0.3s;
+				animation-timing-function: ease-in-out;
+				animation-delay: 0s;
+				animation-iteration-count: 1;
+				animation-direction: normal;
+				animation-fill-mode: forwards;
+				animation-play-state: running;
+			}
+			.getFrames2{
+			    animation-name: myframes2;
+				animation-duration: 0.3s;
+				animation-timing-function: ease-in-out;
+				animation-delay: 0s;
+				animation-iteration-count: 1;
+				animation-direction: normal;
+				animation-fill-mode: normal;
+				animation-play-state: running;
+			}
+			@keyframes myframes{
+			    0%{ opacity: 0; height: 0; visibility: hidden}
+				50%{opacity: 0}
+				100%{opacity: 1; height: 100px; visibility: visible}
+			}
+			@keyframes myframes2{
+			    0%{opacity: 1; height: 100px; visibility: visible}
+				20%{opacity: 0}
+				100%{opacity: 0; height: 0px; visibility: hidden}
+			}
+			#confirm-new p{
+			    margin-top: 0px;
+				margin-bottom: 5px;
+				max-width: 390px;
+				text-align: justify;
+				font-size: 16px;
+				line-height: 21px;
+				box-sizing: border-box;
+			}
+			#confirm-new input{
+			    margin-top: 16px;
+				margin-bottom: 16px;
+			}
+			#assignment{
+			    padding-top: 15px;
+				padding-bottom: 15px;
+				padding-left: 20px;
+				padding-right: 15px;
+				margin-bottom: 30px;
+				margin-top: 30px;
+				border-radius: 3px;
+				min-width: 100px;
+				max-width: 390px;
+				width: 100%;
+				height: 55px;
+				outline: none;
+				border: 2px solid rgb(143, 86, 227);
+				background-color: rgb(255, 255, 255);
+				background-size: 45px;
+			}
+			#assignmentGObutton{
+			    padding-top: 15px;
+				padding-bottom: 15px;
+				width: 390px;
+				font-size: 20px;
+				font-weight: 600;
+				letter-spacing: 1px;
+				text-decoration: none;
+				background: rgb(98, 194, 19);
+				border-radius: 3px;
+				transition: all 300ms;
+				color: white;
+				outline: none;
+			}
+			#assignmentGObutton:hover{
+			    box-shadow: 0px 0px 0px 1px #4A6BD6 outset, 0px 0px 0px 1.5px white outset;
+				cursor: pointer;
+			}
+			.belt-container{
+			    overflow: hidden;
+			}
+			.belt-container .belt{
+			    width: 200%;
+				display: flex;
+				transition: transform 0.2s ease-in-out;
+			}
+			.belt-container .state{
+			    width: 50%;
+				display: flex;
+			    align-items: center;
+				justify-content: center;
+				flex-direction: column;
+			}
+			.belt-container .state-1{
+			    transition: transform 0.2s ease-in-out;
+				transform-origin: center right;
+			}
+			.state-1 h1{
+			    margin-top: 40px;
+			}
+			.belt-container .state-2{
+			    z-index: 2;
+			    transition: all 200ms ease-in-out;
+			    margin-top: -10px;
+			}
+			.belt-container.is-transitioned .belt{
+			    transform: translateX(-50%);
+			}
+			.container{
+			    width: 510px;
+			}
+			.newUserContainer{
+			    display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.newUserContainer span{
+			    padding-left: 4px;
+			}
+		
+			
 		</style>
 		<script type="text/javascript" src="config.js"></script>
 		<script type="text/javascript" src="jquery-3.1.1.min.js"></script>
@@ -23,40 +290,50 @@
 	</head>
 
 	<body>
-		<h1>Select the assignment you're working on.</h1>
-
-		<div id="form-id">
-			<form>
-				Unity ID:
-				<input id="input-id" name="id" placeholder="e.g. jtsmith2"
-					required pattern="[A-Za-z0-9_]+">
-				<br />
-				<span class="hint">
-					This is the part of your email before @ncsu.
-				</span>
-				<div id="confirm-new" class="hidden">
-					<p class="alert">
-						This is the first time we've seen a user with
-						the ID <span id="display-id"></span>.
-						If you're a new user, please check the box
-						below. If not, please double-check your ID.
-					</p>
-					<input id="input-new" type="checkbox" name="new"
-						value="true">
-					I'm a new user.
+		<div id="flex-Parent">
+		    <div id="blackBar"><img src="NCStateLogoWhite.png"> <span id="courseName"> CSC 200 | Introduction To Computers and Their Uses</span></div>
+			<div id="theBox">
+			    <div id="needsCookiesEnabled" class="hidden"><i class="fa fa-exclamation-circle fa-2x" aria-hidden="true"></i><span>It looks like you have cookies disabled. You'll need to have cookies enabled for Snap to work.</span></div>
+				<div id="theBorder">
+				    <div id="snapLogo"><img src="SnapLogo.png"></img></div>
+				    <div class="container">
+						<div class="belt-container">
+							<div class="belt">
+							    <div class="state state-1">
+									<div>
+										<h1>Sign in with your Unity ID</h1>
+										<div id="unityID-hint"> ( This is the part of your email before @ncsu )</div>
+									</div>
+									<div id="form-id">
+										<form id="form-flex-Parent">
+											<input id="input-id" name="id" placeholder="Enter your Unity ID" required pattern="[A-Za-z0-9_]+" autofocus>
+											<div id="confirm-new">
+												<p class="alert"> This is the first time we've seen a user with the ID <span id="display-id"></span> If you're a new user, please check the box below and hit next. If not, please double-check your ID.</p>
+												<div class="newUserContainer"><input id="input-new" type="checkbox" name="new" value="true"> <span>I'm a new user</span></div>		
+											</div>
+										</form>
+									</div>
+									<div><button type="submit" id="sign-in-Button" onclick="validifyID()">Next</button></div>
+								</div>
+								<div class="state state-2">
+									<div id="form-assignment">
+										<h1>Choose Your Assignment</h1>
+										<form action="../snap.html" method="get">
+											<div><select id="assignment" name="assignment"></select></div>
+											<div><button id="assignmentGObutton" type="submit">GO</button></div>
+										</form>
+									</div>
+								</div>
+							</div>	
+						</div>
+				    </div>
 				</div>
-				<br />
-				<button type="submit">Submit</button>
-			</form>
+			</div>
 		</div>
+		
 
-		<div id="form-assignment" class="hidden">
-			<form action="../snap.html" method="get">
-				Assignment:
-				<select id="assignment" name="assignment"></select>
-				<button type="submit">Go</button>
-			</form>
-		</div>
+
+
 
 		<br /><br /><br />
 		<div id="logout" class="hidden">
@@ -64,6 +341,20 @@
 		</div>
 
 		<script type="text/javascript">
+			
+			//validifyID is just for testing purposes
+			function validifyID(){
+			    if($('#input-id').val() == "a"){
+				    $('#needsCookiesEnabled').removeClass('hidden');
+					$('#needsCookiesEnabled').addClass('getFlex');
+					$('#confirm-new').addClass('getFrames');
+					$("#confirm-new").css("margin-bottom", "20px");
+				} else if($('#input-id').val() == "b"){
+				    $('#confirm-new').addClass('getFrames2');
+					$('.belt-container').toggleClass('is-transitioned');
+				}
+			}
+			
 			var assignments = window.assignments;
 			var select = document.getElementById("assignment");
 			for (var key in assignments) {
@@ -83,14 +374,16 @@
 				// have an emergency option to disable
 			}
 
+			
 			function setUserID(id) {
 				if (!id) return;
 				window.userID = id;
-				$('#form-id').addClass('hidden');
+				//$('#form-id').addClass('hidden');
 				$('#form-assignment').removeClass('hidden');
 				$('#logout').removeClass('hidden');
 			}
-
+            
+			
 			function logout() {
 				$.removeCookie('userID');
 				$('#form-id').removeClass('hidden');

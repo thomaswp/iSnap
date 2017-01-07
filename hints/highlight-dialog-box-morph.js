@@ -8,11 +8,15 @@ HighlightDialogBoxMorph.prototype = Object.create(DialogBoxMorph.prototype);
 HighlightDialogBoxMorph.constructor = HighlightDialogBoxMorph;
 HighlightDialogBoxMorph.uber = DialogBoxMorph.prototype;
 
+HighlightDialogBoxMorph.showOnRun = true;
+
 HighlightDialogBoxMorph.prototype.init = function(target) {
     HighlightDialogBoxMorph.uber.init.call(this, target, null, target);
 
     this.key = 'highlightDialog';
-    this.addButton('ok', localize('OK'));
+    this.insertButton =
+        this.addButton('toggleInsert', localize('Show Next Steps'));
+    this.addButton('ok', localize('Done'));
 
     this.labelString = 'Checking your Work';
     this.createLabel();
@@ -56,21 +60,30 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
         true
     );
 
+    var mainFrame = new AlignmentMorph('column', this.padding);
+    mainFrame.alignment = 'left';
+
     addText(
-        "\nRED highlighted blocks probably doesn't belong in the solution:"
+        "\nRED highlighted blocks probably doesn't belong in the solution:",
+        null, mainFrame
     );
-    addBlock('doSayFor', HighlightDisplay.deleteColor);
+    addBlock('doSayFor', HighlightDisplay.deleteColor, mainFrame);
 
     addText(
         '\nYELLOW highlighted blocks are probably part of ' +
-        'the soltion, but need to be moved or reordered:'
+        'the soltion, but need to be moved or reordered:',
+        null, mainFrame
     );
     var moveBlocks = new AlignmentMorph('row', this.padding);
     addBlock('forward', HighlightDisplay.moveColor, moveBlocks);
     addBlockWithInput('doSayFor', 'getLastAnswer', 0,
         HighlightDisplay.moveColor, moveBlocks);
     moveBlocks.fixLayout();
-    body.add(moveBlocks);
+    mainFrame.add(moveBlocks);
+
+    mainFrame.fixLayout();
+    body.add(mainFrame);
+    this.mainFrame = mainFrame;
 
     var insertFrame = new AlignmentMorph('column', this.padding);
     insertFrame.alignment = 'left';
@@ -95,9 +108,16 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
         hatBlock, hatBlock, function() { }, false);
 
     insertFrame.fixLayout();
+    insertFrame.hide();
+    this.insertFrame = insertFrame;
     hatBlock.setLeft(hatBlock.left() + 30);
     body.add(insertFrame);
 
+    var check = new ToggleMorph('checkbox', this, 'toggleShowOnRun',
+        'Always check my work when I run scripts', function() {
+            return HighlightDialogBoxMorph.showOnRun;
+        });
+    body.add(check);
 
     body.fixLayout();
     this.addBody(body);
@@ -129,4 +149,26 @@ HighlightDialogBoxMorph.prototype.fixLayout = function() {
 
 
     HighlightDialogBoxMorph.uber.fixLayout.call(this);
+};
+
+HighlightDialogBoxMorph.prototype.toggleInsert = function() {
+    if (this.insertFrame.isVisible) {
+        this.insertFrame.hide();
+        this.mainFrame.show();
+        this.insertButton.labelString = localize('Show Next Steps');
+    } else {
+        this.insertFrame.show();
+        this.mainFrame.hide();
+        this.insertButton.labelString = localize('Hide Next Steps');
+    }
+    this.insertButton.createLabel();
+    this.insertButton.fixLayout();
+    this.body.fixLayout();
+    this.body.drawNew();
+    this.fixLayout();
+    this.drawNew();
+};
+
+HighlightDialogBoxMorph.prototype.toggleShowOnRun = function() {
+    HighlightDialogBoxMorph.showOnRun = !HighlightDialogBoxMorph.showOnRun;
 };

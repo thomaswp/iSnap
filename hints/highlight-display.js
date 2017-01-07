@@ -259,5 +259,5 @@ function(block, positionMorph, callback, before) {
 
     block.add(button);
     block.fixLayout();
-    return block;
+    return button;
 };

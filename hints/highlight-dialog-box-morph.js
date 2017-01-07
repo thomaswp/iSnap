@@ -133,6 +133,7 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
 HighlightDialogBoxMorph.prototype.destroy = function() {
     HighlightDialogBoxMorph.uber.destroy.call(this);
     this.destroyed = true;
+    window.hintProvider.setDisplayEnabled(HighlightDisplay, false);
 };
 
 HighlightDialogBoxMorph.prototype.popUp = function() {
@@ -163,6 +164,8 @@ HighlightDialogBoxMorph.prototype.popUp = function() {
         this.setLeft(origin.x);
         this.setTop(origin.y);
     }
+
+    window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
 };
 
 HighlightDialogBoxMorph.prototype.fixLayout = function() {

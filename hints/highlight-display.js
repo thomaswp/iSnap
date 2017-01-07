@@ -16,6 +16,9 @@ HighlightDisplay.deleteColor = new Color(255, 0, 0);
 HighlightDisplay.moveColor = new Color(255, 255, 0);
 
 HighlightDisplay.prototype.initDisplay = function() {
+    // Start disabled until the highlight dialog box is shown
+    this.enabled = false;
+
     this.highlights = [];
     this.insertButtons = [];
     this.hoverHints = [];

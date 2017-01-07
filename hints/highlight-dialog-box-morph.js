@@ -56,7 +56,7 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
     }
 
     addText(
-        "I'm checking your work against previous students' solutions...",
+        "I'm checking your work using previous students' solutions...",
         true
     );
 
@@ -64,7 +64,7 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
     mainFrame.alignment = 'left';
 
     addText(
-        "\nRED highlighted blocks probably doesn't belong in the solution:",
+        "RED highlighted blocks probably doesn't belong in the solution:",
         null, mainFrame
     );
     addBlock('doSayFor', HighlightDisplay.deleteColor, mainFrame);
@@ -81,6 +81,12 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
     moveBlocks.fixLayout();
     mainFrame.add(moveBlocks);
 
+    addText(
+        "For a hint on what to do next, click the 'Show Next Steps' button " +
+        'below.',
+        null, mainFrame
+    );
+
     mainFrame.fixLayout();
     body.add(mainFrame);
     this.mainFrame = mainFrame;
@@ -89,7 +95,7 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
     insertFrame.alignment = 'left';
 
     addText(
-        '\nBLUE highlighted inputs probably need a new block added to them. ' +
+        'BLUE highlighted inputs probably need a new block added to them. ' +
         'Click on the input to get a suggestion.',
         null, insertFrame
     );
@@ -139,10 +145,24 @@ HighlightDialogBoxMorph.prototype.popUp = function() {
         return;
     }
 
+    // Set the top-left corner to that of the previous dialog or the corralBar
+    var origin = null;
+    if (showing) {
+        origin = showing.bounds.origin;
+    } else if (window.ide && window.ide.corralBar) {
+        origin = window.ide.corralBar.bounds.origin;
+    }
+
     this.fixLayout();
     this.drawNew();
     HighlightDialogBoxMorph.showing = this;
     HighlightDialogBoxMorph.uber.popUp.call(this, world);
+
+    // Wait to set the origin until after popping up
+    if (origin) {
+        this.setLeft(origin.x);
+        this.setTop(origin.y);
+    }
 };
 
 HighlightDialogBoxMorph.prototype.fixLayout = function() {

@@ -8,6 +8,12 @@ function HighlightDisplay() {
 }
 
 HighlightDisplay.prototype = Object.create(HintDisplay.prototype);
+HighlightDisplay.constructor = HighlightDisplay;
+HighlightDisplay.uber = HintDisplay.prototype;
+
+HighlightDisplay.insertColor = new Color(0, 0, 255);
+HighlightDisplay.deleteColor = new Color(255, 0, 0);
+HighlightDisplay.moveColor = new Color(255, 255, 0);
 
 HighlightDisplay.prototype.initDisplay = function() {
     this.highlights = [];
@@ -102,7 +108,8 @@ HighlightDisplay.prototype.showDeleteHint = function(data) {
         Trace.logErrorMessage('Unknown node in delete hint');
         return;
     }
-    this.addHighlight(node, new Color(255, 0, 0), data.node.label !== 'script');
+    this.addHighlight(node, HighlightDisplay.deleteColor,
+        data.node.label !== 'script');
 };
 
 HighlightDisplay.prototype.showReorderHint = function(data) {
@@ -113,7 +120,7 @@ HighlightDisplay.prototype.showReorderHint = function(data) {
     }
     // Don't worry about reordering scripts;
     if (data.node.label === 'script') return;
-    this.addHighlight(node, new Color(255, 255, 0), true);
+    this.addHighlight(node, HighlightDisplay.moveColor, true);
 };
 
 HighlightDisplay.prototype.showInsertHint = function(data) {
@@ -132,14 +139,14 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
             Trace.logErrorMessage('Unknown candidate for insert hint');
             return;
         }
-        this.addHighlight(candidate, new Color(255, 255, 0), true);
+        this.addHighlight(candidate, HighlightDisplay.moveColor, true);
     }
 
     if (data.replacement) {
         var replacement = this.getCode(data.replacement);
         if (replacement) {
             var color = replacement instanceof BlockMorph ?
-                    new Color(255, 0, 0) : new Color(0, 0, 255);
+                    HighlightDisplay.deleteColor : HighlightDisplay.insertColor;
             this.addHighlight(replacement, color, true);
 
             if (replacement instanceof ArgMorph) {
@@ -219,13 +226,19 @@ HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
         return;
     }
 
+    var button = this.createInsertButton(
+            block, positionMorph, callback, before);
+    this.insertButtons.push(button);
+};
+
+HighlightDisplay.prototype.createInsertButton =
+function(block, positionMorph, callback, before) {
     var button = new PushButtonMorph(block, callback,
         new SymbolMorph('plus', 10));
-    button.labelColor = new Color(0, 0, 255);
+    button.labelColor = HighlightDisplay.insertColor;
     button.positionMorph = positionMorph;
     button.before = before;
     button.float = true;
-    this.insertButtons.push(button);
 
     layout = function(button) {
         var block = button.positionMorph;
@@ -243,4 +256,5 @@ HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
 
     block.add(button);
     block.fixLayout();
+    return block;
 };

@@ -1,4 +1,5 @@
 require('hint-dialog-box-morph');
+require('gui-extensions');
 
 // HintDialogBoxMorph instance creation
 function CodeHintDialogBoxMorph(target, simple) {
@@ -218,14 +219,7 @@ function(selector, parent, numArgs) {
     }
 
     // Make sure the block doesn't respond to menus and clicks
-    noop = function() { return null; };
-    param.userMenu = noop;
-    param.allChildren().filter(
-        function (child) {
-            return child instanceof InputSlotMorph;
-        }).forEach(function(child) {
-            child.mouseClickLeft = noop;
-        });
+    param.disable();
 
     return param;
 };

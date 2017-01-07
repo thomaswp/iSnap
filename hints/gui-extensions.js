@@ -65,3 +65,16 @@ BlockMorph.prototype.addSingleHighlight = function(color) {
     this.fullChanged();
     return highlight;
 };
+
+BlockMorph.prototype.disable = function() {
+    noop = function() { return null; };
+    this.userMenu = noop;
+    this.allChildren().filter(
+        function (child) {
+            return child instanceof InputSlotMorph ||
+                child instanceof StringMorph;
+        }).forEach(function(child) {
+            child.mouseClickLeft = noop;
+            child.mouseDownLeft = noop;
+        });
+};

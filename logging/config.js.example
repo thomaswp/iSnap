@@ -41,7 +41,7 @@ window.assignments = {
 window.requireAssignment = true;
 
 // If true, users are required to login before they can use the system
-windows.requireLogin = true;
+window.requireLogin = true;
 
 // Create the logger you want to use on this snap deployment
 window.createLogger = function(assignmentID) {

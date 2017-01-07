@@ -313,7 +313,7 @@
 											</div>
 										</form>
 									</div>
-									<div><button type="submit" id="sign-in-Button" onclick="validifyID()">Next</button></div>
+									<div><input type="submit" id="sign-in-Button" value="Next"></input></div>
 								</div>
 								<div class="state state-2">
 									<div id="form-assignment">
@@ -343,17 +343,7 @@
 		<script type="text/javascript">
 			
 			//validifyID is just for testing purposes
-			function validifyID(){
-			    if($('#input-id').val() == "a"){
-				    $('#needsCookiesEnabled').removeClass('hidden');
-					$('#needsCookiesEnabled').addClass('getFlex');
-					$('#confirm-new').addClass('getFrames');
-					$("#confirm-new").css("margin-bottom", "20px");
-				} else if($('#input-id').val() == "b"){
-				    $('#confirm-new').addClass('getFrames2');
-					$('.belt-container').toggleClass('is-transitioned');
-				}
-			}
+
 			
 			var assignments = window.assignments;
 			var select = document.getElementById("assignment");
@@ -378,11 +368,19 @@
 			function setUserID(id) {
 				if (!id) return;
 				window.userID = id;
+			     $('#confirm-new').addClass('getFrames2');
+					$('.belt-container').toggleClass('is-transitioned');
 				//$('#form-id').addClass('hidden');
-				$('#form-assignment').removeClass('hidden');
-				$('#logout').removeClass('hidden');
+
 			}
             
+			function skipLogIn(warn){
+			    setUserID('none');
+				if(warn){
+					$('#needsCookiesEnabled').removeClass('hidden');
+					$('#needsCookiesEnabled').addClass('getFlex');
+				}
+			}
 			
 			function logout() {
 				$.removeCookie('userID');
@@ -395,7 +393,7 @@
 
 			setUserID($.cookie('userID'));
 
-			$('#form-id').submit(function() {
+			$('#form-flex-Parent').submit(function() {
 				var id = $('#input-id').val();
 				$('#display-id').html(id);
 				$.post('login.php', {
@@ -403,13 +401,18 @@
 					'new': $('#input-new').prop('checked'),
 				}, function(data, status) {
 					// TODO: catch errors on parsin the JSON and handle as below
+					//try catch if error
 					var response = JSON.parse(data);
+					
 					if (response.newUser) {
-						$('#confirm-new').removeClass('hidden');
+				
+						$('#confirm-new').addClass('getFrames');
+						$("#confirm-new").css("margin-bottom", "20px");
 						return;
 					}
 					setUserID(response.userID);
 				}).fail(function() {
+					skipLogIn(true);
 					// TODO: Handle this error
 					// The user should be able proceed anyway after
 					// trying again?
@@ -418,8 +421,10 @@
 			});
 
 			if (!window.requireLogin) {
-				setUserID('none');
+				skipLogIn(false);
+				
 				$('#logout').addClass('hidden');
+				//to do - back button should be hidden if login is not required
 			}
 		</script>
 	</body>

@@ -67,7 +67,6 @@ HighlightDisplay.prototype.clear = function() {
     this.insertButtons = [];
 
     toRedraw.forEach(function(block) {
-        block.removeHighlight();
         this.redrawBlock(block);
     }, this);
 

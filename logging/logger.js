@@ -141,11 +141,22 @@ Logger.prototype.addCode = function(log) {
     log.projectID = ide.stage.guid;
     var code = this.serializer.serialize(ide.stage);
     code = this.removeImages(code);
-    if (code != this.lastCode) {
+
+    if (this.hasCodeChanged(this.lastCode, code)) {
         log.code = code;
         this.lastCode = code;
         if (this.onCodeChanged) this.onCodeChanged(code);
     }
+};
+
+Logger.prototype.removeCoordinates = function(xml) {
+    if (!xml) return xml;
+    // Remove the open sprite tags, since they contain things
+    return xml.replace(/<(sprite|stage|watcher) [^>]*>/g, '');
+};
+
+Logger.prototype.hasCodeChanged = function(xml1, xml2) {
+    return this.removeCoordinates(xml1) !== this.removeCoordinates(xml2);
 };
 
 Logger.prototype.addXmlNewlines = function(xml) {

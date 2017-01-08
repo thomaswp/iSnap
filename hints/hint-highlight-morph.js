@@ -13,16 +13,21 @@ HintHighlightMorph.prototype.topMorphAt = function(point) {
 
 SyntaxElementMorph.prototype.highlightImage =
     BlockMorph.prototype.highlightImage;
-SyntaxElementMorph.prototype.highlightImageBlurred =
-    BlockMorph.prototype.highlightImageBlurred;
 
 SyntaxElementMorph.prototype.addHintHighlight = function(color) {
     var isHidden = !this.isVisible,
         highlight;
 
     if (isHidden) {this.show(); }
+    // Before adding, remove any normal block highlights
+    var children = this.children;
+    this.children = this.children.filter(function(child) {
+        return !(child instanceof BlockHighlightMorph);
+    });
     highlight = this.hintHighlight(color, 2);
-    this.addBack(highlight);
+    // After highlighting, manually add the morph and reset the children
+    children.push(highlight);
+    this.children = children;
     this.fullChanged();
     if (isHidden) {this.hide(); }
     return highlight;

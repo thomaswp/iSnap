@@ -134,6 +134,15 @@ HighlightDialogBoxMorph.prototype.destroy = function() {
     HighlightDialogBoxMorph.uber.destroy.call(this);
     this.destroyed = true;
     window.hintProvider.setDisplayEnabled(HighlightDisplay, false);
+    this.setShowInserts(false);
+};
+
+HighlightDialogBoxMorph.prototype.setShowInserts = function(show) {
+    window.hintProvider.displays.forEach(function(display) {
+        if (!display instanceof HighlightDisplay) return;
+        display.showInserts = show;
+    });
+    window.hintProvider.getHintsFromServer();
 };
 
 HighlightDialogBoxMorph.prototype.popUp = function() {
@@ -184,10 +193,12 @@ HighlightDialogBoxMorph.prototype.toggleInsert = function() {
         this.insertFrame.hide();
         this.mainFrame.show();
         this.insertButton.labelString = localize('Show Next Steps');
+        this.setShowInserts(false);
     } else {
         this.insertFrame.show();
         this.mainFrame.hide();
         this.insertButton.labelString = localize('Hide Next Steps');
+        this.setShowInserts(true);
     }
     this.insertButton.createLabel();
     this.insertButton.fixLayout();
@@ -224,7 +235,6 @@ extend(BlockMorph, 'mouseClickLeft', function(base) {
     if (stage && HighlightDialogBoxMorph.showOnRun) {
         var process = stage.threads.findProcess(top);
         if (process && !process.readyToTerminate) {
-            console.log("!");
             new HighlightDialogBoxMorph(window.ide).popUp();
         }
     }

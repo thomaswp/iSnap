@@ -18,6 +18,7 @@ HighlightDisplay.moveColor = new Color(255, 255, 0);
 HighlightDisplay.prototype.initDisplay = function() {
     // Start disabled until the highlight dialog box is shown
     this.enabled = false;
+    this.showInserts = false;
 
     this.highlights = [];
     this.insertButtons = [];
@@ -83,6 +84,7 @@ HighlightDisplay.prototype.clear = function() {
 };
 
 HighlightDisplay.prototype.addHighlight = function(block, color, single) {
+    if (color == HighlightDisplay.insertColor && !this.showInserts) return;
     if (block instanceof MultiArgMorph) {
         block = block.parent;
     }
@@ -196,7 +198,7 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
 };
 
 HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
-    if (!(argMorph instanceof ArgMorph)) return;
+    if (!this.showInserts || !(argMorph instanceof ArgMorph)) return;
 
     if (argMorph.contents) {
         var contents = argMorph.contents();
@@ -210,6 +212,7 @@ HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
 };
 
 HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
+    if (!this.showInserts) return;
     if (!(block instanceof BlockMorph || block instanceof CSlotMorph)) {
         Trace.logErrorMessage('Non-insertable morph: ' +
             (block ? block.getDebugType() : null));

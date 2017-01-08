@@ -120,7 +120,7 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
     body.add(insertFrame);
 
     var check = new ToggleMorph('checkbox', this, 'toggleShowOnRun',
-        'Always check my work when I run scripts', function() {
+        'Always check my work when I click the Green Flag', function() {
             return HighlightDialogBoxMorph.showOnRun;
         });
     body.add(check);
@@ -146,16 +146,21 @@ HighlightDialogBoxMorph.prototype.popUp = function() {
         return;
     }
 
+    this.fixLayout();
+    this.drawNew();
+
     // Set the top-left corner to that of the previous dialog or the corralBar
     var origin = null;
     if (showing) {
         origin = showing.bounds.origin;
     } else if (window.ide && window.ide.corralBar) {
-        origin = window.ide.corralBar.bounds.origin;
+        var ide = window.ide;
+        origin = ide.corralBar.bounds.origin;
+        // Make sure it doesn't pop up partially offscreen
+        origin.x = Math.min(origin.x, ide.width() - this.width());
+        origin.y = Math.min(origin.y, ide.height() - this.height());
     }
 
-    this.fixLayout();
-    this.drawNew();
     HighlightDialogBoxMorph.showing = this;
     HighlightDialogBoxMorph.uber.popUp.call(this, world);
 
@@ -195,3 +200,9 @@ HighlightDialogBoxMorph.prototype.toggleInsert = function() {
 HighlightDialogBoxMorph.prototype.toggleShowOnRun = function() {
     HighlightDialogBoxMorph.showOnRun = !HighlightDialogBoxMorph.showOnRun;
 };
+
+extend(StageMorph, 'fireGreenFlagEvent', function(base) {
+    if (HighlightDialogBoxMorph.showOnRun) {
+        new HighlightDialogBoxMorph(window.ide).popUp();
+    }
+});

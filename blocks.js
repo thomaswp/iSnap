@@ -3298,8 +3298,9 @@ BlockMorph.prototype.mouseClickLeft = function () {
     if (receiver) {
         stage = receiver.parentThatIsA(StageMorph);
         if (stage) {
-            Trace.log("Block.clickRun", top.blockId());
-            window.lastRun = top; //TODO: REMOVE
+            Trace.log('Block.clickRun', top.blockId());
+            // Useful for debugging
+            window.lastRun = top;
             stage.threads.toggleProcess(top);
         }
     }

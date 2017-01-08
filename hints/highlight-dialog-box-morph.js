@@ -120,7 +120,7 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
     body.add(insertFrame);
 
     var check = new ToggleMorph('checkbox', this, 'toggleShowOnRun',
-        'Always check my work when I click the Green Flag', function() {
+        'Always check my work when I run scripts', function() {
             return HighlightDialogBoxMorph.showOnRun;
         });
     body.add(check);
@@ -204,5 +204,28 @@ HighlightDialogBoxMorph.prototype.toggleShowOnRun = function() {
 extend(StageMorph, 'fireGreenFlagEvent', function(base) {
     if (HighlightDialogBoxMorph.showOnRun) {
         new HighlightDialogBoxMorph(window.ide).popUp();
+    }
+});
+
+extend(BlockMorph, 'mouseClickLeft', function(base) {
+    base.call(this);
+    var top = this.topBlock(),
+        receiver = top.receiver();
+    if (!receiver) return;
+
+    var children = top.allChildren().filter(function(child) {
+        return child instanceof BlockMorph;
+    }).length;
+
+    // Limit click-run checking to 3-block scripts
+    if (children < 3) return;
+
+    var stage = top.receiver().parentThatIsA(StageMorph);
+    if (stage && HighlightDialogBoxMorph.showOnRun) {
+        var process = stage.threads.findProcess(top);
+        if (process && !process.readyToTerminate) {
+            console.log("!");
+            new HighlightDialogBoxMorph(window.ide).popUp();
+        }
     }
 });

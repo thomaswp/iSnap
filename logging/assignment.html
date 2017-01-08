@@ -3,316 +3,10 @@
 <html>
 
 	<head>
-		<script src="https://use.fontawesome.com/a78350546c.js"></script>
 		<meta charset="UTF-8">
 		<title>Select an assignment</title>
-		<style>
-			.hidden {
-				display: none;
-			}
-			.hint {
-				color: #888;
-				font-style: italic;
-			}
-			#display-id {
-				font-weight: bold;
-			}
-			display-id-loggedIN{
-			    font-weight: bold;
-			}
-			body{
-			    margin: 0px;
-				padding: 0px;
-				font-family: 'Open Sans', sans-serif;
-				//-webkit-font-smoothing: antialiased;
-				background: url(loginBackground.png);
-			}
-			#flex-Parent{
-			    display: flex;
-				align-items: center;
-				justify-content: center;
-				flex-direction: column;
-			}
-			#blackBar{
-			    width: 100%;
-				background-color: #000000;
-				height: 30px;
-				margin: 0px;
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-			}
-			#blackBar img{
-			    width: 190px;
-				height: auto;
-			}
-			#courseName{
-			    color: white;
-				font-weight: 700;
-				font-size: 12px;
-				margin-right: 25px;
-			}
-			#theBox{
-			    display: flex;
-				flex-direction: column;
-				justify-content: center;
-				align-items: center;
-				position: fixed;
-				text-align: center;
-				top: 0;
-				right: 0;
-				left: 0;
-				bottom: 0;
-				width: 100%;
-				height: 100%;
-				margin-top: -25px;
-			}
-			#theBorder{
-			    box-shadow: 0px 0px 100px rgba(0,0,0,0.3);
-				display: flex;
-				flex-direction: column;
-				background-color: rgb(247, 247, 247);
-				padding-top: 50px;
-				padding-bottom: 30px;
-				border-radius: 6px;
-				border: 7px solid rgb(255, 201, 62);
-				justify-content: center;
-				align-items: center;
-			}
-			#form-flex-Parent{
-			    width: 555px;
-				display: flex;
-				flex-direction: column;
-				justify-content: center;
-				align-items: center;
-			}
-			#snapLogo{
-			    display: flex;
-				flex-direction: column;
-				justify-content: center;
-				align-items: center;
-			}
-			#snapLogo img{
-			    max-width: 50%;
-				max-height: 50%;
-				border-radius: 5px;
-			}
-			h1{
-			    margin: 0px;
-				color: #8F56E3;
-			}
-			#unityID-hint{
-			    font-weight: 200;
-				font-size: 12px;
-				color: #656565;
-				margin-bottom: 25px;
-			}
-			#input-id{
-			    padding-top: 10px;
-				padding-bottom: 10px;
-				padding-left: 20px;
-				margin-bottom: 25px;
-				border-radius: 3px;
-				min-width: 100px;
-				max-width: 370px;
-				width: 100%;
-				height: 45px;
-				font-size: 27px;
-				outline: none;
-				border: 2px solid rgb(143,86,227);
-				background: url(userIcon.png) no-repeat right 10px center;
-				background-color: rgb(255,255,255);
-				background-size: 45px 45px;
-			}
-			#sign-in-Button{
-			    padding-top: 15px;
-				padding-bottom: 15px;
-				width: 390px;
-				font-size: 20px;
-				font-weight: 600;
-				letter-spacing: 1px;
-				text-decoration: none;
-				background: #4A6BD6;
-				border-radius: 3px;
-				color: white;
-				outline: none;
-			}
-			#sign-in-Button:hover{
-			    box-shadow: 0px 0px 0px 1px #4A6BD6 outset, 0px 0px 0px 1.5px white outset;
-				cursor: pointer;
-			}
-			#needsCookiesEnabled{
-			    margin-bottom: 30px;
-				padding: 14px;
-				background: rgb(255,246,191);
-				max-width: 450px;
-				font-size: 17px;
-				text-align: justify;
-				transition: all 300ms ease-in-out 1s;
-			}
-			.fa-exclamation-circle{
-			    margin-right: 12px;
-			}
-			.hidden{
-			    display: none;
-			}
-			.getFlex{
-			    display: flex;
-			}
-			#confirm-new{
-			    height: 0px;
-				opacity: 0;
-				transition: height 2s;
-				visibility: hidden;
-			}
-			.getFrames{
-			    animation-name: myframes;
-				animation-duration: 0.3s;
-				animation-timing-function: ease-in-out;
-				animation-delay: 0s;
-				animation-iteration-count: 1;
-				animation-direction: normal;
-				animation-fill-mode: forwards;
-				animation-play-state: running;
-			}
-			.getFrames2{
-			    animation-name: myframes2;
-				animation-duration: 0.3s;
-				animation-timing-function: ease-in-out;
-				animation-delay: 0s;
-				animation-iteration-count: 1;
-				animation-direction: normal;
-				animation-fill-mode: normal;
-				animation-play-state: running;
-			}
-			@keyframes myframes{
-			    0%{ opacity: 0; height: 0; visibility: hidden}
-				50%{opacity: 0}
-				100%{opacity: 1; height: 100px; visibility: visible}
-			}
-			@keyframes myframes2{
-			    0%{opacity: 1; height: 100px; visibility: visible}
-				20%{opacity: 0}
-				100%{opacity: 0; height: 0px; visibility: hidden}
-			}
-			#confirm-new p{
-			    margin-top: 0px;
-				margin-bottom: 5px;
-				max-width: 390px;
-				text-align: justify;
-				font-size: 16px;
-				line-height: 21px;
-				box-sizing: border-box;
-			}
-			#confirm-new input{
-			    margin-top: 16px;
-				margin-bottom: 16px;
-			}
-			#assignment{
-			    padding-top: 15px;
-				padding-bottom: 15px;
-				padding-left: 20px;
-				padding-right: 15px;
-				margin-bottom: 30px;
-				margin-top: 30px;
-				border-radius: 3px;
-				min-width: 100px;
-				max-width: 390px;
-				width: 100%;
-				height: 55px;
-				outline: none;
-				border: 2px solid rgb(143, 86, 227);
-				background-color: rgb(255, 255, 255);
-				background-size: 45px;
-			}
-			#assignmentGObutton{
-			    padding-top: 15px;
-				padding-bottom: 15px;
-				width: 390px;
-				font-size: 20px;
-				font-weight: 600;
-				letter-spacing: 1px;
-				text-decoration: none;
-				background: rgb(98, 194, 19);
-				border-radius: 3px;
-				transition: all 300ms;
-				color: white;
-				outline: none;
-			}
-			#assignmentGObutton:hover{
-			    box-shadow: 0px 0px 0px 1px #4A6BD6 outset, 0px 0px 0px 1.5px white outset;
-				cursor: pointer;
-			}
-			.belt-container{
-			    overflow: hidden;
-			}
-			.belt-container .belt{
-			    width: 200%;
-				display: flex;
-				transition: transform 0.2s ease-in-out;
-			}
-			.belt-container .state{
-			    width: 50%;
-				display: flex;
-			    align-items: center;
-				justify-content: center;
-				flex-direction: column;
-			}
-			.belt-container .state-1{
-			    transition: transform 0.2s ease-in-out;
-				transform-origin: center right;
-			}
-			.state-1 h1{
-			    margin-top: 40px;
-			}
-			.belt-container .state-2{
-			    z-index: 2;
-			    transition: all 200ms ease-in-out;
-			    margin-top: -10px;
-			}
-			.belt-container.is-transitioned .belt{
-			    transform: translateX(-50%);
-			}
-			.container{
-			    width: 510px;
-			}
-			.newUserContainer{
-			    display: flex;
-				justify-content: center;
-				align-items: center;
-			}
-			.newUserContainer span{
-			    padding-left: 4px;
-			}
-			#logout{
-			   
-				justify-content: space-between;
-				align-items: center;
-				text-align: center;
-				width: 100%;	
-			}
-			
-			#back-arrow{
-			    padding-left: 20px;
-			}
-		
-			
-			#display-id-loggedIN{
-				display: hidden;
-				width: 100%;
-				align-items: center;
-				align-self: center;
-				font-weight: bold;
-			}
-			
-			#signed-in-as{
-			    padding-right: 20px;
-			}
-			
-		
-		
-			
-		</style>
+        <link rel="stylesheet" type="text/css" href="/logging/login/assignment.css">
+		<script src="https://use.fontawesome.com/a78350546c.js"></script>
 		<script type="text/javascript" src="config.js"></script>
 		<script type="text/javascript" src="jquery-3.1.1.min.js"></script>
 		<script type="text/javascript" src="jquery.cookie.js"></script>
@@ -320,12 +14,12 @@
 
 	<body>
 		<div id="flex-Parent">
-		    <div id="blackBar"><img src="NCStateLogoWhite.png"> <span id="courseName"> CSC 200 | Introduction To Computers and Their Uses</span></div>
+		    <div id="blackBar"><img src="login/NCStateLogoWhite.png"> <span id="courseName"> CSC 200 | Introduction To Computers and Their Uses</span></div>
 			<div id="theBox">
 			    <div id="needsCookiesEnabled" class="hidden"><i class="fa fa-exclamation-circle fa-2x" aria-hidden="true"></i><span>We are having trouble logging you in due to server issues. Continue with selecting an assignment</span></div>
 				<div id="theBorder">
 					<div id="logout" class="hidden"> <div id="back-arrow"><a href="#" onclick="logout()"><i class="fa fa-long-arrow-left fa-3x" aria-hidden="true"></i></a></div> <div id="signed-in-as">Signed in as <span id="display-id-loggedIN"></span></div></div>
-				    <div id="snapLogo"><img src="SnapLogo.png"></img></div>
+				    <div id="snapLogo"><img src="login/SnapLogo.png"></img></div>
 				    <div class="container">
 						<div class="belt-container">
 							<div class="belt">
@@ -352,7 +46,6 @@
 											<div><select id="assignment" name="assignment"></select></div>
 											<div><button id="assignmentGObutton" type="submit">GO</button></div>
 										</form>
-										
 									</div>
 								</div>
 							</div>	
@@ -402,6 +95,7 @@
 					$('#logout').removeClass('hidden');
 					$('#logout').addClass('getFlex');
 				    $("#theBorder").css("padding-top", "10px");
+				    $("#theBorder").css("padding-bottom", "0px");
 				    $("#logout").css("padding-bottom", "10px");
 				//$('#form-id').addClass('hidden');
 
@@ -420,16 +114,15 @@
 				$('.belt-container').toggleClass('is-transitioned');
 				$('#logout').removeClass('getFlex');
 				$('#logout').addClass('hidden');
+				$('#confirm-new').removeClass('getFrames');
 				$('#confirm-new').addClass('getFrames2');
 				$("#confirm-new").css("margin-bottom", "0px");
 				$("#theBorder").css("padding-top", "50px");
-				
-					
-				
+				$("#theBorder").css("padding-bottom", "30px");
 			}
 
 			setUserID($.cookie('userID'));
-
+			
 			$('#form-flex-Parent').submit(function() {
 				var id = $('#input-id').val();
 				$('#display-id').html(id);
@@ -447,6 +140,40 @@
 					    skipLogIn(true);
 					}
 					if (response.newUser) {
+						$('#confirm-new').removeClass('getFrames2');
+						$('#confirm-new').addClass('getFrames');
+						$("#confirm-new").css("margin-bottom", "20px");
+						return;
+					}
+					setUserID(response.userID);
+				}).fail(function() {
+					skipLogIn(true);
+					// TODO: Handle this error
+					// The user should be able proceed anyway after
+					// trying again?
+				});
+				return false;
+			});
+			
+			
+			$("#sign-in-Button").click(function(){
+				var id = $('#input-id').val();
+				$('#display-id').html(id);
+				$('#display-id-loggedIN').html(id);
+				$.post('login.php', {
+					'id': id,
+					'new': $('#input-new').prop('checked'),
+				}, function(data, status) {
+					// TODO: catch errors on parsin the JSON and handle as below
+					//try catch if error
+					try{
+					    var response = JSON.parse(data);
+					}
+					catch(e){
+					    skipLogIn(true);
+					}
+					if (response.newUser) {
+						$('#confirm-new').removeClass('getFrames2');
 						$('#confirm-new').addClass('getFrames');
 						$("#confirm-new").css("margin-bottom", "20px");
 						return;

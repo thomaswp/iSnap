@@ -18,7 +18,10 @@ HighlightDisplay.moveColor = new Color(255, 255, 0);
 HighlightDisplay.prototype.initDisplay = function() {
     // Start disabled until the highlight dialog box is shown
     this.enabled = false;
+    // Show insert hints (next steps)
     this.showInserts = false;
+    // Show a dialog, even if no hints were shown
+    this.forceShowDialog = false;
 
     this.highlights = [];
     this.insertButtons = [];
@@ -26,8 +29,10 @@ HighlightDisplay.prototype.initDisplay = function() {
 
     BlockEditorMorph.defaultHatBlockMargin = new Point(35, 20);
 
+    var myself = this;
     this.addHintButton(localize('Check My Work'), function() {
-        window.hintProvider.setDisplayEnabled(HighlightDisplay);
+        myself.forceShowDialog = true;
+        window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
     });
 };
 
@@ -40,12 +45,28 @@ HighlightDisplay.prototype.finishedHints = function() {
     if (!dialogShowing) {
         if (hintsShown) {
             // Show it if and we've shown hints
-            new HighlightDialogBoxMorph(window.ide).popUp();
+            new HighlightDialogBoxMorph(window.ide, this.showInserts).popUp();
         } else {
             // Or disable highlights if not
             this.enabled = false;
+            // If no hints were shown, but the user clicked the hint button...
+            if (this.forceShowDialog) {
+                // Show a dialog to confirm they want next-step hints
+                new DialogBoxMorph(this, function() {
+                    // If they say yes, show inserts and reshow this
+                    this.showInserts = true;
+                    window.hintProvider.setDisplayEnabled(HighlightDisplay,
+                        true);
+                }).askYesNo(
+                    'Check Passed',
+                    'Everything looks good. Would you like me to suggest ' +
+                    'some next steps?',
+                    window.world
+                );
+            }
         }
     }
+    this.forceShowDialog = false;
 };
 
 HighlightDisplay.prototype.showHint = function(hint) {

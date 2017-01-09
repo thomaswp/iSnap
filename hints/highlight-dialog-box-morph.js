@@ -1,7 +1,7 @@
 require('gui-extensions');
 
-function HighlightDialogBoxMorph(target) {
-    this.init(target);
+function HighlightDialogBoxMorph(target, showInserts) {
+    this.init(target, showInserts);
 }
 
 HighlightDialogBoxMorph.prototype = Object.create(DialogBoxMorph.prototype);
@@ -10,12 +10,12 @@ HighlightDialogBoxMorph.uber = DialogBoxMorph.prototype;
 
 HighlightDialogBoxMorph.showOnRun = true;
 
-HighlightDialogBoxMorph.prototype.init = function(target) {
+HighlightDialogBoxMorph.prototype.init = function(target, showInserts) {
     HighlightDialogBoxMorph.uber.init.call(this, target, null, target);
 
     this.key = 'highlightDialog';
     this.insertButton =
-        this.addButton('toggleInsert', localize('Show Next Steps'));
+        this.addButton('toggleInsert', this.nextButtonText(showInserts));
     this.addButton('ok', localize('Done'));
 
     this.labelString = 'Checking your Work';
@@ -88,6 +88,7 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
     );
 
     mainFrame.fixLayout();
+    if (showInserts) mainFrame.hide();
     body.add(mainFrame);
     this.mainFrame = mainFrame;
 
@@ -114,7 +115,7 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
         hatBlock, hatBlock, function() { }, false);
 
     insertFrame.fixLayout();
-    insertFrame.hide();
+    if (!showInserts) insertFrame.hide();
     this.insertFrame = insertFrame;
     hatBlock.setLeft(hatBlock.left() + 30);
     body.add(insertFrame);
@@ -188,18 +189,22 @@ HighlightDialogBoxMorph.prototype.fixLayout = function() {
     HighlightDialogBoxMorph.uber.fixLayout.call(this);
 };
 
+HighlightDialogBoxMorph.prototype.nextButtonText = function(showInserts) {
+    return showInserts ? localize('Hide Next Steps') :
+        localize('Show Next Steps');
+};
+
 HighlightDialogBoxMorph.prototype.toggleInsert = function() {
-    if (this.insertFrame.isVisible) {
-        this.insertFrame.hide();
-        this.mainFrame.show();
-        this.insertButton.labelString = localize('Show Next Steps');
-        this.setShowInserts(false);
-    } else {
+    var showInserts = !this.insertFrame.isVisible;
+    if (showInserts) {
         this.insertFrame.show();
         this.mainFrame.hide();
-        this.insertButton.labelString = localize('Hide Next Steps');
-        this.setShowInserts(true);
+    } else {
+        this.insertFrame.hide();
+        this.mainFrame.show();
     }
+    this.insertButton.labelString = this.nextButtonText(showInserts);
+    this.setShowInserts(showInserts);
     this.insertButton.createLabel();
     this.insertButton.fixLayout();
     this.body.fixLayout();

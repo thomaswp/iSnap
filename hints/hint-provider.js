@@ -175,7 +175,7 @@ HintProvider.prototype.setDisplayEnabled = function(displayType, enabled) {
     var refresh = false;
     this.displays.forEach(function(display) {
         if (display instanceof displayType) {
-            refresh |= enabled && !display.enabled;
+            refresh = refresh || (enabled && !display.enabled);
             display.enabled = enabled;
             if (!enabled) {
                 display.clear();

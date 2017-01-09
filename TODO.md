@@ -2,9 +2,10 @@ Highlight:
 * Bugs:
   * Duplicating a single block with a full-script highlight has a graphical bug
 * TODO:
-  * Add UI for starting/explaining hints
   * Test on existing hint requests
   * Show that you need more custom block inputs (possibly in calls as well)
+  * Save preferences
+  * Auto-dismiss
 * Reach:
   * Show list insert hints as a dialog
   * Find a better way of doing structure hints

@@ -172,15 +172,17 @@ HintProvider.prototype.loadCode = function() {
 };
 
 HintProvider.prototype.setDisplayEnabled = function(displayType, enabled) {
+    var refresh = false;
     this.displays.forEach(function(display) {
         if (display instanceof displayType) {
+            refresh |= enabled && !display.enabled;
             display.enabled = enabled;
             if (!enabled) {
                 display.clear();
             }
         }
     });
-    if (enabled) this.getHintsFromServer();
+    if (refresh) this.getHintsFromServer();
 };
 
 HintProvider.prototype.showLoggedHint = function(data) {

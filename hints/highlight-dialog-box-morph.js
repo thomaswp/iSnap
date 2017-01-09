@@ -132,9 +132,11 @@ HighlightDialogBoxMorph.prototype.init = function(target) {
 
 HighlightDialogBoxMorph.prototype.destroy = function() {
     HighlightDialogBoxMorph.uber.destroy.call(this);
-    this.destroyed = true;
-    window.hintProvider.setDisplayEnabled(HighlightDisplay, false);
-    this.setShowInserts(false);
+    if (!this.destroyed) {
+        this.destroyed = true;
+        window.hintProvider.setDisplayEnabled(HighlightDisplay, false);
+        this.setShowInserts(false);
+    }
 };
 
 HighlightDialogBoxMorph.prototype.setShowInserts = function(show) {
@@ -178,8 +180,6 @@ HighlightDialogBoxMorph.prototype.popUp = function() {
         this.setLeft(origin.x);
         this.setTop(origin.y);
     }
-
-    window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
 };
 
 HighlightDialogBoxMorph.prototype.fixLayout = function() {
@@ -212,9 +212,15 @@ HighlightDialogBoxMorph.prototype.toggleShowOnRun = function() {
     HighlightDialogBoxMorph.showOnRun = !HighlightDialogBoxMorph.showOnRun;
 };
 
+HighlightDialogBoxMorph.showHighlights = function() {
+    if (window.hintProvider) {
+        window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
+    }
+};
+
 extend(StageMorph, 'fireGreenFlagEvent', function(base) {
     if (HighlightDialogBoxMorph.showOnRun) {
-        new HighlightDialogBoxMorph(window.ide).popUp();
+        HighlightDialogBoxMorph.showHighlights();
     }
 });
 
@@ -235,7 +241,7 @@ extend(BlockMorph, 'mouseClickLeft', function(base) {
     if (stage && HighlightDialogBoxMorph.showOnRun) {
         var process = stage.threads.findProcess(top);
         if (process && !process.readyToTerminate) {
-            new HighlightDialogBoxMorph(window.ide).popUp();
+            HighlightDialogBoxMorph.showHighlights();
         }
     }
 });

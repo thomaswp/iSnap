@@ -27,8 +27,25 @@ HighlightDisplay.prototype.initDisplay = function() {
     BlockEditorMorph.defaultHatBlockMargin = new Point(35, 20);
 
     this.addHintButton(localize('Check My Work'), function() {
-        new HighlightDialogBoxMorph(window.ide).popUp();
+        window.hintProvider.setDisplayEnabled(HighlightDisplay);
     });
+};
+
+HighlightDisplay.prototype.finishedHints = function() {
+    var dialogShowing = HighlightDialogBoxMorph.showing &&
+            !HighlightDialogBoxMorph.showing.destroyed;
+    var hintsShown = this.highlights.length + this.insertButtons.length +
+            this.hoverHints.length > 0;
+    // If the dialog isn't showing...
+    if (!dialogShowing) {
+        if (hintsShown) {
+            // Show it if and we've shown hints
+            new HighlightDialogBoxMorph(window.ide).popUp();
+        } else {
+            // Or disable highlights if not
+            this.enabled = false;
+        }
+    }
 };
 
 HighlightDisplay.prototype.showHint = function(hint) {

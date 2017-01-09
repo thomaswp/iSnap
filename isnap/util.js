@@ -1,7 +1,7 @@
 
 // Helper functions
 
-/* exported newGuid checkAssignment createCORSRequest extend */
+/* exported newGuid checkAssignment createCORSRequest extend extendObject */
 
 // Generates a random GUID to help us keep track of things across sessions
 // Credit: http://stackoverflow.com/a/8809472/816458
@@ -94,15 +94,19 @@ function extend(clazz, functionName, newFunction) {
         console.error('extend requires a class for its first argument');
         return;
     }
-    if (!clazz.prototype[functionName]) {
+    return extendObject(clazz.prototype, functionName, newFunction);
+}
+
+function extendObject(object, functionName, newFunction) {
+    if (!object[functionName]) {
         // eslint-disable-next-line no-console
-        console.error('Cannot extend function ' + functionName + ' of class ' +
-                clazz.name + ' because it does not exist.');
+        console.error('Cannot extend function ' + functionName +
+            ' because it does not exist.');
         return;
     }
 
-    var oldFunction = clazz.prototype[functionName];
-    clazz.prototype[functionName] = function() {
+    var oldFunction = object[functionName];
+    object[functionName] = function() {
         var args = [].slice.call(arguments);
         args.unshift(oldFunction);
         return newFunction.apply(this, args);

@@ -1,7 +1,7 @@
 require('gui-extensions');
 
-function HighlightDialogBoxMorph(target, showInserts) {
-    this.init(target, showInserts);
+function HighlightDialogBoxMorph(target, showInserts, autoClear) {
+    this.init(target, showInserts, autoClear);
 }
 
 HighlightDialogBoxMorph.prototype = Object.create(DialogBoxMorph.prototype);
@@ -10,7 +10,8 @@ HighlightDialogBoxMorph.uber = DialogBoxMorph.prototype;
 
 HighlightDialogBoxMorph.showOnRun = true;
 
-HighlightDialogBoxMorph.prototype.init = function(target, showInserts) {
+HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
+        autoClear) {
     HighlightDialogBoxMorph.uber.init.call(this, target, null, target);
 
     this.key = 'highlightDialog';
@@ -20,6 +21,7 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts) {
 
     this.labelString = 'Checking your Work';
     this.createLabel();
+    this.autoClear = autoClear;
 
     var body = new AlignmentMorph('column', this.padding);
     body.alignment = 'left';
@@ -120,11 +122,18 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts) {
     hatBlock.setLeft(hatBlock.left() + 30);
     body.add(insertFrame);
 
-    var check = new ToggleMorph('checkbox', this, 'toggleShowOnRun',
+    var checkShowOnRun = new ToggleMorph('checkbox', this, 'toggleShowOnRun',
         'Always check my work when I run scripts', function() {
             return HighlightDialogBoxMorph.showOnRun;
         });
-    body.add(check);
+    body.add(checkShowOnRun);
+
+    var myself = this;
+    var checkAutoClear = new ToggleMorph('checkbox', this, 'toggleAutoClear',
+        'Clear highlights when I edit my code', function() {
+            return myself.autoClear;
+        });
+    body.add(checkAutoClear);
 
     body.fixLayout();
     this.addBody(body);
@@ -215,6 +224,15 @@ HighlightDialogBoxMorph.prototype.toggleInsert = function() {
 
 HighlightDialogBoxMorph.prototype.toggleShowOnRun = function() {
     HighlightDialogBoxMorph.showOnRun = !HighlightDialogBoxMorph.showOnRun;
+};
+
+HighlightDialogBoxMorph.prototype.toggleAutoClear = function() {
+    var autoClear = this.autoClear = !this.autoClear;
+    window.hintProvider.displays.forEach(function(display) {
+        if (display instanceof HighlightDisplay) {
+            display.autoClear = autoClear;
+        }
+    });
 };
 
 HighlightDialogBoxMorph.showHighlights = function() {

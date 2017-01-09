@@ -5,7 +5,7 @@ Highlight:
   * Test on existing hint requests
   * Show that you need more custom block inputs (possibly in calls as well)
   * Save preferences
-  * Auto-dismiss
+  * Logging
 * Reach:
   * Show list insert hints as a dialog
   * Find a better way of doing structure hints

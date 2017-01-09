@@ -22,6 +22,8 @@ HighlightDisplay.prototype.initDisplay = function() {
     this.showInserts = false;
     // Show a dialog, even if no hints were shown
     this.forceShowDialog = false;
+    // Auto-clear the highlights after each edit
+    this.autoClear = false;
 
     this.highlights = [];
     this.insertButtons = [];
@@ -34,6 +36,12 @@ HighlightDisplay.prototype.initDisplay = function() {
         myself.forceShowDialog = true;
         window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
     });
+
+    extendObject(Trace, 'onCodeChanged', function(base, code) {
+        // Don't show hints after next clear (but don't clear them now)
+        if (myself.autoClear) myself.enabled = false;
+        base.call(this, code);
+    });
 };
 
 HighlightDisplay.prototype.finishedHints = function() {
@@ -45,7 +53,8 @@ HighlightDisplay.prototype.finishedHints = function() {
     if (!dialogShowing) {
         if (hintsShown) {
             // Show it if and we've shown hints
-            new HighlightDialogBoxMorph(window.ide, this.showInserts).popUp();
+            new HighlightDialogBoxMorph(
+                window.ide, this.showInserts, this.autoClear).popUp();
         } else {
             // Or disable highlights if not
             this.enabled = false;
@@ -88,6 +97,12 @@ HighlightDisplay.prototype.getHintType = function() {
 };
 
 HighlightDisplay.prototype.clear = function() {
+    var dialogShowing = HighlightDialogBoxMorph.showing &&
+            !HighlightDialogBoxMorph.showing.destroyed;
+    if (!this.enabled && dialogShowing) {
+        HighlightDialogBoxMorph.showing.destroy();
+    }
+
     var toRedraw = [];
     function redraw(block) {
         var topBlock = block.topBlock();
@@ -113,7 +128,7 @@ HighlightDisplay.prototype.clear = function() {
         if (argMorph.contents) {
             var contents = argMorph.contents();
             if (contents instanceof StringMorph) {
-                contents.isEditable = false;
+                contents.isEditable = true;
             }
         }
         argMorph.onClick = null;

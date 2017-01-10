@@ -60,6 +60,10 @@ include '../../logging/config.php';
 					return a.dataset.rid == id;
 				});
 			}
+
+			function resetFilter() {
+				document.location = './';
+			}
 		</script>
 	</head>
 
@@ -70,6 +74,13 @@ include '../../logging/config.php';
 			</div>
 			<div id="content">
 				<div style="overflow: scroll; height: 100%;">
+				<form action="" method="GET">
+					Filter IDs:
+					<input id="filter" type="text" name="ids" pattern="([0-9]+ ?)*"
+						placeholder="e.g. 123 888 12345"
+						value="<?php if (array_key_exists('ids', $_GET)) echo $_GET['ids']; ?>">
+					<input type="button" value="Reset" onclick="resetFilter()" >
+				</form>
 				<?php
 if ($enble_viewer) {
 
@@ -78,14 +89,30 @@ if ($enble_viewer) {
 		die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
 	}
 
-	$query = "SELECT * FROM `trace` WHERE message LIKE 'SnapDisplay.show%Hint' ORDER BY assignmentID, projectID, time";
+	// Allow for filtering by a set of space-separated ids
+	$where = "WHERE message LIKE 'SnapDisplay.show%Hint'";
+	if (array_key_exists('ids', $_GET)) {
+		$ids = $_GET['ids'];
+		$ids = explode(' ', $ids);
+		$list = '(';
+		foreach ($ids as $id) {
+			if (strlen($list) > 1) $list .= ', ';
+			$list .= intval($id);
+		}
+		$list .= ')';
+		$where .= " AND id IN $list";
+	}
+
+	$query = "SELECT * FROM `trace` $where
+		ORDER BY assignmentID, projectID, time";
+
 	$result = $mysqli->query($query);
 	if (!$result) {
 		die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
 	}
 
 	echo "<table cellspacing='0'>";
-	echo "<thead><th>Assignment</th><th>Project ID</th><th>Type</th><th>Time</th></thead>";
+	echo "<thead><th>Log ID</th><th>Project ID</th><th>Type</th><th>Time</th></thead>";
 	while($row = mysqli_fetch_array($result)) {
 		$id=$row['id'];
 		$assignmentID = $row['assignmentID'];
@@ -97,8 +124,12 @@ if ($enble_viewer) {
 		$data = json_encode($row['data']);
 		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\", $data, \"$type\")";
 		$onclick = htmlspecialchars($onclick);
-		echo "<tr><td id='$id'>$assignmentID</td><td>
-			<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$displayID</a></td>
+		$contextLink = "../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$id";
+		echo "<tr><td id='$id'>
+			<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$id</a>
+			</td>
+			<td>$assignmentID </br>
+			<a href='$contextLink' target='_blank' title='See the full logs for this attempt...'>$displayID</a></td>
 			<td>$type</td><td>$time</td></tr>";
 	}
 	echo "</table>";

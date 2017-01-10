@@ -55,13 +55,6 @@
 			</div>
 		</div>
 		
-
-
-
-
-		
-		
-
 		<script type="text/javascript">
 			
 			//validifyID is just for testing purposes
@@ -90,14 +83,13 @@
 			function setUserID(id) {
 				if (!id) return;
 				window.userID = id;
-			        $('#confirm-new').addClass('getFrames2');
-			        $('.belt-container').toggleClass('is-transitioned');
-					$('#logout').removeClass('hidden');
-					$('#logout').addClass('getFlex');
-				    $("#theBorder").css("padding-top", "10px");
-				    $("#theBorder").css("padding-bottom", "0px");
-				    $("#logout").css("padding-bottom", "10px");
-				//$('#form-id').addClass('hidden');
+				$('#confirm-new').addClass('getFrames2');
+				$('.belt-container').toggleClass('is-transitioned');
+				$('#logout').removeClass('hidden');
+				$('#logout').addClass('getFlex');
+				$("#theBorder").css("padding-top", "10px");
+				$("#theBorder").css("padding-bottom", "0px");
+				$("#logout").css("padding-bottom", "10px");
 
 			}
             
@@ -111,7 +103,7 @@
 			
 			function logout() {
 				$.removeCookie('userID');
-				$('.belt-container').toggleClass('is-transitioned');
+				$('.belt-container').removeClass('is-transitioned');
 				$('#logout').removeClass('getFlex');
 				$('#logout').addClass('hidden');
 				$('#confirm-new').removeClass('getFrames');
@@ -119,80 +111,49 @@
 				$("#confirm-new").css("margin-bottom", "0px");
 				$("#theBorder").css("padding-top", "50px");
 				$("#theBorder").css("padding-bottom", "30px");
+				$('#input-new').prop('checked', false);
+			}
+			
+			function tryLogin() {
+				// Defocus the login input so Chrome will hide autocomplete
+				$('#input-id').blur();
+
+				var id = $('#input-id').val();
+				$('#display-id').html(id);
+				$.post('login/login.php', {
+					'id': id,
+					'new': $('#input-new').prop('checked'),
+				}, function(data, status) {
+					var response;
+					try {
+						response = JSON.parse(data);
+					} catch(e) {
+					    skipLogIn(true);
+						return;
+					}
+					if (response.newUser) {
+						$('#confirm-new').removeClass('getFrames2');
+						$('#confirm-new').addClass('getFrames');
+						$("#confirm-new").css("margin-bottom", "20px");
+						return;
+					}
+					$('#display-id-loggedIN').html(id);
+					setUserID(response.userID);
+				}).fail(function() {
+					skipLogIn(true);
+				});
+				return false;
 			}
 
-			setUserID($.cookie('userID'));
-			
-			$('#form-flex-Parent').submit(function() {
-				var id = $('#input-id').val();
-				$('#display-id').html(id);
-				$('#display-id-loggedIN').html(id);
-				$.post('login.php', {
-					'id': id,
-					'new': $('#input-new').prop('checked'),
-				}, function(data, status) {
-					// TODO: catch errors on parsin the JSON and handle as below
-					//try catch if error
-					try{
-					    var response = JSON.parse(data);
-					}
-					catch(e){
-					    skipLogIn(true);
-					}
-					if (response.newUser) {
-						$('#confirm-new').removeClass('getFrames2');
-						$('#confirm-new').addClass('getFrames');
-						$("#confirm-new").css("margin-bottom", "20px");
-						return;
-					}
-					setUserID(response.userID);
-				}).fail(function() {
-					skipLogIn(true);
-					// TODO: Handle this error
-					// The user should be able proceed anyway after
-					// trying again?
-				});
-				return false;
-			});
-			
-			
-			$("#sign-in-Button").click(function(){
-				var id = $('#input-id').val();
-				$('#display-id').html(id);
-				$('#display-id-loggedIN').html(id);
-				$.post('login.php', {
-					'id': id,
-					'new': $('#input-new').prop('checked'),
-				}, function(data, status) {
-					// TODO: catch errors on parsin the JSON and handle as below
-					//try catch if error
-					try{
-					    var response = JSON.parse(data);
-					}
-					catch(e){
-					    skipLogIn(true);
-					}
-					if (response.newUser) {
-						$('#confirm-new').removeClass('getFrames2');
-						$('#confirm-new').addClass('getFrames');
-						$("#confirm-new").css("margin-bottom", "20px");
-						return;
-					}
-					setUserID(response.userID);
-				}).fail(function() {
-					skipLogIn(true);
-					// TODO: Handle this error
-					// The user should be able proceed anyway after
-					// trying again?
-				});
-				return false;
-			});
+			$('#form-flex-Parent').submit(tryLogin);
+			$("#sign-in-Button").click(tryLogin);
 
 			if (!window.requireLogin) {
+				$('#back-arrow').addClass('hidden');
 				skipLogIn(false);
-				
-				$('#logout').addClass('hidden');
-				//to do - back button should be hidden if login is not required
+			} else {
+				// Always start logged out
+				$.removeCookie('userID');
 			}
 		</script>
 	</body>

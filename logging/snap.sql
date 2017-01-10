@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS `trace` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE trace ADD INDEX (assignmentID);
+ALTER TABLE trace ADD INDEX (userID);
 ALTER TABLE trace ADD INDEX (message);
 ALTER TABLE trace ADD INDEX (projectID);
 

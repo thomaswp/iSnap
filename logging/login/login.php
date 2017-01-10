@@ -1,6 +1,6 @@
 <?php
 
-include('config.php');
+include('../config.php');
 
     if (!array_key_exists('id', $_POST)) {
         return;

@@ -83,25 +83,25 @@ include '../config.php';
 			<div id="content">
 				<div style="overflow: scroll; height: 100%;">
 				<?php
-function tryGetParam($key) {
-	return array_key_exists($key, $_GET) ? mysql_real_escape_string($_GET[$key]) : NULL;
+function tryGetParam($key, $mysqli) {
+	return array_key_exists($key, $_GET) ? $mysqli->real_escape_string($_GET[$key]) : NULL;
 }
 
 if ($enble_viewer) {
-
-	$id = mysql_real_escape_string($_GET['id']);
-	$assignment = tryGetParam('assignment');
-	$start = tryGetParam('start');
-	$end = tryGetParam('end');
-	$snapshots = tryGetParam('snapshots');
-
-	echo "<h3>Project: $id</h3>";
-	echo "<p>This lists all logs for this project. Click on a date to see the code at that time, or click here and then use the A and D keys to scroll through snapshots. Loads quickest on Chrome.</p>";
 
 	$mysqli = new mysqli($host, $user, $password, $db);
 	if ($mysqli->connect_errno) {
 		die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
 	}
+
+	$id = $mysqli->real_escape_string($_GET['id']);
+	$assignment = tryGetParam('assignment', $mysqli);
+	$start = tryGetParam('start', $mysqli);
+	$end = tryGetParam('end', $mysqli);
+	$snapshots = tryGetParam('snapshots', $mysqli);
+
+	echo "<h3>Project: $id</h3>";
+	echo "<p>This lists all logs for this project. Click on a date to see the code at that time, or click here and then use the A and D keys to scroll through snapshots. Loads quickest on Chrome.</p>";
 
 	$where = "WHERE projectID='$id'";
 	if ($assignment) {

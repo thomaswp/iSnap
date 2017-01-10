@@ -7,7 +7,7 @@ include '../config.php';
 <!doctype html>
 
 <html>
-	
+
 	<head>
 		<meta charset="UTF-8">
 		<title>View Project</title>
@@ -61,7 +61,7 @@ include '../config.php';
 		</script>
 	</head>
 	<body>
-	
+
 	<?php
 
 
@@ -97,38 +97,38 @@ include '../config.php';
 
 		<div id="wrapper">
 			<div id="sidebar">
-				 <iframe id="snap" width="100%" height="100%" src="../../snap.html?assignment=view"></iframe> 
+				 <iframe id="snap" width="100%" height="100%" src="../../snap.html?assignment=view"></iframe>
 			</div>
 			<div id="content">
 				<div style="overflow: scroll; height: 100%;">
 				<?php
-						$assignment = mysql_real_escape_string($_GET['assignment']);
-						$time = mysql_real_escape_string($_GET['time']);
-
-						echo "<h3>Projects: $assignment</h3>";
-						
 						$mysqli = new mysqli($host, $user, $password, $db);
 						if ($mysqli->connect_errno) {
 							die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
 						}
-						
+
+						$assignment = $mysqli->real_escape_string($_GET['assignment']);
+						$time = $mysqli->real_escape_string($_GET['time']);
+
+						echo "<h3>Projects: $assignment</h3>";
+
 						$query = "SELECT id, time, projectID FROM $table WHERE assignmentID='$assignment' AND message='IDE.exportProject' AND time < '$time' ORDER BY projectID, time ASC;";
-						$result = $mysqli->query($query); 
+						$result = $mysqli->query($query);
 						if (!$result) {
 							die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
 						}
-						
+
 						echo "<table cellspacing='0'>";
 						echo "<thead><th>Time</th><th>ID</th><th>Project</th></thead>";
 						while($row = mysqli_fetch_array($result)) {
-							
+
 							$id = $row['id'];
 							$time = $row['time'];
 							$projectID = $row['projectID'];
-							
+
 							$first = $time;
 							$first = "<a href='#$id' onclick='loadSnap(\"$id\", \"$projectID\")'>$first</a>";
-								
+
 							echo "<tr><td>$first</td><td>$id</td><td>$projectID</td></tr>";
 						}
 						echo "</table>";
@@ -140,7 +140,7 @@ include '../config.php';
 			</div>
 			<div id="cleared"></div>
 			<script type="text/javascript">
-				var snap = document.getElementById("snap"); 
+				var snap = document.getElementById("snap");
 				snap.onload = function() {
 					snap.contentWindow.ide.toggleStageSize();
 				}

@@ -16,7 +16,7 @@
 			    margin: 0px;
 				padding: 0px;
 				font-family: 'Open Sans', sans-serif;
-				//-webkit-font-smoothing: antialiased;
+				/* -webkit-font-smoothing: antialiased; */
 				background: url(loginBackground.png);
 			}
 			#flex-Parent{

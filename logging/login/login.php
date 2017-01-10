@@ -1,6 +1,6 @@
 <?php
 
-include('config.php');
+include('../config.php');
 
     if (!array_key_exists('id', $_POST)) {
         return;
@@ -34,7 +34,5 @@ include('config.php');
         }
     }
 
-    // Expires in 1 hour; set the path to be one folder up
-    setcookie('userID', $hash, time() + 3600, '/');
     echo '{"userID": "' . $hash . '"}';
 ?>

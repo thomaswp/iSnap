@@ -59,7 +59,8 @@
 			
 			//validifyID is just for testing purposes
 
-			
+			var ID_COOKIE = 'snapIDHash', COOKIE_PATH = '/';
+
 			var assignments = window.assignments;
 			var select = document.getElementById("assignment");
 			for (var key in assignments) {
@@ -83,6 +84,7 @@
 			function setUserID(id) {
 				if (!id) return;
 				window.userID = id;
+				$.cookie(ID_COOKIE, id, { path: COOKIE_PATH });
 				$('#confirm-new').addClass('getFrames2');
 				$('.belt-container').toggleClass('is-transitioned');
 				$('#logout').removeClass('hidden');
@@ -102,7 +104,7 @@
 			}
 			
 			function logout() {
-				$.removeCookie('userID');
+				$.removeCookie(ID_COOKIE, { path: COOKIE_PATH });
 				$('.belt-container').removeClass('is-transitioned');
 				$('#logout').removeClass('getFlex');
 				$('#logout').addClass('hidden');
@@ -153,7 +155,7 @@
 				skipLogIn(false);
 			} else {
 				// Always start logged out
-				$.removeCookie('userID');
+				$.removeCookie(ID_COOKIE, { path: COOKIE_PATH });
 			}
 		</script>
 	</body>

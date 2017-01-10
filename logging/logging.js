@@ -60,7 +60,7 @@ function transformToAssocArray( prmstr ) {
 // Get the assignment passed via GET parameter
 function checkAssignment() {
     window.assignmentID = getSearchParameters()['assignment'];
-    window.userID = getCookie('userID');
+    window.userID = getCookie('snapIDHash');
 
     var redirectURL = 'logging/assignment.html';
 

@@ -97,6 +97,7 @@
             
 			function skipLogIn(warn){
 			    setUserID('none');
+				$('#signed-in-as').addClass('hidden');
 				if(warn){
 					$('#needsCookiesEnabled').removeClass('hidden');
 					$('#needsCookiesEnabled').addClass('getFlex');
@@ -152,6 +153,7 @@
 
 			if (!window.requireLogin) {
 				$('#back-arrow').addClass('hidden');
+				$('.belt, .state').css('transition', 'none');
 				skipLogIn(false);
 			} else {
 				// Always start logged out

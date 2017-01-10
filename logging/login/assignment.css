@@ -95,7 +95,7 @@
 			}
 			#unityID-hint{
 			    font-weight: 200;
-				font-size: 12px;
+				font-size: 14px;
 				color: #656565;
 				margin-bottom: 25px;
 			}
@@ -278,18 +278,18 @@
 			    padding-left: 4px;
 			}
 			#logout{
-			   
+
 				justify-content: space-between;
 				align-items: center;
 				text-align: center;
-				width: 100%;	
+				width: 100%;
 			}
-			
+
 			#back-arrow{
 			    padding-left: 20px;
 			}
-		
-			
+
+
 			#display-id-loggedIN{
 				display: hidden;
 				width: 100%;
@@ -297,11 +297,11 @@
 				align-self: center;
 				font-weight: bold;
 			}
-			
+
 			#signed-in-as{
 			    padding-right: 20px;
 			}
-			
-		
-		
-			
+
+
+
+

@@ -33,7 +33,7 @@
 											<input id="input-id" name="id" placeholder="Enter your Unity ID" required pattern="[A-Za-z0-9_]+" autofocus>
 											<div id="confirm-new">
 												<p class="alert"> This is the first time we've seen a user with the ID <span id="display-id"></span> If you're a new user, please check the box below and hit next. If not, please double-check your ID.</p>
-												<div class="newUserContainer"><input id="input-new" type="checkbox" name="new" value="true"> <span>I'm a new user</span></div>		
+												<div class="newUserContainer"><input id="input-new" type="checkbox" name="new" value="true"> <span>I'm a new user</span></div>
 											</div>
 										</form>
 									</div>
@@ -48,15 +48,15 @@
 										</form>
 									</div>
 								</div>
-							</div>	
+							</div>
 						</div>
 				    </div>
 				</div>
 			</div>
 		</div>
-		
+
 		<script type="text/javascript">
-			
+
 			//validifyID is just for testing purposes
 
 			var ID_COOKIE = 'snapIDHash', COOKIE_PATH = '/';
@@ -80,7 +80,7 @@
 				// have an emergency option to disable
 			}
 
-			
+
 			function setUserID(id) {
 				if (!id) return;
 				window.userID = id;
@@ -92,9 +92,9 @@
 				$("#theBorder").css("padding-top", "10px");
 				$("#theBorder").css("padding-bottom", "0px");
 				$("#logout").css("padding-bottom", "10px");
-
+				$('#assignment').focus();
 			}
-            
+
 			function skipLogIn(warn){
 			    setUserID('none');
 				$('#signed-in-as').addClass('hidden');
@@ -103,7 +103,7 @@
 					$('#needsCookiesEnabled').addClass('getFlex');
 				}
 			}
-			
+
 			function logout() {
 				$.removeCookie(ID_COOKIE, { path: COOKIE_PATH });
 				$('.belt-container').removeClass('is-transitioned');
@@ -115,8 +115,9 @@
 				$("#theBorder").css("padding-top", "50px");
 				$("#theBorder").css("padding-bottom", "30px");
 				$('#input-new').prop('checked', false);
+				$('#input-id').focus();
 			}
-			
+
 			function tryLogin() {
 				// Defocus the login input so Chrome will hide autocomplete
 				$('#input-id').blur();

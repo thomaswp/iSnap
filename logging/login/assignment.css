@@ -16,7 +16,7 @@
 			    margin: 0px;
 				padding: 0px;
 				font-family: 'Open Sans', sans-serif;
-				//-webkit-font-smoothing: antialiased;
+				/* -webkit-font-smoothing: antialiased; */
 				background: url(loginBackground.png);
 			}
 			#flex-Parent{
@@ -112,7 +112,7 @@
 				font-size: 27px;
 				outline: none;
 				border: 2px solid rgb(143,86,227);
-				background: url(login/userIcon.png) no-repeat right 10px center;
+				background: url(userIcon.png) no-repeat right 10px center;
 				background-color: rgb(255,255,255);
 				background-size: 45px 45px;
 			}

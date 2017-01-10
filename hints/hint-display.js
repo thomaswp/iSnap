@@ -278,6 +278,7 @@ HintDisplay.prototype.createBlockHintCallback = function(simple, root,
 HintDisplay.prototype.addHintButton = function(text, onClick) {
     var createButton = function(ide) {
         var hintButton = new PushButtonMorph(ide, onClick, text);
+        // TODO: Change spriteBar to controlBar and update references
         ide.spriteBar.hintButton = hintButton;
         hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
         hintButton.corner = DialogBoxMorph.prototype.buttonCorner;

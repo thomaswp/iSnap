@@ -26,6 +26,7 @@ Logger.prototype.userInfo = function() {
         }
     }
     return {
+        'userID': userID,
         'sessionID': Logger.sessionID,
         'browserID': browserID,
         'assignmentID': assignmentID,

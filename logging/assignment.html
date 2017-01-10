@@ -1,23 +1,72 @@
 <!doctype html>
 
 <html>
-	
+
 	<head>
 		<meta charset="UTF-8">
 		<title>Select an assignment</title>
+        <link rel="stylesheet" type="text/css" href="login/assignment.css">
+		<script src="https://use.fontawesome.com/a78350546c.js"></script>
 		<script type="text/javascript" src="config.js"></script>
+		<script type="text/javascript" src="jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="jquery.cookie.js"></script>
 	</head>
-	
+
 	<body>
-		<h1>Select the assignment you're working on.</h1>
+		<div id="flex-Parent">
+		    <div id="blackBar"><img src="login/NCStateLogoWhite.png"> <span id="courseName"> CSC 200 | Introduction To Computers and Their Uses</span></div>
+			<div id="theBox">
+			    <div id="needsCookiesEnabled" class="hidden"><i class="fa fa-exclamation-circle fa-2x" aria-hidden="true"></i><span>We are having trouble logging you in due to server issues. Continue with selecting an assignment</span></div>
+				<div id="theBorder">
+					<div id="logout" class="hidden"> <div id="back-arrow"><a href="#" onclick="logout()"><i class="fa fa-long-arrow-left fa-3x" aria-hidden="true"></i></a></div> <div id="signed-in-as">Signed in as <span id="display-id-loggedIN"></span></div></div>
+				    <div id="snapLogo"><img src="login/SnapLogo.png"></img></div>
+				    <div class="container">
+						<div class="belt-container">
+							<div class="belt">
+							    <div class="state state-1">
+									<div>
+										<h1>Sign in with your Unity ID</h1>
+										<div id="unityID-hint"> ( This is the part of your email before @ncsu )</div>
+									</div>
+									<div id="form-id">
+										<form id="form-flex-Parent">
+											<input id="input-id" name="id" placeholder="Enter your Unity ID" required pattern="[A-Za-z0-9_]+" autofocus>
+											<div id="confirm-new">
+												<p class="alert"> This is the first time we've seen a user with the ID <span id="display-id"></span> If you're a new user, please check the box below and hit next. If not, please double-check your ID.</p>
+												<div class="newUserContainer"><input id="input-new" type="checkbox" name="new" value="true"> <span>I'm a new user</span></div>		
+											</div>
+										</form>
+									</div>
+									<div><input type="submit" id="sign-in-Button" value="Next"></input></div>
+								</div>
+								<div class="state state-2">
+									<div id="form-assignment">
+										<h1>Choose Your Assignment</h1>
+										<form action="../snap.html" method="get">
+											<div><select id="assignment" name="assignment"></select></div>
+											<div><button id="assignmentGObutton" type="submit">GO</button></div>
+										</form>
+									</div>
+								</div>
+							</div>	
+						</div>
+				    </div>
+				</div>
+			</div>
+		</div>
 		
-		<form action="../snap.html" method="get">
-			Assignment: 
-			<select id="assignment" name="assignment"></select>
-			<button type="submit">Go</button>
-		</form>
+
+
+
+
 		
+		
+
 		<script type="text/javascript">
+			
+			//validifyID is just for testing purposes
+
+			
 			var assignments = window.assignments;
 			var select = document.getElementById("assignment");
 			for (var key in assignments) {
@@ -28,6 +77,122 @@
 					option.value = key;
 					select.add(option);
 				}
+			}
+
+			if (!navigator.cookieEnabled) {
+				// TODO: handle cookies not available!
+				// There's no other way to pass this information from one page
+				// to another, so we'll need them enabled. Again, maybe
+				// have an emergency option to disable
+			}
+
+			
+			function setUserID(id) {
+				if (!id) return;
+				window.userID = id;
+			        $('#confirm-new').addClass('getFrames2');
+			        $('.belt-container').toggleClass('is-transitioned');
+					$('#logout').removeClass('hidden');
+					$('#logout').addClass('getFlex');
+				    $("#theBorder").css("padding-top", "10px");
+				    $("#theBorder").css("padding-bottom", "0px");
+				    $("#logout").css("padding-bottom", "10px");
+				//$('#form-id').addClass('hidden');
+
+			}
+            
+			function skipLogIn(warn){
+			    setUserID('none');
+				if(warn){
+					$('#needsCookiesEnabled').removeClass('hidden');
+					$('#needsCookiesEnabled').addClass('getFlex');
+				}
+			}
+			
+			function logout() {
+				$.removeCookie('userID');
+				$('.belt-container').toggleClass('is-transitioned');
+				$('#logout').removeClass('getFlex');
+				$('#logout').addClass('hidden');
+				$('#confirm-new').removeClass('getFrames');
+				$('#confirm-new').addClass('getFrames2');
+				$("#confirm-new").css("margin-bottom", "0px");
+				$("#theBorder").css("padding-top", "50px");
+				$("#theBorder").css("padding-bottom", "30px");
+			}
+
+			setUserID($.cookie('userID'));
+			
+			$('#form-flex-Parent').submit(function() {
+				var id = $('#input-id').val();
+				$('#display-id').html(id);
+				$('#display-id-loggedIN').html(id);
+				$.post('login.php', {
+					'id': id,
+					'new': $('#input-new').prop('checked'),
+				}, function(data, status) {
+					// TODO: catch errors on parsin the JSON and handle as below
+					//try catch if error
+					try{
+					    var response = JSON.parse(data);
+					}
+					catch(e){
+					    skipLogIn(true);
+					}
+					if (response.newUser) {
+						$('#confirm-new').removeClass('getFrames2');
+						$('#confirm-new').addClass('getFrames');
+						$("#confirm-new").css("margin-bottom", "20px");
+						return;
+					}
+					setUserID(response.userID);
+				}).fail(function() {
+					skipLogIn(true);
+					// TODO: Handle this error
+					// The user should be able proceed anyway after
+					// trying again?
+				});
+				return false;
+			});
+			
+			
+			$("#sign-in-Button").click(function(){
+				var id = $('#input-id').val();
+				$('#display-id').html(id);
+				$('#display-id-loggedIN').html(id);
+				$.post('login.php', {
+					'id': id,
+					'new': $('#input-new').prop('checked'),
+				}, function(data, status) {
+					// TODO: catch errors on parsin the JSON and handle as below
+					//try catch if error
+					try{
+					    var response = JSON.parse(data);
+					}
+					catch(e){
+					    skipLogIn(true);
+					}
+					if (response.newUser) {
+						$('#confirm-new').removeClass('getFrames2');
+						$('#confirm-new').addClass('getFrames');
+						$("#confirm-new").css("margin-bottom", "20px");
+						return;
+					}
+					setUserID(response.userID);
+				}).fail(function() {
+					skipLogIn(true);
+					// TODO: Handle this error
+					// The user should be able proceed anyway after
+					// trying again?
+				});
+				return false;
+			});
+
+			if (!window.requireLogin) {
+				skipLogIn(false);
+				
+				$('#logout').addClass('hidden');
+				//to do - back button should be hidden if login is not required
 			}
 		</script>
 	</body>

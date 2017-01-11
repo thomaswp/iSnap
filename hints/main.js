@@ -9,6 +9,6 @@ require('highlight-display');
 require('snap-display');
 require('gui-extensions');
 
-if (window.getHintProvider && window.assignmentID) {
+if (window.getHintProvider && Assignment.get()) {
     window.hintProvider = window.getHintProvider();
 }

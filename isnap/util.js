@@ -1,7 +1,9 @@
 
 // Helper functions
 
-/* exported newGuid checkAssignment createCORSRequest extend extendObject */
+/* exported newGuid createCORSRequest extend extendObject getSearchParameters
+ * getCookie
+*/
 
 // Generates a random GUID to help us keep track of things across sessions
 // Credit: http://stackoverflow.com/a/8809472/816458
@@ -52,25 +54,6 @@ function transformToAssocArray( prmstr ) {
         params[tmparr[0]] = tmparr[1];
     }
     return params;
-}
-
-// Get the assignment passed via GET parameter
-function checkAssignment() {
-    window.assignmentID = getSearchParameters()['assignment'];
-    window.userID = getCookie('snapIDHash');
-
-    var redirectURL = 'logging/assignment.html';
-
-    if (window.assignments && window.requireAssignment &&
-            !window.assignments[assignmentID]) {
-        // redirect if no assignment is listed
-        window.location.replace(redirectURL);
-    }
-
-    if (window.requireLogin && !userID) {
-        // redirect if the user isn't logged in
-        window.location.replace(redirectURL);
-    }
 }
 
 // eslint-disable-next-line no-unused-vars

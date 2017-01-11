@@ -1,5 +1,7 @@
 // Logger classes
 
+require('assignment');
+
 function Logger(interval) {
     this.init(interval);
 }
@@ -29,7 +31,6 @@ Logger.prototype.userInfo = function() {
         'userID': userID,
         'sessionID': Logger.sessionID,
         'browserID': browserID,
-        'assignmentID': assignmentID,
     };
 };
 
@@ -70,6 +71,7 @@ Logger.prototype.log = function(message, data, saveImmediately) {
         'message': message,
         'data': data,
         'time': Date.now(),
+        'assignmentID': Assignment.getID(),
     };
 
     // Set a callback to save the code state in 1ms

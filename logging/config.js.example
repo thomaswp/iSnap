@@ -39,6 +39,8 @@ window.assignments = {
 // proceeding. Assignments can be pre-specified by using the url
 // snap.html?assignment=id
 window.requireAssignment = true;
+// Allows the user to change their assignment by clicking on project title
+window.allowChangeAssignment = true;
 
 // If true, users are required to login before they can use the system
 window.requireLogin = true;

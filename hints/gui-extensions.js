@@ -78,28 +78,3 @@ BlockMorph.prototype.disable = function() {
             child.mouseDownLeft = noop;
         });
 };
-
-extend(IDE_Morph, 'createControlBar', function(baseCreate) {
-    baseCreate.call(this);
-    var myself = this;
-    extendObject(this.controlBar, 'updateLabel', function(base) {
-        base.call(this);
-        if (myself.isAppMode) return;
-        if (!window.assignmentID || !window.assignments) return;
-        var assignment = window.assignments[window.assignmentID];
-        var text = assignment.name;
-
-        this.label.text += ' - ' + text;
-        this.label.parent = null;
-        this.label.drawNew();
-        this.label.parent = this;
-
-        this.label.mouseEnter = function() {
-            document.body.style.cursor = 'pointer';
-        };
-
-        this.label.mouseLeave = function() {
-            document.body.style.cursor = 'inherit';
-        };
-    });
-});

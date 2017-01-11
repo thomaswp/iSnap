@@ -24,8 +24,9 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
         myself.loadCode();
     }
 
-    if (displays.length == 0 || !window.assignments) return;
-    var assignment = window.assignments[window.assignmentID];
+    // TODO: handle assignment changes
+    var assignment = Assignment.get();
+    if (displays.length == 0 || !assignment) return;
     if (!assignment) return;
 
     // First check the parameters for a hints parameter
@@ -83,7 +84,7 @@ HintProvider.prototype.getHintsFromServer = function() {
     }).join(';');
 
     var xhr = createCORSRequest('POST',
-        this.url + '?assignmentID=' + window.assignmentID +
+        this.url + '?assignmentID=' + Assignment.getID() +
         '&hintTypes=' + encodeURIComponent(hintTypes));
     if (!xhr) {
         myself.showError('CORS not supported on this browser.');
@@ -151,13 +152,13 @@ HintProvider.prototype.processHints = function(json, requestNumber) {
 
 HintProvider.prototype.saveCode = function() {
     if (typeof(Storage) !== 'undefined' && localStorage && this.code) {
-        localStorage.setItem('lastCode-' + window.assignmentID, this.code);
+        localStorage.setItem('lastCode-' + Assignment.getID(), this.code);
     }
 };
 
 HintProvider.prototype.loadCode = function() {
     if (typeof(Storage) !== 'undefined' && localStorage) {
-        var code = localStorage.getItem('lastCode-' + window.assignmentID);
+        var code = localStorage.getItem('lastCode-' + Assignment.getID());
         if (code) {
             if (window.ide) {
                 window.ide.droppedText(code);

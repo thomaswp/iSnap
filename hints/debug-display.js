@@ -89,7 +89,7 @@ DebugDisplay.prototype.saveHint = function(hint, code, links, good) {
     }
 
     var xhr = createCORSRequest('POST',
-        window.hintProvider.url + '?assignmentID=' + window.assignmentID +
+        window.hintProvider.url + '?assignmentID=' + Assignment.getID() +
         '&hint=' + encodeURIComponent(JSON.stringify(hint, null, '\t')));
 
     if (!xhr) {

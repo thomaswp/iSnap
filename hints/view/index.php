@@ -44,7 +44,7 @@ include '../../logging/config.php';
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						var contentWindow = document.getElementById('snap').contentWindow;
-						contentWindow.assignmentID = assignment;
+						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
 						data = JSON.parse(data);
 						data.type = type;

@@ -21,7 +21,6 @@ try {
 
     $userInfo = $json['userInfo'];
     $userID = $mysqli->escape_string($userInfo['userID']);
-    $assignmentID = $mysqli->escape_string($userInfo['assignmentID']);
     $browserID = $mysqli->escape_string($userInfo['browserID']);
     $sessionID = $mysqli->escape_string($userInfo['sessionID']);
 
@@ -42,6 +41,7 @@ try {
         $projectID = $mysqli->escape_string($log['projectID']);
         $data = $mysqli->escape_string(json_encode($log['data']));
         $code = $mysqli->escape_string($log['code']);
+        $assignmentID = $mysqli->escape_string($log['assignmentID']);
 
 
         $query = "INSERT INTO $table (message, time, assignmentID, userID, projectID, browserID, sessionID, data, code)

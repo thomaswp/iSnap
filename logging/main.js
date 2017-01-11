@@ -8,16 +8,16 @@ require('db-logger.js');
 var Trace;
 
 // Setup
-function setupLogging() {
-    var assignmentID = checkAssignment();
+(function () {
+    Assignment.initOrRedirect();
 
     if (window.createLogger) {
-        Trace = window.createLogger(assignmentID);
+        Trace = window.createLogger(Assignment.getID());
     } else {
         Trace = new Logger(50);
     }
 
-    if (window.easyReload && window.easyReload(assignmentID)) {
+    if (window.easyReload && window.easyReload(Assignment.getID())) {
         setTimeout(function() {
             window.onbeforeunload = null;
         }, 2000);
@@ -32,6 +32,4 @@ function setupLogging() {
             'stack': error ? error.stack : null,
         });
     };
-}
-
-setupLogging();
+})();

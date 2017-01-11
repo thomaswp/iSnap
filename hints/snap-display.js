@@ -49,7 +49,7 @@ SnapDisplay.prototype.initDisplay = function() {
 
     BlockEditorMorph.defaultHatBlockMargin = new Point(75, 20);
 
-    var assignment = window.assignments[window.assignmentID];
+    var assignment = Assignment.get();
     if (assignment.promptHints && !window.hintProvider.reloadCode) {
         Trace.log('SnapDisplay.promptHints');
         var message = localize('Welcome to ') + assignment.name + '.';

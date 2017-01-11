@@ -215,9 +215,9 @@ HintDialogBoxMorph.prototype.destroy = function() {
         Trace.log('HintDialogBox.destroy');
         this.destroyed = true;
     }
-    if (ide.spriteBar.hintButton) {
+    if (ide.controlBar.hintButton) {
         window.hintProvider.setDisplayEnabled(SnapDisplay,
-                ide.spriteBar.hintButton.active);
+                ide.controlBar.hintButton.active);
     }
     HintDialogBoxMorph.uber.destroy.call(this);
 };

@@ -49,7 +49,13 @@ HighlightDisplay.prototype.show = function() {
 };
 
 HighlightDisplay.prototype.hide = function() {
-    // this.hintButton.destroy();
+    this.hintButton.destroy();
+    if (HighlightDialogBoxMorph.showing) {
+        HighlightDialogBoxMorph.showing.destroy();
+    }
+    if (HintDialogBoxMorph.showing) {
+        HintDialogBoxMorph.showing.destroy();
+    }
 };
 
 HighlightDisplay.prototype.finishedHints = function() {

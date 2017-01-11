@@ -288,35 +288,34 @@ HintDisplay.prototype.createBlockHintCallback = function(simple, root,
 };
 
 HintDisplay.prototype.addHintButton = function(text, onClick) {
-    var createButton = function(ide) {
-        var hintButton = new PushButtonMorph(ide, onClick, text);
-        // TODO: Change spriteBar to controlBar and update references
-        ide.spriteBar.hintButton = hintButton;
-        hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
-        hintButton.corner = DialogBoxMorph.prototype.buttonCorner;
-        hintButton.edge = DialogBoxMorph.prototype.buttonEdge;
-        hintButton.outline = DialogBoxMorph.prototype.buttonOutline;
-        hintButton.outlineColor = ide.spriteBar.color;
-        hintButton.outlineGradient = false;
-        hintButton.padding = DialogBoxMorph.prototype.buttonPadding;
-        hintButton.contrast = DialogBoxMorph.prototype.buttonContrast;
-        hintButton.drawNew();
-        hintButton.fixLayout();
+    var hintButton = new PushButtonMorph(ide, onClick, text);
+    hintButton.fontSize = DialogBoxMorph.prototype.buttonFontSize;
+    hintButton.corner = DialogBoxMorph.prototype.buttonCorner;
+    hintButton.edge = DialogBoxMorph.prototype.buttonEdge;
+    hintButton.outline = DialogBoxMorph.prototype.buttonOutline;
+    hintButton.outlineColor = ide.spriteBar.color;
+    hintButton.outlineGradient = false;
+    hintButton.padding = DialogBoxMorph.prototype.buttonPadding;
+    hintButton.contrast = DialogBoxMorph.prototype.buttonContrast;
+    hintButton.drawNew();
+    hintButton.fixLayout();
 
-        ide.spriteBar.hintButton = hintButton;
-        ide.spriteBar.add(ide.spriteBar.hintButton);
-    };
+    window.ide.controlBar.add(hintButton);
+    window.ide.controlBar.hintButton = hintButton;
+    window.ide.controlBar.fixLayout();
 
-    var oldFixLayout = IDE_Morph.prototype.fixLayout;
-    IDE_Morph.prototype.fixLayout = function() {
-        oldFixLayout.call(this, arguments);
-        if (!this.spriteBar.hintButton) {
-            createButton(this);
-        }
-        this.spriteBar.hintButton.setPosition(new Point(
-            this.stage.left() - this.spriteBar.hintButton.width() / 2 - 60,
-            this.spriteBar.hintButton.top()));
-    };
-
-    window.ide.fixLayout();
+    return hintButton;
 };
+
+extendObject(window, 'onWorldLoaded', function(base) {
+    base.call(this);
+    extendObject(ide, 'fixLayout', function(base) {
+        base.call(this);
+        var hintButton = this.controlBar.hintButton;
+        if (hintButton) {
+            hintButton.setPosition(new Point(
+                this.stage.left() - hintButton.width() / 2 - 60,
+                hintButton.top()));
+        }
+    });
+});

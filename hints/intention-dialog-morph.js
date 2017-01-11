@@ -208,7 +208,7 @@ IntentionDialogMorph.prototype.showHintBubbles = function() {
 IntentionDialogMorph.prototype.cancel = function() {
     Trace.log('IntentionDialog.cancel');
     this.close();
-    ide.spriteBar.hintButton.show();
+    ide.controlBar.hintButton.show();
 };
 
 IntentionDialogMorph.prototype.close = function() {

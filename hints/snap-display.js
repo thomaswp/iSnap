@@ -6,8 +6,8 @@ require('message-hint-dialog-box-morph');
 
 // Helper function for setting whether or not hints display
 function setHintsActive(active) {
-    if (!ide.spriteBar || !ide.spriteBar.hintButton) return;
-    var hintButton = ide.spriteBar.hintButton;
+    if (!ide.controlBar || !ide.controlBar.hintButton) return;
+    var hintButton = ide.controlBar.hintButton;
     if (hintButton.active === active) return;
     Trace.log('HelpButton.toggled', active);
     hintButton.active = active;
@@ -36,19 +36,10 @@ SnapDisplay.prototype.initDisplay = function() {
     this.hiddenHints = [];
     this.customBlocksWithHints = [];
 
-    var getHint = function() {
-        if (!this.spriteBar || !this.spriteBar.hintButton) return;
-        var hintButton = this.spriteBar.hintButton;
-
-        window.hintProvider.clearDisplays();
-        var active = !hintButton.active;
-        setHintsActive(active);
-        window.hintProvider.setDisplayEnabled(SnapDisplay, active);
-    };
-    this.addHintButton('  ' + localize('Help') + '  ', getHint);
-
     BlockEditorMorph.defaultHatBlockMargin = new Point(75, 20);
+};
 
+SnapDisplay.prototype.show = function() {
     var assignment = Assignment.get();
     if (assignment.promptHints && !window.hintProvider.reloadCode) {
         Trace.log('SnapDisplay.promptHints');
@@ -58,14 +49,25 @@ SnapDisplay.prototype.initDisplay = function() {
         new DialogBoxMorph().inform(localize('Help Available'), message,
             ide.world());
     }
-};
 
-SnapDisplay.prototype.show = function() {
+    var getHint = function() {
+        if (!this.controlBar || !this.controlBar.hintButton) return;
+        var hintButton = this.controlBar.hintButton;
 
+        window.hintProvider.clearDisplays();
+        var active = !hintButton.active;
+        setHintsActive(active);
+        window.hintProvider.setDisplayEnabled(SnapDisplay, active);
+    };
+    this.hintButton =
+        this.addHintButton('  ' + localize('Help') + '  ', getHint);
 };
 
 SnapDisplay.prototype.hide = function() {
-
+    this.hintButton.destroy();
+    if (HintDialogBoxMorph.showing) {
+        HintDialogBoxMorph.showing.destroy();
+    }
 };
 
 SnapDisplay.prototype.getHintType = function() {

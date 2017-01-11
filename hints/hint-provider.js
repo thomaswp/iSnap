@@ -24,36 +24,70 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
         myself.loadCode();
     }
 
-    // TODO: handle assignment changes
-    var assignment = Assignment.get();
-    if (displays.length == 0 || !assignment) return;
-    if (!assignment) return;
+    if (displays.length == 0) return;
+
+    displays.forEach(function(display) {
+        display.enabled = true;
+        display.showing = false;
+    });
 
     // First check the parameters for a hints parameter
     var params = getSearchParameters();
     if ('hints' in params) {
-        // If it's present, use that value
+        // If it's present, use that value, rather than assignment config values
         if (params['hints'] !== 'true') return;
-    } else {
-        // If not, check the config
-        if (!assignment.hints) return;
+        this.alwaysHint = true;
     }
 
-    displays.forEach(function(display) {
-        display.enabled = true;
-    });
-
     Trace.onCodeChanged = function(code) {
-        myself.clearDisplays();
         myself.code = code;
         myself.getHintsFromServer(code);
     };
 
-    window.onWorldLoaded = function() {
+    Assignment.onChanged(function(assignment) {
+        myself.loadAssignment();
+    });
+
+    extendObject(window, 'onWorldLoaded', function(base) {
+        base.call(this);
         myself.displays.forEach(function(display) {
-            if (display.initDisplay) display.initDisplay();
+            display.initDisplay();
+            myself.loadAssignment();
         });
-    };
+    });
+};
+
+HintProvider.prototype.isActive = function() {
+    var assignment = Assignment.get();
+    return assignment && (this.alwaysHint || assignment.hints);
+};
+
+HintProvider.prototype.showDisplays = function() {
+    this.displays.forEach(function(display) {
+        if (!display.showing) {
+            display.show();
+            display.showing = true;
+        }
+    });
+    this.getHintsFromServer();
+};
+
+HintProvider.prototype.hideDisplays = function() {
+    this.displays.forEach(function(display) {
+        if (display.showing) {
+            display.clear();
+            display.hide();
+            display.showing = false;
+        }
+    });
+};
+
+HintProvider.prototype.loadAssignment = function() {
+    if (this.isActive()) {
+        this.showDisplays();
+    } else {
+        this.hideDisplays();
+    }
 };
 
 HintProvider.prototype.clearDisplays = function() {
@@ -63,7 +97,8 @@ HintProvider.prototype.clearDisplays = function() {
 };
 
 HintProvider.prototype.getHintsFromServer = function() {
-    if (!this.code) return;
+    if (!this.code || !this.isActive()) return;
+    this.clearDisplays();
 
     if (!this.displays.some(function(display) {
         return display.enabled;
@@ -76,8 +111,6 @@ HintProvider.prototype.getHintsFromServer = function() {
         this.lastXHR.onload = null;
         this.lastXHR.onerror = null;
     }
-
-    this.clearDisplays();
 
     var hintTypes = this.displays.map(function(display) {
         return display.getHintType();

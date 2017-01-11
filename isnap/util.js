@@ -2,7 +2,7 @@
 // Helper functions
 
 /* exported newGuid createCORSRequest extend extendObject getSearchParameters
- * getCookie
+ * getCookie onWorldLoaded
 */
 
 // Generates a random GUID to help us keep track of things across sessions
@@ -101,6 +101,11 @@ function extend(clazz, functionName, newFunction) {
         return;
     }
     return extendObject(clazz.prototype, functionName, newFunction);
+}
+
+// Called when the Snap world is loaded. No-op allows for extension
+function onWorldLoaded() {
+
 }
 
 function extendObject(object, functionName, newFunction) {

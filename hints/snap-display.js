@@ -60,6 +60,14 @@ SnapDisplay.prototype.initDisplay = function() {
     }
 };
 
+SnapDisplay.prototype.show = function() {
+
+};
+
+SnapDisplay.prototype.hide = function() {
+
+};
+
 SnapDisplay.prototype.getHintType = function() {
     return 'bubble';
 };

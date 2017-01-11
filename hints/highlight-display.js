@@ -32,16 +32,24 @@ HighlightDisplay.prototype.initDisplay = function() {
     BlockEditorMorph.defaultHatBlockMargin = new Point(35, 20);
 
     var myself = this;
-    this.addHintButton(localize('Check My Work'), function() {
-        myself.forceShowDialog = true;
-        window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
-    });
-
     extendObject(Trace, 'onCodeChanged', function(base, code) {
         // Don't show hints after next clear (but don't clear them now)
         if (myself.autoClear) myself.enabled = false;
         base.call(this, code);
     });
+};
+
+HighlightDisplay.prototype.show = function() {
+    var myself = this;
+    this.enabled = false;
+    this.hintButton = this.addHintButton(localize('Check My Work'), function() {
+        myself.forceShowDialog = true;
+        window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
+    });
+};
+
+HighlightDisplay.prototype.hide = function() {
+    // this.hintButton.destroy();
 };
 
 HighlightDisplay.prototype.finishedHints = function() {

@@ -42,14 +42,12 @@ Assignment.setID = function(assignmentID) {
         Trace.logErrorMessage('Invalid assignment: ' + assignmentID);
         return;
     }
+
+    // Log the change twice, so it will show up for both assignments
     var formerID = Assignment.getID();
     Trace.log('Assignment.setID', assignmentID);
     window.assignmentID = assignmentID;
     Trace.log('Assignment.setIDFrom', formerID);
-    var assignment = Assignment.get();
-    Assignment.onChangedHandlers.forEach(function(handler) {
-        if (handler) handler(assignment);
-    });
 
     var params = getSearchParameters();
     var path = location.pathname;
@@ -63,6 +61,11 @@ Assignment.setID = function(assignmentID) {
         sep = '&';
     });
     window.history.replaceState(assignmentID, assignmentID, path);
+
+    var assignment = Assignment.get();
+    Assignment.onChangedHandlers.forEach(function(handler) {
+        if (handler) handler(assignment);
+    });
 };
 
 Assignment.onChanged = function(handler) {

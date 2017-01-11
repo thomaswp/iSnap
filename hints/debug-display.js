@@ -31,8 +31,12 @@ function DebugDisplay() {
 
 DebugDisplay.prototype = Object.create(HintDisplay.prototype);
 
-DebugDisplay.prototype.initDisplay = function() {
+DebugDisplay.prototype.show = function() {
     document.body.appendChild(this.outer);
+};
+
+DebugDisplay.prototype.hide = function() {
+    document.body.removeChild(this.outer);
 };
 
 DebugDisplay.prototype.showHint = function(hint) {

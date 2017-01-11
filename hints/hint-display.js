@@ -5,6 +5,18 @@ require('code-hint-dialog-box-morph');
 
 function HintDisplay() { }
 
+HintDisplay.prototype.initDisplay = function() {
+
+};
+
+HintDisplay.prototype.show = function() {
+
+};
+
+HintDisplay.prototype.hide = function() {
+
+};
+
 HintDisplay.prototype.showHint = function(hint) {
     // eslint-disable-next-line no-console
     console.log(hint.from + ' -> ' + hint.to);

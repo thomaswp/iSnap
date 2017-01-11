@@ -288,8 +288,8 @@ HintDisplay.showLoggedHint = function(data) {
     var type = data.type;
     var fromList;
     if (type === 'StructureHint') {
-        new MessageHintDialogBoxMorph(message, title, null, window.ide)
-            .popUp();
+        new MessageHintDialogBoxMorph(data.message, 'Suggestion', null,
+            window.ide).popUp();
     } else if (type === 'ScriptHint') {
         fromList = data.fromList || [data.from];
         var parent = null;

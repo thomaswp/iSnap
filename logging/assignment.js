@@ -81,9 +81,15 @@ extend(IDE_Morph, 'createControlBar', function(baseCreate) {
         if (ide.isAppMode) return;
         var assignment = Assignment.get();
         if (!assignment) return;
-        var text = assignment.name;
-
-        this.label.text += ' - ' + text;
+        var text = this.label.text;
+        if (Assignment.getID() !== 'none') {
+            text += ' - ' + assignment.name;
+        }
+        var maxLength = 40;
+        if (text.length > maxLength) {
+            text = text.slice(0, maxLength) + '...';
+        }
+        this.label.text = text;
         this.label.parent = null;
         this.label.drawNew();
         this.label.parent = this;
@@ -105,11 +111,16 @@ extend(IDE_Morph, 'createControlBar', function(baseCreate) {
                 localize('Change assignment:'), null, null, null, true);
             Object.keys(window.assignments).forEach(function(key) {
                 if (key === 'test' || key === 'view') return;
-                menu.addItem(window.assignments[key].name, function() {
+                var assignment = window.assignments[key];
+                var name = assignment.name;
+                if (assignment.hint) {
+                    name += ' (' + assignment.hint + ')';
+                }
+                menu.addItem(name, function() {
                     Assignment.setID(key);
                     ide.controlBar.updateLabel();
                     ide.controlBar.fixLayout();
-                }, null, null, false, key === Assignment.getID());
+                }, null, null, key === Assignment.getID());
             });
             menu.popup(world, pos);
         };

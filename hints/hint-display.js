@@ -302,7 +302,7 @@ HintDisplay.prototype.addHintButton = function(text, onClick) {
 
     window.ide.controlBar.add(hintButton);
     window.ide.controlBar.hintButton = hintButton;
-    window.ide.controlBar.fixLayout();
+    window.ide.fixLayout();
 
     return hintButton;
 };

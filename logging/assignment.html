@@ -66,8 +66,12 @@
 			for (var key in assignments) {
 				if (assignments.hasOwnProperty(key)) {
 					if (key == "test" || key == "view") continue;
+					var assignment = assignments[key];
 					var option = document.createElement("option");
-					option.text = assignments[key].name || assignments[key];
+					option.text = assignment.name || assignment;
+					if (assignment.hint) {
+						option.text += ' (' + assignment.hint + ')';
+					}
 					option.value = key;
 					select.add(option);
 				}

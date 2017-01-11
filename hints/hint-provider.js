@@ -218,9 +218,3 @@ HintProvider.prototype.setDisplayEnabled = function(displayType, enabled) {
     });
     if (refresh) this.getHintsFromServer();
 };
-
-HintProvider.prototype.showLoggedHint = function(data) {
-    this.displays.forEach(function(display) {
-        display.showLoggedHint(data);
-    });
-};

@@ -49,7 +49,7 @@ include '../../logging/config.php';
 						data = JSON.parse(data);
 						data.type = type;
 						window.setTimeout(function() {
-							contentWindow.hintProvider.showLoggedHint(data);
+							contentWindow.HintDisplay.showLoggedHint(data);
 						}, 100);
 					}
 				};

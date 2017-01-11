@@ -418,32 +418,3 @@ function(parent, color, scriptHighlight, callback, hasCustom) {
     button.fixLayout();
     hintBar.addButton(button, parent, scriptHighlight);
 };
-
-SnapDisplay.prototype.showLoggedHint = function(data) {
-    var type = data.type;
-    var fromList;
-    if (type === 'StructureHint') {
-        this.showMessageDialog(data.message, 'Suggestion', false, null, null,
-            null);
-    } else if (type === 'ScriptHint') {
-        fromList = data.fromList || [data.from];
-        var parent = null;
-        if (data.parentID) {
-            parent = ide.allChildren().filter(function(x) {
-                return x instanceof BlockMorph && x.id === data.parentID;
-            })[0] || null;
-            if (parent != null) {
-                parent = parent.selector;
-            }
-        }
-        new CodeHintDialogBoxMorph(window.ide)
-            .showScriptHint(parent, data.index, fromList, data.to);
-    } else if (type === 'BlockHint') {
-        fromList = data.fromList || [data.from, []];
-        new CodeHintDialogBoxMorph(window.ide)
-            .showBlockHint(data.parentSelector, fromList[0], data.to,
-                fromList[1]);
-    } else {
-        Trace.logErrorMessage('Unknown logged hint type: ' + type);
-    }
-};

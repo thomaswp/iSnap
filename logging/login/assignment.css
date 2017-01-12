@@ -154,7 +154,7 @@
 			#confirm-new{
 			    height: 0px;
 				opacity: 0;
-				transition: height 2s;
+				transition: height 0.2s;
 				visibility: hidden;
 			}
 			.getFrames{

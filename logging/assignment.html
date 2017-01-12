@@ -92,7 +92,7 @@
 				$("#theBorder").css("padding-top", "10px");
 				$("#theBorder").css("padding-bottom", "0px");
 				$("#logout").css("padding-bottom", "10px");
-				$('#assignment').focus();
+				
 			}
 
 			function skipLogIn(warn){
@@ -139,6 +139,7 @@
 						$('#confirm-new').removeClass('getFrames2');
 						$('#confirm-new').addClass('getFrames');
 						$("#confirm-new").css("margin-bottom", "20px");
+						
 						return;
 					}
 					$('#display-id-loggedIN').html(id);
@@ -153,6 +154,7 @@
 			$("#sign-in-Button").click(tryLogin);
 
 			if (!window.requireLogin) {
+				$('#assignment').focus();
 				$('#back-arrow').addClass('hidden');
 				$('.belt, .state').css('transition', 'none');
 				skipLogIn(false);

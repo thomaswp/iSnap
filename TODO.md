@@ -1,13 +1,14 @@
 Highlight:
 * Bugs:
   * Duplicating a single block with a full-script highlight has a graphical bug
+  * Some artifacts show up when dragging highlighted blocks
 * TODO:
   * Test on existing hint requests
   * Show that you need more custom block inputs (possibly in calls as well)
-  * Save preferences
   * Something should show up for hidden custom block hints
   * Add versioning to JS files to prevent caching issues
 * Reach:
+  * Save preferences
   * Show list insert hints as a dialog
   * Find a better way of doing structure hints
   * Make a more uniform way of logging node IDs

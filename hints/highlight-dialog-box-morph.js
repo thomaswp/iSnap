@@ -9,6 +9,7 @@ HighlightDialogBoxMorph.constructor = HighlightDialogBoxMorph;
 HighlightDialogBoxMorph.uber = DialogBoxMorph.prototype;
 
 HighlightDialogBoxMorph.showOnRun = true;
+HighlightDialogBoxMorph.firstShowOnRun = true;
 
 HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
         autoClear) {
@@ -238,7 +239,27 @@ HighlightDialogBoxMorph.prototype.toggleAutoClear = function() {
 
 HighlightDialogBoxMorph.showHighlights = function() {
     if (window.hintProvider) {
-        window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
+        var show = function() {
+            window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
+        };
+        if (HighlightDialogBoxMorph.firstShowOnRun) {
+            HighlightDialogBoxMorph.firstShowOnRun = false;
+            var dialog = new DialogBoxMorph(null, show);
+            extendObject(dialog, 'cancel', function(base) {
+                HighlightDialogBoxMorph.showOnRun = false;
+                base.call(this);
+            });
+            dialog.askYesNo(
+                localize('Checking your Work'),
+                localize(
+                    'When you run your code, I can check your work for ' +
+                    'possible \nmistakes and make suggestions. Do you want to ' +
+                    'enable this?'),
+                window.world
+            );
+        } else {
+            show();
+        }
     }
 };
 

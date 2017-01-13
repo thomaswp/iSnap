@@ -67,8 +67,8 @@ HighlightDisplay.prototype.finishedHints = function() {
     if (!dialogShowing) {
         if (hintsShown) {
             // Show it if and we've shown hints
-            new HighlightDialogBoxMorph(
-                window.ide, this.showInserts, this.autoClear).popUp();
+            new HighlightDialogBoxMorph(window.ide, this.showInserts,
+                this.autoClear).popUp();
         } else {
             // Or disable highlights if not
             this.enabled = false;

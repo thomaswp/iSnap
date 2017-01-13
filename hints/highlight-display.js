@@ -34,7 +34,10 @@ HighlightDisplay.prototype.initDisplay = function() {
     var myself = this;
     extendObject(Trace, 'onCodeChanged', function(base, code) {
         // Don't show hints after next clear (but don't clear them now)
-        if (myself.autoClear) myself.enabled = false;
+        if (myself.autoClear && myself.enabled) {
+            Trace.log('HighlightDisplay.autoClear');
+            myself.enabled = false;
+        }
         base.call(this, code);
     });
 };
@@ -43,8 +46,9 @@ HighlightDisplay.prototype.show = function() {
     var myself = this;
     this.enabled = false;
     this.hintButton = this.addHintButton(localize('Check My Work'), function() {
+        Trace.log('HighlightDisplay.checkMyWork');
         myself.forceShowDialog = true;
-        window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
+        HighlightDisplay.startHighlight();
     });
 };
 
@@ -56,6 +60,16 @@ HighlightDisplay.prototype.hide = function() {
     if (HintDialogBoxMorph.showing) {
         HintDialogBoxMorph.showing.destroy();
     }
+};
+
+HighlightDisplay.startHighlight = function() {
+    Trace.log('HighlightDisplay.startHighlight');
+    window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
+};
+
+HighlightDisplay.stopHighlight = function(clear) {
+    Trace.log('HighlightDisplay.stopHighlight');
+    window.hintProvider.setDisplayEnabled(HighlightDisplay, false);
 };
 
 HighlightDisplay.prototype.finishedHints = function() {

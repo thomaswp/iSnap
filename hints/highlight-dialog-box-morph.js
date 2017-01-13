@@ -143,10 +143,11 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
 };
 
 HighlightDialogBoxMorph.prototype.destroy = function() {
-    HighlightDialogBoxMorph.uber.destroy.call(this);
     if (!this.destroyed) {
+        Trace.log('HighlightDialogBoxMorph.destroy');
+        HighlightDialogBoxMorph.uber.destroy.call(this);
         this.destroyed = true;
-        window.hintProvider.setDisplayEnabled(HighlightDisplay, false);
+        HighlightDisplay.stopHighlight();
         this.setShowInserts(false);
     }
 };
@@ -194,12 +195,6 @@ HighlightDialogBoxMorph.prototype.popUp = function() {
     }
 };
 
-HighlightDialogBoxMorph.prototype.fixLayout = function() {
-
-
-    HighlightDialogBoxMorph.uber.fixLayout.call(this);
-};
-
 HighlightDialogBoxMorph.prototype.nextButtonText = function(showInserts) {
     return showInserts ? localize('Hide Next Steps') :
         localize('Show Next Steps');
@@ -207,6 +202,7 @@ HighlightDialogBoxMorph.prototype.nextButtonText = function(showInserts) {
 
 HighlightDialogBoxMorph.prototype.toggleInsert = function() {
     var showInserts = !this.insertFrame.isVisible;
+    Trace.log('HighlightDialogBoxMorph.toggleInsert', showInserts);
     if (showInserts) {
         this.insertFrame.show();
         this.mainFrame.hide();
@@ -226,10 +222,13 @@ HighlightDialogBoxMorph.prototype.toggleInsert = function() {
 
 HighlightDialogBoxMorph.prototype.toggleShowOnRun = function() {
     HighlightDialogBoxMorph.showOnRun = !HighlightDialogBoxMorph.showOnRun;
+    Trace.log('HighlightDialogBoxMorph.toggleShowOnRun',
+        HighlightDialogBoxMorph.showOnRun);
 };
 
 HighlightDialogBoxMorph.prototype.toggleAutoClear = function() {
     var autoClear = this.autoClear = !this.autoClear;
+    Trace.log('HighlightDialogBoxMorph.toggleAutoClear', autoClear);
     window.hintProvider.displays.forEach(function(display) {
         if (display instanceof HighlightDisplay) {
             display.autoClear = autoClear;
@@ -240,12 +239,15 @@ HighlightDialogBoxMorph.prototype.toggleAutoClear = function() {
 HighlightDialogBoxMorph.showHighlights = function() {
     if (window.hintProvider) {
         var show = function() {
-            window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
+            Trace.log('HighlightDialogBoxMorph.showOnRun');
+            HighlightDisplay.startHighlight();
         };
         if (HighlightDialogBoxMorph.firstShowOnRun) {
+            Trace.log('HighlightDialogBoxMorph.promptShowOnRun');
             HighlightDialogBoxMorph.firstShowOnRun = false;
             var dialog = new DialogBoxMorph(null, show);
             extendObject(dialog, 'cancel', function(base) {
+                Trace.log('HighlightDialogBoxMorph.cancelShowOnRun');
                 HighlightDialogBoxMorph.showOnRun = false;
                 base.call(this);
             });

@@ -5,7 +5,6 @@ Highlight:
   * Test on existing hint requests
   * Show that you need more custom block inputs (possibly in calls as well)
   * Save preferences
-  * Logging
   * Something should show up for hidden custom block hints
   * Add versioning to JS files to prevent caching issues
 * Reach:

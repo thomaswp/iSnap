@@ -19,14 +19,23 @@ import java.util.regex.Pattern;
 
 public class ScriptGenerator {
 	public static void main(String[] args) throws IOException {
-		if (args.length != 2) {
-			System.out.println("Usage: ScriptGenerator index.min.html compiled.min.js");
+		if (args.length != 3) {
+			System.out.println("Usage: ScriptGenerator index.min.html compiled.min.js version.txt");
 			return;
 		}
-		generate(args[0], args[1]);
+		File versionFile = new File(args[2]);
+		if (!versionFile.exists()) {
+			System.out.println("Version file does not exist: " + args[2]);
+			return;
+		}
+		Scanner sc = new Scanner(versionFile);
+		String version = sc.next();
+		sc.close();
+		System.out.println("Generating scripts version " + version);
+		generate(args[0], args[1], version);
 	}
 
-	public static void generate(String htmlPath, String output) throws IOException {
+	public static void generate(String htmlPath, String output, String version) throws IOException {
 		HashMap<String, Graph.Node> map = new LinkedHashMap<>();
 		File htmlFile = new File(htmlPath);
 		if (!htmlFile.exists()) throw new RuntimeException("No such file: " + htmlFile);
@@ -54,7 +63,14 @@ public class ScriptGenerator {
 		String files = "";
 		while (sc.hasNext()) {
 			String line = sc.nextLine();
-			if (line.contains(output) && line.contains("<script") && line.contains("</script>")) {
+			if (line.contains("<script") && line.contains("</script>")) {
+				if (!line.contains(output)) {
+					// TODO: Use Regex to avoid required attribute order
+					writer.println(
+							line.replace("'>", "?v=" + version + "'>")
+							.replace("\">", "?v=" + version + "\">"));
+					continue;
+				}
 				String indent = "";
 				for (int i = 0; i < line.length(); i++) {
 					char c = line.charAt(i);
@@ -65,14 +81,20 @@ public class ScriptGenerator {
 				writer.println(indent + "<!-- Begin auto-generated script tags -->");
 				for (Graph.Node node : sorted) {
 					System.out.println("Added script: " + getRelativePath(node.name, rootPath));
-					writer.println(indent + toScript(node.name, rootPath));
+					writer.println(indent + toScript(node.name, rootPath, version));
 					files += " " + getRelativePath(node.name, rootPath);
 				}
 				writer.println(indent + "<!-- End auto-generated script tags -->");
 				writer.println();
 			} else if (line.contains(badLine)){
 				writer.println("//" + line);
-			} else {
+			} else if (line.contains("<link") && line.contains(">")) {
+				// TODO: Use Regex to avoid required attribute order
+				writer.println(
+						line.replace("'>", "?v=" + version + "'>")
+						.replace("\">", "?v=" + version + "\">"));
+			}
+			else {
 				writer.println(line);
 			}
 		}
@@ -90,10 +112,10 @@ public class ScriptGenerator {
 		writer.close();
 	}
 
-	private static String toScript(String path, String rootPath) {
+	private static String toScript(String path, String rootPath, String version) {
 		path = getRelativePath(path, rootPath);
-		return String.format("<script type=\"text/javascript\" src=\"%s\"></script>",
-				path.replace(rootPath, ""));
+		return String.format("<script type=\"text/javascript\" src=\"%s?v=%s\"></script>",
+				path.replace(rootPath, ""), version);
 	}
 
 	private static String getRelativePath(String path, String rootPath) {

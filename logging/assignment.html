@@ -16,7 +16,7 @@
 		<div id="flex-Parent">
 		    <div id="blackBar"><img src="login/NCStateLogoWhite.png"> <span id="courseName"> CSC 200 | Introduction To Computers and Their Uses</span></div>
 			<div id="theBox">
-			    <div id="needsCookiesEnabled" class="hidden"><i class="fa fa-exclamation-circle fa-2x" aria-hidden="true"></i><span>We are having trouble logging you in due to server issues. Continue with selecting an assignment</span></div>
+				<div id="needsCookiesEnabled" class="hidden"><i class="fa fa-exclamation-circle fa-2x" aria-hidden="true"></i><span>We are having trouble logging you in. <b>Please inform your TA</b>, then continue selecting an assignment.</span></div>
 				<div id="theBorder">
 					<div id="logout" class="hidden"> <div id="back-arrow"><a href="#" onclick="logout()"><i class="fa fa-long-arrow-left fa-3x" aria-hidden="true"></i></a></div> <div id="signed-in-as">Signed in as <span id="display-id-loggedIN"></span></div></div>
 				    <div id="snapLogo"><img src="login/SnapLogo.png"></img></div>
@@ -32,7 +32,13 @@
 										<form id="form-flex-Parent">
 											<input id="input-id" name="id" placeholder="Enter your Unity ID" required pattern="[A-Za-z0-9_]+" autofocus>
 											<div id="confirm-new">
-												<p class="alert"> This is the first time we've seen a user with the ID <span id="display-id"></span> If you're a new user, please check the box below and hit next. If not, please double-check your ID.</p>
+												<p class="alert">
+													This is the first time we've seen a user with the ID <span id="display-id"></span>.
+												</p>
+												<ul>
+													<li>If you're a new user, please check the box below and hit next.</li>
+													<li>If not, please re-enter your ID and try again.</li>
+												</ul>
 												<div class="newUserContainer"><input id="input-new" type="checkbox" name="new" value="true"> <span>I'm a new user</span></div>
 											</div>
 										</form>
@@ -96,7 +102,7 @@
 				$("#theBorder").css("padding-top", "10px");
 				$("#theBorder").css("padding-bottom", "0px");
 				$("#logout").css("padding-bottom", "10px");
-				$('#assignment').focus();
+
 			}
 
 			function skipLogIn(warn){
@@ -143,6 +149,7 @@
 						$('#confirm-new').removeClass('getFrames2');
 						$('#confirm-new').addClass('getFrames');
 						$("#confirm-new").css("margin-bottom", "20px");
+
 						return;
 					}
 					$('#display-id-loggedIN').html(id);
@@ -157,6 +164,7 @@
 			$("#sign-in-Button").click(tryLogin);
 
 			if (!window.requireLogin) {
+				$('#assignment').focus();
 				$('#back-arrow').addClass('hidden');
 				$('.belt, .state').css('transition', 'none');
 				skipLogIn(false);

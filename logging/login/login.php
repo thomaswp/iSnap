@@ -6,7 +6,7 @@ include('../config.php');
         return;
     }
 
-    $id = $_POST['id'];
+    $id = strtolower($_POST['id']);
     $hash = password_hash($id, PASSWORD_DEFAULT, array(
         // Salt comes from the config file and is static
         'salt' => $salt

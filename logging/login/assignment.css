@@ -154,8 +154,15 @@
 			#confirm-new{
 			    height: 0px;
 				opacity: 0;
-				transition: height 2s;
+				transition: height 0.2s;
 				visibility: hidden;
+				padding-left: 4em;
+				padding-right: 4em;
+			}
+			#confirm-new ul {
+				text-align: left;
+				margin-top: 0.2em;
+				margin-bottom: 0.2em
 			}
 			.getFrames{
 			    animation-name: myframes;
@@ -180,10 +187,10 @@
 			@keyframes myframes{
 			    0%{ opacity: 0; height: 0; visibility: hidden}
 				50%{opacity: 0}
-				100%{opacity: 1; height: 100px; visibility: visible}
+				100%{opacity: 1; height: 130px; visibility: visible}
 			}
 			@keyframes myframes2{
-			    0%{opacity: 1; height: 100px; visibility: visible}
+			    0%{opacity: 1; height: 130px; visibility: visible}
 				20%{opacity: 0}
 				100%{opacity: 0; height: 0px; visibility: hidden}
 			}
@@ -301,7 +308,5 @@
 			#signed-in-as{
 			    padding-right: 20px;
 			}
-
-
 
 

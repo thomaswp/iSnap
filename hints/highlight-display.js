@@ -189,6 +189,8 @@ HighlightDisplay.prototype.showDeleteHint = function(data) {
         Trace.logErrorMessage('Unknown node in delete hint');
         return;
     }
+    // Ignore variable insertion/deletion
+    if (data.node.label === 'var') return;
     this.addHighlight(node, HighlightDisplay.deleteColor,
         data.node.label !== 'script');
 };

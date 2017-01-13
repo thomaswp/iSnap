@@ -81,9 +81,11 @@ HighlightDisplay.prototype.finishedHints = function() {
                     window.hintProvider.setDisplayEnabled(HighlightDisplay,
                         true);
                 }).askYesNo(
-                    'Check Passed',
-                    'Everything looks good. Would you like me to suggest ' +
-                    'some next steps?',
+                    localize('Check Passed'),
+                    localize (
+                        'Everything looks good so far. Would you like me to ' +
+                        'suggest some next steps?'
+                    ),
                     window.world
                 );
             }
@@ -103,7 +105,15 @@ HighlightDisplay.prototype.showHint = function(hint) {
 };
 
 HighlightDisplay.prototype.showError = function(error) {
-
+    if (this.forceShowDialog) {
+        new DialogBoxMorph(this).inform(
+            localize('Error'),
+            localize("We've run into an error checking your work. " +
+                'Please let you TA know.'),
+            window.world
+        );
+        this.forceShowDialog = false;
+    }
 };
 
 HighlightDisplay.prototype.getHintType = function() {

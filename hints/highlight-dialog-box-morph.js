@@ -26,8 +26,8 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     var body = new AlignmentMorph('column', this.padding);
     body.alignment = 'left';
 
-    var fontSize = 14;
-    var width = 420;
+    var fontSize = 13;
+    var width = 430;
     function addText(text, bold, parent) {
         var textMorph = new TextMorph(localize(text), fontSize,
             null, bold, null, null, width);
@@ -58,7 +58,8 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     }
 
     addText(
-        "I'm checking your work using previous students' solutions...",
+        "I'm checking your work using previous students' solutions...\n" +
+            '*These are suggestions and do not guarantee a correct solution!*',
         true
     );
 
@@ -72,8 +73,8 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     addBlock('doSayFor', HighlightDisplay.deleteColor, mainFrame);
 
     addText(
-        '\nYELLOW highlighted blocks are probably part of ' +
-        'the soltion, but need to be moved or reordered:',
+        'YELLOW highlighted blocks are probably part of ' +
+        'the solution, but need to be moved or reordered:',
         null, mainFrame
     );
     var moveBlocks = new AlignmentMorph('row', this.padding);

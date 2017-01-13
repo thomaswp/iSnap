@@ -1,2 +1,2 @@
 javac ScriptGenerator.java
-java ScriptGenerator ../snap.min.html isnap.min.js
+java ScriptGenerator ../snap.min.html isnap.min.js version.txt

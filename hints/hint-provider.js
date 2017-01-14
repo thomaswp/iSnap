@@ -52,8 +52,8 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
         base.call(this);
         myself.displays.forEach(function(display) {
             display.initDisplay();
-            myself.loadAssignment();
         });
+        myself.loadAssignment();
     });
 };
 

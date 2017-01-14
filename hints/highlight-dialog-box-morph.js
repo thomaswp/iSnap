@@ -211,9 +211,9 @@ HighlightDialogBoxMorph.prototype.toggleInsert = function() {
         this.mainFrame.show();
     }
     this.insertButton.labelString = this.nextButtonText(showInserts);
-    this.setShowInserts(showInserts);
     this.insertButton.createLabel();
     this.insertButton.fixLayout();
+    this.setShowInserts(showInserts);
     this.body.fixLayout();
     this.body.drawNew();
     this.fixLayout();

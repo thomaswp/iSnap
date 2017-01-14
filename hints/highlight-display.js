@@ -185,9 +185,11 @@ HighlightDisplay.prototype.addHighlight = function(block, color, single) {
         return;
     }
     // First come, first highlight
+    // TODO: Instead, have highlight priorities, since inserts may add delete
     if (block.getHintHighlight()) {
-        // console.log(block, block.getHighlight());
+        // console.log(block, block.getHintHighlight());
         return;
+        // block.removeHintHighlight();
     }
     if (single) {
         block.addSingleHintHighlight(color);
@@ -203,8 +205,8 @@ HighlightDisplay.prototype.showDeleteHint = function(data) {
         Trace.logErrorMessage('Unknown node in delete hint');
         return;
     }
-    // Ignore variable insertion/deletion
-    if (data.node.label === 'var') return;
+    // Ignore variable and literal deletion
+    if (data.node.label === 'var' || data.node.label === 'literal') return;
     this.addHighlight(node, HighlightDisplay.deleteColor,
         data.node.label !== 'script');
 };
@@ -215,8 +217,8 @@ HighlightDisplay.prototype.showReorderHint = function(data) {
         Trace.logErrorMessage('Unknown node in reorder hint');
         return;
     }
-    // Don't worry about reordering scripts;
-    if (data.node.label === 'script') return;
+    // Don't worry about reordering scripts or literals
+    if (data.node.label === 'script' || data.node.label === 'literal') return;
     this.addHighlight(node, HighlightDisplay.moveColor, true);
 };
 
@@ -242,11 +244,12 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     if (data.replacement) {
         var replacement = this.getCode(data.replacement);
         if (replacement) {
-            var color = replacement instanceof BlockMorph ?
-                    HighlightDisplay.deleteColor : HighlightDisplay.insertColor;
+            var isSlot = replacement instanceof ArgMorph;
+            var color = isSlot ? HighlightDisplay.insertColor :
+                    HighlightDisplay.deleteColor;
             this.addHighlight(replacement, color, true);
 
-            if (replacement instanceof ArgMorph) {
+            if (isSlot) {
                 var otherBlocks = [];
                 if (candidate) otherBlocks.push(candidate.selector);
                 var onClick = this.createBlockHintCallback(true,

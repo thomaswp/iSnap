@@ -32,6 +32,8 @@ HighlightDisplay.prototype.initDisplay = function() {
     this.highlights = [];
     this.insertButtons = [];
     this.hoverHints = [];
+    // TODO: handle these somehow
+    this.hiddenCustomBlockHintRoots = [];
 
     BlockEditorMorph.defaultHatBlockMargin = new Point(35, 20);
 
@@ -90,6 +92,7 @@ HighlightDisplay.prototype.finishedHints = function() {
         } else {
             // Or disable highlights if not
             this.enabled = false;
+            // TODO: Handle no hints to give
             // If no hints were shown, but the user clicked the hint button...
             if (this.forceShowDialog) {
                 // Show a dialog to confirm they want next-step hints
@@ -114,7 +117,18 @@ HighlightDisplay.prototype.finishedHints = function() {
 
 HighlightDisplay.prototype.showHint = function(hint) {
     if (!hint.data) return;
+
     var action = hint.data.action;
+
+    var parent = this.getCode(hint.data.parent);
+    if (parent instanceof CustomBlockDefinition) {
+        // For hints that are in hiddent custom blocks, we save the
+        // parents, but don't show it immediately
+        this.hiddenCustomBlockHintRoots.push(parent);
+        // Allow insert hints, since the candidate could be outside the block
+        if (action !== 'insert') return;
+    }
+
     switch (action) {
     case 'delete' : this.showDeleteHint(hint.data); break;
     case 'reorder': this.showReorderHint(hint.data); break;
@@ -177,10 +191,15 @@ HighlightDisplay.prototype.clear = function() {
         argMorph.onClick = null;
     });
     this.hoverHints = [];
+
+    this.hiddenCustomBlockHintRoots = [];
 };
 
 HighlightDisplay.prototype.addHighlight = function(block, color, single) {
     if (color == HighlightDisplay.insertColor && !this.showInserts) return;
+    // It's possible a candidate will be inside a hidden custom block, so just
+    // suppress the highlight
+    if (block instanceof CustomBlockDefinition) return;
     if (block instanceof MultiArgMorph) {
         block = block.parent;
     }
@@ -237,14 +256,20 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     if (data.type === 'script') return;
 
     var candidate = null;
-    if (data.candidate && data.candidate.label != 'literal') {
+    if (data.candidate && data.candidate.label !== 'literal' &&
+            data.candidate.label !== 'var') {
         candidate = this.getCode(data.candidate);
         if (!candidate) {
             Trace.logErrorMessage('Unknown candidate for insert hint');
             return;
         }
+        console.log(candidate, data.candidate);
         this.addHighlight(candidate, HighlightDisplay.moveColor, true);
     }
+
+    // We can still highlight candidates for hidden custom blocks, but
+    // nothing else
+    if (parent instanceof CustomBlockDefinition) return;
 
     if (data.replacement) {
         var replacement = this.getCode(data.replacement);

@@ -200,7 +200,7 @@ function(selector, parent, numArgs) {
         // Create custom blocks
         type = 'command';
         if (parent) {
-            type = parent._debugType == 'BooleanSlotMorph' ?
+            type = parent instanceof BooleanSlotMorph ?
                 'predicate' : 'reporter';
         }
         spec = 'Custom Block';

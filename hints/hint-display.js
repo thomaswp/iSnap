@@ -62,7 +62,6 @@ HintDisplay.prototype.editingCustomBlock = function(storedBlocks, index) {
             })[0];
         return scriptsMorph;
     }
-    storedBlock._debugType = storedBlock.getDebugType();
     return storedBlock;
 };
 

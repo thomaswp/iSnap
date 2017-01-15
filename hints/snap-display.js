@@ -286,7 +286,7 @@ SnapDisplay.prototype.showScriptHint = function(hint, oldHint) {
     // Custom blocks have a header block on top, which we may want to skip for
     // displaying hints if there's another block underneath. But right now we're
     // not.
-    // if (root._debugType == 'PrototypeHatBlockMorph' && root.nextBlock()) {
+    // if (root instanceof PrototypeHatBlockMorph && root.nextBlock()) {
     //     root = root.nextBlock();
     // }
 

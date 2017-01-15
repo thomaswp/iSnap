@@ -283,13 +283,53 @@ HintDisplay.prototype.createBlockHintCallback = function(simple, root,
     };
 };
 
+HintDisplay.prototype.createStructureHintCallback = function(simple, root,
+        message, from, to, onThumbsDown) {
+
+    var rootType = null;
+    var rootID = null;
+    if (root instanceof SpriteMorph) {
+        rootType = 'sprite';
+        rootID = root.name;
+    } else if (root instanceof IDE_Morph) {
+        rootType = 'snapshot';
+    } else if (root instanceof StageMorph) {
+        rootType = 'stage';
+    } else if (root instanceof ScriptsMorph) {
+        // ScriptsMorphs should only be the root for custom block hints
+        rootType = 'customBlock';
+        if (root.children[0] && root.children[0].definition) {
+            rootID = root.children[0].definition.guid;
+        }
+    } else {
+        // eslint-disable-next-line no-console
+        console.warn('Unknown root type', root);
+    }
+
+    var data = {
+        'rootType': rootType,
+        'rootID': rootID,
+        'message': message,
+        'from': from,
+        'to': to
+    };
+
+    return function() {
+        Trace.log('SnapDisplay.showStructureHint', data);
+        var dialog = new MessageHintDialogBoxMorph(window.ide, simple, message,
+            'Suggestion');
+        dialog.onThumbsDown(onThumbsDown);
+        dialog.popUp();
+    };
+};
+
 // Static method - shows a logged hints retreived from the database
 HintDisplay.showLoggedHint = function(data) {
     var type = data.type;
     var fromList;
     if (type === 'StructureHint') {
-        new MessageHintDialogBoxMorph(data.message, 'Suggestion', null,
-            window.ide).popUp();
+        new MessageHintDialogBoxMorph(window.ide, true, data.message,
+            'Suggestion').popUp();
     } else if (type === 'ScriptHint') {
         fromList = data.fromList || [data.from];
         var parent = null;

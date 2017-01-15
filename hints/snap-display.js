@@ -206,12 +206,12 @@ function(hint, scripts, map, postfix, color) {
     var root = hint.root, from = hint.from, to = hint.to;
     var myself = this;
     if (!postfix) postfix = '';
-    for (var key in map) {
-        if (!map.hasOwnProperty(key)) continue;
+    Object.keys(map).forEach(function(key) {
+        if (!map.hasOwnProperty(key)) return;
 
-        var fromItems = this.countWhere(from, key);
-        var toItems = this.countWhere(to, key);
-        if (fromItems == toItems) continue;
+        var fromItems = myself.countWhere(from, key);
+        var toItems = myself.countWhere(to, key);
+        if (fromItems == toItems) return;
         var diff = toItems - fromItems;
 
         var message = null;
@@ -228,40 +228,14 @@ function(hint, scripts, map, postfix, color) {
         message += postfix + '.';
         message = localize(message);
 
-        var rootType = null;
-        var rootID = null;
-        if (root instanceof SpriteMorph) {
-            rootType = 'sprite';
-            rootID = root.name;
-        } else if (root instanceof IDE_Morph) {
-            rootType = 'snapshot';
-        } else if (root instanceof StageMorph) {
-            rootType = 'stage';
-        } else if (root instanceof ScriptsMorph) {
-            // ScriptsMorphs should only be the root for custom block hints
-            rootType = 'customBlock';
-            rootID = root.children[0].definition.guid;
-        } else {
-            // eslint-disable-next-line no-console
-            console.warn('Unknown root type', root);
-        }
+        var callback = myself.createStructureHintCallback(false, root, message,
+            from, to, function() {
+                myself.hideHint(root, to, null);
+            });
 
-        color = color || this.hintColorStructure;
-        (function(message) {
-            myself.createHintButton(scripts, color, false,
-                function() {
-                    Trace.log('SnapDisplay.showStructureHint', {
-                        'rootType': rootType,
-                        'rootID': rootID,
-                        'message': message,
-                        'from': from,
-                        'to': to
-                    });
-                    myself.showMessageDialog(message, 'Suggestion', false, root,
-                        to, null);
-                });
-        })(message);
-    }
+        color = color || myself.hintColorStructure;
+        myself.createHintButton(scripts, color, false, callback);
+    });
 };
 
 SnapDisplay.prototype.showSnapshotHint = function(hint) {
@@ -346,15 +320,8 @@ SnapDisplay.prototype.countWhere = function(array, item) {
     return count;
 };
 
-SnapDisplay.prototype.showMessageDialog =
-function(message, title, showRating, root, to, type) {
-    var myself = this;
-    var dialog = new MessageHintDialogBoxMorph(message, title, showRating,
-        window.ide);
-    dialog.onThumbsDown(function() {
-        myself.hideHint(root, to, type);
-    });
-    dialog.popUp();
+SnapDisplay.prototype.showMessageDialog = function(message, title) {
+    new MessageHintDialogBoxMorph(window.ide, false, message, title).popUp();
 };
 
 SnapDisplay.prototype.hideHint = function(root, to, type) {

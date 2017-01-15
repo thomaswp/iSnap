@@ -1,8 +1,8 @@
 require('hint-dialog-box-morph');
 
 // MessageHintDialogMorph ////////////////////////////////////////
-function MessageHintDialogBoxMorph(message, title, showRating, target) {
-    this.init(message, title, showRating, target);
+function MessageHintDialogBoxMorph(target, simple, message, title) {
+    this.init(target, simple, message, title);
 }
 
 // MessageHintDialogMorph inherits from DialogBoxMorph
@@ -14,10 +14,8 @@ MessageHintDialogBoxMorph.uber = HintDialogBoxMorph.prototype;
 
 // initialize Message Hint Dialogue box
 MessageHintDialogBoxMorph.prototype.init =
-function (message, title, showRating, target) {
+function (target, simple, message, title) {
     var txt;
-
-    this.showRating = showRating;
 
     this.handle = null;
 
@@ -46,11 +44,7 @@ function (message, title, showRating, target) {
     );
     this.addBody(txt);
 
-    this.initButtons();
-
-    if (showRating) {
-        this.createThumbButtons();
-    }
+    this.initButtons(simple);
 
     this.fixExtent();
     this.fixLayout();

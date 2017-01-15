@@ -15,6 +15,10 @@ HighlightDisplay.insertColor = new Color(0, 0, 255);
 HighlightDisplay.deleteColor = new Color(255, 0, 0);
 HighlightDisplay.moveColor = new Color(255, 255, 0);
 
+HighlightDisplay.TOP_LEFT = 'top-left';
+HighlightDisplay.BOTTOM_LEFT = 'bottom-left';
+HighlightDisplay.ABOVE = 'above';
+
 HighlightDisplay.prototype.initDisplay = function() {
     // Start disabled until the highlight dialog box is shown
     this.enabled = false;
@@ -143,6 +147,7 @@ HighlightDisplay.prototype.clear = function() {
 
     var toRedraw = [];
     function redraw(block) {
+        if (!block.topBlock) block = block.parentThatIsA(BlockMorph);
         var topBlock = block.topBlock();
         if (!toRedraw.includes(topBlock)) toRedraw.push(topBlock);
     }
@@ -264,11 +269,12 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         return;
     }
 
+    var callback;
     if (data.parent.label === 'script' &&
             !(parent instanceof CustomBlockDefinition)) {
         var fromList = [data.from];
         if (data.candidate) fromList.push([data.candidate.label]);
-        var callback = this.createScriptHintCallback(true, parent, candidate,
+        callback = this.createScriptHintCallback(true, parent, candidate,
             fromList, data.to);
 
         var index = data.index;
@@ -276,15 +282,25 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         if (parent instanceof PrototypeHatBlockMorph) index++;
 
         if (index === 0) {
-            this.addInsertButton(parent, true, callback);
+            this.addInsertButton(parent, HighlightDisplay.TOP_LEFT, callback);
         } else {
             if (parent instanceof CSlotMorph) parent = parent.children[0];
             var precedingBlock = parent;
             for (var i = 0; i < index - 1 && precedingBlock != null; i++) {
                 precedingBlock = precedingBlock.nextBlock();
             }
-            this.addInsertButton(precedingBlock, false, callback);
+            this.addInsertButton(precedingBlock, HighlightDisplay.BOTTOM_LEFT,
+                callback);
         }
+    } else if (data.parent.label === 'customBlock' &&
+            parent instanceof ScriptsMorph) {
+        var message = localize(
+            'You probably need another input for this block. ' +
+            'Add one with the plus button below.'
+        );
+        callback = this.createStructureHintCallback(true, parent, message,
+            data.from, data.to);
+        this.addPlusHintButton(parent, callback);
     } else {
         // console.log(data.parent.label);
         // TODO: handle list inserts, which won't be in scripts
@@ -307,9 +323,11 @@ HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
     this.hoverHints.push(argMorph);
 };
 
-HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
+HighlightDisplay.prototype.addInsertButton =
+function(block, attachPoint, callback) {
     if (!this.showInserts) return;
-    if (!(block instanceof BlockMorph || block instanceof CSlotMorph)) {
+    if (!(block instanceof BlockMorph || block instanceof CSlotMorph ||
+            block instanceof BlockLabelPlaceHolderMorph)) {
         Trace.logErrorMessage('Non-insertable morph: ' +
             (block ? block.getDebugType() : null));
         return;
@@ -322,40 +340,67 @@ HighlightDisplay.prototype.addInsertButton = function(block, before, callback) {
 
     // Don't allow duplicate insert buttons in the same position
     if (this.insertButtons.some(function(button) {
-        return button.positionMorph == positionMorph && button.before == before;
+        return button.positionMorph == positionMorph &&
+            button.attachPoint == attachPoint;
     })) {
         return;
     }
 
     var button = this.createInsertButton(
-            block, positionMorph, callback, before);
+            block, positionMorph, callback, attachPoint);
     this.insertButtons.push(button);
 };
 
 HighlightDisplay.prototype.createInsertButton =
-function(block, positionMorph, callback, before) {
+function(block, positionMorph, callback, attachPoint) {
     var button = new PushButtonMorph(block, callback,
         new SymbolMorph('plus', 10));
     button.labelColor = HighlightDisplay.insertColor;
     button.positionMorph = positionMorph;
-    button.before = before;
+    button.attachPoint = attachPoint;
     button.float = true;
 
     layout = function(button) {
         var block = button.positionMorph;
-        button.setRight(block.left() - 3);
-        button.setTop((button.before ? block.top() : block.bottom()) -
-                button.height() / 2);
+        var padding = 3;
+        if (button.attachPoint === HighlightDisplay.TOP_LEFT) {
+            button.setRight(block.left() - padding);
+            button.setTop(block.top() - button.height() / 2);
+        } else if (button.attachPoint === HighlightDisplay.BOTTOM_LEFT) {
+            button.setRight(block.left() - padding);
+            button.setTop(block.bottom() - button.height() / 2);
+        } else if (button.attachPoint === HighlightDisplay.ABOVE) {
+            button.setCenter(block.center());
+            button.setBottom(block.top() - padding);
+        } else {
+            Trace.logErrorMessage('Unknown insert button attachPoint: ' +
+                button.attachPoint);
+        }
         button.fixLayout();
     };
 
-    var oldFixLayout = block.fixLayout;
-    block.fixLayout = function() {
+    var layoutBlock = block;
+    while (!layoutBlock.fixLayout) layoutBlock = layoutBlock.parent;
+    var oldFixLayout = layoutBlock.fixLayout;
+    layoutBlock.fixLayout = function() {
         oldFixLayout.apply(this, arguments);
         layout(button);
     };
 
     block.add(button);
-    block.fixLayout();
+    layoutBlock.fixLayout();
     return button;
+};
+
+HighlightDisplay.prototype.addPlusHintButton = function(parent, callback) {
+    var prototypeHBM = parent.children[0];
+    if (!(prototypeHBM instanceof PrototypeHatBlockMorph)) return;
+    var customCBM = prototypeHBM.children[0];
+    if (!(customCBM instanceof CustomCommandBlockMorph)) return;
+    var pluses = customCBM.children.filter(function (child) {
+        return child instanceof BlockLabelPlaceHolderMorph;
+    });
+    var lastPlus = pluses[pluses.length - 1];
+    if (!lastPlus) return;
+    this.addInsertButton(lastPlus, HighlightDisplay.ABOVE, callback);
 };

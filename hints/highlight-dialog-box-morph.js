@@ -116,7 +116,7 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     var hatBlock = addBlock('receiveGo', null, insertFrame);
     hatBlock.nextBlock(createBlock('doSayFor'));
     HighlightDisplay.prototype.createInsertButton(
-        hatBlock, hatBlock, function() { }, false);
+        hatBlock, hatBlock, function() { }, HighlightDisplay.BOTTOM_LEFT);
 
     insertFrame.fixLayout();
     if (!showInserts) insertFrame.hide();

@@ -9205,7 +9205,7 @@ SymbolMorph.prototype.drawSymbolPlus = function (canvas, color) {
         h = canvas.height;
 
     ctx.strokeStyle = color.toString();
-    ctx.lineWidth = 2;
+    ctx.lineWidth = h * 0.2;
     ctx.moveTo(0, h / 2);
     ctx.lineTo(w, h / 2);
     ctx.stroke();

@@ -2,7 +2,7 @@
 // Helper functions
 
 /* exported newGuid createCORSRequest extend extendObject getSearchParameters
- * getCookie onWorldLoaded
+ * getCookie onWorldLoaded instanceOfAny
 */
 
 // Generates a random GUID to help us keep track of things across sessions
@@ -124,4 +124,10 @@ function extendObject(object, functionName, newFunction) {
     };
 
     return oldFunction;
+}
+
+function instanceOfAny(object, types) {
+    return types.some(function(type) {
+        return object instanceof type;
+    });
 }

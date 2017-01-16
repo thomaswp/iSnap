@@ -18,6 +18,7 @@ HighlightDisplay.moveColor = new Color(255, 255, 0);
 HighlightDisplay.TOP_LEFT = 'top-left';
 HighlightDisplay.BOTTOM_LEFT = 'bottom-left';
 HighlightDisplay.ABOVE = 'above';
+HighlightDisplay.RIGHT = 'right';
 
 HighlightDisplay.prototype.initDisplay = function() {
     // Start disabled until the highlight dialog box is shown
@@ -145,6 +146,7 @@ HighlightDisplay.prototype.showHint = function(hint) {
         // parents, but don't show it immediately
         this.hiddenCustomBlockHintRoots.push(parent);
         // Allow insert hints, since the candidate could be outside the block
+        this.addCustomBlockHint(parent);
         if (action !== 'insert') return;
     }
 
@@ -180,9 +182,13 @@ HighlightDisplay.prototype.clear = function() {
 
     var toRedraw = [];
     function redraw(block) {
-        if (!block.topBlock) block = block.parentThatIsA(BlockMorph);
-        var topBlock = block.topBlock();
-        if (!toRedraw.includes(topBlock)) toRedraw.push(topBlock);
+        var parentBlock = block.parentThatIsA(BlockMorph);
+        if (block.topBlock) {
+            block = block.topBlock();
+        } else if (parentBlock && parentBlock.topBlock) {
+            block = parentBlock.topBlock();
+        }
+        if (!toRedraw.includes(block)) toRedraw.push(block);
     }
     this.highlights.forEach(function(block) {
         block.removeHintHighlight();
@@ -241,6 +247,39 @@ HighlightDisplay.prototype.addHighlight = function(block, color, single) {
         block.addHintHighlight(color);
     }
     this.highlights.push(block);
+};
+
+HighlightDisplay.prototype.addCustomBlockHint = function(definition) {
+    var index = SpriteMorph.prototype.categories.indexOf(definition.category);
+    if (index === -1) {
+        Trace.logErrorMessage('Unknown custom block category: ' +
+            definition.category);
+        return;
+    }
+
+    // 'other' and 'lists' show up under variables, the last category
+    index = Math.min(index, window.ide.categories.children.length - 1);
+    var button = window.ide.categories.children[index];
+    if (!button) {
+        Trace.logErrorMessage('Missing button index: ' + index);
+        return;
+    }
+
+    if (button.state) {
+        // TODO: Add button to custom block
+        return;
+    }
+
+    this.addInsertButton(button, HighlightDisplay.RIGHT, function() {
+        Trace.log('HighlightDisplay.showCustomBlockHintUnderCategory');
+        new DialogBoxMorph(this).inform(
+            localize('Suggestions for Custom Block'),
+            localize(
+                'Click the "' + definition.category + '" category to see '
+            ),
+            window.world
+        );
+    }, 7);
 };
 
 HighlightDisplay.prototype.showDeleteHint = function(data) {
@@ -372,9 +411,9 @@ HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
 };
 
 HighlightDisplay.prototype.addInsertButton =
-function(block, attachPoint, callback) {
-    if (!(block instanceof BlockMorph || block instanceof CSlotMorph ||
-            block instanceof BlockLabelPlaceHolderMorph)) {
+function(block, attachPoint, callback, size) {
+    if (!instanceOfAny(block, [BlockMorph, CSlotMorph,
+            BlockLabelPlaceHolderMorph, PushButtonMorph]))  {
         Trace.logErrorMessage('Non-insertable morph: ' +
             (block ? block.getDebugType() : null));
         return;
@@ -398,39 +437,46 @@ function(block, attachPoint, callback) {
     }
 
     var button = this.createInsertButton(
-            block, positionMorph, callback, attachPoint);
+            block, positionMorph, callback, attachPoint, size);
     this.insertButtons.push(button);
 };
 
 HighlightDisplay.prototype.createInsertButton =
-function(block, positionMorph, callback, attachPoint) {
-    var button = new PushButtonMorph(block, callback,
-        new SymbolMorph('plus', 10));
+function(parent, positionMorph, callback, attachPoint, size) {
+    size = size || 10;
+    var button = new PushButtonMorph(parent, callback,
+        new SymbolMorph('plus', size));
     button.labelColor = HighlightDisplay.insertColor;
     button.positionMorph = positionMorph;
     button.attachPoint = attachPoint;
     button.float = true;
 
     layout = function(button) {
-        var block = button.positionMorph;
+        var pMorph = button.positionMorph;
         var padding = 3;
         if (button.attachPoint === HighlightDisplay.TOP_LEFT) {
-            button.setRight(block.left() - padding);
-            button.setTop(block.top() - button.height() / 2);
+            button.setRight(pMorph.left() - padding);
+            button.setTop(pMorph.top() - button.height() / 2);
         } else if (button.attachPoint === HighlightDisplay.BOTTOM_LEFT) {
-            button.setRight(block.left() - padding);
-            button.setTop(block.bottom() - button.height() / 2);
+            button.setRight(pMorph.left() - padding);
+            button.setTop(pMorph.bottom() - button.height() / 2);
         } else if (button.attachPoint === HighlightDisplay.ABOVE) {
-            button.setCenter(block.center());
-            button.setBottom(block.top() - padding);
-        } else {
+            button.setCenter(pMorph.center());
+            button.setBottom(pMorph.top() - padding);
+        } else if (button.attachPoint === HighlightDisplay.RIGHT) {
+            button.setCenter(pMorph.center());
+            // HACK: the RIGHT position is only used by category blocks, and
+            // they cutoff the button if it's set full to the right
+            button.setLeft(pMorph.right() - 3 * padding);
+        }
+        else {
             Trace.logErrorMessage('Unknown insert button attachPoint: ' +
                 button.attachPoint);
         }
         button.fixLayout();
     };
 
-    var layoutBlock = block;
+    var layoutBlock = parent;
     while (!layoutBlock.fixLayout) layoutBlock = layoutBlock.parent;
     var oldFixLayout = layoutBlock.fixLayout;
     layoutBlock.fixLayout = function() {
@@ -438,7 +484,7 @@ function(block, positionMorph, callback, attachPoint) {
         layout(button);
     };
 
-    block.add(button);
+    parent.add(button);
     layoutBlock.fixLayout();
     return button;
 };

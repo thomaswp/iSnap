@@ -18,6 +18,7 @@ HighlightDisplay.moveColor = new Color(255, 255, 0);
 HighlightDisplay.TOP_LEFT = 'top-left';
 HighlightDisplay.BOTTOM_LEFT = 'bottom-left';
 HighlightDisplay.ABOVE = 'above';
+HighlightDisplay.LEFT = 'left';
 HighlightDisplay.RIGHT = 'right';
 
 HighlightDisplay.prototype.initDisplay = function() {
@@ -36,6 +37,7 @@ HighlightDisplay.prototype.initDisplay = function() {
     // TODO: handle these somehow
     this.hiddenCustomBlockHintRoots = [];
     this.hiddenInsertHints = 0;
+    this.addCustomBlock = false;
 
     BlockEditorMorph.defaultHatBlockMargin = new Point(35, 20);
 
@@ -85,6 +87,7 @@ HighlightDisplay.prototype.finishedHints = function() {
             !HighlightDialogBoxMorph.showing.destroyed;
     var hintsShown = this.highlights.length + this.insertButtons.length +
             this.hoverHints.length > 0;
+
     // If the dialog isn't showing...
     if (!dialogShowing) {
         if (hintsShown) {
@@ -146,7 +149,6 @@ HighlightDisplay.prototype.showHint = function(hint) {
         // parents, but don't show it immediately
         this.hiddenCustomBlockHintRoots.push(parent);
         // Allow insert hints, since the candidate could be outside the block
-        this.addCustomBlockHint(parent);
         if (action !== 'insert') return;
     }
 
@@ -219,6 +221,7 @@ HighlightDisplay.prototype.clear = function() {
 
     this.hiddenCustomBlockHintRoots = [];
     this.hiddenInsertHints = 0;
+    this.addCustomBlock = false;
 };
 
 HighlightDisplay.prototype.addHighlight = function(block, color, single) {
@@ -249,37 +252,43 @@ HighlightDisplay.prototype.addHighlight = function(block, color, single) {
     this.highlights.push(block);
 };
 
-HighlightDisplay.prototype.addCustomBlockHint = function(definition) {
-    var index = SpriteMorph.prototype.categories.indexOf(definition.category);
-    if (index === -1) {
-        Trace.logErrorMessage('Unknown custom block category: ' +
-            definition.category);
+// TODO: refresh on category change
+HighlightDisplay.prototype.showAddCustomBlockHint = function(data) {
+    // Only show this hint once
+    if (this.addCustomBlock) return;
+    if (!this.showInserts) {
+        this.hiddenInsertHints++;
         return;
     }
+    this.addCustomBlock = true;
 
-    // 'other' and 'lists' show up under variables, the last category
-    index = Math.min(index, window.ide.categories.children.length - 1);
-    var button = window.ide.categories.children[index];
+    // Get the 'Variables' category button
+    var button = window.ide.categories.children[7];
     if (!button) {
-        Trace.logErrorMessage('Missing button index: ' + index);
+        Trace.logErrorMessage('Missing variables button');
         return;
     }
 
-    if (button.state) {
-        // TODO: Add button to custom block
+    var message = localize(
+        'You probably need to make a new block. Do that ' +
+        'by clicking\nthe "Variables" category and click "Make a ' +
+        'Block".'
+    );
+    var callback = this.createStructureHintCallback(true, window.ide, message,
+        data.from, data.to);
+
+    // If the variables tab isn't selected, show the button there
+    if (!button.state) {
+        this.addInsertButton(button, HighlightDisplay.LEFT, callback, 7);
         return;
     }
 
-    this.addInsertButton(button, HighlightDisplay.RIGHT, function() {
-        Trace.log('HighlightDisplay.showCustomBlockHintUnderCategory');
-        new DialogBoxMorph(this).inform(
-            localize('Suggestions for Custom Block'),
-            localize(
-                'Click the "' + definition.category + '" category to see '
-            ),
-            window.world
-        );
-    }, 7);
+    if (!ide.palette || !ide.palette.children[0]) return;
+    var buttons = ide.palette.children[0].children.filter(function(child) {
+        return button instanceof PushButtonMorph;
+    });
+    var createCustomBlock = buttons[buttons.length - 1];
+    this.addInsertButton(createCustomBlock, HighlightDisplay.RIGHT, callback);
 };
 
 HighlightDisplay.prototype.showDeleteHint = function(data) {
@@ -313,6 +322,11 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     }
     // Don't worry about inserting scripts;
     if (data.type === 'script') return;
+
+    if (data.parent.label === 'snapshot' && data.type === 'customBlock') {
+        this.showAddCustomBlockHint(data);
+        return;
+    }
 
     var candidate = null;
     if (data.candidate && data.candidate.label !== 'literal' &&
@@ -388,8 +402,6 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     } else {
         // console.log(data.parent.label);
         // TODO: handle list inserts, which won't be in scripts
-        // along with structure hints like snapshot parents and hidden
-        // custom block hints
     }
 };
 
@@ -463,13 +475,13 @@ function(parent, positionMorph, callback, attachPoint, size) {
         } else if (button.attachPoint === HighlightDisplay.ABOVE) {
             button.setCenter(pMorph.center());
             button.setBottom(pMorph.top() - padding);
+        } else if (button.attachPoint === HighlightDisplay.LEFT) {
+            button.setCenter(pMorph.center());
+            button.setRight(pMorph.left() - padding);
         } else if (button.attachPoint === HighlightDisplay.RIGHT) {
             button.setCenter(pMorph.center());
-            // HACK: the RIGHT position is only used by category blocks, and
-            // they cutoff the button if it's set full to the right
-            button.setLeft(pMorph.right() - 3 * padding);
-        }
-        else {
+            button.setLeft(pMorph.right() + padding);
+        } else {
             Trace.logErrorMessage('Unknown insert button attachPoint: ' +
                 button.attachPoint);
         }

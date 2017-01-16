@@ -245,7 +245,13 @@ HighlightDialogBoxMorph.showHighlights = function() {
         if (HighlightDialogBoxMorph.firstShowOnRun) {
             Trace.log('HighlightDialogBoxMorph.promptShowOnRun');
             HighlightDialogBoxMorph.firstShowOnRun = false;
-            var dialog = new DialogBoxMorph(null, show);
+            var dialog = new DialogBoxMorph(null, function() {
+                // Treat as if the button was clicked
+                window.hintProvider.displays.forEach(function(display) {
+                    display.forceShowDialog = true;
+                });
+                show();
+            });
             extendObject(dialog, 'cancel', function(base) {
                 Trace.log('HighlightDialogBoxMorph.cancelShowOnRun');
                 HighlightDialogBoxMorph.showOnRun = false;
@@ -255,8 +261,8 @@ HighlightDialogBoxMorph.showHighlights = function() {
                 localize('Checking your Work'),
                 localize(
                     'When you run your code, I can check your work for ' +
-                    'possible \nmistakes and make suggestions. Do you want to ' +
-                    'enable this?'),
+                    'possible \nmistakes and make suggestions. Do you want ' +
+                    'to enable this?'),
                 window.world
             );
         } else {

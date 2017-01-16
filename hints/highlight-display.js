@@ -34,6 +34,7 @@ HighlightDisplay.prototype.initDisplay = function() {
     this.hoverHints = [];
     // TODO: handle these somehow
     this.hiddenCustomBlockHintRoots = [];
+    this.hiddenInsertHints = 0;
 
     BlockEditorMorph.defaultHatBlockMargin = new Point(35, 20);
 
@@ -92,27 +93,45 @@ HighlightDisplay.prototype.finishedHints = function() {
         } else {
             // Or disable highlights if not
             this.enabled = false;
-            // TODO: Handle no hints to give
             // If no hints were shown, but the user clicked the hint button...
             if (this.forceShowDialog) {
-                // Show a dialog to confirm they want next-step hints
-                new DialogBoxMorph(this, function() {
-                    // If they say yes, show inserts and reshow this
-                    this.showInserts = true;
-                    window.hintProvider.setDisplayEnabled(HighlightDisplay,
-                        true);
-                }).askYesNo(
-                    localize('Check Passed'),
-                    localize (
-                        'Everything looks good so far. Would you like me to ' +
-                        'suggest some next steps?'
-                    ),
-                    window.world
-                );
+                if (this.hiddenInsertHints === 0) {
+                    // Tell them no hints are available
+                    this.informNoHints();
+                } else {
+                    // Or show a dialog to confirm they want next-step hints
+                    this.promptShowInserts();
+                }
             }
         }
     }
     this.forceShowDialog = false;
+};
+
+HighlightDisplay.prototype.promptShowInserts = function() {
+    var myself = this;
+    new DialogBoxMorph(this, function() {
+        // If they say yes, show inserts and reshow this
+        myself.showInserts = true;
+        myself.forceShowDialog = true;
+        window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
+    }).askYesNo(
+        localize('Check Passed'),
+        localize (
+            'Everything looks good so far. Would you like me to ' +
+            'suggest some next steps?'
+        ),
+        window.world
+    );
+};
+
+HighlightDisplay.prototype.informNoHints = function() {
+    new DialogBoxMorph(this).inform(
+        localize('Check Passed'),
+        localize('Everything on the screen looks good so far, but remember ' +
+            "it's\nup to you to make sure everything works before you submit."),
+        window.world
+    );
 };
 
 HighlightDisplay.prototype.showHint = function(hint) {
@@ -193,6 +212,7 @@ HighlightDisplay.prototype.clear = function() {
     this.hoverHints = [];
 
     this.hiddenCustomBlockHintRoots = [];
+    this.hiddenInsertHints = 0;
 };
 
 HighlightDisplay.prototype.addHighlight = function(block, color, single) {
@@ -335,7 +355,10 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
 };
 
 HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
-    if (!this.showInserts || !(argMorph instanceof ArgMorph)) return;
+    if (!(argMorph instanceof ArgMorph)) return;
+    if (!this.showInserts) {
+        this.hiddenInsertHints++;
+    }
 
     if (argMorph.contents) {
         var contents = argMorph.contents();
@@ -350,11 +373,14 @@ HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
 
 HighlightDisplay.prototype.addInsertButton =
 function(block, attachPoint, callback) {
-    if (!this.showInserts) return;
     if (!(block instanceof BlockMorph || block instanceof CSlotMorph ||
             block instanceof BlockLabelPlaceHolderMorph)) {
         Trace.logErrorMessage('Non-insertable morph: ' +
             (block ? block.getDebugType() : null));
+        return;
+    }
+    if (!this.showInserts) {
+        this.hiddenInsertHints++;
         return;
     }
 

@@ -68,7 +68,7 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     mainFrame.alignment = 'left';
 
     addText(
-        "RED highlighted blocks probably doesn't belong in the solution:",
+        "RED highlighted blocks probably don't belong in the solution:",
         null, mainFrame
     );
     addBlock('doSayFor', HighlightDisplay.deleteColor, mainFrame);
@@ -272,6 +272,7 @@ HighlightDialogBoxMorph.showHighlights = function() {
 };
 
 extend(StageMorph, 'fireGreenFlagEvent', function(base) {
+    base.call(this);
     if (HighlightDialogBoxMorph.showOnRun) {
         HighlightDialogBoxMorph.showHighlights();
     }

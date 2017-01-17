@@ -346,7 +346,6 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
             Trace.logErrorMessage('Unknown candidate for insert hint');
             return;
         }
-        console.log(candidate, data.candidate);
         this.addHighlight(candidate, HighlightDisplay.moveColor, true);
     }
 

@@ -2,6 +2,7 @@ Highlight:
 * Bugs:
   * Duplicating a single block with a full-script highlight has a graphical bug
   * Some artifacts show up when dragging highlighted blocks
+  * Something is trying to highlight ScriptsMorphs
 * TODO:
   * Test on existing hint requests
   * Something should show up for hidden custom block hints

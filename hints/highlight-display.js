@@ -252,7 +252,6 @@ HighlightDisplay.prototype.addHighlight = function(block, color, single) {
     this.highlights.push(block);
 };
 
-// TODO: refresh on category change
 HighlightDisplay.prototype.showAddCustomBlockHint = function(data) {
     // Only show this hint once
     if (this.addCustomBlock) return;
@@ -290,6 +289,17 @@ HighlightDisplay.prototype.showAddCustomBlockHint = function(data) {
     var createCustomBlock = buttons[buttons.length - 1];
     this.addInsertButton(createCustomBlock, HighlightDisplay.RIGHT, callback);
 };
+
+extend(IDE_Morph, 'refreshPalette', function(base, shouldIgnorePosition) {
+    base.call(this, shouldIgnorePosition);
+    // When the palette changes, if there's a addCustomBlock button, refresh
+    // the hints to redraw it (probably a bit overkill, but it's clean)
+    if (window.hintProvider.displays.some(function(display) {
+        return display instanceof HighlightDisplay && display.addCustomBlock;
+    })) {
+        window.hintProvider.getHintsFromServer();
+    }
+});
 
 HighlightDisplay.prototype.showDeleteHint = function(data) {
     var node = this.getCode(data.node);

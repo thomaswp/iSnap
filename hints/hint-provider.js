@@ -41,7 +41,7 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
 
     Trace.onCodeChanged = function(code) {
         myself.code = code;
-        myself.getHintsFromServer(code);
+        myself.getHintsFromServer();
     };
 
     Assignment.onChanged(function(assignment) {

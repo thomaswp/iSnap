@@ -270,8 +270,8 @@ HighlightDisplay.prototype.showAddCustomBlockHint = function(data) {
 
     var message = localize(
         'You probably need to make a new block. Do that ' +
-        'by clicking\nthe "Variables" category and click "Make a ' +
-        'Block".'
+        'by clicking\nthe "Variables" category and then click "Make a ' +
+        'block."'
     );
     var callback = this.createStructureHintCallback(true, window.ide, message,
         data.from, data.to);
@@ -284,7 +284,7 @@ HighlightDisplay.prototype.showAddCustomBlockHint = function(data) {
 
     if (!ide.palette || !ide.palette.children[0]) return;
     var buttons = ide.palette.children[0].children.filter(function(child) {
-        return button instanceof PushButtonMorph;
+        return child instanceof PushButtonMorph;
     });
     var createCustomBlock = buttons[buttons.length - 1];
     this.addInsertButton(createCustomBlock, HighlightDisplay.RIGHT, callback);

@@ -272,10 +272,11 @@ HighlightDialogBoxMorph.showHighlights = function() {
 };
 
 extend(StageMorph, 'fireGreenFlagEvent', function(base) {
-    base.call(this);
+    var procs = base.call(this);
     if (HighlightDialogBoxMorph.showOnRun) {
         HighlightDialogBoxMorph.showHighlights();
     }
+    return procs;
 });
 
 extend(BlockMorph, 'mouseClickLeft', function(base) {

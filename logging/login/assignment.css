@@ -20,19 +20,34 @@
 				background: url(loginBackground.png);
 			}
 			#flex-Parent{
+			    display: -webkit-box;
+			    display: -ms-flexbox;
 			    display: flex;
-				align-items: center;
-				justify-content: center;
-				flex-direction: column;
+				-webkit-box-align: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
 			}
 			#blackBar{
 			    width: 100%;
 				background-color: #000000;
 				height: 30px;
 				margin: 0px;
+				display: -webkit-box;
+				display: -ms-flexbox;
 				display: flex;
-				justify-content: space-between;
-				align-items: center;
+				-webkit-box-pack: justify;
+				    -ms-flex-pack: justify;
+				        justify-content: space-between;
+				-webkit-box-align: center;
+				    -ms-flex-align: center;
+				        align-items: center;
 			}
 			#blackBar img{
 			    width: 190px;
@@ -45,10 +60,19 @@
 				margin-right: 25px;
 			}
 			#theBox{
+			    display: -webkit-box;
+			    display: -ms-flexbox;
 			    display: flex;
-				flex-direction: column;
-				justify-content: center;
-				align-items: center;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-box-align: center;
+				    -ms-flex-align: center;
+				        align-items: center;
 				position: fixed;
 				text-align: center;
 				top: 0;
@@ -61,28 +85,55 @@
 			}
 			#theBorder{
 			    box-shadow: 0px 0px 100px rgba(0,0,0,0.3);
+				display: -webkit-box;
+				display: -ms-flexbox;
 				display: flex;
-				flex-direction: column;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
 				background-color: rgb(247, 247, 247);
 				padding-top: 50px;
 				padding-bottom: 30px;
 				border-radius: 6px;
 				border: 7px solid rgb(255, 201, 62);
-				justify-content: center;
-				align-items: center;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-box-align: center;
+				    -ms-flex-align: center;
+				        align-items: center;
 			}
 			#form-flex-Parent{
 			    width: 555px;
+				display: -webkit-box;
+				display: -ms-flexbox;
 				display: flex;
-				flex-direction: column;
-				justify-content: center;
-				align-items: center;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-box-align: center;
+				    -ms-flex-align: center;
+				        align-items: center;
 			}
 			#snapLogo{
+			    display: -webkit-box;
+			    display: -ms-flexbox;
 			    display: flex;
-				flex-direction: column;
-				justify-content: center;
-				align-items: center;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-box-align: center;
+				    -ms-flex-align: center;
+				        align-items: center;
 			}
 			#snapLogo img{
 			    max-width: 50%;
@@ -140,6 +191,7 @@
 				max-width: 450px;
 				font-size: 17px;
 				text-align: justify;
+				-webkit-transition: all 300ms ease-in-out 1s;
 				transition: all 300ms ease-in-out 1s;
 			}
 			.fa-exclamation-circle{
@@ -149,11 +201,14 @@
 			    display: none;
 			}
 			.getFlex{
+			    display: -webkit-box;
+			    display: -ms-flexbox;
 			    display: flex;
 			}
 			#confirm-new{
 			    height: 0px;
 				opacity: 0;
+				-webkit-transition: height 0.2s;
 				transition: height 0.2s;
 				visibility: hidden;
 				padding-left: 4em;
@@ -165,29 +220,55 @@
 				margin-bottom: 0.2em
 			}
 			.getFrames{
-			    animation-name: myframes;
-				animation-duration: 0.3s;
-				animation-timing-function: ease-in-out;
-				animation-delay: 0s;
-				animation-iteration-count: 1;
-				animation-direction: normal;
-				animation-fill-mode: forwards;
-				animation-play-state: running;
+			    -webkit-animation-name: myframes;
+			            animation-name: myframes;
+				-webkit-animation-duration: 0.3s;
+				        animation-duration: 0.3s;
+				-webkit-animation-timing-function: ease-in-out;
+				        animation-timing-function: ease-in-out;
+				-webkit-animation-delay: 0s;
+				        animation-delay: 0s;
+				-webkit-animation-iteration-count: 1;
+				        animation-iteration-count: 1;
+				-webkit-animation-direction: normal;
+				        animation-direction: normal;
+				-webkit-animation-fill-mode: forwards;
+				        animation-fill-mode: forwards;
+				-webkit-animation-play-state: running;
+				        animation-play-state: running;
 			}
 			.getFrames2{
-			    animation-name: myframes2;
-				animation-duration: 0.3s;
-				animation-timing-function: ease-in-out;
-				animation-delay: 0s;
-				animation-iteration-count: 1;
-				animation-direction: normal;
-				animation-fill-mode: normal;
-				animation-play-state: running;
+			    -webkit-animation-name: myframes2;
+			            animation-name: myframes2;
+				-webkit-animation-duration: 0.3s;
+				        animation-duration: 0.3s;
+				-webkit-animation-timing-function: ease-in-out;
+				        animation-timing-function: ease-in-out;
+				-webkit-animation-delay: 0s;
+				        animation-delay: 0s;
+				-webkit-animation-iteration-count: 1;
+				        animation-iteration-count: 1;
+				-webkit-animation-direction: normal;
+				        animation-direction: normal;
+				-webkit-animation-fill-mode: normal;
+				        animation-fill-mode: normal;
+				-webkit-animation-play-state: running;
+				        animation-play-state: running;
+			}
+			@-webkit-keyframes myframes{
+			    0%{ opacity: 0; height: 0; visibility: hidden}
+				50%{opacity: 0}
+				100%{opacity: 1; height: 130px; visibility: visible}
 			}
 			@keyframes myframes{
 			    0%{ opacity: 0; height: 0; visibility: hidden}
 				50%{opacity: 0}
 				100%{opacity: 1; height: 130px; visibility: visible}
+			}
+			@-webkit-keyframes myframes2{
+			    0%{opacity: 1; height: 130px; visibility: visible}
+				20%{opacity: 0}
+				100%{opacity: 0; height: 0px; visibility: hidden}
 			}
 			@keyframes myframes2{
 			    0%{opacity: 1; height: 130px; visibility: visible}
@@ -235,6 +316,7 @@
 				text-decoration: none;
 				background: rgb(98, 194, 19);
 				border-radius: 3px;
+				-webkit-transition: all 300ms;
 				transition: all 300ms;
 				color: white;
 				outline: none;
@@ -248,46 +330,78 @@
 			}
 			.belt-container .belt{
 			    width: 200%;
+				display: -webkit-box;
+				display: -ms-flexbox;
 				display: flex;
+				-webkit-transition: -webkit-transform 0.2s ease-in-out;
+				transition: -webkit-transform 0.2s ease-in-out;
 				transition: transform 0.2s ease-in-out;
+				transition: transform 0.2s ease-in-out, -webkit-transform 0.2s ease-in-out;
 			}
 			.belt-container .state{
 			    width: 50%;
+				display: -webkit-box;
+				display: -ms-flexbox;
 				display: flex;
-			    align-items: center;
-				justify-content: center;
-				flex-direction: column;
+			    -webkit-box-align: center;
+			        -ms-flex-align: center;
+			            align-items: center;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
 			}
 			.belt-container .state-1{
+			    -webkit-transition: -webkit-transform 0.2s ease-in-out;
+			    transition: -webkit-transform 0.2s ease-in-out;
 			    transition: transform 0.2s ease-in-out;
-				transform-origin: center right;
+			    transition: transform 0.2s ease-in-out, -webkit-transform 0.2s ease-in-out;
+				-webkit-transform-origin: center right;
+				        transform-origin: center right;
 			}
 			.state-1 h1{
 			    margin-top: 40px;
 			}
 			.belt-container .state-2{
 			    z-index: 2;
+			    -webkit-transition: all 200ms ease-in-out;
 			    transition: all 200ms ease-in-out;
 			    margin-top: -10px;
 			}
 			.belt-container.is-transitioned .belt{
-			    transform: translateX(-50%);
+			    -webkit-transform: translateX(-50%);
+			            transform: translateX(-50%);
 			}
 			.container{
 			    width: 510px;
 			}
 			.newUserContainer{
+			    display: -webkit-box;
+			    display: -ms-flexbox;
 			    display: flex;
-				justify-content: center;
-				align-items: center;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-box-align: center;
+				    -ms-flex-align: center;
+				        align-items: center;
 			}
 			.newUserContainer span{
 			    padding-left: 4px;
 			}
 			#logout{
 
-				justify-content: space-between;
-				align-items: center;
+				-webkit-box-pack: justify;
+
+				    -ms-flex-pack: justify;
+
+				        justify-content: space-between;
+				-webkit-box-align: center;
+				    -ms-flex-align: center;
+				        align-items: center;
 				text-align: center;
 				width: 100%;
 			}
@@ -300,13 +414,16 @@
 			#display-id-loggedIN{
 				display: hidden;
 				width: 100%;
-				align-items: center;
-				align-self: center;
+				-webkit-box-align: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+				-ms-flex-item-align: center;
+				    -ms-grid-row-align: center;
+				    align-self: center;
 				font-weight: bold;
 			}
 
 			#signed-in-as{
 			    padding-right: 20px;
 			}
-
 

@@ -19,7 +19,7 @@ Assignment.initOrRedirect = function() {
 
     // Also check for a userID
     window.userID = getCookie('snapIDHash');
-    if (window.requireLogin && !userID) {
+    if (window.requireLogin && !userID && window.assignmentID !== 'view') {
         // redirect if the user isn't logged in
         window.location.replace(redirectURL);
     }

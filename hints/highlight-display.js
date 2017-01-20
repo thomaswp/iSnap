@@ -34,7 +34,6 @@ HighlightDisplay.prototype.initDisplay = function() {
     this.highlights = [];
     this.insertButtons = [];
     this.hoverHints = [];
-    // TODO: handle these somehow
     this.hiddenCustomBlockHintRoots = [];
     this.hiddenInsertHints = 0;
     this.addCustomBlock = false;
@@ -99,12 +98,15 @@ HighlightDisplay.prototype.finishedHints = function() {
             this.enabled = false;
             // If no hints were shown, but the user clicked the hint button...
             if (this.forceShowDialog) {
-                if (this.hiddenInsertHints === 0) {
-                    // Tell them no hints are available
-                    this.informNoHints();
-                } else {
-                    // Or show a dialog to confirm they want next-step hints
+                if (this.hiddenInsertHints !== 0) {
+                    // Show a dialog to confirm they want next-step hints
                     this.promptShowInserts();
+                } else if (this.hiddenCustomBlockHintRoots.length !== 0 &&
+                    !BlockEditorMorph.showing) {
+                    this.promptShowBlockHints();
+                } else {
+                    // Or tell them no hints are available
+                    this.informNoHints();
                 }
             }
         }
@@ -113,12 +115,14 @@ HighlightDisplay.prototype.finishedHints = function() {
 };
 
 HighlightDisplay.prototype.promptShowInserts = function() {
+    Trace.log('HighlightDisplay.promptShowInserts');
     var myself = this;
     new DialogBoxMorph(this, function() {
         // If they say yes, show inserts and reshow this
         myself.showInserts = true;
         myself.forceShowDialog = true;
         window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
+        Trace.log('HighlightDisplay.showInsertsFromPrompt');
     }).askYesNo(
         localize('Check Passed'),
         localize (
@@ -129,7 +133,35 @@ HighlightDisplay.prototype.promptShowInserts = function() {
     );
 };
 
+HighlightDisplay.prototype.promptShowBlockHints = function() {
+    Trace.log('HighlightDisplay.promptShowBlockHints');
+    var def = this.hiddenCustomBlockHintRoots[0];
+    var name = def.spec.replace(/%'([^']*)'/g, '[$1]');
+    var myself = this;
+    new DialogBoxMorph(this, function() {
+        Trace.log('HighlightDisplay.showCustomBlockFromPrompt', {
+            'spec': def.spec,
+            'guid': def.guid,
+        });
+        Morph.prototype.trackChanges = false;
+        // Should this be the owning Sprite instead? Hard case to test...
+        editor = new BlockEditorMorph(def, window.ide.currentSprite);
+        editor.popUp();
+        Morph.prototype.trackChanges = true;
+        editor.changed();
+        myself.forceShowDialog = true;
+        window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
+    }).askYesNo(
+        localize('Suggestions for Block'),
+        localize ('I have some suggestions for the block ') +
+            '"' + name + '".\n' +
+            localize('Would you like to open it?'),
+        window.world
+    );
+};
+
 HighlightDisplay.prototype.informNoHints = function() {
+    Trace.log('HighlightDisplay.informNoHints');
     new DialogBoxMorph(this).inform(
         localize('Check Passed'),
         localize('Everything on the screen looks good so far, but remember ' +

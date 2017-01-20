@@ -86,7 +86,7 @@ HighlightDisplay.prototype.finishedHints = function() {
     var dialogShowing = HighlightDialogBoxMorph.showing &&
             !HighlightDialogBoxMorph.showing.destroyed;
     var hintsShown = this.highlights.length + this.insertButtons.length +
-            this.hoverHints.length > 0;
+            this.hoverHints.length;
 
     // If the dialog isn't showing...
     if (!dialogShowing) {
@@ -418,6 +418,7 @@ HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
     if (!(argMorph instanceof ArgMorph)) return;
     if (!this.showInserts) {
         this.hiddenInsertHints++;
+        return;
     }
 
     if (argMorph.contents) {

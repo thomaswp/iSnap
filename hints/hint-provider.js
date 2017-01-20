@@ -138,48 +138,67 @@ HintProvider.prototype.getHintsFromServer = function() {
     xhr.send(this.code);
 };
 
-HintProvider.prototype.showError = function(error) {
-    Trace.logErrorMessage(error);
+HintProvider.prototype.showError = function(message) {
+    Trace.logErrorMessage(message);
     this.displays.forEach(function(display) {
         if (display.enabled) {
-            display.showError(error);
+            display.showError(message);
         }
     });
 };
 
 HintProvider.prototype.processHints = function(json, requestNumber) {
+    // If a more recent request has been fired, wait on that one
+    // This is below the log statement because if we have pending code
+    // changes to log, they'll flush and call a new request, and this one
+    // should then be ignored.
+    if (this.requestNumber != requestNumber) return;
+
+    Trace.log('HintProvider.processHints', hints);
+
+    var hints;
     try {
-        var hints = JSON.parse(json);
-        Trace.log('HintProvider.processHints', hints);
-        // If a more recent request has been fired, wait on that one
-        // This is below the log statement because if we have pending code
-        // changes to log, they'll flush and call a new request, and this one
-        // should then be ignored.
-        if (this.requestNumber != requestNumber) return;
-        for (var i = 0; i < hints.length; i++) {
-            var hint = hints[i];
-            this.displays.forEach(function(display) {
-                if (display.enabled) {
-                    try {
-                        display.showHint(hint);
-                    } catch (e2) {
-                        Trace.logError(e2);
-                    }
-                }
-            });
+        hints = JSON.parse(json);
+    } catch (e) {
+        this.showError('Bad JSON: ' + json);
+        return;
+    }
+
+    var nErrors = 0, nHints = 0;
+    for (var i = 0; i < hints.length; i++) {
+        var hint = hints[i];
+        if (hint.error) {
+            Trace.logError(hint);
+            nErrors++;
+            continue;
         }
         this.displays.forEach(function(display) {
             if (display.enabled) {
                 try {
-                    display.finishedHints();
+                    display.showHint(hint);
+                    nHints++;
                 } catch (e2) {
                     Trace.logError(e2);
+                    nErrors++;
                 }
             }
         });
-        this.lastHints = hints;
-    } catch (e) {
-        Trace.logError(e);
+    }
+    this.displays.forEach(function(display) {
+        if (display.enabled) {
+            try {
+                display.finishedHints();
+            } catch (e2) {
+                Trace.logError(e2);
+            }
+        }
+    });
+    this.lastHints = hints;
+
+    if (nErrors > 0 && nHints == 0) {
+        // It's possible to have some hints and errors, but if we only have
+        // errors, we need to have the hint providers show an error message
+        this.showError('Error generating hints!');
     }
 };
 

@@ -213,12 +213,18 @@
 				visibility: hidden;
 				padding-left: 4em;
 				padding-right: 4em;
+				max-width: 390px;
 			}
 			#confirm-new ul {
 				text-align: left;
 				margin-top: 0.2em;
 				margin-bottom: 0.2em
 			}
+
+			#confirm-new ul li:first-child{
+			    margin-bottom: 5px;
+			}
+
 			.getFrames{
 			    -webkit-animation-name: myframes;
 			            animation-name: myframes;

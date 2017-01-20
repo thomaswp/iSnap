@@ -23,6 +23,7 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     this.labelString = 'Checking your Work';
     this.createLabel();
     this.autoClear = autoClear;
+    this.showInserts = showInserts;
 
     var body = new AlignmentMorph('column', this.padding);
     body.alignment = 'left';
@@ -137,6 +138,15 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
         });
     body.add(checkAutoClear);
 
+    // By default, show() shows all children, so we must avoid this for
+    // hidden frames where the visibility is manually controlled
+    extendObject(mainFrame, 'show', function(base) {
+        if (!myself.showInserts) base.call(this);
+    });
+    extendObject(insertFrame, 'show', function(base) {
+        if (myself.showInserts) base.call(this);
+    });
+
     body.fixLayout();
     this.addBody(body);
     body.drawNew();
@@ -148,11 +158,11 @@ HighlightDialogBoxMorph.prototype.destroy = function() {
         HighlightDialogBoxMorph.uber.destroy.call(this);
         this.destroyed = true;
         HighlightDisplay.stopHighlight();
-        this.setShowInserts(false);
+        this.setDisplayShowInserts(false);
     }
 };
 
-HighlightDialogBoxMorph.prototype.setShowInserts = function(show) {
+HighlightDialogBoxMorph.prototype.setDisplayShowInserts = function(show) {
     window.hintProvider.displays.forEach(function(display) {
         if (!display instanceof HighlightDisplay) return;
         display.showInserts = show;
@@ -201,19 +211,19 @@ HighlightDialogBoxMorph.prototype.nextButtonText = function(showInserts) {
 };
 
 HighlightDialogBoxMorph.prototype.toggleInsert = function() {
-    var showInserts = !this.insertFrame.isVisible;
-    Trace.log('HighlightDialogBoxMorph.toggleInsert', showInserts);
-    if (showInserts) {
+    this.showInserts = !this.showInserts;
+    Trace.log('HighlightDialogBoxMorph.toggleInsert', this.showInserts);
+    if (this.showInserts) {
         this.insertFrame.show();
         this.mainFrame.hide();
     } else {
         this.insertFrame.hide();
         this.mainFrame.show();
     }
-    this.insertButton.labelString = this.nextButtonText(showInserts);
+    this.insertButton.labelString = this.nextButtonText(this.showInserts);
     this.insertButton.createLabel();
     this.insertButton.fixLayout();
-    this.setShowInserts(showInserts);
+    this.setDisplayShowInserts(this.showInserts);
     this.body.fixLayout();
     this.body.drawNew();
     this.fixLayout();

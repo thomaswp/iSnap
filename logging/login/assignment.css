@@ -29,6 +29,7 @@
 				-webkit-box-pack: center;
 				    -ms-flex-pack: center;
 				        justify-content: center;
+				-webkit-justify-content: center;
 				-webkit-box-orient: vertical;
 				-webkit-box-direction: normal;
 				    -ms-flex-direction: column;
@@ -45,6 +46,7 @@
 				-webkit-box-pack: justify;
 				    -ms-flex-pack: justify;
 				        justify-content: space-between;
+				-webkit-justify-content: space-between;
 				-webkit-box-align: center;
 				    -ms-flex-align: center;
 				        align-items: center;
@@ -70,6 +72,7 @@
 				-webkit-box-pack: center;
 				    -ms-flex-pack: center;
 				        justify-content: center;
+				-webkit-justify-content: center;
 				-webkit-box-align: center;
 				    -ms-flex-align: center;
 				        align-items: center;
@@ -100,6 +103,7 @@
 				-webkit-box-pack: center;
 				    -ms-flex-pack: center;
 				        justify-content: center;
+				-webkit-justify-content: center;
 				-webkit-box-align: center;
 				    -ms-flex-align: center;
 				        align-items: center;
@@ -115,6 +119,7 @@
 				        flex-direction: column;
 				-webkit-box-pack: center;
 				    -ms-flex-pack: center;
+				-webkit-justify-content: center;
 				        justify-content: center;
 				-webkit-box-align: center;
 				    -ms-flex-align: center;
@@ -130,6 +135,7 @@
 				        flex-direction: column;
 				-webkit-box-pack: center;
 				    -ms-flex-pack: center;
+				-webkit-justify-content: center;
 				        justify-content: center;
 				-webkit-box-align: center;
 				    -ms-flex-align: center;
@@ -224,7 +230,6 @@
 			#confirm-new ul li:first-child{
 			    margin-bottom: 5px;
 			}
-
 			.getFrames{
 			    -webkit-animation-name: myframes;
 			            animation-name: myframes;
@@ -355,6 +360,7 @@
 				-webkit-box-pack: center;
 				    -ms-flex-pack: center;
 				        justify-content: center;
+				-webkit-justify-content: center;
 				-webkit-box-orient: vertical;
 				-webkit-box-direction: normal;
 				    -ms-flex-direction: column;
@@ -391,6 +397,7 @@
 				-webkit-box-pack: center;
 				    -ms-flex-pack: center;
 				        justify-content: center;
+				-webkit-justify-content: center;
 				-webkit-box-align: center;
 				    -ms-flex-align: center;
 				        align-items: center;
@@ -399,12 +406,10 @@
 			    padding-left: 4px;
 			}
 			#logout{
-
 				-webkit-box-pack: justify;
-
 				    -ms-flex-pack: justify;
-
 				        justify-content: space-between;
+				-webkit-justify-content: space-between;
 				-webkit-box-align: center;
 				    -ms-flex-align: center;
 				        align-items: center;

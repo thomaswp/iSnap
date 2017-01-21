@@ -175,13 +175,15 @@ HighlightDisplay.prototype.showHint = function(hint) {
 
     var action = hint.data.action;
 
-    var parent = this.getCode(hint.data.parent);
-    if (parent instanceof CustomBlockDefinition) {
-        // For hints that are in hiddent custom blocks, we save the
-        // parents, but don't show it immediately
-        this.hiddenCustomBlockHintRoots.push(parent);
-        // Allow insert hints, since the candidate could be outside the block
-        if (action !== 'insert') return;
+    if (!hint.data.missingParent) {
+        var parent = this.getCode(hint.data.parent);
+        if (parent instanceof CustomBlockDefinition) {
+            // For hints that are in hiddent custom blocks, we save the
+            // parents, but don't show it immediately
+            this.hiddenCustomBlockHintRoots.push(parent);
+            // Allow insert hints, since the candidate could be visible
+            if (action !== 'insert') return;
+        }
     }
 
     switch (action) {
@@ -357,19 +359,22 @@ HighlightDisplay.prototype.showReorderHint = function(data) {
 };
 
 HighlightDisplay.prototype.showInsertHint = function(data) {
-    var parent = this.getCode(data.parent);
-    if (parent == null) {
-        Trace.logErrorMessage('Unknown parent in insert hint');
-        return;
-    }
     // Don't worry about inserting scripts;
     if (data.type === 'script') return;
 
-    if (data.parent.label === 'snapshot' && data.type === 'customBlock') {
-        this.showAddCustomBlockHint(data);
-        return;
+    var parent = null;
+    // The parent may be missing (and null) if this insert is for code that
+    // hasn't been written yet, but we still show the candidate highlight
+    // in this case.
+    if (!data.missingParent) {
+        parent = this.getCode(data.parent);
+        if (parent == null) {
+            Trace.logErrorMessage('Unknown parent in insert hint');
+            return;
+        }
     }
 
+    // Show candidate highlighting
     var candidate = null;
     if (data.candidate && data.candidate.label !== 'literal' &&
             data.candidate.label !== 'var') {
@@ -379,6 +384,15 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
             return;
         }
         this.addHighlight(candidate, HighlightDisplay.moveColor, true);
+    }
+
+    // At this point, we quit if the parent is missing
+    if (!parent) return;
+
+    // If a hint inserts a custom block, handle that separately
+    if (data.parent.label === 'snapshot' && data.type === 'customBlock') {
+        this.showAddCustomBlockHint(data);
+        return;
     }
 
     // We can still highlight candidates for hidden custom blocks, but

@@ -8,6 +8,7 @@ Highlight:
   * Test on existing hint requests
   * Limit plus buttons
   * Reorder/move needs a hint attached
+  * Possibly a different color for replacements?
 * Reach:
   * Save preferences
   * Show list insert hints as a dialog

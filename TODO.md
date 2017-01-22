@@ -6,6 +6,8 @@ Highlight:
   * Mabe hide highlights on other sprites so it doesn't show the dialog
 * TODO:
   * Test on existing hint requests
+  * Limit plus buttons
+  * Reorder/move needs a hint attached
 * Reach:
   * Save preferences
   * Show list insert hints as a dialog

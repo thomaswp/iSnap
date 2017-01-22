@@ -419,7 +419,6 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
             Trace.logErrorMessage('Unknown replacement in insert hint: ' +
                 data.replacement.label);
         }
-        return;
     }
 
     var callback;

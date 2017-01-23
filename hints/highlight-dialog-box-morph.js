@@ -247,7 +247,7 @@ HighlightDialogBoxMorph.prototype.toggleAutoClear = function() {
 };
 
 HighlightDialogBoxMorph.showHighlights = function() {
-    if (window.hintProvider) {
+    if (window.hintProvider && window.hintProvider.isActive()) {
         var show = function() {
             Trace.log('HighlightDialogBoxMorph.showOnRun');
             HighlightDisplay.startHighlight();

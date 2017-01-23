@@ -1,6 +1,7 @@
 Highlight:
 * Bugs:
   * Duplicating a single block with a full-script highlight has a graphical bug
+  * Duplicating a full script with a plus button creates graphical lag
   * Some artifacts show up when dragging highlighted blocks
   * Something is trying to highlight ScriptsMorphs and SpriteMorphs
   * Mabe hide highlights on other sprites so it doesn't show the dialog

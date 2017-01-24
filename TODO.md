@@ -9,7 +9,6 @@ Highlight:
 * TODO:
   * Test on existing hint requests
   * Limit plus buttons
-  * Reorder/move reporter blocks need hover indicators
   * Possibly a different color for replacements?
 * Reach:
   * Save preferences

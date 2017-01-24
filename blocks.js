@@ -5255,7 +5255,11 @@ ScriptsMorph.prototype.step = function () {
 
 ScriptsMorph.prototype.showReporterDropFeedback = function (block, hand) {
     var target = this.closestInput(block, hand);
+    this.showReporterDropFeedbackFromTarget(block, target);
+};
 
+ScriptsMorph.prototype.showReporterDropFeedbackFromTarget = function (block,
+        target) {
     if (target === null) {
         return null;
     }

@@ -426,6 +426,10 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
                     parent.enclosingBlock(), candidate, data.from, data.to,
                     otherBlocks);
                 this.addHoverHint(replacement, onClick);
+                if (candidate) {
+                    this.addHoverInsertIndicator(candidate,
+                        data.replacement.parent, data.replacement.index);
+                }
             }
         } else {
             Trace.logErrorMessage('Unknown replacement in insert hint: ' +
@@ -597,6 +601,13 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
     var parent = this.getCode(parentRef);
     if (!parent) {
         Trace.logErrorMessage('Unknown parent in hover insert indicator');
+        return;
+    }
+
+    var scriptParent = block.parentThatIsA(ScriptsMorph);
+    if (!scriptParent) return;
+    if (!scriptParent.hoverBlocks) {
+        scriptParent.hoverBlocks = [];
     }
 
     if (parentRef.label === 'script') {
@@ -627,27 +638,35 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
                 };
             }
         };
-        var scriptParent = block.parentThatIsA(ScriptsMorph);
-        if (scriptParent) {
-            if (!scriptParent.hoverBlocks) {
-                scriptParent.hoverBlocks = [];
-            }
-            scriptParent.hoverBlocks.push(block);
+    } else if (parent instanceof BlockMorph ||
+            parent instanceof MultiArgMorph) {
+        var input = parent.inputs()[index];
+        if (!input || !(input instanceof ArgMorph)) {
+            Trace.logErrorMessage('Bad index in insert indicator');
+            return;
         }
-        this.hoverInsertIndicatorBlocks.push(block);
+        block.feedbackInput = input;
     } else {
-        // TODO: Handle parameters
+        Trace.logErrorMessage('Unknown parent type: ' + parent);
+        return;
     }
+    scriptParent.hoverBlocks.push(block);
+    this.hoverInsertIndicatorBlocks.push(block);
 };
 
 extend(ScriptsMorph, 'step', function(base) {
     base.call(this);
     if (this.hoverBlocks && this.hoverBlocks.length > 0) {
         var topBlock = this.topMorphAt(window.world.hand.position());
-        if (topBlock) {
+        if (topBlock && !(topBlock instanceof PushButtonMorph)) {
             topBlock = topBlock.parentThatIsA(BlockMorph);
             if (this.hoverBlocks.indexOf(topBlock) >= 0) {
-                this.showCommandDropFeedback(topBlock.feedbackBlock);
+                if (topBlock.feedbackBlock) {
+                    this.showCommandDropFeedback(topBlock.feedbackBlock);
+                } else if (topBlock.feedbackInput) {
+                    this.showReporterDropFeedbackFromTarget(topBlock,
+                        topBlock.feedbackInput);
+                }
             }
         }
     }

@@ -4,11 +4,12 @@ Highlight:
   * Duplicating a full script with a plus button creates graphical lag
   * Some artifacts show up when dragging highlighted blocks
   * Something is trying to highlight ScriptsMorphs and SpriteMorphs
-  * Mabe hide highlights on other sprites so it doesn't show the dialog
+  * Maybe hide highlights on other sprites so it doesn't show the dialog
+  * Check my work prompt shouldn't happen on run if already showing
 * TODO:
   * Test on existing hint requests
   * Limit plus buttons
-  * Reorder/move needs a hint attached
+  * Reorder/move reporter blocks need hover indicators
   * Possibly a different color for replacements?
 * Reach:
   * Save preferences

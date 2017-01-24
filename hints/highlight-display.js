@@ -35,6 +35,7 @@ HighlightDisplay.prototype.initDisplay = function() {
     this.insertButtons = [];
     this.hoverHints = [];
     this.hiddenCustomBlockHintRoots = [];
+    this.hoverInsertIndicatorBlocks = [];
     this.hiddenInsertHints = 0;
     this.addCustomBlock = false;
 
@@ -253,6 +254,16 @@ HighlightDisplay.prototype.clear = function() {
     });
     this.hoverHints = [];
 
+    this.hoverInsertIndicatorBlocks.forEach(function(block) {
+        block.feedbackBlock = null;
+    });
+    window.ide.allChildren().forEach(function(child) {
+        if (child instanceof ScriptsMorph) {
+            child.hoverBlocks = null;
+        }
+    });
+    this.hoverInsertIndicatorBlocks = [];
+
     this.hiddenCustomBlockHintRoots = [];
     this.hiddenInsertHints = 0;
     this.addCustomBlock = false;
@@ -356,6 +367,7 @@ HighlightDisplay.prototype.showReorderHint = function(data) {
     // Don't worry about reordering scripts or literals
     if (data.node.label === 'script' || data.node.label === 'literal') return;
     this.addHighlight(node, HighlightDisplay.moveColor, true);
+    this.addHoverInsertIndicator(node, data.parent, data.index);
 };
 
 HighlightDisplay.prototype.showInsertHint = function(data) {
@@ -433,16 +445,10 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         // Increase the hint index by 1 if there's a PrototypeHatBlock
         if (parent instanceof PrototypeHatBlockMorph) index++;
 
-        if (index === 0) {
-            this.addInsertButton(parent, HighlightDisplay.TOP_LEFT, callback);
-        } else {
-            if (parent instanceof CSlotMorph) parent = parent.children[0];
-            var precedingBlock = parent;
-            for (var i = 0; i < index - 1 && precedingBlock != null; i++) {
-                precedingBlock = precedingBlock.nextBlock();
-            }
-            this.addInsertButton(precedingBlock, HighlightDisplay.BOTTOM_LEFT,
-                callback);
+        var insertRef = this.getInsertReference(parent, index);
+        this.addInsertButton(insertRef.block, insertRef.position, callback);
+        if (candidate) {
+            this.addHoverInsertIndicator(candidate, data.parent, index);
         }
     } else if (data.parent.label === 'customBlock' &&
             parent instanceof ScriptsMorph) {
@@ -457,6 +463,22 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         // console.log(data.parent.label);
         // TODO: handle list inserts, which won't be in scripts
     }
+};
+
+HighlightDisplay.prototype.getInsertReference = function(parent, index) {
+    var block = parent, position = HighlightDisplay.BOTTOM_LEFT;
+    if (index === 0) {
+        position = HighlightDisplay.TOP_LEFT;
+    } else {
+        if (block instanceof CSlotMorph) block = block.children[0];
+        for (var i = 0; i < index - 1 && block != null; i++) {
+            block = block.nextBlock();
+        }
+    }
+    return {
+        'block': block,
+        'position': position,
+    };
 };
 
 HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
@@ -568,3 +590,65 @@ HighlightDisplay.prototype.addPlusHintButton = function(parent, callback) {
     if (!lastPlus) return;
     this.addInsertButton(lastPlus, HighlightDisplay.ABOVE, callback);
 };
+
+HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
+        index) {
+
+    var parent = this.getCode(parentRef);
+    if (!parent) {
+        Trace.logErrorMessage('Unknown parent in hover insert indicator');
+    }
+
+    if (parentRef.label === 'script') {
+        var insertRef = this.getInsertReference(parent, index);
+        var isBottom = insertRef.position === HighlightDisplay.BOTTOM_LEFT;
+        var attachBlock = insertRef.block;
+        var attachPointFunction;
+        var attachType;
+        var attachLocation = isBottom ? 'bottom' : 'top';
+        if (attachBlock instanceof CommandSlotMorph) {
+            attachPoint = attachBlock.slotAttachPoint;
+            attachType = 'slot';
+        } else {
+            if (isBottom) {
+                attachPointFunction = attachBlock.bottomAttachPoint;
+            } else {
+                attachPointFunction = attachBlock.topAttachPoint;
+            }
+            attachType = 'block';
+        }
+        block.feedbackBlock =  {
+            closestAttachTarget: function() {
+                return {
+                    point: attachPointFunction.call(attachBlock),
+                    element: attachBlock,
+                    type: attachType,
+                    location: attachLocation,
+                };
+            }
+        };
+        var scriptParent = block.parentThatIsA(ScriptsMorph);
+        if (scriptParent) {
+            if (!scriptParent.hoverBlocks) {
+                scriptParent.hoverBlocks = [];
+            }
+            scriptParent.hoverBlocks.push(block);
+        }
+        this.hoverInsertIndicatorBlocks.push(block);
+    } else {
+        // TODO: Handle parameters
+    }
+};
+
+extend(ScriptsMorph, 'step', function(base) {
+    base.call(this);
+    if (this.hoverBlocks && this.hoverBlocks.length > 0) {
+        var topBlock = this.topMorphAt(window.world.hand.position());
+        if (topBlock) {
+            topBlock = topBlock.parentThatIsA(BlockMorph);
+            if (this.hoverBlocks.indexOf(topBlock) >= 0) {
+                this.showCommandDropFeedback(topBlock.feedbackBlock);
+            }
+        }
+    }
+});

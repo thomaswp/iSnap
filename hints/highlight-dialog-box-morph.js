@@ -76,7 +76,8 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
 
     addText(
         'YELLOW highlighted blocks are probably part of ' +
-        'the solution, but need to be moved or reordered:',
+        'the solution, but need to be moved or reordered. ' +
+        'Hover over them to see where to move them:',
         null, mainFrame
     );
     var moveBlocks = new AlignmentMorph('row', this.padding);

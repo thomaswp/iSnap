@@ -388,14 +388,16 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
 
     // Show candidate highlighting
     var candidate = null;
-    if (data.candidate && data.candidate.label !== 'literal' &&
-            data.candidate.label !== 'var') {
+    if (data.candidate && data.candidate.label !== 'literal') {
         candidate = this.getCode(data.candidate);
+        if (!(candidate instanceof BlockMorph)) {
+            candidate = null;
+        }
         if (!candidate) {
             Trace.logErrorMessage('Unknown candidate for insert hint');
-            return;
+        } else {
+            this.addHighlight(candidate, HighlightDisplay.moveColor, true);
         }
-        this.addHighlight(candidate, HighlightDisplay.moveColor, true);
     }
 
     // At this point, we quit if the parent is missing

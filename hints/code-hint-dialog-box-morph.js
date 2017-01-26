@@ -188,9 +188,9 @@ CodeHintDialogBoxMorph.prototype.createBlock =
 function(selector, parent, numArgs) {
     numArgs = numArgs | 0;
     var param;
-    if (selector === 'var') {
+    if (selector === 'var' || selector === 'reportGetVar') {
         // Create variable (getter) blocks
-        param = SpriteMorph.prototype.variableBlock(selector);
+        param = SpriteMorph.prototype.variableBlock('var');
         param.isDraggable = false;
     } else if (selector == 'prototypeHatBlock') {
         // Create custom block header blocks
@@ -216,6 +216,7 @@ function(selector, parent, numArgs) {
     }
     if (param == null) {
         Trace.logErrorMessage('Cannot initialize selector: ' + selector);
+        return null;
     }
 
     // Make sure the block doesn't respond to menus and clicks

@@ -5,15 +5,18 @@ Highlight:
   * Some artifacts show up when dragging highlighted blocks
   * Something is trying to highlight ScriptsMorphs and SpriteMorphs
   * Maybe hide highlights on other sprites so it doesn't show the dialog
+  * Hint buttons can overlap too much
 * TODO:
   * Test on existing hint requests
   * Limit plus buttons
+  * Speed up a lot on Firefox!
 * Reach:
   * Save preferences
   * Show list insert hints as a dialog
   * Possibly a different color for replacements?
   * On insert hints, show deleted code highlights or faded, etc.
   * Make a more uniform way of logging node IDs
+  * [Server] Custom block side scripts should be able to be candidates
 
 UI:
 * Fix parent.adjustBounds bug in HintBar

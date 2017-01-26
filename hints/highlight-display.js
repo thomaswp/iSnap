@@ -256,6 +256,7 @@ HighlightDisplay.prototype.clear = function() {
 
     this.hoverInsertIndicatorBlocks.forEach(function(block) {
         block.feedbackBlock = null;
+        block.feedbackInput = null;
     });
     window.ide.allChildren().forEach(function(child) {
         if (child instanceof ScriptsMorph) {
@@ -606,11 +607,7 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
         return;
     }
 
-    var scriptParent = block.parentThatIsA(ScriptsMorph);
-    if (!scriptParent) return;
-    if (!scriptParent.hoverBlocks) {
-        scriptParent.hoverBlocks = [];
-    }
+    var scriptParent;
 
     if (parentRef.label === 'script') {
         var insertRef = this.getInsertReference(parent, index);
@@ -640,6 +637,7 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
                 };
             }
         };
+        scriptParent = attachBlock.parentThatIsA(ScriptsMorph);
     } else if (parent instanceof BlockMorph ||
             parent instanceof MultiArgMorph) {
         var input = parent.inputs()[index];
@@ -648,9 +646,14 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
             return;
         }
         block.feedbackInput = input;
+        scriptParent = input.parentThatIsA(ScriptsMorph);
     } else {
         Trace.logErrorMessage('Unknown parent type: ' + parent);
         return;
+    }
+    if (!scriptParent) return;
+    if (!scriptParent.hoverBlocks) {
+        scriptParent.hoverBlocks = [];
     }
     scriptParent.hoverBlocks.push(block);
     this.hoverInsertIndicatorBlocks.push(block);
@@ -659,8 +662,8 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
 extend(ScriptsMorph, 'step', function(base) {
     base.call(this);
     if (this.hoverBlocks && this.hoverBlocks.length > 0) {
-        var topBlock = this.topMorphAt(window.world.hand.position());
-        if (topBlock && !(topBlock instanceof PushButtonMorph)) {
+        var topBlock = window.ide.topMorphAt(window.world.hand.position());
+        if (topBlock && !topBlock.parentThatIsA(PushButtonMorph)) {
             topBlock = topBlock.parentThatIsA(BlockMorph);
             if (this.hoverBlocks.indexOf(topBlock) >= 0) {
                 if (topBlock.feedbackBlock) {

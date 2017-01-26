@@ -248,37 +248,39 @@ HighlightDialogBoxMorph.prototype.toggleAutoClear = function() {
 };
 
 HighlightDialogBoxMorph.showHighlights = function() {
-    if (window.hintProvider && window.hintProvider.isActive()) {
-        var show = function() {
-            Trace.log('HighlightDialogBoxMorph.showOnRun');
-            HighlightDisplay.startHighlight();
-        };
-        if (HighlightDialogBoxMorph.firstShowOnRun) {
-            Trace.log('HighlightDialogBoxMorph.promptShowOnRun');
-            HighlightDialogBoxMorph.firstShowOnRun = false;
-            var dialog = new DialogBoxMorph(null, function() {
-                // Treat as if the button was clicked
-                window.hintProvider.displays.forEach(function(display) {
-                    display.forceShowDialog = true;
-                });
-                show();
+    if (!(window.hintProvider && window.hintProvider.isActive())) return;
+    var showing = HighlightDialogBoxMorph.showing;
+    if (showing && !showing.destroyed) return;
+
+    var show = function() {
+        Trace.log('HighlightDialogBoxMorph.showOnRun');
+        HighlightDisplay.startHighlight();
+    };
+    if (HighlightDialogBoxMorph.firstShowOnRun) {
+        Trace.log('HighlightDialogBoxMorph.promptShowOnRun');
+        HighlightDialogBoxMorph.firstShowOnRun = false;
+        var dialog = new DialogBoxMorph(null, function() {
+            // Treat as if the button was clicked
+            window.hintProvider.displays.forEach(function(display) {
+                display.forceShowDialog = true;
             });
-            extendObject(dialog, 'cancel', function(base) {
-                Trace.log('HighlightDialogBoxMorph.cancelShowOnRun');
-                HighlightDialogBoxMorph.showOnRun = false;
-                base.call(this);
-            });
-            dialog.askYesNo(
-                localize('Checking your Work'),
-                localize(
-                    'When you run your code, I can check your work for ' +
-                    'possible \nmistakes and make suggestions. Do you want ' +
-                    'to enable this?'),
-                window.world
-            );
-        } else {
             show();
-        }
+        });
+        extendObject(dialog, 'cancel', function(base) {
+            Trace.log('HighlightDialogBoxMorph.cancelShowOnRun');
+            HighlightDialogBoxMorph.showOnRun = false;
+            base.call(this);
+        });
+        dialog.askYesNo(
+            localize('Checking your Work'),
+            localize(
+                'When you run your code, I can check your work for ' +
+                'possible \nmistakes and make suggestions. Do you want ' +
+                'to enable this?'),
+            window.world
+        );
+    } else {
+        show();
     }
 };
 

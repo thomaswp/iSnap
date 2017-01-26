@@ -5,15 +5,14 @@ Highlight:
   * Some artifacts show up when dragging highlighted blocks
   * Something is trying to highlight ScriptsMorphs and SpriteMorphs
   * Maybe hide highlights on other sprites so it doesn't show the dialog
-  * Check my work prompt shouldn't happen on run if already showing
 * TODO:
   * Test on existing hint requests
   * Limit plus buttons
-  * Possibly a different color for replacements?
 * Reach:
   * Save preferences
   * Show list insert hints as a dialog
-  * Find a better way of doing structure hints
+  * Possibly a different color for replacements?
+  * On insert hints, show deleted code highlights or faded, etc.
   * Make a more uniform way of logging node IDs
 
 UI:

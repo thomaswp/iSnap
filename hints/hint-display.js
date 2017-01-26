@@ -332,7 +332,9 @@ HintDisplay.showLoggedHint = function(data) {
     } else if (type === 'ScriptHint') {
         fromList = data.fromList || [data.from];
         var parent = null;
-        if (data.parentID) {
+        if (data.parentSelector) {
+            parent = data.parentSelector;
+        } else if (data.parentID) {
             parent = ide.allChildren().filter(function(x) {
                 return x instanceof BlockMorph && x.id === data.parentID;
             })[0] || null;

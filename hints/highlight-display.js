@@ -354,7 +354,8 @@ HighlightDisplay.prototype.showDeleteHint = function(data) {
         return;
     }
     // Ignore variable and literal deletion
-    if (data.node.label === 'var' || data.node.label === 'literal') return;
+    if (data.node.label === 'var' || data.node.label === 'literal' ||
+            data.node.label === 'customBlock') return;
     this.addHighlight(node, HighlightDisplay.deleteColor,
         data.node.label !== 'script');
 };

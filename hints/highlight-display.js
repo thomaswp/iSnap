@@ -621,7 +621,7 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
         var attachType;
         var attachLocation = isBottom ? 'bottom' : 'top';
         if (attachBlock instanceof CommandSlotMorph) {
-            attachPoint = attachBlock.slotAttachPoint;
+            attachPointFunction = attachBlock.slotAttachPoint;
             attachType = 'slot';
         } else {
             if (isBottom) {

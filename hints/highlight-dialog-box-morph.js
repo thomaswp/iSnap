@@ -108,7 +108,7 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     insertFrame.alignment = 'left';
 
     addText(
-        'BLUE highlighted inputs probably need a new block added to them. ' +
+        'BLUE highlighted inputs may need a new block added to them. ' +
         'Click on the input to get a suggestion.',
         null, insertFrame
     );
@@ -117,7 +117,7 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
         HighlightDisplay.insertColor);
 
     addText(
-        'BLUE [+] buttons will appear where you probably need to add a new ' +
+        'BLUE [+] buttons will appear where you may need to add a new ' +
         'block to a script. Click on the button for a suggestion.',
         null, insertFrame
     );

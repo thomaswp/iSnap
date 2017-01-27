@@ -454,9 +454,12 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         if (parent instanceof PrototypeHatBlockMorph) index++;
 
         var insertRef = this.getInsertReference(parent, index);
-        this.addInsertButton(insertRef.block, insertRef.position, callback);
-        if (candidate) {
-            this.addHoverInsertIndicator(candidate, data.parent, index);
+        // Don't show insert on scripts that are just a ReporterBlockMorph
+        if (!(insertRef.block instanceof ReporterBlockMorph)) {
+            this.addInsertButton(insertRef.block, insertRef.position, callback);
+            if (candidate) {
+                this.addHoverInsertIndicator(candidate, data.parent, index);
+            }
         }
     } else if (data.parent.label === 'customBlock' &&
             parent instanceof ScriptsMorph) {

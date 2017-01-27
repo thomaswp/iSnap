@@ -80,6 +80,8 @@ HintDisplay.prototype.getCode = function(ref) {
     var label = ref.label;
     var index = ref.index;
 
+    var nVars, nScripts;
+
     switch (ref.parent.label) {
     case 'snapshot':
         if (label == 'stage')
@@ -91,14 +93,17 @@ HintDisplay.prototype.getCode = function(ref) {
             return parent.globalVariables.vars;
         break;
     case 'stage':
+        nVars = Object.keys(parent.variables.vars).length;
+        nScripts = parent.scripts.children.length;
+        var nCustomBlocks = parent.customBlocks.length;
         if (label == 'sprite') {
             return parent.children.filter(function(child) {
                 return child instanceof SpriteMorph;
-            })[index];
+            })[index - nVars - nScripts - nCustomBlocks];
         }
     case 'sprite':
-        var nVars = Object.keys(parent.variables.vars).length;
-        var nScripts = parent.scripts.children.length;
+        nVars = Object.keys(parent.variables.vars).length;
+        nScripts = parent.scripts.children.length;
         if (label == 'var')
             return parent.variables.vars;
         else if (label == 'script')

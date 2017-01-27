@@ -349,13 +349,13 @@ extend(IDE_Morph, 'refreshPalette', function(base, shouldIgnorePosition) {
 
 HighlightDisplay.prototype.showDeleteHint = function(data) {
     var node = this.getCode(data.node);
+    // Ignore variable and literal deletion
+    if (data.node.label === 'var' || data.node.label === 'literal' ||
+            data.node.label === 'customBlock') return;
     if (node == null) {
         Trace.logErrorMessage('Unknown node in delete hint');
         return;
     }
-    // Ignore variable and literal deletion
-    if (data.node.label === 'var' || data.node.label === 'literal' ||
-            data.node.label === 'customBlock') return;
     this.addHighlight(node, HighlightDisplay.deleteColor,
         data.node.label !== 'script');
 };
@@ -392,12 +392,15 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
     var candidate = null;
     if (data.candidate && data.candidate.label !== 'literal') {
         candidate = this.getCode(data.candidate);
-        if (!(candidate instanceof BlockMorph)) {
+        if (candidate instanceof CustomBlockDefinition) {
+            // Don't show hidden candidates, but don't error either
+            candidate = null;
+        } else if (!(candidate instanceof BlockMorph)) {
+            // Otherwise, if it's null or not a BlockMorph, error
+            Trace.logErrorMessage('Unknown candidate for insert hint');
             candidate = null;
         }
-        if (!candidate) {
-            Trace.logErrorMessage('Unknown candidate for insert hint');
-        } else {
+        if (candidate) {
             this.addHighlight(candidate, HighlightDisplay.moveColor, true);
         }
     }

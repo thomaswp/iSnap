@@ -10,6 +10,7 @@ HighlightDialogBoxMorph.uber = DialogBoxMorph.prototype;
 
 HighlightDialogBoxMorph.showOnRun = true;
 HighlightDialogBoxMorph.firstShowOnRun = true;
+HighlightDialogBoxMorph.minimized = false;
 
 HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
         autoClear) {
@@ -18,6 +19,8 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     this.key = 'highlightDialog';
     this.insertButton =
         this.addButton('toggleInsert', this.nextButtonText(showInserts));
+    this.minimizeButton = this.addButton('toggleMinimized',
+        this.minimizeButtonText());
     this.addButton('ok', localize('Done'));
 
     this.labelString = 'Checking your Work';
@@ -25,8 +28,11 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     this.autoClear = autoClear;
     this.showInserts = showInserts;
 
+    var bodyWrapper = new AlignmentMorph('column', this.padding);
+
     var body = new AlignmentMorph('column', this.padding);
     body.alignment = 'left';
+    body.isVisible = !HighlightDialogBoxMorph.minimized;
 
     var fontSize = 13;
     var width = 430;
@@ -62,7 +68,7 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     addText(
         "I'm checking your work using previous students' solutions...\n" +
             '*These are suggestions and do not guarantee a correct solution!*',
-        true
+        true, bodyWrapper
     );
 
     var mainFrame = new AlignmentMorph('column', this.padding);
@@ -147,10 +153,16 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     extendObject(insertFrame, 'show', function(base) {
         if (myself.showInserts) base.call(this);
     });
-
+    extendObject(body, 'show', function(base) {
+        if (!HighlightDialogBoxMorph.minimized) base.call(this);
+    });
     body.fixLayout();
-    this.addBody(body);
-    body.drawNew();
+    this.bodyFrame = body;
+
+    bodyWrapper.add(body);
+    bodyWrapper.fixLayout();
+    this.addBody(bodyWrapper);
+    bodyWrapper.drawNew();
 };
 
 HighlightDialogBoxMorph.prototype.destroy = function() {
@@ -225,6 +237,24 @@ HighlightDialogBoxMorph.prototype.toggleInsert = function() {
     this.insertButton.createLabel();
     this.insertButton.fixLayout();
     this.setDisplayShowInserts(this.showInserts);
+    this.body.fixLayout();
+    this.body.drawNew();
+    this.fixLayout();
+    this.drawNew();
+};
+
+HighlightDialogBoxMorph.prototype.minimizeButtonText = function() {
+    return HighlightDialogBoxMorph.minimized ? localize('Show Instructions') :
+        localize('Hide Instructions');
+};
+
+HighlightDialogBoxMorph.prototype.toggleMinimized = function() {
+    var minimized = HighlightDialogBoxMorph.minimized =
+        !HighlightDialogBoxMorph.minimized;
+    this.minimizeButton.labelString = this.minimizeButtonText();
+    this.minimizeButton.createLabel();
+    this.minimizeButton.fixLayout();
+    this.bodyFrame.isVisible = !minimized;
     this.body.fixLayout();
     this.body.drawNew();
     this.fixLayout();

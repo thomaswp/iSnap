@@ -666,7 +666,7 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
 extend(ScriptsMorph, 'step', function(base) {
     base.call(this);
     if (this.hoverBlocks && this.hoverBlocks.length > 0) {
-        var topBlock = window.ide.topMorphAt(window.world.hand.position());
+        var topBlock = window.world.topMorphAt(window.world.hand.position());
         if (topBlock && !topBlock.parentThatIsA(PushButtonMorph)) {
             topBlock = topBlock.parentThatIsA(BlockMorph);
             if (this.hoverBlocks.indexOf(topBlock) >= 0) {

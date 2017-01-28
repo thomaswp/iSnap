@@ -93,11 +93,12 @@
 				$.cookie(ID_COOKIE, id, { path: COOKIE_PATH });
 				$('#confirm-new').addClass('getFrames2');
 				$('.belt-container').toggleClass('is-transitioned');
+				$('.state-1 h1').css("margin-top", "0px");
 				$('#logout').removeClass('hidden');
 				$('#logout').addClass('getFlex');
-				$("#theBorder").css("padding-top", "10px");
+				$("#theBorder").css("padding-top", "0px");
 				$("#theBorder").css("padding-bottom", "0px");
-				$("#logout").css("padding-bottom", "10px");
+				
 
 			}
 
@@ -113,6 +114,7 @@
 			function logout() {
 				$.removeCookie(ID_COOKIE, { path: COOKIE_PATH });
 				$('.belt-container').removeClass('is-transitioned');
+				$('.state-1 h1').css("margin-top", "35px");
 				$('#logout').removeClass('getFlex');
 				$('#logout').addClass('hidden');
 				$('#confirm-new').removeClass('getFrames');

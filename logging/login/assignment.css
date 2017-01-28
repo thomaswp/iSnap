@@ -324,8 +324,8 @@
 				padding-bottom: 15px;
 				padding-left: 25px;
 				padding-right: 15px;
-				margin-bottom: 25px;
-				margin-top: 25px;
+				margin-bottom: 20px;
+				margin-top: 18px;
 				border-radius: 3px;
 				min-width: 100px;
 				max-width: 390px;
@@ -340,6 +340,7 @@
 			#assignmentGObutton{
 			    padding-top: 15px;
 				padding-bottom: 15px;
+				margin-bottom: -5px;
 				width: 390px;
 				font-size: 20px;
 				font-weight: 600;
@@ -399,7 +400,7 @@
 				        transform-origin: center right;
 			}
 			.state-1 h1{
-			    margin-top: 40px;
+			    margin-top: 35px;
 			}
 			.belt-container .state-2{
 			    z-index: 2;
@@ -412,7 +413,9 @@
 			            transform: translateX(-50%);
 			}
 			.container{
-			    width: 510px;
+			    width: 500px;
+				margin: 0px;
+				padding: 0px;
 			}
 			.newUserContainer{
 			    display: -webkit-box;
@@ -443,9 +446,17 @@
 				        align-items: center;
 				text-align: center;
 				width: 100%;
+				background-color: rgba(219,219,219,1.0);
+				margin-bottom: 25px;
 			}
 			#back-arrow{
 			    padding-left: 20px;
+				color: black;
+				text-decoration: none;
+			}
+			#back-arrow a{
+				color: black;
+				text-decoration: none;
 			}
 			#display-id-loggedIN{
 				display: hidden;
@@ -457,8 +468,15 @@
 				    -ms-grid-row-align: center;
 				    align-self: center;
 				font-weight: bold;
+				font-size: 17px;
     -webkit-font-smoothing: antialiased;
 			}
 			#signed-in-as{
 			    padding-right: 20px;
 			}
+
+	#form-assignment h1{
+	    margin-bottom: 0px;
+		margin-top: 0px;
+	}
+

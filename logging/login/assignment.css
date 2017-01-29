@@ -446,7 +446,7 @@
 				        align-items: center;
 				text-align: center;
 				width: 100%;
-				background-color: rgba(219,219,219,1.0);
+				background-color: rgba(219,219,219,0.9);
 				margin-bottom: 25px;
 			}
 			#back-arrow{

@@ -98,8 +98,7 @@
 				$('#logout').addClass('getFlex');
 				$("#theBorder").css("padding-top", "0px");
 				$("#theBorder").css("padding-bottom", "0px");
-				
-
+				$('#assignment').focus();
 			}
 
 			function skipLogIn(warn){
@@ -123,7 +122,7 @@
 				$("#theBorder").css("padding-top", "30px");
 				$("#theBorder").css("padding-bottom", "30px");
 				$('#input-new').prop('checked', false);
-    $("#sign-in-Button").css("margin-top", "0px");
+    			$("#sign-in-Button").css("margin-top", "0px");
 				$('#input-id').focus();
 			}
 
@@ -148,7 +147,7 @@
 						$('#confirm-new').removeClass('getFrames2');
 						$('#confirm-new').addClass('getFrames');
 						$("#confirm-new").css("margin-bottom", "20px");
-      $("#sign-in-Button").css("margin-top", "10px");
+      					$("#sign-in-Button").css("margin-top", "10px");
 						return;
 					}
 					$('#display-id-loggedIN').html(id);

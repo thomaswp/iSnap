@@ -5,7 +5,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Select an assignment</title>
-        <link rel="stylesheet" type="text/css" href="login/assignment.css">
+        <link rel="stylesheet" type="text/css" href="login/assignment.css?v=2.0.6">
 		<script src="https://use.fontawesome.com/a78350546c.js"></script>
 		<script type="text/javascript" src="../isnap/util.js"></script>
 		<script type="text/javascript" src="config.js"></script>
@@ -112,8 +112,8 @@
 				$('#logout').addClass('hidden');
 				$('#logout').removeClass('hidden');
 				$('#input-id,#sign-in-Button').prop('disabled', true);
-				$('#assignment,#assignmentGoButton').prop('disabled', false);
-				$('#assignment').focus();
+				$('#assignment,#assignmentGObutton').prop('disabled', false);
+				// $('#assignment').focus();
 			}
 
 			function skipLogIn(warn){
@@ -138,7 +138,7 @@
 				$("#confirm-new").css("margin-bottom", "0px");
 				$('#input-new').prop('checked', false);
 				$('#input-id,#sign-in-Button').prop('disabled', false);
-				$('#assignment,#assignmentGoButton').prop('disabled', true);
+				$('#assignment,#assignmentGObutton').prop('disabled', true);
 				$('#input-id').focus();
 			}
 

@@ -454,8 +454,6 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
             fromList, data.to);
 
         var index = data.index;
-        // Increase the hint index by 1 if there's a PrototypeHatBlock
-        if (parent instanceof PrototypeHatBlockMorph) index++;
 
         var insertRef = this.getInsertReference(parent, index);
         // Don't show insert on scripts that are just a ReporterBlockMorph
@@ -481,6 +479,9 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
 };
 
 HighlightDisplay.prototype.getInsertReference = function(parent, index) {
+    // Increase the hint index by 1 if there's a PrototypeHatBlock
+    if (parent instanceof PrototypeHatBlockMorph) index++;
+
     var block = parent, position = HighlightDisplay.BOTTOM_LEFT;
     if (index === 0) {
         position = HighlightDisplay.TOP_LEFT;
@@ -669,18 +670,29 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
 
 extend(ScriptsMorph, 'step', function(base) {
     base.call(this);
-    if (this.hoverBlocks && this.hoverBlocks.length > 0) {
-        var topBlock = window.world.topMorphAt(window.world.hand.position());
-        if (topBlock && !topBlock.parentThatIsA(PushButtonMorph)) {
-            topBlock = topBlock.parentThatIsA(BlockMorph);
-            if (this.hoverBlocks.indexOf(topBlock) >= 0) {
-                if (topBlock.feedbackBlock) {
-                    this.showCommandDropFeedback(topBlock.feedbackBlock);
-                } else if (topBlock.feedbackInput) {
-                    this.showReporterDropFeedbackFromTarget(topBlock,
-                        topBlock.feedbackInput);
-                }
-            }
+    // If the hand is grabbing, don't show hover feedback
+    if (window.world.hand.children.length > 0) return;
+    if (!this.hoverBlocks) return;
+
+    // For each block with a hover action...
+    this.hoverBlocks.some(function(block) {
+        // Find the top-child under the cursor
+        var topMorph = block.topMorphAt(window.world.hand.position());
+        // And ensure it exists, it's not a button and it is the hover block,
+        // not some child block
+        if (!topMorph || topMorph.parentThatIsA(PushButtonMorph) ||
+            block != topMorph.parentThatIsA(BlockMorph)) {
+            return false;
         }
-    }
+        // Then show the appropriate feedback
+        if (block.feedbackBlock) {
+            this.showCommandDropFeedback(block.feedbackBlock);
+            return true;
+        } else if (block.feedbackInput) {
+            this.showReporterDropFeedbackFromTarget(block,
+                block.feedbackInput);
+            return true;
+        }
+        return false;
+    }, this);
 });

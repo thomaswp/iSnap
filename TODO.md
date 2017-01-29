@@ -9,7 +9,6 @@ Highlight:
 * TODO:
   * Test on existing hint requests
   * Limit plus buttons
-  * Speed up a lot on Firefox!
 * Reach:
   * Save preferences
   * Show list insert hints as a dialog
@@ -17,6 +16,7 @@ Highlight:
   * On insert hints, show deleted code highlights or faded, etc.
   * Make a more uniform way of logging node IDs
   * [Server] Custom block side scripts should be able to be candidates
+  * Speed up more on Firefox
 
 UI:
 * Fix parent.adjustBounds bug in HintBar

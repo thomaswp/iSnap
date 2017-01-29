@@ -42,16 +42,16 @@
 												</ul>
 												<div class="newUserContainer"><input id="input-new" type="checkbox" name="new" value="true"> <span>I'm a new user</span></div>
 											</div>
+											<div><input type="submit" id="sign-in-Button" value="Next"></input></div>
 										</form>
 									</div>
-									<div><input type="submit" id="sign-in-Button" value="Next"></input></div>
 								</div>
 								<div class="state state-2">
 									<div id="form-assignment">
 										<h1>Choose Your Assignment</h1>
 										<form action="../snap.html" method="get">
-											<div><select id="assignment" name="assignment"></select></div>
-											<div><button id="assignmentGObutton" type="submit">GO</button></div>
+											<div><select id="assignment" name="assignment" disabled></select></div>
+											<div><button id="assignmentGObutton" type="submit" disabled>GO</button></div>
 										</form>
 									</div>
 								</div>
@@ -101,13 +101,18 @@
 				if (!id) return;
 				window.userID = id;
 				$.cookie(ID_COOKIE, id, { path: COOKIE_PATH });
-				$('#confirm-new').addClass('getFrames2');
-				$('.belt-container').toggleClass('is-transitioned');
+				$('.belt-container').addClass('is-transitioned');
 				$('#logout').removeClass('hidden');
 				$('#logout').addClass('getFlex');
+				$("#logout").css("padding-bottom", "10px");
 				$("#theBorder").css("padding-top", "10px");
 				$("#theBorder").css("padding-bottom", "0px");
-				$("#logout").css("padding-bottom", "10px");
+				$('#confirm-new').removeClass('getFrames');
+				$('#confirm-new').addClass('getFrames2');
+				$('#logout').addClass('hidden');
+				$('#logout').removeClass('hidden');
+				$('#input-id,#sign-in-Button').prop('disabled', true);
+				$('#assignment,#assignmentGoButton').prop('disabled', false);
 				$('#assignment').focus();
 			}
 
@@ -125,20 +130,33 @@
 				$('.belt-container').removeClass('is-transitioned');
 				$('#logout').removeClass('getFlex');
 				$('#logout').addClass('hidden');
+				$("#logout").css("padding-bottom", "10px");
+				$("#theBorder").css("padding-top", "50px");
+				$("#theBorder").css("padding-bottom", "30px");
 				$('#confirm-new').removeClass('getFrames');
 				$('#confirm-new').addClass('getFrames2');
 				$("#confirm-new").css("margin-bottom", "0px");
-				$("#theBorder").css("padding-top", "50px");
-				$("#theBorder").css("padding-bottom", "30px");
 				$('#input-new').prop('checked', false);
+				$('#input-id,#sign-in-Button').prop('disabled', false);
+				$('#assignment,#assignmentGoButton').prop('disabled', true);
 				$('#input-id').focus();
 			}
 
+			if (!String.prototype.trim) {
+				String.prototype.trim = function () {
+					return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,
+						'');
+				};
+			}
+
 			function tryLogin() {
+				// Get the id and ensure it has a value
+				var id = $('#input-id').val().trim();
+				if (id.length === 0) return;
+
 				// Defocus the login input so Chrome will hide autocomplete
 				$('#input-id').blur();
 
-				var id = $('#input-id').val();
 				$('#display-id').html(id);
 				$.post('login/login.php', {
 					'id': id,
@@ -155,7 +173,6 @@
 						$('#confirm-new').removeClass('getFrames2');
 						$('#confirm-new').addClass('getFrames');
 						$("#confirm-new").css("margin-bottom", "20px");
-
 						return;
 					}
 					$('#display-id-loggedIN').html(id);
@@ -167,7 +184,6 @@
 			}
 
 			$('#form-flex-Parent').submit(tryLogin);
-			$("#sign-in-Button").click(tryLogin);
 
 			if (!window.requireLogin) {
 				$('#back-arrow').addClass('hidden');

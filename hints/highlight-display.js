@@ -203,6 +203,7 @@ HighlightDisplay.prototype.showError = function(error) {
             window.world
         );
         this.forceShowDialog = false;
+        HighlightDisplay.stopHighlight();
     }
 };
 

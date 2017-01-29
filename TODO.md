@@ -7,8 +7,6 @@ Highlight:
   * Maybe hide highlights on other sprites so it doesn't show the dialog
   * Hint buttons can overlap too much
 * TODO:
-  * Test on existing hint requests
-  * Limit plus buttons
 * Reach:
   * Save preferences
   * Show list insert hints as a dialog

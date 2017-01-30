@@ -21,9 +21,11 @@
 			}
 			#flex-Parent{
 			    display: -webkit-box;
+       display: -webkit-flex;
 			    display: -ms-flexbox;
 			    display: flex;
 				-webkit-box-align: center;
+    -webkit-align-items: center;
 				    -ms-flex-align: center;
 				        align-items: center;
 				-webkit-box-pack: center;
@@ -32,6 +34,7 @@
 				-webkit-justify-content: center;
 				-webkit-box-orient: vertical;
 				-webkit-box-direction: normal;
+    -webkit-flex-direction: column;
 				    -ms-flex-direction: column;
 				        flex-direction: column;
 			}
@@ -41,6 +44,7 @@
 				height: 30px;
 				margin: 0px;
 				display: -webkit-box;
+    display: -webkit-flex;
 				display: -ms-flexbox;
 				display: flex;
 				-webkit-box-pack: justify;
@@ -48,25 +52,28 @@
 				        justify-content: space-between;
 				-webkit-justify-content: space-between;
 				-webkit-box-align: center;
+    -webkit-align-items: center;
 				    -ms-flex-align: center;
 				        align-items: center;
 			}
 			#blackBar img{
-			    width: 190px;
+			 width: 190px;
 				height: auto;
 			}
 			#courseName{
-			    color: white;
+			 color: white;
 				font-weight: 700;
-				font-size: 12px;
+				font-size: 13px;
 				margin-right: 25px;
 			}
 			#theBox{
 			    display: -webkit-box;
+       display: -webkit-flex;
 			    display: -ms-flexbox;
 			    display: flex;
 				-webkit-box-orient: vertical;
 				-webkit-box-direction: normal;
+    -webkit-flex-direction: column;
 				    -ms-flex-direction: column;
 				        flex-direction: column;
 				-webkit-box-pack: center;
@@ -74,6 +81,7 @@
 				        justify-content: center;
 				-webkit-justify-content: center;
 				-webkit-box-align: center;
+    -webkit-align-items: center;
 				    -ms-flex-align: center;
 				        align-items: center;
 				position: fixed;
@@ -87,16 +95,18 @@
 				margin-top: -25px;
 			}
 			#theBorder{
-			    box-shadow: 0px 0px 100px rgba(0,0,0,0.3);
+			 box-shadow: 0px 0px 100px rgba(0,0,0,0.3);
 				display: -webkit-box;
+    display: -webkit-flex;
 				display: -ms-flexbox;
 				display: flex;
 				-webkit-box-orient: vertical;
 				-webkit-box-direction: normal;
+    -webkit-flex-direction: column;
 				    -ms-flex-direction: column;
 				        flex-direction: column;
 				background-color: rgb(247, 247, 247);
-				padding-top: 50px;
+				padding-top: 30px;
 				padding-bottom: 30px;
 				border-radius: 6px;
 				border: 7px solid rgb(255, 201, 62);
@@ -105,16 +115,19 @@
 				        justify-content: center;
 				-webkit-justify-content: center;
 				-webkit-box-align: center;
+    -webkit-align-items: center;
 				    -ms-flex-align: center;
 				        align-items: center;
 			}
 			#form-flex-Parent{
 			    width: 555px;
 				display: -webkit-box;
+    display: -webkit-flex;
 				display: -ms-flexbox;
 				display: flex;
 				-webkit-box-orient: vertical;
 				-webkit-box-direction: normal;
+    -webkit-flex-direction: column;
 				    -ms-flex-direction: column;
 				        flex-direction: column;
 				-webkit-box-pack: center;
@@ -122,15 +135,18 @@
 				-webkit-justify-content: center;
 				        justify-content: center;
 				-webkit-box-align: center;
+    -webkit-align-items: center;
 				    -ms-flex-align: center;
 				        align-items: center;
 			}
 			#snapLogo{
 			    display: -webkit-box;
+       display: -webkit-flex;
 			    display: -ms-flexbox;
 			    display: flex;
 				-webkit-box-orient: vertical;
 				-webkit-box-direction: normal;
+    -webkit-flex-direction: column;
 				    -ms-flex-direction: column;
 				        flex-direction: column;
 				-webkit-box-pack: center;
@@ -138,19 +154,20 @@
 				-webkit-justify-content: center;
 				        justify-content: center;
 				-webkit-box-align: center;
+    -webkit-align-items: center;
 				    -ms-flex-align: center;
 				        align-items: center;
 			}
 			#snapLogo img{
-			    max-width: 50%;
+			 max-width: 50%;
 				border-radius: 5px;
 			}
 			h1{
-			    margin: 0px;
+			 margin: 0px;
 				color: #8F56E3;
 			}
 			#unityID-hint{
-			    font-weight: 200;
+			 font-weight: 200;
 				font-size: 14px;
 				color: #656565;
 				margin-bottom: 25px;
@@ -159,7 +176,7 @@
 			    padding-top: 10px;
 				padding-bottom: 10px;
 				padding-left: 20px;
-				margin-bottom: 25px;
+				margin-bottom: 18px;
 				border-radius: 3px;
 				min-width: 100px;
 				max-width: 370px;
@@ -186,11 +203,12 @@
 				outline: none;
 			}
 			#sign-in-Button:hover{
-			    box-shadow: 0px 0px 0px 1px #4A6BD6 outset, 0px 0px 0px 1.5px white outset;
+			 box-shadow: 0px 0px 0px 1px #4A6BD6 outset, 0px 0px 0px 1.5px white outset;
 				cursor: pointer;
+    -webkit-font-smoothing: antialiased;
 			}
 			#needsCookiesEnabled{
-			    margin-bottom: 30px;
+			 margin-bottom: 30px;
 				padding: 14px;
 				background: rgb(255,246,191);
 				max-width: 450px;
@@ -200,18 +218,19 @@
 				transition: all 300ms ease-in-out 1s;
 			}
 			.fa-exclamation-circle{
-			    margin-right: 12px;
+			 margin-right: 12px;
 			}
 			.hidden{
-			    display: none;
+			 display: none;
 			}
 			.getFlex{
 			    display: -webkit-box;
+       display: -webkit-flex;
 			    display: -ms-flexbox;
 			    display: flex;
 			}
 			#confirm-new{
-			    height: 0px;
+			 height: 0px;
 				opacity: 0;
 				-webkit-transition: height 0.2s;
 				transition: height 0.2s;
@@ -225,7 +244,6 @@
 				margin-top: 0.2em;
 				margin-bottom: 0.2em
 			}
-
 			#confirm-new ul li:first-child{
 			    margin-bottom: 5px;
 			}
@@ -287,12 +305,14 @@
 			}
 			#confirm-new p{
 			    margin-top: 0px;
-				margin-bottom: 5px;
+				margin-bottom: 15px;
 				max-width: 390px;
 				text-align: justify;
 				font-size: 16px;
 				line-height: 21px;
 				box-sizing: border-box;
+    max-width: 380px;
+    padding-left: 5px;
 			}
 			#confirm-new input{
 			    margin-top: 16px;
@@ -303,8 +323,8 @@
 				padding-bottom: 15px;
 				padding-left: 25px;
 				padding-right: 15px;
-				margin-bottom: 25px;
-				margin-top: 25px;
+				margin-bottom: 20px;
+				margin-top: 18px;
 				border-radius: 3px;
 				min-width: 100px;
 				max-width: 390px;
@@ -319,6 +339,7 @@
 			#assignmentGObutton{
 			    padding-top: 15px;
 				padding-bottom: 15px;
+				margin-bottom: -5px;
 				width: 390px;
 				font-size: 20px;
 				font-weight: 600;
@@ -332,15 +353,16 @@
 				outline: none;
 			}
 			#assignmentGObutton:hover{
-			    box-shadow: 0px 0px 0px 1px #4A6BD6 outset, 0px 0px 0px 1.5px white outset;
+			 box-shadow: 0px 0px 0px 1px #4A6BD6 outset, 0px 0px 0px 1.5px white outset;
 				cursor: pointer;
 			}
 			.belt-container{
-			    overflow: hidden;
+			 overflow: hidden;
 			}
 			.belt-container .belt{
-			    width: 200%;
+			 width: 200%;
 				display: -webkit-box;
+    display: -webkit-flex;
 				display: -ms-flexbox;
 				display: flex;
 				-webkit-transition: -webkit-transform 0.2s ease-in-out;
@@ -349,11 +371,13 @@
 				transition: transform 0.2s ease-in-out, -webkit-transform 0.2s ease-in-out;
 			}
 			.belt-container .state{
-			    width: 50%;
+			 width: 50%;
 				display: -webkit-box;
+    display: -webkit-flex;
 				display: -ms-flexbox;
 				display: flex;
 			    -webkit-box-align: center;
+       -webkit-align-items: center;
 			        -ms-flex-align: center;
 			            align-items: center;
 				-webkit-box-pack: center;
@@ -362,6 +386,7 @@
 				-webkit-justify-content: center;
 				-webkit-box-orient: vertical;
 				-webkit-box-direction: normal;
+    -webkit-flex-direction: column;
 				    -ms-flex-direction: column;
 				        flex-direction: column;
 			}
@@ -374,7 +399,7 @@
 				        transform-origin: center right;
 			}
 			.state-1 h1{
-			    margin-top: 40px;
+			    margin-top: 35px;
 			}
 			.belt-container .state-2{
 			    z-index: 2;
@@ -387,10 +412,13 @@
 			            transform: translateX(-50%);
 			}
 			.container{
-			    width: 510px;
+			    width: 500px;
+				margin: 0px;
+				padding: 0px;
 			}
 			.newUserContainer{
 			    display: -webkit-box;
+       display: -webkit-flex;
 			    display: -ms-flexbox;
 			    display: flex;
 				-webkit-box-pack: center;
@@ -398,11 +426,13 @@
 				        justify-content: center;
 				-webkit-justify-content: center;
 				-webkit-box-align: center;
+    -webkit-align-items: center;
 				    -ms-flex-align: center;
 				        align-items: center;
 			}
 			.newUserContainer span{
 			    padding-left: 4px;
+       -webkit-font-smoothing: antialiased;
 			}
 			#logout{
 				-webkit-box-pack: justify;
@@ -410,17 +440,23 @@
 				        justify-content: space-between;
 				-webkit-justify-content: space-between;
 				-webkit-box-align: center;
+    -webkit-align-items: center;
 				    -ms-flex-align: center;
 				        align-items: center;
 				text-align: center;
 				width: 100%;
+				background-color: rgba(219,219,219,0.9);
+				margin-bottom: 25px;
 			}
-
 			#back-arrow{
 			    padding-left: 20px;
+				color: black;
+				text-decoration: none;
 			}
-
-
+			#back-arrow a{
+				color: black;
+				text-decoration: none;
+			}
 			#display-id-loggedIN{
 				display: hidden;
 				width: 100%;
@@ -431,9 +467,15 @@
 				    -ms-grid-row-align: center;
 				    align-self: center;
 				font-weight: bold;
+				font-size: 17px;
+    -webkit-font-smoothing: antialiased;
 			}
-
 			#signed-in-as{
 			    padding-right: 20px;
 			}
+
+	#form-assignment h1{
+	    margin-bottom: 0px;
+		margin-top: 0px;
+	}
 

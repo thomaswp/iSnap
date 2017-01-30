@@ -19,7 +19,7 @@
 			<div id="theBox">
 				<div id="needsCookiesEnabled" class="hidden"><i class="fa fa-exclamation-circle fa-2x" aria-hidden="true"></i><span>We are having trouble logging you in. <b>Please inform your TA</b>, then continue selecting an assignment.</span></div>
 				<div id="theBorder">
-					<div id="logout" class="hidden"> <div id="back-arrow"><a href="#" onclick="logout()"><i class="fa fa-long-arrow-left fa-3x" aria-hidden="true"></i></a></div> <div id="signed-in-as">Signed in as <span id="display-id-loggedIN"></span></div></div>
+					<div id="logout" class="getFlex"> <div id="back-arrow"><a href="#" onclick="logout()"><i class="fa fa-long-arrow-left fa-3x" aria-hidden="true"></i></a></div> <div id="signed-in-as">Signed in as <span id="display-id-loggedIN"></span></div></div>
 				    <div id="snapLogo"><img src="login/SnapLogo.png"></img></div>
 				    <div class="container">
 						<div class="belt-container">
@@ -102,15 +102,9 @@
 				window.userID = id;
 				$.cookie(ID_COOKIE, id, { path: COOKIE_PATH });
 				$('.belt-container').addClass('is-transitioned');
-				$('#logout').removeClass('hidden');
-				$('#logout').addClass('getFlex');
-				$("#logout").css("padding-bottom", "10px");
-				$("#theBorder").css("padding-top", "10px");
-				$("#theBorder").css("padding-bottom", "0px");
+				$('#logout').css('visibility', 'visible');
 				$('#confirm-new').removeClass('getFrames');
 				$('#confirm-new').addClass('getFrames2');
-				$('#logout').addClass('hidden');
-				$('#logout').removeClass('hidden');
 				$('#input-id,#sign-in-Button').prop('disabled', true);
 				$('#assignment,#assignmentGObutton').prop('disabled', false);
 				$('#assignment').focus();
@@ -128,11 +122,7 @@
 			function logout() {
 				$.removeCookie(ID_COOKIE, { path: COOKIE_PATH });
 				$('.belt-container').removeClass('is-transitioned');
-				$('#logout').removeClass('getFlex');
-				$('#logout').addClass('hidden');
-				$("#logout").css("padding-bottom", "10px");
-				$("#theBorder").css("padding-top", "50px");
-				$("#theBorder").css("padding-bottom", "30px");
+				$('#logout').css('visibility', 'hidden');
 				$('#confirm-new').removeClass('getFrames');
 				$('#confirm-new').addClass('getFrames2');
 				$("#confirm-new").css("margin-bottom", "0px");
@@ -172,7 +162,7 @@
 					if (response.newUser) {
 						$('#confirm-new').removeClass('getFrames2');
 						$('#confirm-new').addClass('getFrames');
-						$("#confirm-new").css("margin-bottom", "20px");
+						$("#confirm-new").css("margin-bottom", "30px");
 						return;
 					}
 					$('#display-id-loggedIN').html(id);

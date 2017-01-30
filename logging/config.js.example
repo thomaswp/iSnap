@@ -4,28 +4,36 @@
 // 'test' and 'view' will not show up on the selection menu
 window.assignments = {
     'none': {
-        name: 'None (just using Snap)',
+        name: 'None',
+        hint: 'just using Snap',
     },
     'lightsCameraActionHW': {
-        name: 'Lights, Camera, Action! (Homework 1)'
+        name: 'Lights, Camera, Action!',
+        hint: 'Homework 1',
     },
     'polygonMakerLab': {
-        name: 'Polygon Maker (In Lab Activity 2)',
+        name: 'Polygon Maker',
+        hint: 'In Lab Activity 2',
     },
     'squiralHW': {
-        name: 'Squiral (Homework 2)',
+        name: 'Squiral',
+        hint: 'Homework 2',
     },
     'guess1Lab': {
-        name: 'Guessing Game Part 1 (In Lab Activity 3)',
+        name: 'Guessing Game Part 1',
+        hint: 'In Lab Activity 3',
     },
     'guess2HW': {
-        name: 'Guessing Game Part 2 (Homework 3)',
+        name: 'Guessing Game Part 2',
+        hint: 'Homework 3',
     },
     'guess3Lab': {
-        name: 'Guessing Game Part 3 (In Lab Activity 4)',
+        name: 'Guessing Game Part 3',
+        hint: 'In Lab Activity 4',
     },
     'project': {
-        name: 'SNAP Project (Project Deliverable 1)',
+        name: 'SNAP Project',
+        hint: 'Project Deliverable 1',
     },
     'test': {
         name: 'Testing',
@@ -39,6 +47,8 @@ window.assignments = {
 // proceeding. Assignments can be pre-specified by using the url
 // snap.html?assignment=id
 window.requireAssignment = true;
+// Allows the user to change their assignment by clicking on project title
+window.allowChangeAssignment = true;
 
 // If true, users are required to login before they can use the system
 window.requireLogin = true;

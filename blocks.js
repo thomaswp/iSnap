@@ -2088,16 +2088,16 @@ BlockMorph.prototype.toString = function () {
 
 BlockMorph.prototype.blockId = function() {
     return {
-        "selector": this.selector,
-        "id": this.id,
-        "template": this.isTemplate,
-        "spec": this.blockSpec,
+        'selector': this.selector,
+        'id': this.id,
+        'template': this.isTemplate,
+        'spec': this.blockSpec,
     };
-}
+};
 
 BlockMorph.prototype.userDestroy = function() {
-    Trace.log("Block.userDestroy", this.blockId());
-}
+    Trace.log('Block.userDestroy', this.blockId());
+};
 
 // BlockMorph spec:
 
@@ -2991,29 +2991,22 @@ BlockMorph.prototype.eraseHoles = function (context) {
 // BlockMorph highlighting
 
 BlockMorph.prototype.addHighlight = function (oldHighlight) {
-    var isHidden = !this.isVisible,
-        highlight;
-
-    if (isHidden) {this.show(); }
-    highlight = this.highlight(
-        oldHighlight ? oldHighlight.color : this.activeHighlight,
-        this.activeBlur,
-        this.activeBorder
-    );
-    this.addBack(highlight);
-    this.fullChanged();
-    if (isHidden) {this.hide(); }
-    return highlight;
+    return this.addActiveHighlight(
+        oldHighlight ? oldHighlight.color : this.activeHighlight);
 };
 
 BlockMorph.prototype.addErrorHighlight = function () {
+    this.removeHighlight();
+    return this.addActiveHighlight(this.errorHighlight);
+};
+
+BlockMorph.prototype.addActiveHighlight = function(color) {
     var isHidden = !this.isVisible,
         highlight;
 
     if (isHidden) {this.show(); }
-    this.removeHighlight();
     highlight = this.highlight(
-        this.errorHighlight,
+        color,
         this.activeBlur,
         this.activeBorder
     );
@@ -3305,8 +3298,14 @@ BlockMorph.prototype.mouseClickLeft = function () {
     if (receiver) {
         stage = receiver.parentThatIsA(StageMorph);
         if (stage) {
-            Trace.log("Block.clickRun", top.blockId());
-            window.lastRun = top; //TODO: REMOVE
+            var process = stage.threads.findProcess(top);
+            if (process && !process.readyToTerminate) {
+                Trace.log('Block.clickStopRun', top.blockId());
+            } else {
+                Trace.log('Block.clickRun', top.blockId());
+            }
+            // Useful for debugging
+            window.lastRun = top;
             stage.threads.toggleProcess(top);
         }
     }
@@ -3457,7 +3456,10 @@ BlockMorph.prototype.situation = function () {
 // BlockMorph sticky comments
 
 BlockMorph.prototype.prepareToBeGrabbed = function (hand) {
-    Trace.log("Block.grabbed", {"id": this.blockId(), "origin": this.bounds.origin});
+    Trace.log('Block.grabbed', {
+        'id': this.blockId(),
+        'origin': this.bounds.origin
+    });
     var myself = this;
     this.allComments().forEach(function (comment) {
         comment.startFollowing(myself, hand.world);
@@ -5253,7 +5255,11 @@ ScriptsMorph.prototype.step = function () {
 
 ScriptsMorph.prototype.showReporterDropFeedback = function (block, hand) {
     var target = this.closestInput(block, hand);
+    this.showReporterDropFeedbackFromTarget(block, target);
+};
 
+ScriptsMorph.prototype.showReporterDropFeedbackFromTarget = function (block,
+        target) {
     if (target === null) {
         return null;
     }
@@ -8303,6 +8309,7 @@ SymbolMorph.prototype.names = [
     'circleSolid',
     'line',
     'crosshairs',
+    'plus',
     'paintbucket',
     'eraser',
     'pipette',
@@ -8452,6 +8459,8 @@ SymbolMorph.prototype.symbolCanvasColored = function (aColor) {
         return this.drawSymbolLine(canvas, aColor);
     case 'crosshairs':
         return this.drawSymbolCrosshairs(canvas, aColor);
+    case 'plus':
+        return this.drawSymbolPlus(canvas, aColor);
     case 'paintbucket':
         return this.drawSymbolPaintbucket(canvas, aColor);
     case 'eraser':
@@ -9189,6 +9198,23 @@ SymbolMorph.prototype.drawSymbolCrosshairs = function (canvas, color) {
     ctx.stroke();
     ctx.moveTo(w / 2, h / 2);
     ctx.arc(w / 2, w / 2, w / 3 - l, radians(0), radians(360), false);
+    ctx.stroke();
+    return canvas;
+};
+
+SymbolMorph.prototype.drawSymbolPlus = function (canvas, color) {
+    // answer a canvas showing a plus
+    var ctx = canvas.getContext('2d'),
+        w = canvas.width,
+        h = canvas.height;
+
+    ctx.strokeStyle = color.toString();
+    ctx.lineWidth = h * 0.2;
+    ctx.moveTo(0, h / 2);
+    ctx.lineTo(w, h / 2);
+    ctx.stroke();
+    ctx.moveTo(w / 2, 0);
+    ctx.lineTo(w / 2, h);
     ctx.stroke();
     return canvas;
 };

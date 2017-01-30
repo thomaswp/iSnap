@@ -44,12 +44,12 @@ include '../../logging/config.php';
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						var contentWindow = document.getElementById('snap').contentWindow;
-						contentWindow.assignmentID = assignment;
+						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
 						data = JSON.parse(data);
 						data.type = type;
 						window.setTimeout(function() {
-							contentWindow.hintProvider.showLoggedHint(data);
+							contentWindow.HintDisplay.showLoggedHint(data);
 						}, 100);
 					}
 				};

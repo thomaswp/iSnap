@@ -103,6 +103,9 @@
 				$.cookie(ID_COOKIE, id, { path: COOKIE_PATH });
 				$('.belt-container').addClass('is-transitioned');
 				$('#logout').css('visibility', 'visible');
+				$('.state-1 h1').css("margin-top", "0px");
+				$('#theBorder').css("padding-bottom", "0px");
+				$('#snapLogo').css("margin-top", "0px");
 				$('#confirm-new').removeClass('getFrames');
 				$('#confirm-new').addClass('getFrames2');
 				$('#input-id,#sign-in-Button').prop('disabled', true);
@@ -123,6 +126,9 @@
 				$.removeCookie(ID_COOKIE, { path: COOKIE_PATH });
 				$('.belt-container').removeClass('is-transitioned');
 				$('#logout').css('visibility', 'hidden');
+				$('.state-1 h1').css("margin-top", "20px");
+				$('#theBorder').css("padding-bottom", "15px");
+				$('#snapLogo').css("margin-top", "-20px");
 				$('#confirm-new').removeClass('getFrames');
 				$('#confirm-new').addClass('getFrames2');
 				$("#confirm-new").css("margin-bottom", "0px");

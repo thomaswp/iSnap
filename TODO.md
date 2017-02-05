@@ -6,6 +6,7 @@ Highlight:
   * Something is trying to highlight ScriptsMorphs and SpriteMorphs
   * Maybe hide highlights on other sprites so it doesn't show the dialog
   * Hint buttons can overlap too much
+  * reifyScript block isn't handled by getCode
 * TODO:
 * Reach:
   * Save preferences

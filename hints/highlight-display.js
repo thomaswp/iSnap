@@ -365,8 +365,8 @@ HighlightDisplay.prototype.showDeleteHint = function(data) {
 };
 
 HighlightDisplay.prototype.showReorderHint = function(data) {
-    // Only reorder-highlight things that have a script ancestor
-    if (!this.hasScriptAncestor(data.node)) return;
+    // Only reorder-highlight things that have a parent with a script ancestor
+    if (!this.hasScriptAncestor(data.node.parent)) return;
     // Ignore literal reorders
     if (data.node.label === 'literal') return;
 
@@ -380,10 +380,9 @@ HighlightDisplay.prototype.showReorderHint = function(data) {
     this.addHoverInsertIndicator(node, data.parent, data.index);
 };
 
-HighlightDisplay.prototype.hasScriptAncestor = function(ref) {
-    var parent = ref.parent;
-    while (parent && parent.label !== 'script') parent = parent.parent;
-    return parent != null;
+HighlightDisplay.prototype.hasScriptAncestor = function(blockRef) {
+    while (blockRef && blockRef.label !== 'script') blockRef = blockRef.parent;
+    return blockRef != null;
 };
 
 HighlightDisplay.prototype.showInsertHint = function(data) {

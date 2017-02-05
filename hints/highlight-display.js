@@ -349,32 +349,37 @@ extend(IDE_Morph, 'refreshPalette', function(base, shouldIgnorePosition) {
 });
 
 HighlightDisplay.prototype.showDeleteHint = function(data) {
+    // Only delete-highlight things that have a script ancestor
+    if (!this.hasScriptAncestor(data.node)) return;
+
     var node = this.getCode(data.node);
-    // Ignore variable and literal deletion
-    if (data.node.label === 'var' || data.node.label === 'literal' ||
-            data.node.label === 'customBlock') return;
     if (node == null) {
         Trace.logErrorMessage('Unknown node in delete hint');
         return;
     }
+
     this.addHighlight(node, HighlightDisplay.deleteColor,
         data.node.label !== 'script');
 };
 
 HighlightDisplay.prototype.showReorderHint = function(data) {
+    // Only reorder-highlight things that have a script ancestor
+    if (!this.hasScriptAncestor(data.node)) return;
+
     var node = this.getCode(data.node);
     if (node == null) {
         Trace.logErrorMessage('Unknown node in reorder hint');
         return;
     }
-    // Don't worry about reordering scripts, literals or custom blocks
-    if (data.node.label === 'script' || data.node.label === 'literal' ||
-            data.node.label === 'customBlock') {
-        return;
-    }
 
     this.addHighlight(node, HighlightDisplay.moveColor, true);
     this.addHoverInsertIndicator(node, data.parent, data.index);
+};
+
+HighlightDisplay.prototype.hasScriptAncestor = function(ref) {
+    var parent = ref.parent;
+    while (parent && parent.label !== 'script') parent = parent.parent;
+    return parent != null;
 };
 
 HighlightDisplay.prototype.showInsertHint = function(data) {

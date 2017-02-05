@@ -351,6 +351,8 @@ extend(IDE_Morph, 'refreshPalette', function(base, shouldIgnorePosition) {
 HighlightDisplay.prototype.showDeleteHint = function(data) {
     // Only delete-highlight things that have a script ancestor
     if (!this.hasScriptAncestor(data.node)) return;
+    // Ignore variable and literal deletion
+    if (data.node.label === 'var' || data.node.label === 'literal') return;
 
     var node = this.getCode(data.node);
     if (node == null) {
@@ -365,6 +367,8 @@ HighlightDisplay.prototype.showDeleteHint = function(data) {
 HighlightDisplay.prototype.showReorderHint = function(data) {
     // Only reorder-highlight things that have a script ancestor
     if (!this.hasScriptAncestor(data.node)) return;
+    // Ignore literal reorders
+    if (data.node.label === 'literal') return;
 
     var node = this.getCode(data.node);
     if (node == null) {

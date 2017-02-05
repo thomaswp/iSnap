@@ -367,8 +367,12 @@ HighlightDisplay.prototype.showReorderHint = function(data) {
         Trace.logErrorMessage('Unknown node in reorder hint');
         return;
     }
-    // Don't worry about reordering scripts or literals
-    if (data.node.label === 'script' || data.node.label === 'literal') return;
+    // Don't worry about reordering scripts, literals or custom blocks
+    if (data.node.label === 'script' || data.node.label === 'literal' ||
+            data.node.label === 'customBlock') {
+        return;
+    }
+
     this.addHighlight(node, HighlightDisplay.moveColor, true);
     this.addHoverInsertIndicator(node, data.parent, data.index);
 };
@@ -657,7 +661,8 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
         block.feedbackInput = input;
         scriptParent = input.parentThatIsA(ScriptsMorph);
     } else {
-        Trace.logErrorMessage('Unknown parent type: ' + parent);
+        Trace.logErrorMessage('Unknown parent type: ' +
+            (parent ? parent.getDebugType() : parent));
         return;
     }
     if (!scriptParent) return;

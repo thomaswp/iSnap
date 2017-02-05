@@ -7,6 +7,7 @@ Highlight:
   * Maybe hide highlights on other sprites so it doesn't show the dialog
   * Hint buttons can overlap too much
   * reifyScript block isn't handled by getCode
+  * Hover feedback still shows when a dialog is in between mouse and block
 * TODO:
 * Reach:
   * Save preferences

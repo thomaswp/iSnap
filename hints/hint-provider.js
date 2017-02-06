@@ -154,8 +154,6 @@ HintProvider.prototype.processHints = function(json, requestNumber) {
     // should then be ignored.
     if (this.requestNumber != requestNumber) return;
 
-    Trace.log('HintProvider.processHints', hints);
-
     var hints;
     try {
         hints = JSON.parse(json);
@@ -163,6 +161,8 @@ HintProvider.prototype.processHints = function(json, requestNumber) {
         this.showError('Bad JSON: ' + json);
         return;
     }
+
+    Trace.log('HintProvider.processHints', hints);
 
     var nErrors = 0, nHints = 0;
     for (var i = 0; i < hints.length; i++) {

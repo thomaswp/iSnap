@@ -349,33 +349,45 @@ extend(IDE_Morph, 'refreshPalette', function(base, shouldIgnorePosition) {
 });
 
 HighlightDisplay.prototype.showDeleteHint = function(data) {
-    var node = this.getCode(data.node);
+    // Only delete-highlight things that have a script ancestor
+    if (!this.hasScriptAncestor(data.node)) return;
     // Ignore variable and literal deletion
-    if (data.node.label === 'var' || data.node.label === 'literal' ||
-            data.node.label === 'customBlock') return;
+    if (data.node.label === 'var' || data.node.label === 'literal') return;
+
+    var node = this.getCode(data.node);
     if (node == null) {
         Trace.logErrorMessage('Unknown node in delete hint');
         return;
     }
+
     this.addHighlight(node, HighlightDisplay.deleteColor,
         data.node.label !== 'script');
 };
 
 HighlightDisplay.prototype.showReorderHint = function(data) {
+    // Only reorder-highlight things that have a parent with a script ancestor
+    if (!this.hasScriptAncestor(data.node.parent)) return;
+    // Ignore literal and nested-script reorders
+    if (data.node.label === 'literal' || data.node.label === 'script') return;
+
     var node = this.getCode(data.node);
     if (node == null) {
         Trace.logErrorMessage('Unknown node in reorder hint');
         return;
     }
-    // Don't worry about reordering scripts or literals
-    if (data.node.label === 'script' || data.node.label === 'literal') return;
+
     this.addHighlight(node, HighlightDisplay.moveColor, true);
     this.addHoverInsertIndicator(node, data.parent, data.index);
 };
 
+HighlightDisplay.prototype.hasScriptAncestor = function(blockRef) {
+    while (blockRef && blockRef.label !== 'script') blockRef = blockRef.parent;
+    return blockRef != null;
+};
+
 HighlightDisplay.prototype.showInsertHint = function(data) {
-    // Don't worry about inserting scripts;
-    if (data.type === 'script') return;
+    // Don't worry about inserting scripts or lists
+    if (data.type === 'script' || data.type === 'list') return;
 
     var parent = null;
     // The parent may be missing (and null) if this insert is for code that
@@ -657,7 +669,8 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
         block.feedbackInput = input;
         scriptParent = input.parentThatIsA(ScriptsMorph);
     } else {
-        Trace.logErrorMessage('Unknown parent type: ' + parent);
+        Trace.logErrorMessage('Unknown parent type: ' +
+            (parent ? parent.getDebugType() : parent));
         return;
     }
     if (!scriptParent) return;

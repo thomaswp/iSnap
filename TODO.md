@@ -6,6 +6,9 @@ Highlight:
   * Something is trying to highlight ScriptsMorphs and SpriteMorphs
   * Maybe hide highlights on other sprites so it doesn't show the dialog
   * Hint buttons can overlap too much
+  * reifyScript block isn't handled by getCode
+  * Hover feedback still shows when a dialog is in between mouse and block
+  * require() statements shouldn't be needed in the config, since this isn't VCd
 * TODO:
 * Reach:
   * Save preferences

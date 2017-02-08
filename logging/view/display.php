@@ -40,10 +40,13 @@ include '../config.php';
 		</style>
 		<script type="text/javascript">
 			function loadSnap(id, project) {
+				var assignment = "<?php echo $_GET['assignment']; ?>";
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
-						document.getElementById('snap').contentWindow.ide.droppedText(xhr.responseText);
+						var contentWindow = document.getElementById('snap').contentWindow;
+						contentWindow.Assignment.setID(assignment);
+						contentWindow.ide.droppedText(xhr.responseText);
 					}
 				};
 				xhr.open("GET", "code.php?id=" + id + "&project=" + project, true);

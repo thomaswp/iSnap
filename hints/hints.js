@@ -146,38 +146,57 @@ HintProvider.prototype.showError = function(error) {
 };
 
 HintProvider.prototype.processHints = function(json, requestNumber) {
+    // If a more recent request has been fired, wait on that one
+    // This is below the log statement because if we have pending code
+    // changes to log, they'll flush and call a new request, and this one
+    // should then be ignored.
+    if (this.requestNumber != requestNumber) return;
+
+    var hints;
     try {
-        var hints = JSON.parse(json);
-        Trace.log('HintProvider.processHints', hints);
-        // If a more recent request has been fired, wait on that one
-        // This is below the log statement because if we have pending code
-        // changes to log, they'll flush and call a new request, and this one
-        // should then be ignored.
-        if (this.requestNumber != requestNumber) return;
-        for (var i = 0; i < hints.length; i++) {
-            var hint = hints[i];
-            this.displays.forEach(function(display) {
-                if (display.enabled) {
-                    try {
-                        display.showHint(hint);
-                    } catch (e2) {
-                        Trace.logError(e2);
-                    }
-                }
-            });
+        hints = JSON.parse(json);
+    } catch (e) {
+        this.showError('Bad JSON: ' + json);
+        return;
+    }
+
+    Trace.log('HintProvider.processHints', hints);
+
+    var nErrors = 0, nHints = 0;
+    for (var i = 0; i < hints.length; i++) {
+        var hint = hints[i];
+        if (hint.error) {
+            Trace.logError(hint);
+            nErrors++;
+            continue;
         }
         this.displays.forEach(function(display) {
             if (display.enabled) {
                 try {
-                    display.finishedHints();
+                    display.showHint(hint);
+                    nHints++;
                 } catch (e2) {
                     Trace.logError(e2);
+                    nErrors++;
                 }
             }
         });
-        this.lastHints = hints;
-    } catch (e) {
-        Trace.logError(e);
+    }
+    this.displays.forEach(function(display) {
+        if (display.enabled) {
+            try {
+                display.finishedHints();
+            } catch (e2) {
+                Trace.logError(e2);
+            }
+        }
+    });
+    this.lastHints = hints;
+
+    if (nErrors > 0 && nHints == 0) {
+        // It's possible to have some hints and errors, but if we only have
+        // errors, we need to have the hint providers show an error message
+        this.showError('Error generating hints!');
     }
 };
 
@@ -503,12 +522,14 @@ SnapDisplay.prototype.getCode = function(ref) {
     var parent = this.getCode(ref.parent);
     // If this is a non-showing custom block, we should just return it to show
     // a special hint
-    if (parent == null || parent._debugType == 'CustomBlockDefinition') {
+    if (parent == null || parent instanceof CustomBlockDefinition) {
         return parent;
     }
 
     var label = ref.label;
     var index = ref.index;
+
+    var nVars, nScripts;
 
     switch (ref.parent.label) {
     case 'snapshot':
@@ -521,14 +542,17 @@ SnapDisplay.prototype.getCode = function(ref) {
             return parent.globalVariables.vars;
         break;
     case 'stage':
+        nVars = Object.keys(parent.variables.vars).length;
+        nScripts = parent.scripts.children.length;
+        var nCustomBlocks = parent.customBlocks.length;
         if (label == 'sprite') {
             return parent.children.filter(function(child) {
                 return child instanceof SpriteMorph;
-            })[index];
+            })[index - nVars - nScripts - nCustomBlocks];
         }
     case 'sprite':
-        var nVars = Object.keys(parent.variables.vars).length;
-        var nScripts = parent.scripts.children.length;
+        nVars = Object.keys(parent.variables.vars).length;
+        nScripts = parent.scripts.children.length;
         if (label == 'var')
             return parent.variables.vars;
         else if (label == 'script')
@@ -539,7 +563,7 @@ SnapDisplay.prototype.getCode = function(ref) {
         break;
     case 'script':
         var block = parent;
-        if (block._debugType == 'CSlotMorph') block = block.children[0];
+        if (block instanceof CSlotMorph) block = block.children[0];
         if (ref.parent.parent && ref.parent.parent.label == 'customBlock') {
             // Scripts in a custom block must skip one extra because the
             // first block is the header CustomHatBlock.

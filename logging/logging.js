@@ -144,6 +144,11 @@ Logger.prototype.log = function(message, data, saveImmediately) {
 };
 
 Logger.prototype.logErrorMessage = function(error) {
+    if (!error || !error.length) return;
+    var maxLength = 5000;
+    if (error.length > maxLength) {
+        error = error.substring(0, maxLength) + '...';
+    }
     try {
         // Have to actually throw the error for .stack to show up on IE
         throw new Error(error);

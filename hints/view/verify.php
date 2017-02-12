@@ -1,9 +1,3 @@
-<?php
-
-include '../../logging/config.php';
-
-?>
-
 <!doctype html>
 
 <html>
@@ -97,14 +91,19 @@ include '../../logging/config.php';
 				for (var i = 0; i < hintsA.length; i++) {
 					var hintA = hintsA[i];
 					var dataA = hintA.data;
-					// Get rid of logged prototypeHatBlocks, which the server
-					// will not have added
-					if (dataA.from[0] === 'prototypeHatBlock') {
-						dataA.from.splice(0, 1);
+
+					if (!hintA.type) hintsA.type = 'vector';
+					if (hintA.type === 'vector') {
+						// Get rid of logged prototypeHatBlocks, which the
+						// server will not have added
+						if (dataA.from[0] === 'prototypeHatBlock') {
+							dataA.from.splice(0, 1);
+						}
+						if (dataA.to[0] === 'prototypeHatBlock') {
+							dataA.to.splice(0, 1);
+						}
 					}
-					if (dataA.to[0] === 'prototypeHatBlock') {
-						dataA.to.splice(0, 1);
-					}
+
 					for (var j = 0; j < hintsB.length; j++) {
 						if (areHintsEqual(hintA, hintsB[j])) {
 							shared.push(hintsA.splice(i--, 1)[0]);
@@ -122,7 +121,6 @@ include '../../logging/config.php';
 			}
 
 			function areHintsEqual(hintA, hintB) {
-				if (!hintA.type) hintsA.type = 'vector';
 				if (hintA.type !== hintB.type) return false;
 				if (hintA.type === 'vector') {
 					return areVectorHintsEqual(hintA.data, hintB.data);
@@ -239,6 +237,8 @@ include '../../logging/config.php';
 			<div id="content">
 				<div style="overflow: scroll; height: 100%;">
 				<?php
+include '../../logging/config.php';
+
 if ($enble_viewer) {
 
 	$mysqli = new mysqli($host, $user, $password, $db);

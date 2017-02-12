@@ -95,7 +95,8 @@ include '../../logging/config.php';
 				var shared = [];
 
 				for (var i = 0; i < hintsA.length; i++) {
-					var dataA = hintsA[i].data;
+					var hintA = hintsA[i];
+					var dataA = hintA.data;
 					// Get rid of logged prototypeHatBlocks, which the server
 					// will not have added
 					if (dataA.from[0] === 'prototypeHatBlock') {
@@ -105,8 +106,7 @@ include '../../logging/config.php';
 						dataA.to.splice(0, 1);
 					}
 					for (var j = 0; j < hintsB.length; j++) {
-						var dataB = hintsB[j].data;
-						if (areHintsEqual(dataA, dataB)) {
+						if (areHintsEqual(hintA, hintsB[j])) {
 							shared.push(hintsA.splice(i--, 1)[0]);
 							hintsB.splice(j, 1);
 							break;
@@ -121,7 +121,18 @@ include '../../logging/config.php';
 				};
 			}
 
-			function areHintsEqual(dataA, dataB) {
+			function areHintsEqual(hintA, hintB) {
+				if (!hintA.type) hintsA.type = 'vector';
+				if (hintA.type !== hintB.type) return false;
+				if (hintA.type === 'vector') {
+					return areVectorHintsEqual(hintA.data, hintB.data);
+				} else if (hintA.type === 'highlight') {
+					return areHighlightHintsEqual(hintA.data, hintB.data);
+				}
+				return false;
+			}
+
+			function areVectorHintsEqual(dataA, dataB) {
 				if (!dataA || !dataB) return false;
 				if (JSON.stringify(dataA.from) !== JSON.stringify(dataB.from) ||
 						JSON.stringify(dataA.to) !== JSON.stringify(dataB.to)) {
@@ -129,6 +140,13 @@ include '../../logging/config.php';
 				}
 				if (!areRootsEqual(dataA.root, dataB.root)) return false;
 				return true;
+			}
+
+			function areHighlightHintsEqual(dataA, dataB) {
+				// For not, JSON should be formatted the same in server
+				// and logs, but this may change and require more complex
+				// parsing and comparing
+				return JSON.stringify(dataA) === JSON.stringify(dataB);
 			}
 
 			function areRootsEqual(rootA, rootB) {
@@ -163,11 +181,17 @@ include '../../logging/config.php';
 			var verifyCallback;
 
 			function verify(id, project, assignment, data) {
+				var dataJSON = JSON.parse(data);
+				var type = 'vector';
+				if (dataJSON[0] && dataJSON[0].type) type = dataJSON[0].type;
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						var xml = xhr.responseText;
-						var url = getHintURL() + '?assignmentID=' + encodeURIComponent(assignment);
+						var url = getHintURL() +
+							'?assignmentID=' + encodeURIComponent(assignment) +
+							'&hintTypes=' + encodeURIComponent(type);
+
 						if (window.assignments) {
 							var dataset = window.assignments[assignment].dataset;
 							if (dataset) url += '&dataset=' + encodeURIComponent(dataset);
@@ -180,7 +204,7 @@ include '../../logging/config.php';
 							if (!diff) {
 								link.innerHTML = 'Pass';
 								link.classList.add('pass');
-								diff = hints;
+								diff = dataJSON;
 							} else {
 								link.innerHTML = '-' +
 									diff.uniqueHintsA.length + ' / +' +

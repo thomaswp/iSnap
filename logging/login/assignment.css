@@ -159,10 +159,11 @@
     -webkit-align-items: center;
 				    -ms-flex-align: center;
 				        align-items: center;
-				margin-top: -20px;
+				margin-top: -15px;
+				margin-bottom: 15px;
 			}
 			#snapLogo img{
-			 max-width: 40%;
+			 max-width: 32%;
 				border-radius: 5px;
 				
 			}
@@ -172,18 +173,18 @@
 			}
 			#unityID-hint{
 			 font-weight: 200;
-				font-size: 14px;
+				font-size: 13px;
 				color: #656565;
-				margin-bottom: 22px;
+				margin-bottom: 20px;
 			}
 			#input-id{
-			    padding-top: 7px;
-				padding-bottom: 7px;
+			    padding-top: 5px;
+				padding-bottom: 5px;
 				padding-left: 20px;
 				margin-bottom: 20px;
 				border-radius: 3px;
 				min-width: 100px;
-				max-width: 370px;
+				max-width: 325px;
 				width: 100%;
 				height: 40px;
 				font-size: 22px;
@@ -196,8 +197,8 @@
 			#sign-in-Button{
 			    padding-top: 12px;
 				padding-bottom: 12px;
-				width: 390px;
-				font-size: 18px;
+				width: 350px;
+				font-size: 16px;
 				font-weight: 600;
 				letter-spacing: 1px;
 				text-decoration: none;
@@ -310,13 +311,12 @@
 			#confirm-new p{
 			    margin-top: 0px;
 				margin-bottom: 15px;
-				max-width: 390px;
 				text-align: justify;
 				font-size: 16px;
 				line-height: 21px;
 				box-sizing: border-box;
-    max-width: 380px;
-    padding-left: 5px;
+    max-width: 365px;
+    padding-left: 25px;
 			}
 			#confirm-new input{
 			    margin-top: 16px;
@@ -327,13 +327,13 @@
 				padding-bottom: 15px;
 				padding-left: 25px;
 				padding-right: 15px;
-				margin-bottom: 20px;
-				margin-top: 18px;
+				margin-bottom: 15px;
+				margin-top: 15px;
 				border-radius: 3px;
 				min-width: 100px;
-				max-width: 390px;
+				max-width: 350px;
 				width: 100%;
-				height: 55px;
+				height: 50px;
 				outline: none;
 				border: 2px solid rgb(143, 86, 227);
 				background-color: rgb(255, 255, 255);
@@ -341,10 +341,10 @@
 				font-size: 16px;
 			}
 			#assignmentGObutton{
-			    padding-top: 15px;
-				padding-bottom: 15px;
-				margin-bottom: -5px;
-				width: 390px;
+			    padding-top: 10px;
+				padding-bottom: 10px;
+				margin-bottom: 0px;
+				width: 350px;
 				font-size: 20px;
 				font-weight: 600;
 				letter-spacing: 1px;
@@ -403,21 +403,20 @@
 				        transform-origin: center right;
 			}
 			.state-1 h1{
-			    margin-top: 25px;
-				font-size: 30px;
+				font-size: 28px;
 			}
 			.belt-container .state-2{
 			    z-index: 2;
 			    -webkit-transition: all 200ms ease-in-out;
 			    transition: all 200ms ease-in-out;
-			    margin-top: -10px;
+			    margin-top: 5px;
 			}
 			.belt-container.is-transitioned .belt{
 			    -webkit-transform: translateX(-50%);
 			            transform: translateX(-50%);
 			}
 			.container{
-			    width: 450px;
+			    width: 390px;
 				margin: 0px;
 				padding: 0px;
 			}
@@ -441,7 +440,6 @@
 			}
 			#logout{
 				visibility: hidden;
-				min-height: 48px;
 				-webkit-box-pack: justify;
 				    -ms-flex-pack: justify;
 				        justify-content: space-between;
@@ -452,7 +450,7 @@
 				        align-items: center;
 				text-align: center;
 				width: 100%;
-				font-size: 15px;
+				font-size: 14px;
 			}
 			#back-arrow{
 			    padding-left: 20px;
@@ -476,12 +474,13 @@
     -webkit-font-smoothing: antialiased;
 			}
 			#signed-in-as{
-			    padding-right: 20px;
+			    margin-bottom: 12px;
 				
 			}
 
 	#form-assignment h1{
 	    margin-bottom: 0px;
 		margin-top: 0px;
+		font-size: 28px;
 	}
 

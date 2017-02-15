@@ -2025,6 +2025,7 @@ BlockMorph.prototype = new SyntaxElementMorph();
 BlockMorph.prototype.constructor = BlockMorph;
 BlockMorph.uber = SyntaxElementMorph.prototype;
 BlockMorph.nextId = 0;
+BlockMorph.copyIDs = false;
 
 // BlockMorph preferences settings:
 
@@ -3243,7 +3244,7 @@ BlockMorph.prototype.setCategory = function (aString) {
 
 BlockMorph.prototype.copy = function() {
     var copy = BlockMorph.uber.copy.call(this);
-    copy.id = BlockMorph.nextId++;
+    if (!BlockMorph.copyIDs) copy.id = BlockMorph.nextId++;
     return copy;
 };
 

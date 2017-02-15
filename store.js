@@ -987,7 +987,7 @@ SnapSerializer.prototype.loadEditing = function (project, model) {
 
     setTimeout(function() {
         Morph.prototype.trackChanges = false;
-        editor = new BlockEditorMorph(editingCopy, editingSprite);
+        var editor = new BlockEditorMorph(editingCopy, editingSprite);
         editor.popUp();
         Morph.prototype.trackChanges = true;
         editor.changed();

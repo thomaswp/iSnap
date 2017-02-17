@@ -1,9 +1,3 @@
-<?php
-
-include '../../logging/config.php';
-
-?>
-
 <!doctype html>
 
 <html>
@@ -11,7 +5,7 @@ include '../../logging/config.php';
 	<head>
 		<meta charset="UTF-8">
 		<title>View Project</title>
-		<link rel="stylesheet" type="text/css" href="../../logging/view/table.css">
+		<link rel="stylesheet" type="text/css" href="../../../logging/view/table.css">
 		<style>
 			html {
 				height: 100%;
@@ -37,23 +31,26 @@ include '../../logging/config.php';
 			#cleared {
 				clear: both;
 			}
+			a.disabled:link {
+				pointer-events: none;
+				color: #666;
+				font-weight: normal;
+				font-style: italic;
+			}
 		</style>
 		<script type="text/javascript">
-			function loadSnap(id, project, assignment, data, type) {
+			var user = "<?php echo $_GET['user']; ?>";
+
+			function loadSnap(id, project, assignment) {
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						var contentWindow = document.getElementById('snap').contentWindow;
 						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
-						data = JSON.parse(data);
-						data.type = type;
-						window.setTimeout(function() {
-							contentWindow.HintDisplay.showLoggedHint(data);
-						}, 100);
 					}
 				};
-				xhr.open("GET", "../../logging/view/code.php?id=" + id + "&project=" + project, true);
+				xhr.open("GET", "../../../logging/view/code.php?id=" + id + "&project=" + project, true);
 				xhr.send();
 				window.location.hash = id;
 				window.index = rows.findIndex(function(a) {
@@ -61,8 +58,38 @@ include '../../logging/config.php';
 				});
 			}
 
-			function resetFilter() {
-				document.location = './';
+			function saveHint(rowID, phase, projectID) {
+				var contentWindow = document.getElementById('snap').contentWindow;
+				if (contentWindow.ide.stage.guid !== projectID) {
+					alert("Project ID does not match original code. Make sure you pressed the right save button.");
+					return;
+				}
+				var code = contentWindow.Trace.lastCode;
+				if (!code || code.length == 0) alert("No code to save");
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState==4 && xhr.status==200) {
+						var date = document.getElementById('d' + rowID + '-' + phase);
+						date.innerHTML = xhr.responseText;
+						var load = document.getElementById('l' + rowID + '-' + phase);
+						load.classList.remove('disabled');
+					}
+				};
+				xhr.open("POST", "hint.php?rowID=" + rowID + "&phase=" + phase + "&user=" + user, true);
+				xhr.send(code);
+			}
+
+			function loadHint(rowID, phase, assignment) {
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState==4 && xhr.status==200) {
+						var contentWindow = document.getElementById('snap').contentWindow;
+						contentWindow.Assignment.setID(assignment);
+						contentWindow.ide.droppedText(xhr.responseText);
+					}
+				};
+				xhr.open("GET", "hint.php?rowID=" + rowID + "&phase=" + phase + "&user=" + user, true);
+				xhr.send();
 			}
 		</script>
 	</head>
@@ -70,18 +97,12 @@ include '../../logging/config.php';
 	<body>
 		<div id="wrapper">
 			<div id="sidebar">
-				 <iframe id="snap" width="100%" height="100%" src="../../snap.html?assignment=view&hints=true"></iframe>
+				 <iframe id="snap" width="100%" height="100%" src="../../../snap.html?assignment=view&hints=true"></iframe>
 			</div>
 			<div id="content">
 				<div style="overflow: scroll; height: 100%;">
-				<form action="" method="GET">
-					Filter IDs:
-					<input id="filter" type="text" name="ids" pattern="([0-9]+ ?)*"
-						placeholder="e.g. 123 888 12345"
-						value="<?php if (array_key_exists('ids', $_GET)) echo $_GET['ids']; ?>">
-					<input type="button" value="Reset" onclick="resetFilter()" >
-				</form>
 				<?php
+include '../../../logging/config.php';
 if ($enble_viewer) {
 
 	$mysqli = new mysqli($host, $user, $password, $db);
@@ -101,14 +122,19 @@ if ($enble_viewer) {
 
     function hintCell($row, $n) {
         $updated = $row["h${n}Updated"];
+		$id=$row['rowID'];
         if (!$updated) $updated = "<i>No hint saved</i>";
-        $load = '<i>Load</i>';
-        $save = '<a href="javascript:void(0)">Save</a>';
-        return "$updated<br/>$load<br/>$save";
+		$code = $row["h${n}Code"];
+		$assignment = $row["assignmentID"];
+		$projectID = $row["projectID"];
+		$loadClass = $code ? '' : 'disabled';
+		$load = "<a id='l$id-$n' class='$loadClass' href='javascript:void(0)' onclick='loadHint($id, $n, \"$assignment\")'>Load</a>";
+        $save = "<a href='javascript:void(0)' onclick='saveHint($id, $n, \"$projectID\")'>Save</a>";
+        return "<span id='d$id-$n'>$updated</span><br/>$load<br/>$save";
     }
 
 	echo "<table cellspacing='0'>";
-	echo "<thead><th>Log ID</th><th>Project ID</th><th>Phase 1</th><th>Phase 2</th></thead>";
+	echo "<thead><th>Log ID</th><th>Project ID</th><th>Best Hint</th><th>All Edits</th></thead>";
 	while($row = mysqli_fetch_array($result)) {
 		$id=$row['rowID'];
 		$assignmentID = $row['assignmentID'];
@@ -118,7 +144,7 @@ if ($enble_viewer) {
 		$type = str_replace('SnapDisplay.show', '', $type);
 		$time = $row['time'];
 		$data = json_encode($row['data']);
-		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\", $data, \"$type\")";
+		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\")";
 		$onclick = htmlspecialchars($onclick);
 		$contextLink = "../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$id";
         $h1 = hintCell($row, 1);
@@ -162,7 +188,7 @@ if ($enble_viewer) {
 				var snap = document.getElementById("snap");
 				snap.onload = function() {
 					snap.contentWindow.ide.toggleStageSize();
-					if (index > 0 && rows.length > 0) {
+					if (rows.length > 0) {
 						rows[index].onclick();
 					}
 				}

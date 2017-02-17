@@ -31,9 +31,9 @@ CREATE TABLE IF NOT EXISTS `hints` (
   `userID` varchar(24) NOT NULL,
   `rowID` int(11) NOT NULL,
   `h1Code` text DEFAULT NULL,
-  `h1Updated` date DEFAULT NULL,
+  `h1Updated` datetime DEFAULT NULL,
   `h2Code` text DEFAULT NULL,
-  `h2Updated` date DEFAULT NULL
+  `h2Updated` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

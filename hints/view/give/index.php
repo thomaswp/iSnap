@@ -46,7 +46,7 @@
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						var contentWindow = document.getElementById('snap').contentWindow;
-						contentWindow.Assignment.setID(assignment);
+						contentWindow.assignmentID = assignment;
 						contentWindow.ide.droppedText(xhr.responseText);
 					}
 				};
@@ -84,7 +84,7 @@
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						var contentWindow = document.getElementById('snap').contentWindow;
-						contentWindow.Assignment.setID(assignment);
+						contentWindow.assignmentID = assignment;
 						contentWindow.ide.droppedText(xhr.responseText);
 					}
 				};

@@ -146,7 +146,7 @@ if ($enble_viewer) {
 		$data = json_encode($row['data']);
 		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\")";
 		$onclick = htmlspecialchars($onclick);
-		$contextLink = "../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$id";
+		$contextLink = "../../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$id";
         $h1 = hintCell($row, 1);
         $h2 = hintCell($row, 2);
 

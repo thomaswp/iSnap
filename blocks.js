@@ -2616,6 +2616,9 @@ BlockMorph.prototype.restoreInputs = function (oldInputs) {
         nb,
         myself = this;
 
+    // When relabeling, copied blocks in inputs should keep their IDs
+    BlockMorph.copyIDs = true;
+
     this.inputs().forEach(function (inp) {
         old = oldInputs[i];
         if (old instanceof ReporterBlockMorph) {
@@ -2636,6 +2639,8 @@ BlockMorph.prototype.restoreInputs = function (oldInputs) {
         i += 1;
     });
     this.cachedInputs = null;
+    // Make sure to set copyIDs back to false when finished
+    BlockMorph.copyIDs = false;
 };
 
 BlockMorph.prototype.showHelp = function () {

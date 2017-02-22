@@ -249,8 +249,10 @@
 				margin-top: 0.2em;
 				margin-bottom: 0.2em
 			}
+	
 			#confirm-new ul li:first-child{
 			    margin-bottom: 5px;
+				margin-right: 7px;
 			}
 			.getFrames{
 			    -webkit-animation-name: myframes;
@@ -338,7 +340,7 @@
 				border: 2px solid rgb(143, 86, 227);
 				background-color: rgb(255, 255, 255);
 				background-size: 45px;
-				font-size: 16px;
+				font-size: 14px;
 			}
 			#assignmentGObutton{
 			    padding-top: 10px;

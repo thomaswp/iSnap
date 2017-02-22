@@ -19,6 +19,9 @@ Highlight:
   * [Server] Custom block side scripts should be able to be candidates
   * Speed up more on Firefox
 
+Logging:
+* (!) Change the way custom block definitions are logged (see TODO in store.js)
+
 UI:
 * Fix parent.adjustBounds bug in HintBar
 * Clean up breaks the hint margin for custom blocks

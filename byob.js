@@ -2291,6 +2291,12 @@ BlockLabelFragment.prototype.defSpecFragment = function () {
             '' : pref + this.labelString + (this.type ? '\'' : '');
 };
 
+// List of suffixes to clean input names when loading an editing block
+BlockLabelFragment.suffixes = [
+    ' \u2191', '...', ' \u03BB', ' ?', ' \uFE19', ' %turtleOutline', ' \u03BB',
+    ' #'
+];
+
 BlockLabelFragment.prototype.defTemplateSpecFragment = function () {
     // answer a string representing my prototype's spec
     // which also indicates my type, default value or arity

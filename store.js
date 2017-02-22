@@ -952,23 +952,51 @@ SnapSerializer.prototype.loadEditing = function (project, model) {
 
     if (!editingBlock) return;
 
-    // TODO: parse block inputs as well (I really should have used the block
-    // definition, rather than the ScriptsMorph for serialization...)
+    // TODO: switch to serializing/loading the block definition, rather than
+    // the ScriptsMorph currently used. Make sure to be able to load both.
+    // The current logging method omits the variable types, so they cannot be
+    // reloaded.
     var scriptsElement = model.childNamed('scripts');
     if (!scriptsElement) return;
+    var blockInputs = {};
+    var blockSpec = editingBlock.spec;
     if (scriptsElement.children[0] && scriptsElement.children[0].children) {
-        // Remove the first item in the script, since it's the weird
+        // Get the first item in the script, since it's the weird
         // CustomHatBlockMorph that can't be properly parsed by the
         // loadScriptsArray method
-        scriptsElement.children[0].children.shift();
+        var header = scriptsElement.children[0].children.shift();
+        while (header && header.tag !== 'custom-block' &&
+                    header.children.length > 0) {
+            header = header.children[0];
+        }
+        if (header && header.tag === 'custom-block') {
+            var spec = header.attributes['s'];
+            if (spec) blockSpec = spec;
+            header.children.forEach(function(child) {
+                if (child.tag === 'l') {
+                    var varName = child.contents;
+                    BlockLabelFragment.suffixes.forEach(function(suffix) {
+                        if (varName.endsWith(suffix)) {
+                            varName = varName.substring(
+                                0, varName.length - suffix.length);
+                        }
+                    });
+                    // Create a default variable type
+                    // (It's not clear that this is used for anything other than
+                    // determining the varaible type, so these default
+                    // declarations may not be needed. Still better safe...)
+                    blockInputs[varName] = ['%s', '', undefined, false];
+                }
+            });
+        }
     }
     var scripts = this.loadScriptsArray(scriptsElement);
 
     var editingCopy;
-    if (scripts.length !== 0) {
-        // Clone the editing block, since we don't want to overwrite the
-        // original block with the editing changes, in case they're canceled
-        editingCopy = editingBlock.copyAndBindTo();
+    // Clone the editing block, since we don't want to overwrite the
+    // original block with the editing changes, in case they're canceled
+    editingCopy = editingBlock.copyAndBindTo();
+    if (scripts.length > 0) {
         if (!editingCopy.body) {
             editingCopy.body = new Context(
                 null,
@@ -977,13 +1005,13 @@ SnapSerializer.prototype.loadEditing = function (project, model) {
                 editingSprite
             );
         }
-        // Set it's experssion to the main script and it's scripts to the rest
-        // of them
+        // Set it's experssion to the main script and it's scripts to the
+        // rest of them
         editingCopy.body.expression = scripts.shift();
-        editingCopy.scripts = scripts;
-    } else {
-        editingCopy = editingBlock;
     }
+    editingCopy.scripts = scripts;
+    editingCopy.declarations = blockInputs;
+    editingCopy.spec = blockSpec;
 
     setTimeout(function() {
         Morph.prototype.trackChanges = false;

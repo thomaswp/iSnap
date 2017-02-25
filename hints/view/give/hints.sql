@@ -33,7 +33,9 @@ CREATE TABLE IF NOT EXISTS `hints` (
   `h1Code` text DEFAULT NULL,
   `h1Updated` datetime DEFAULT NULL,
   `h2Code` text DEFAULT NULL,
-  `h2Updated` datetime DEFAULT NULL
+  `h2Updated` datetime DEFAULT NULL,
+  `h1Edits` text DEFAULT NULL,
+  `h2Edits` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

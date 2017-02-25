@@ -41,13 +41,14 @@
 		<script type="text/javascript">
 			var user = "<?php echo $_GET['user']; ?>";
 
-			function loadSnap(id, project, assignment) {
+			function loadSnap(id, project, assignment, callback) {
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						var contentWindow = document.getElementById('snap').contentWindow;
 						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
+						if (callback) callback();
 					}
 				};
 				xhr.open("GET", "../../../logging/view/code.php?id=" + id + "&project=" + project, true);
@@ -91,6 +92,22 @@
 				xhr.open("GET", "hint.php?rowID=" + rowID + "&phase=" + phase + "&user=" + user, true);
 				xhr.send();
 			}
+
+			function showEdits(edits, id, project, assignment, callback) {
+				var contentWindow = document.getElementById('snap').contentWindow;
+				var provider = contentWindow.hintProvider;
+				if (!provider) return;
+				provider.forcedHints = [];
+				loadSnap(id, project, assignment, function() {
+					setTimeout(function() {
+						provider.forcedHints = edits;
+						provider.displays.forEach(function(display) {
+							display.enabled = true;
+						});
+						provider.getHintsFromServer();
+					}, 300);
+				});
+			}
 		</script>
 	</head>
 
@@ -133,6 +150,14 @@ if ($enble_viewer) {
         return "<span id='d$id-$n'>$updated</span><br/>$load<br/>$save";
     }
 
+	function editsLink($row, $n, $id, $projectID, $assignmentID) {
+		$edits = $row["h${n}Edits"];
+		if ($edits == null) return "<i>Edits $n</i>";
+		$onclick = "showEdits($edits, \"$id\", \"$projectID\", \"$assignmentID\")";
+		$onclick = htmlspecialchars($onclick);
+		return "<a href='javascript:void(0)' onclick=\"$onclick\">Edits $n</a>";
+	}
+
 	echo "<table cellspacing='0'>";
 	echo "<thead><th>Log ID</th><th>Project ID</th><th>Best Hint</th><th>All Edits</th></thead>";
 	while($row = mysqli_fetch_array($result)) {
@@ -149,9 +174,14 @@ if ($enble_viewer) {
 		$contextLink = "../../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$id";
         $h1 = hintCell($row, 1);
         $h2 = hintCell($row, 2);
+		$e1 = editsLink($row, 1, $id, $projectID, $assignmentID);
+		$e2 = editsLink($row, 2, $id, $projectID, $assignmentID);
 
 		echo "<tr>
-            <td id='$id'><a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$id</a></td>
+            <td id='$id'>
+				<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$id</a><br />
+				$e1<br />$e2
+			</td>
 			<td>$assignmentID </br>
 			    <a href='$contextLink' target='_blank' title='See the full logs for this attempt...'>$displayID</a></td>
             <td>$h1</td>
@@ -187,7 +217,24 @@ if ($enble_viewer) {
 				}
 				var snap = document.getElementById("snap");
 				snap.onload = function() {
-					snap.contentWindow.ide.toggleStageSize();
+					var cw = snap.contentWindow;
+					cw.ide.toggleStageSize();
+					cw.hintProvider.forcedHints = [];
+					if (!cw.hintProvider.displays.some(function(display) {
+						return display instanceof cw.DebugDisplay;
+					})) {
+						var debugDisplay = new cw.DebugDisplay();
+						console.log(debugDisplay);
+						cw.hintProvider.displays.push(debugDisplay);
+						debugDisplay.show();
+					}
+					cw.hintProvider.displays.forEach(function(display) {
+						if (display instanceof cw.HighlightDisplay) {
+							display.showInserts = true;
+							display.forceShowDialog = true;
+							display.enabled = true;
+						}
+					});
 					if (rows.length > 0) {
 						rows[index].onclick();
 					}

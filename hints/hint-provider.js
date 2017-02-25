@@ -9,6 +9,8 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
     this.lastHints = [];
     this.requestNumber = 0;
     this.reloadCode = reloadCode;
+    // For viewing purposes, this overrides server requests with static hints
+    this.forcedHints;
 
     if (!displays) displays = [];
     if (!displays.length) displays = [displays];
@@ -104,6 +106,11 @@ HintProvider.prototype.getHintsFromServer = function() {
         return display.enabled;
     })) return;
 
+    if (this.forcedHints) {
+        this.processHints(this.forcedHints);
+        return;
+    }
+
     var myself = this;
 
     if (this.lastXHR) {
@@ -128,7 +135,7 @@ HintProvider.prototype.getHintsFromServer = function() {
     // Response handlers.
     var requestNumber = ++this.requestNumber;
     xhr.onload = function() {
-        myself.processHints(xhr.responseText, requestNumber);
+        myself.processHintRequest(xhr.responseText, requestNumber);
     };
 
     xhr.onerror = function(e) {
@@ -147,7 +154,7 @@ HintProvider.prototype.showError = function(message) {
     });
 };
 
-HintProvider.prototype.processHints = function(json, requestNumber) {
+HintProvider.prototype.processHintRequest = function(json, requestNumber) {
     // If a more recent request has been fired, wait on that one
     // This is below the log statement because if we have pending code
     // changes to log, they'll flush and call a new request, and this one
@@ -162,6 +169,10 @@ HintProvider.prototype.processHints = function(json, requestNumber) {
         return;
     }
 
+    this.processHints(hints);
+};
+
+HintProvider.prototype.processHints = function(hints) {
     Trace.log('HintProvider.processHints', hints);
 
     var nErrors = 0, nHints = 0;

@@ -397,7 +397,6 @@ HighlightDisplay.prototype.showInsertHint = function(data) {
         parent = this.getCode(data.parent);
         if (parent == null) {
             Trace.logErrorMessage('Unknown parent in insert hint');
-            return;
         }
     }
 

@@ -10,7 +10,7 @@
 
 	<body>
 		<div id="flex-Parent">
-		    <div id="blackBar"><div><img src="login/NCStateLogoWhite.png"></div> <div><span id="courseName"> CSC 200 | Introduction To Computers and Their Uses</span></div></div>
+		    <div id="blackBar"><div><img id="headerLogo"></div> <div><span id="courseName"> </span></div></div>
 			<div id="theBox">
 				<div id="needsCookiesEnabled" class="hidden"><i class="fa fa-exclamation-circle fa-2x" aria-hidden="true"></i><span>We are having trouble logging you in. <b>Please inform your TA</b>, then continue selecting an assignment.</span></div>
 				<div id="theBorder">
@@ -84,6 +84,24 @@
 						option.selected = true;
 					}
 					select.add(option);
+				}
+			}
+
+
+			// Set the logo and description from the config file
+			var headerLogo = document.getElementById("headerLogo");
+			var headerDescription = document.getElementById("courseName");
+			headerLogo.onerror = function(){
+				this.style.display = "none";
+			}
+			// Get the navbar config from the config file
+			if (window.loginHeader) {
+				if (window.loginHeader.logo) {
+					headerLogo.src = window.loginHeader.logo;
+				}
+				if (window.loginHeader.description) {
+					headerDescription.innerHTML =
+						window.loginHeader.description;
 				}
 			}
 

@@ -43,6 +43,12 @@ window.assignments = {
     },
 };
 
+window.navbar = {
+    logo: "login/NCStateLogoWhite.png",
+	description: "CSC 200 | Introduction To Computers and Their Uses"
+};
+
+
 // If true, requires the Snap users to select an assignment before
 // proceeding. Assignments can be pre-specified by using the url
 // snap.html?assignment=id

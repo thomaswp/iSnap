@@ -43,12 +43,6 @@ window.assignments = {
     },
 };
 
-window.navbar = {
-    logo: "login/NCStateLogoWhite.png",
-	description: "CSC 200 | Introduction To Computers and Their Uses"
-};
-
-
 // If true, requires the Snap users to select an assignment before
 // proceeding. Assignments can be pre-specified by using the url
 // snap.html?assignment=id
@@ -58,6 +52,11 @@ window.allowChangeAssignment = true;
 
 // If true, users are required to login before they can use the system
 window.requireLogin = true;
+
+window.loginHeader = {
+    logo: 'login/NCStateLogoWhite.png',
+    description: 'CSC 200 | Introduction To Computers and Their Uses'
+};
 
 // Create the logger you want to use on this snap deployment
 window.createLogger = function(assignmentID) {

@@ -257,7 +257,8 @@ SnapSerializer.uber = XML_Serializer.prototype;
 
 // SnapSerializer constants:
 
-SnapSerializer.prototype.app = 'Snap! (iSnap 2.1), http://go.ncsu.edu/isnap';
+SnapSerializer.prototype.app = 'iSnap 2.1, http://go.ncsu.edu/isnap';
+SnapSerializer.prototype.appParent = 'Snap! 4.0, http://snap.berkeley.edu';
 
 SnapSerializer.prototype.thumbnailSize = new Point(160, 120);
 
@@ -325,7 +326,9 @@ SnapSerializer.prototype.loadProjectModel = function (xmlNode, ide) {
     var appInfo = xmlNode.attributes.app,
         app = appInfo ? appInfo.split(' ')[0] : null;
 
-    if (ide && app && app !== this.app.split(' ')[0]) {
+    var sourceApp = this.app.split(' ')[0];
+    var sourceAppParent = this.appParent.split(' ')[0];
+    if (ide && app && app !== sourceApp && app !== sourceAppParent) {
         ide.inform(
             app + ' Project',
             'This project has been created by a different app:\n\n' +

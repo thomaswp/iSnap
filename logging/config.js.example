@@ -53,6 +53,10 @@ window.allowChangeAssignment = true;
 // If true, users are required to login before they can use the system
 window.requireLogin = true;
 
+// Specify to override the default Snap cloud URL
+// window.snapCloudURL = 'https://snap.apps.miosoft.com/SnapCloud';
+
+// Specify the login header's logo and title text
 window.loginHeader = {
     logo: 'login/NCStateLogoWhite.png',
     description: 'CSC 200 | Introduction To Computers and Their Uses'

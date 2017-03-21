@@ -1,5 +1,3 @@
-require('../logging/config');
-
 window.assignments.polygonMakerLab.hints = true;
 window.assignments.squiralHW.hints = true;
 window.assignments.squiralHW.promptHints = true;

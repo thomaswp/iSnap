@@ -1,6 +1,5 @@
 // Logs things. Not a morphic.
 
-require('config');
 require('console-logger.js');
 require('diff-logger.js');
 require('db-logger.js');

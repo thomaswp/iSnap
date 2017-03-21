@@ -1,5 +1,3 @@
-// require('../logging/config');
-
 /*
  * Assignments consist of objectives; this is the constructor for an individual
  * objective. each objective has a description which tells more about the

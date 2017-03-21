@@ -13,7 +13,7 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
     this.forcedHints;
 
     if (!displays) displays = [];
-    if (!displays.length) displays = [displays];
+    if (displays instanceof HintDisplay) displays = [displays];
     this.displays = displays;
 
     var myself = this;

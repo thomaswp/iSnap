@@ -6255,8 +6255,11 @@ ScriptsMorph.prototype.undrop = function () {
     var myself = this;
     if (this.isAnimating) {return; }
     if (!this.dropRecord || !this.dropRecord.lastRecord) {return; }
-    // TODO: more comprehensive logging
-    Trace.log("Scripts.undrop", this.dropRecord.lastDroppedBlock.blockId());
+    console.log(this.dropRecord);
+    Trace.log('Scripts.undrop', {
+        'action': this.dropRecord.action,
+        'block': this.dropRecord.lastDroppedBlock.blockId()
+    });
     if (!this.dropRecord.situation) {
         this.dropRecord.situation =
             this.dropRecord.lastDroppedBlock.situation();
@@ -6279,8 +6282,10 @@ ScriptsMorph.prototype.redrop = function () {
     if (this.isAnimating) {return; }
     if (!this.dropRecord || !this.dropRecord.nextRecord) {return; }
     this.dropRecord = this.dropRecord.nextRecord;
-    // TODO: more comprehensive logging
-    Trace.log("Scripts.redrop", this.dropRecord.lastDroppedBlock.blockId());
+    Trace.log('Scripts.redrop', {
+        'action': this.dropRecord.action,
+        'block': this.dropRecord.lastDroppedBlock.blockId()
+    });
     if (this.dropRecord.action === 'delete') {
         this.recoverLastDrop(true);
         this.dropRecord.lastDroppedBlock.destroy();

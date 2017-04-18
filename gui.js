@@ -1067,6 +1067,7 @@ IDE_Morph.prototype.createPalette = function (forSearching) {
             myself.currentSprite.wearCostume(null);
             droppedMorph.perish();
         } else if (droppedMorph instanceof BlockMorph) {
+            Trace.log("Block.dragDestroy", droppedMorph.blockId());
             if (hand && hand.grabOrigin.origin instanceof ScriptsMorph) {
                 hand.grabOrigin.origin.clearDropInfo();
                 hand.grabOrigin.origin.lastDroppedBlock = droppedMorph;
@@ -1074,9 +1075,6 @@ IDE_Morph.prototype.createPalette = function (forSearching) {
             }
             droppedMorph.perish();
         } else {
-            if (droppedMorph instanceof BlockMorph) {
-                Trace.log("Block.dragDestroy", droppedMorph.blockId());
-            }
             droppedMorph.perish();
         }
     };

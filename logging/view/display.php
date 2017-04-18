@@ -40,10 +40,13 @@ include '../config.php';
 		</style>
 		<script type="text/javascript">
 			function loadSnap(id, project) {
+				var assignment = "<?php echo $_GET['assignment']; ?>";
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
-						document.getElementById('snap').contentWindow.ide.droppedText(xhr.responseText);
+						var contentWindow = document.getElementById('snap').contentWindow;
+						contentWindow.Assignment.setID(assignment);
+						contentWindow.ide.droppedText(xhr.responseText);
 					}
 				};
 				xhr.open("GET", "code.php?id=" + id + "&project=" + project, true);
@@ -71,6 +74,27 @@ include '../config.php';
 						alert('please press Ctrl/Cmd+C to copy');
 					}
 				}
+			}
+			// Credit: http://stackoverflow.com/a/29428076/816458
+			function viewJSON(jsonObject) {
+				var winURL='json-viewer.php';
+				var params = { 'json' : JSON.stringify(jsonObject) };
+				var form = document.createElement("form");
+				form.setAttribute("method", "post");
+				form.setAttribute("action", winURL);
+				form.setAttribute("target", "_blank");
+				for (var i in params) {
+					if (params.hasOwnProperty(i)) {
+						var input = document.createElement('input');
+						input.type = 'hidden';
+						input.name = i;
+						input.value = params[i];
+						form.appendChild(input);
+					}
+				}
+				document.body.appendChild(form);
+				form.submit();
+				document.body.removeChild(form);
 			}
 		</script>
 	</head>
@@ -143,15 +167,13 @@ if ($enble_viewer) {
 			$class = "rid";
 		}
 
-		$link = "http://www.bodurov.com/JsonFormatter/view.aspx?json=" . urlencode($data);
-
 		$link_text = $data;
 		$cutoff = 35;
 		if ($link_text == "\"\"") $link_text = "";
 		if (strlen($link_text) > $cutoff) {
 			$link_text = substr($link_text, 0, $cutoff) . "...";
 		}
-		$link = "<a target='_blank' href='$link' title='$data'>$link_text</a>";
+		$link = "<a title='$data' href='#json-$rid' onclick='viewJSON($data)'>$link_text</a>";
 
 		echo "<tr><td>$first</td><td class='$class' id='$rid' title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";
 	}

@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS `trace` (
   `message` varchar(40) NOT NULL,
   `data` text NOT NULL,
   `assignmentID` varchar(40) NOT NULL,
+  `userID` varchar(255),
   `projectID` varchar(40) NOT NULL,
   `sessionID` varchar(40) NOT NULL,
   `browserID` varchar(40) NOT NULL,
@@ -38,6 +39,7 @@ CREATE TABLE IF NOT EXISTS `trace` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE trace ADD INDEX (assignmentID);
+ALTER TABLE trace ADD INDEX (userID);
 ALTER TABLE trace ADD INDEX (message);
 ALTER TABLE trace ADD INDEX (projectID);
 

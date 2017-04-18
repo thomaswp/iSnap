@@ -1823,6 +1823,10 @@ BlockEditorMorph.prototype.init = function (definition, target) {
     this.labelString = 'Block Editor';
     this.createLabel();
 
+    // Copy IDs when copying blocks, rather than making new block IDs
+    // as we would do for duplicating a block
+    BlockMorph.copyIDs = true;
+
     // create scripting area
     scripts = new ScriptsMorph(target);
     scripts.isDraggable = false;
@@ -1861,6 +1865,9 @@ BlockEditorMorph.prototype.init = function (definition, target) {
     proto.allComments().forEach(function (comment) {
         comment.align(proto);
     });
+
+    // Make sure to disable block ID copying
+    BlockMorph.copyIDs = false;
 
     scriptsFrame = new ScrollFrameMorph(scripts);
     scriptsFrame.padding = 10;
@@ -2017,6 +2024,11 @@ BlockEditorMorph.prototype.updateDefinition = function () {
     this.definition.scripts = [];
     this.definition.editorDimensions = this.bounds.copy();
 
+
+    // Copy IDs when copying blocks, rather than making new block IDs
+    // as we would do for duplicating a block
+    BlockMorph.copyIDs = true;
+
     this.body.contents.children.forEach(function (morph) {
         if (morph instanceof PrototypeHatBlockMorph) {
             head = morph;
@@ -2042,6 +2054,9 @@ BlockEditorMorph.prototype.updateDefinition = function () {
 
     this.definition.body = this.context(head);
     this.refreshAllBlockInstances();
+
+    // Make sure to turn copying IDs off when finished
+    BlockMorph.copyIDs = false;
 
     ide = this.target.parentThatIsA(IDE_Morph);
     ide.flushPaletteCache();
@@ -2275,6 +2290,12 @@ BlockLabelFragment.prototype.defSpecFragment = function () {
     return this.isDeleted ?
             '' : pref + this.labelString + (this.type ? '\'' : '');
 };
+
+// List of suffixes to clean input names when loading an editing block
+BlockLabelFragment.suffixes = [
+    ' \u2191', '...', ' \u03BB', ' ?', ' \uFE19', ' %turtleOutline', ' \u03BB',
+    ' #'
+];
 
 BlockLabelFragment.prototype.defTemplateSpecFragment = function () {
     // answer a string representing my prototype's spec

@@ -1,6 +1,6 @@
 <?php
 
-include '../../logging/config.php';
+include '../config.php';
 
 ?>
 
@@ -11,7 +11,7 @@ include '../../logging/config.php';
 	<head>
 		<meta charset="UTF-8">
 		<title>View Project</title>
-		<link rel="stylesheet" type="text/css" href="../../logging/view/table.css">
+		<link rel="stylesheet" type="text/css" href="table.css">
 		<style>
 			html {
 				height: 100%;
@@ -46,14 +46,9 @@ include '../../logging/config.php';
 						var contentWindow = document.getElementById('snap').contentWindow;
 						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
-						data = JSON.parse(data);
-						data.type = type;
-						window.setTimeout(function() {
-							contentWindow.HintDisplay.showLoggedHint(data);
-						}, 100);
 					}
 				};
-				xhr.open("GET", "../../logging/view/code.php?id=" + id + "&project=" + project, true);
+				xhr.open("GET", "code.php?id=" + id + "&project=" + project, true);
 				xhr.send();
 				window.location.hash = id;
 				window.index = rows.findIndex(function(a) {
@@ -90,7 +85,7 @@ if ($enble_viewer) {
 	}
 
 	// Allow for filtering by a set of space-separated ids
-	$where = "WHERE message LIKE 'SnapDisplay.show%Hint'";
+	$where = "";
 	if (array_key_exists('ids', $_GET)) {
 		$ids = $_GET['ids'];
 		$ids = explode(' ', $ids);
@@ -100,11 +95,10 @@ if ($enble_viewer) {
 			$list .= intval($id);
 		}
 		$list .= ')';
-		$where .= " AND id IN $list";
+		$where .= "WHERE id IN $list";
 	}
 
-	$query = "SELECT * FROM `trace` $where
-		ORDER BY assignmentID, projectID, time";
+	$query = "SELECT * FROM `trace` $where LIMIT 100";
 
 	$result = $mysqli->query($query);
 	if (!$result) {

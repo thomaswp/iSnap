@@ -1,9 +1,3 @@
-<?php
-
-include '../../logging/config.php';
-
-?>
-
 <!doctype html>
 
 <html>
@@ -89,34 +83,68 @@ include '../../logging/config.php';
 				return xhr;
 			}
 
-			function compareHints(a, b) {
+			function hintDifference(a, b) {
 				var hintsA = JSON.parse(a);
 				var hintsB = JSON.parse(b);
+				var shared = [];
 
-				if (hintsA.length !== hintsB.length) {
-					console.log(hintsA.length, 'vs', hintsB.length);
-					return false;
-				}
-
-				var same = true;
 				for (var i = 0; i < hintsA.length; i++) {
-					var dataA = hintsA[i].data;
-					var dataB = hintsB[i].data;
-					if (!areHintsEqual(dataA, dataB)) {
-						console.log(dataA, 'vs', dataB);
-						same = false;
+					var hintA = hintsA[i];
+					var dataA = hintA.data;
+
+					if (!hintA.type) hintsA.type = 'vector';
+					if (hintA.type === 'vector') {
+						// Get rid of logged prototypeHatBlocks, which the
+						// server will not have added
+						if (dataA.from[0] === 'prototypeHatBlock') {
+							dataA.from.splice(0, 1);
+						}
+						if (dataA.to[0] === 'prototypeHatBlock') {
+							dataA.to.splice(0, 1);
+						}
+					}
+
+					for (var j = 0; j < hintsB.length; j++) {
+						if (areHintsEqual(hintA, hintsB[j])) {
+							shared.push(hintsA.splice(i--, 1)[0]);
+							hintsB.splice(j, 1);
+							break;
+						}
 					}
 				}
-				return same;
+				if (hintsA.length === 0 && hintsB.length === 0) return null;
+				return {
+					'uniqueHintsA': hintsA,
+					'uniqueHintsB': hintsB,
+					'sharedHints': shared,
+				};
 			}
 
-			function areHintsEqual(dataA, dataB) {
+			function areHintsEqual(hintA, hintB) {
+				if (hintA.type !== hintB.type) return false;
+				if (hintA.type === 'vector') {
+					return areVectorHintsEqual(hintA.data, hintB.data);
+				} else if (hintA.type === 'highlight') {
+					return areHighlightHintsEqual(hintA.data, hintB.data);
+				}
+				return false;
+			}
+
+			function areVectorHintsEqual(dataA, dataB) {
+				if (!dataA || !dataB) return false;
 				if (JSON.stringify(dataA.from) !== JSON.stringify(dataB.from) ||
 						JSON.stringify(dataA.to) !== JSON.stringify(dataB.to)) {
 					return false;
 				}
 				if (!areRootsEqual(dataA.root, dataB.root)) return false;
 				return true;
+			}
+
+			function areHighlightHintsEqual(dataA, dataB) {
+				// For not, JSON should be formatted the same in server
+				// and logs, but this may change and require more complex
+				// parsing and comparing
+				return JSON.stringify(dataA) === JSON.stringify(dataB);
 			}
 
 			function areRootsEqual(rootA, rootB) {
@@ -127,25 +155,64 @@ include '../../logging/config.php';
 					areRootsEqual(rootA.parent, rootB.parent);
 			}
 
+			function viewJSON(jsonObject) {
+				var winURL='../../logging/view/json-viewer.php';
+				var params = { 'json' : JSON.stringify(jsonObject) };
+				var form = document.createElement("form");
+				form.setAttribute("method", "post");
+				form.setAttribute("action", winURL);
+				form.setAttribute("target", "_blank");
+				for (var i in params) {
+					if (params.hasOwnProperty(i)) {
+						var input = document.createElement('input');
+						input.type = 'hidden';
+						input.name = i;
+						input.value = params[i];
+						form.appendChild(input);
+					}
+				}
+				document.body.appendChild(form);
+				form.submit();
+				document.body.removeChild(form);
+			}
+
 			var verifyCallback;
 
 			function verify(id, project, assignment, data) {
+				var dataJSON = JSON.parse(data);
+				var type = 'vector';
+				if (dataJSON[0] && dataJSON[0].type) type = dataJSON[0].type;
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						var xml = xhr.responseText;
-						var cors = createCORSRequest('POST',
-							getHintURL() + '?assignmentID=' + assignment);
+						var url = getHintURL() +
+							'?assignmentID=' + encodeURIComponent(assignment) +
+							'&hintTypes=' + encodeURIComponent(type);
+
+						if (window.assignments) {
+							var dataset = window.assignments[assignment].dataset;
+							if (dataset) url += '&dataset=' + encodeURIComponent(dataset);
+						}
+						var cors = createCORSRequest('POST', url);
 						cors.onload = function() {
 							var hints = cors.responseText;
 							var link = document.getElementById('v' + id);
-							if (compareHints(data, hints)) {
-								link.innerHTML = 'Pass!';
+							var diff = hintDifference(data, hints);
+							if (!diff) {
+								link.innerHTML = 'Pass';
 								link.classList.add('pass');
+								diff = dataJSON;
 							} else {
-								link.innerHTML = 'Fail!';
+								link.innerHTML = '-' +
+									diff.uniqueHintsA.length + ' / +' +
+									diff.uniqueHintsB.length + ' / ~' +
+									diff.sharedHints.length;
 								link.classList.add('fail');
 							}
+							link.onclick = function() {
+								viewJSON(diff);
+							};
 							if (verifyCallback) verifyCallback();
 						};
 
@@ -170,6 +237,8 @@ include '../../logging/config.php';
 			<div id="content">
 				<div style="overflow: scroll; height: 100%;">
 				<?php
+include '../../logging/config.php';
+
 if ($enble_viewer) {
 
 	$mysqli = new mysqli($host, $user, $password, $db);
@@ -184,14 +253,19 @@ if ($enble_viewer) {
 			hint.assignmentID AS assignmentID, hint.projectID AS projectID, hint.id AS id, hint.time AS time, hint.message AS message,
 			hint.data AS hintData, proc.data AS procData, proc.code AS procCode
 		FROM (
-			SELECT *, FLOOR(UNIX_TIMESTAMP(time)) AS g
+			SELECT *
 			FROM trace
 			WHERE message='HintProvider.processHints' AND assignmentID='$assignment'
 		) AS proc JOIN (
-			SELECT *, FLOOR(UNIX_TIMESTAMP(time)) AS g
+			SELECT *
 			FROM trace
 			WHERE message LIKE 'SnapDisplay.show%Hint' AND assignmentID='$assignment'
-		) AS hint ON proc.assignmentID=hint.assignmentID AND proc.projectID=hint.projectID AND proc.g=hint.g
+		) AS hint ON proc.assignmentID=hint.assignmentID AND proc.projectID=hint.projectID AND proc.id <= hint.id
+		WHERE NOT EXISTS (
+			SELECT * FROM trace WHERE
+				trace.assignmentID=proc.assignmentID AND trace.projectID=proc.projectID AND trace.message='HintProvider.processHints' AND
+				trace.id > proc.id AND trace.id <= hint.id
+		)
 		";
 
 	$result = $mysqli->query($query);

@@ -3,3 +3,4 @@
 .htpasswd
 .vscode/
 isnap.min.js
+.tern-port

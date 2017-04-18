@@ -14,6 +14,7 @@ Logger.prototype.init = function(interval) {
     this.onCodeChanged = null;
     this.log('Logger.started');
     this.start(interval);
+    this.forceLogCode = false;
 };
 
 // Get user identifying user info and bundle it as an object
@@ -61,8 +62,10 @@ Logger.prototype.flushSaveCode = function() {
  * statement. For example, this allows a logging statement to come at the
  * beginning of a method which alters the code, and have that state change
  * still captured.
+ * @param {boolean} forceLogCode Forces the logger to log the code state, even
+ * if unchanged.
  */
-Logger.prototype.log = function(message, data, saveImmediately) {
+Logger.prototype.log = function(message, data, saveImmediately, forceLogCode) {
     if (!(message || data)) return;
 
     this.flushSaveCode();
@@ -73,6 +76,8 @@ Logger.prototype.log = function(message, data, saveImmediately) {
         'time': Date.now(),
         'assignmentID': Assignment.getID(),
     };
+
+    this.forceLogCode |= forceLogCode;
 
     // Set a callback to save the code state in 1ms
     // This allows us to call log() at the beginning of a method
@@ -150,7 +155,8 @@ Logger.prototype.addCode = function(log) {
     var code = this.serializer.serialize(ide.stage);
     code = this.removeImages(code);
 
-    if (this.hasCodeChanged(this.lastCode, code)) {
+    if (this.forceLogCode || this.hasCodeChanged(this.lastCode, code)) {
+        this.forceLogCode = false;
         log.code = code;
         this.lastCode = code;
         if (this.onCodeChanged) this.onCodeChanged(code);

@@ -50,7 +50,9 @@ Assignment.setID = function(assignmentID) {
     var formerID = Assignment.getID();
     Trace.log('Assignment.setID', assignmentID);
     window.assignmentID = assignmentID;
-    Trace.log('Assignment.setIDFrom', formerID);
+    // Force the code to be re-logged so that we have an initial code state for
+    // the new assignment log
+    Trace.log('Assignment.setIDFrom', formerID, false, true);
 
     var params = getSearchParameters();
     var path = location.pathname;

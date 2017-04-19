@@ -60,6 +60,7 @@ SyntaxElementMorph.prototype.hintHighlight = function (color, border) {
     highlight.color = color;
     highlight.image = this.highlightImage(color, border);
     highlight.setPosition(fb.origin.subtract(new Point(border, border)));
+    highlight.parent = this;
     return highlight;
 };
 

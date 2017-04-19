@@ -165,8 +165,8 @@ Logger.prototype.addCode = function(log) {
 
 Logger.prototype.removeCoordinates = function(xml) {
     if (!xml) return xml;
-    // Remove the open sprite tags, since they contain things
-    return xml.replace(/<(sprite|stage|watcher) [^>]*>/g, '');
+    // Remove the tags that have coordinates (and nothing else of interest)
+    return xml.replace(/<(sprite|stage|watcher|script) [^>]*>/g, '');
 };
 
 Logger.prototype.hasCodeChanged = function(xml1, xml2) {

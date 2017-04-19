@@ -6255,7 +6255,6 @@ ScriptsMorph.prototype.undrop = function () {
     var myself = this;
     if (this.isAnimating) {return; }
     if (!this.dropRecord || !this.dropRecord.lastRecord) {return; }
-    console.log(this.dropRecord);
     Trace.log('Scripts.undrop', {
         'action': this.dropRecord.action,
         'block': this.dropRecord.lastDroppedBlock.blockId()

@@ -9,7 +9,10 @@ Highlight:
   * reifyScript block isn't handled by getCode
   * Hover feedback still shows when a dialog is in between mouse and block
   * require() statements shouldn't be needed in the config, since this isn't VCd
+  * CommandBlock wrapping on highlighted blocks makes the CSlot too big
 * TODO:
+  * Visible Stepping causes lots of highlight bugs. Should be fixed or a warning
+    displayed at least
 * Reach:
   * Save preferences
   * Show list insert hints as a dialog

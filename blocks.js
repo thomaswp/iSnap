@@ -3931,7 +3931,10 @@ BlockMorph.prototype.stackWidth = function () {
 };
 
 BlockMorph.prototype.snap = function () {
-    Trace.log("Block.snapped", {"id": this.blockId(), "origin": this.bounds.origin});
+    Trace.log('Block.snapped', {
+        'id': this.blockId(),
+        'origin': this.bounds.origin,
+    });
     var top = this.topBlock(),
         receiver,
         stage,
@@ -4273,6 +4276,11 @@ CommandBlockMorph.prototype.snap = function (hand) {
         this.setLeft(target.element.left());
         this.bottomBlock().nextBlock(target.element);
     } else if (target.loc === 'wrap') {
+        Trace.log('CommandBlock.wrap', {
+            'id': this.blockId(),
+            'target': target.element.blockId ? target.element.blockId() : null,
+        });
+
         cslot = detect( // this should be a method making use of caching
             this.inputs(), // these are already cached, so maybe it's okay
             function (each) {return each instanceof CSlotMorph; }

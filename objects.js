@@ -2819,7 +2819,7 @@ SpriteMorph.prototype.reporterize = function (expressionString) {
 // SpriteMorph variable management
 
 SpriteMorph.prototype.addVariable = function (name, isGlobal) {
-    Trace.log("Sprite.addVariable", name);
+    Trace.log('Sprite.addVariable', name);
     var ide = this.parentThatIsA(IDE_Morph);
     if (isGlobal) {
         this.globalVariables().addVar(name);
@@ -2833,7 +2833,7 @@ SpriteMorph.prototype.addVariable = function (name, isGlobal) {
 };
 
 SpriteMorph.prototype.deleteVariable = function (varName) {
-    Trace.log("Sprite.deleteVariable", varName);
+    Trace.log('Sprite.deleteVariable', varName);
     var ide = this.parentThatIsA(IDE_Morph);
     if (!contains(this.inheritedVariableNames(true), varName)) {
         // check only shadowed variables

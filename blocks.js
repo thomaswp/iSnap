@@ -2370,9 +2370,9 @@ BlockMorph.prototype.userMenu = function () {
         new DialogBoxMorph(
             myself,
             function(arg) {
-                Trace.log("Block.rename", {
-                    "id": myself.blockId(),
-                    "name": arg,
+                Trace.log('Block.rename', {
+                    'id': myself.blockId(),
+                    'name': arg,
                 });
                 myself.userSetSpec(arg);
             },
@@ -3205,7 +3205,7 @@ BlockMorph.prototype.refactorThisVar = function (justTheTemplate) {
         Trace.log('Block.refactorVar', {
             'id': myself.blockId(),
             'oldName': oldName,
-            'newName': newName
+            'newName': newName,
         });
 
         var definer;
@@ -3327,7 +3327,7 @@ BlockMorph.prototype.refactorThisVar = function (justTheTemplate) {
     }
 
     function varExistsError (where) {
-        Trace.log("Block.refactorVarError", {
+        Trace.log('Block.refactorVarError', {
             'id': myself.blockId(),
             'oldName': oldName,
             'newName': newName,

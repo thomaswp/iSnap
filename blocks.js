@@ -7940,7 +7940,8 @@ InputSlotMorph.prototype.dropDownMenu = function (enableKeyboard) {
 };
 
 InputSlotMorph.prototype.menuFromDict = function (choices, noEmptyOption) {
-    var key,
+    var myself = this,
+        key,
         menu = new MenuMorph(
             this.setContents,
             null,
@@ -7955,9 +7956,9 @@ InputSlotMorph.prototype.menuFromDict = function (choices, noEmptyOption) {
     }
     if (!noEmptyOption) {
         menu.addItem(' ', function() {
-            Trace.log("InputSlot.menuItemSelected", {
-                "id": myself.argId(),
-                "item": " ",
+            Trace.log('InputSlot.menuItemSelected', {
+                'id': myself.argId(),
+                'item': ' ',
             });
             return ' ';
         });
@@ -7976,9 +7977,9 @@ InputSlotMorph.prototype.menuFromDict = function (choices, noEmptyOption) {
                 // capture the key in a function call to avoid closure nonsense
                 (function (fKey) {
                     menu.addItem(key, function() {
-                        Trace.log("InputSlot.menuItemSelected", {
-                            "id": myself.argId(),
-                            "item": fKey,
+                        Trace.log('InputSlot.menuItemSelected', {
+                            'id': myself.argId(),
+                            'item': fKey,
                         });
                         var choice = choices[fKey];
                         if (choice instanceof Function) return choice();

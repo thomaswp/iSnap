@@ -6150,7 +6150,7 @@ ScriptsMorph.prototype.userMenu = function () {
         'exportScriptsPicture',
         'open a new window\nwith a picture of all scripts'
     );
-    if (ide && !BlockEditorMorph.showing) {
+    if (ide) {
         menu.addLine();
         menu.addItem(
             'make a block...',

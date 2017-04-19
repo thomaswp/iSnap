@@ -512,15 +512,16 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
 
     // Regardless of whether we're showing an editing block, we should close
     // any open editor window when loading a new project.
-    if (BlockEditorMorph.showing) {
-        BlockEditorMorph.showing.close();
-    }
+    BlockEditorMorph.showing.forEach(function(editor) {
+        editor.close();
+    });
+
     model.editing  = model.project.childNamed('editing');
     if (model.editing) {
-        var editingGUID = model.editing.attributes.guid;
-        if (editingGUID && editingGUID.length > 0) {
-            myself.loadEditing(project, model.editing);
-        }
+        var defaultGUID = model.editing.attributes.guid;
+        model.editing.children.forEach(function(scripts) {
+            myself.loadEditing(project, scripts, defaultGUID);
+        });
     }
 
     /* Global Variables */
@@ -938,8 +939,7 @@ SnapSerializer.prototype.populateCustomBlocks = function (
 };
 
 
-SnapSerializer.prototype.loadEditing = function (project, model) {
-
+SnapSerializer.prototype.loadEditing = function (project, model, defaultGUID) {
     var stage = project.stage;
 
     var allBlocks = [];
@@ -949,7 +949,8 @@ SnapSerializer.prototype.loadEditing = function (project, model) {
         allBlocks[i + 1] = sprite.customBlocks;
     });
 
-    var guid = model.attributes.guid;
+    // Backwards compatibility for when the guid was stored in <editing>
+    var guid = model.attributes.guid || defaultGUID;
     var editingBlock = null, editingSprite = null;
     Object.keys(allBlocks).forEach(function(sprite, i) {
         allBlocks[sprite].forEach(function(block) {
@@ -966,15 +967,17 @@ SnapSerializer.prototype.loadEditing = function (project, model) {
     // the ScriptsMorph currently used. Make sure to be able to load both.
     // The current logging method omits the variable types, so they cannot be
     // reloaded.
-    var scriptsElement = model.childNamed('scripts');
-    if (!scriptsElement) return;
     var blockInputs = {};
     var blockSpec = editingBlock.spec;
-    if (scriptsElement.children[0] && scriptsElement.children[0].children) {
+    if (model.children[0] && model.children[0].children) {
+        // TODO: This improperly loads non-primary scripts as the main script
+        // when there isn't one. Be better to just fix the representation if
+        // you can (see above)
+
         // Get the first item in the script, since it's the weird
         // CustomHatBlockMorph that can't be properly parsed by the
         // loadScriptsArray method
-        var header = scriptsElement.children[0].children.shift();
+        var header = model.children[0].children.shift();
         while (header && header.tag !== 'custom-block' &&
                     header.children.length > 0) {
             header = header.children[0];
@@ -1000,7 +1003,7 @@ SnapSerializer.prototype.loadEditing = function (project, model) {
             });
         }
     }
-    var scripts = this.loadScriptsArray(scriptsElement);
+    var scripts = this.loadScriptsArray(model);
 
     var editingCopy;
     // Clone the editing block, since we don't want to overwrite the
@@ -1655,28 +1658,25 @@ StageMorph.prototype.toXML = function (serializer) {
     this.removeAllClones();
 
     // If the user is currently editing a custom block, we add it to the XML.
-    // This is just for logging - it is not used when importing from XML.
 
     var makeEditingBlock = function() {
-        var editingBlock = '';
-        var editingBlockGuid = '';
-        if (BlockEditorMorph.showing) {
-            var children = BlockEditorMorph.showing.allChildren().filter(function (child) {
+        var editingBlocks = BlockEditorMorph.showing.map(function(editor) {
+            var children = editor.allChildren().filter(function (child) {
                 return child instanceof ScriptsMorph;
             });
-            if (children.length > 0) {
-                editingBlock = '<scripts>' +
-                    children[0].toXML(serializer) +
-                    '</scripts>';
-                if (BlockEditorMorph.showing.definition) {
-                    editingBlockGuid = BlockEditorMorph.showing.definition.guid;
-                }
+            if (children.length === 0) return '';
+            var editingBlockGuid = '';
+            if (editor.definition) {
+                editingBlockGuid = editor.definition.guid;
             }
-        }
+            return serializer.format('<scripts guid="@">%</scripts>',
+                editingBlockGuid,
+                children[0].toXML(serializer)
+            );
+        });
         return serializer.format(
-            '<editing guid="@">%</editing>',
-            editingBlockGuid,
-            editingBlock
+            '<editing>%</editing>',
+            editingBlocks.join()
         );
     };
 

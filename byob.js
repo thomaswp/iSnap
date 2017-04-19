@@ -916,9 +916,7 @@ CustomCommandBlockMorph.prototype.userMenu = function () {
             monitor(vName);
         });
     }
-    if (!BlockEditorMorph.showing) {
-        menu.addItem("edit...", 'edit'); // works also for prototypes
-    }
+    menu.addItem("edit...", 'edit'); // works also for prototypes
     return menu;
 };
 
@@ -1780,8 +1778,8 @@ BlockEditorMorph.prototype = new DialogBoxMorph();
 BlockEditorMorph.prototype.constructor = BlockEditorMorph;
 BlockEditorMorph.uber = DialogBoxMorph.prototype;
 
-// Keep track of the currently showing block editor (and allow only one)
-BlockEditorMorph.showing = null;
+// Keep track of the currently showing block editors
+BlockEditorMorph.showing = [];
 
 // BlockEditorMorph instance creation:
 
@@ -1790,15 +1788,17 @@ function BlockEditorMorph(definition, target) {
 }
 
 BlockEditorMorph.prototype.ok = function() {
-    Trace.log("BlockEditor.ok");
+    Trace.log('BlockEditor.ok');
     BlockEditorMorph.uber.ok.apply(this, arguments);
-}
+};
 
 BlockEditorMorph.prototype.destroy = function() {
     BlockEditorMorph.uber.destroy.apply(this, arguments);
-    if (BlockEditorMorph.showing != this) return;
-    BlockEditorMorph.showing = null;
-}
+    var index = BlockEditorMorph.showing.indexOf(this);
+    if (index >= 0) {
+        BlockEditorMorph.showing.splice(index, 1);
+    }
+};
 
 BlockEditorMorph.defaultHatBlockMargin = new Point(10, 10);
 
@@ -1813,8 +1813,6 @@ BlockEditorMorph.prototype.init = function (definition, target) {
         "type": definition.type,
         "guid": definition.guid,
     } : null);
-
-    BlockEditorMorph.showing = this;
 
     // additional properties:
     this.definition = definition;
@@ -1907,6 +1905,9 @@ BlockEditorMorph.prototype.init = function (definition, target) {
 
 BlockEditorMorph.prototype.popUp = function () {
     var world = this.target.world();
+
+    // Add this to the list of showing blockEditorMorphs
+    BlockEditorMorph.showing.push(this);
 
     if (world) {
         BlockEditorMorph.uber.popUp.call(this, world);

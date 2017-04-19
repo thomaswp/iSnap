@@ -2365,7 +2365,6 @@ BlockMorph.prototype.userMenu = function () {
     }
 
     function renameVar() {
-        // TODO: figure out if this copy should keep its ID
         var blck = myself.fullCopy();
         blck.addShadow();
         new DialogBoxMorph(
@@ -2672,6 +2671,8 @@ BlockMorph.prototype.toggleTransientVariable = function () {
     if (!varFrame) {return; }
     varFrame.vars[this.blockSpec].isTransient =
         !(varFrame.vars[this.blockSpec].isTransient);
+    Trace.log("Block.toggleTransientVariable",
+        varFrame.vars[this.blockSpec].isTransient);
 };
 
 BlockMorph.prototype.deleteBlock = function () {
@@ -3201,6 +3202,12 @@ BlockMorph.prototype.refactorThisVar = function (justTheTemplate) {
     );
 
     function renameVarTo (newName) {
+        Trace.log('Block.refactorVar', {
+            'id': myself.blockId(),
+            'oldName': oldName,
+            'newName': newName
+        });
+
         var definer;
 
         if (this.parent instanceof SyntaxElementMorph) {
@@ -3320,6 +3327,12 @@ BlockMorph.prototype.refactorThisVar = function (justTheTemplate) {
     }
 
     function varExistsError (where) {
+        Trace.log("Block.refactorVarError", {
+            'id': myself.blockId(),
+            'oldName': oldName,
+            'newName': newName,
+            'where': where,
+        });
         ide.inform(
             'Variable exists',
             'A variable with this name already exists ' +

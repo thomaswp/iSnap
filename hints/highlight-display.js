@@ -87,6 +87,7 @@ HighlightDisplay.prototype.finishedHints = function() {
             !HighlightDialogBoxMorph.showing.destroyed;
     var hintsShown = this.highlights.length + this.insertButtons.length +
             this.hoverHints.length;
+    console.log(this.highlights);
 
     // If the dialog isn't showing...
     if (!dialogShowing) {
@@ -102,8 +103,7 @@ HighlightDisplay.prototype.finishedHints = function() {
                 if (this.hiddenInsertHints !== 0) {
                     // Show a dialog to confirm they want next-step hints
                     this.promptShowInserts();
-                } else if (this.hiddenCustomBlockHintRoots.length !== 0 &&
-                    !BlockEditorMorph.showing) {
+                } else if (this.hiddenCustomBlockHintRoots.length !== 0) {
                     this.promptShowBlockHints();
                 } else {
                     // Or tell them no hints are available

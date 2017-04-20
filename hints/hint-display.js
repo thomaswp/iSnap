@@ -53,16 +53,17 @@ HintDisplay.prototype.editingCustomBlock = function(storedBlocks, index) {
         return !block.isImported;
     })[index];
     if (!storedBlock) return null;
-    var showing = BlockEditorMorph.showing;
-    if (storedBlock && showing && showing.definition &&
-            showing.definition.guid == storedBlock.guid) {
-        var scriptsMorph = BlockEditorMorph.showing.allChildren().filter(
-            function (child) {
-                return child instanceof ScriptsMorph;
-            })[0];
-        return scriptsMorph;
-    }
-    return storedBlock;
+
+    // Find the showing BlockEditorMorph with a matching guid
+    var matchingBlocks = BlockEditorMorph.showing.filter(function(editor) {
+        return editor.definition && editor.definition.guid == storedBlock.guid;
+    });
+    if (matchingBlocks.length === 0) return storedBlock;
+
+    // There should be at most one, so if we find it, return it's ScriptsMorph
+    return matchingBlocks[0].allChildren().filter(function (child) {
+        return child instanceof ScriptsMorph;
+    })[0];
 };
 
 HintDisplay.prototype.getCode = function(ref) {

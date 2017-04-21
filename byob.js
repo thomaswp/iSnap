@@ -2027,20 +2027,25 @@ BlockEditorMorph.prototype.refreshAllBlockInstances = function () {
 };
 
 BlockEditorMorph.prototype.updateDefinition = function () {
+    Trace.log('BlockEditor.apply');
+    this.applyToDefinition(this.definition);
+};
+
+// We want to be able to apply the edits represented in this editor to an
+// arbitrary block definition (e.g. a copy of the original), mainly for
+// logging purposes.
+BlockEditorMorph.prototype.applyToDefinition = function (definition) {
     var head, ide,
         pos = this.body.contents.position(),
-        element,
-        myself = this;
+        element;
 
-    Trace.log("BlockEditor.apply");
-
-    this.definition.receiver = this.target; // only for serialization
-    this.definition.spec = this.prototypeSpec();
-    this.definition.declarations = this.prototypeSlots();
-    this.definition.variableNames = this.variableNames();
-    this.definition.scripts = [];
-    this.definition.editorDimensions = this.bounds.copy();
-    this.definition.cachedIsRecursive = null; // flush the cache, don't update
+    definition.receiver = this.target; // only for serialization
+    definition.spec = this.prototypeSpec();
+    definition.declarations = this.prototypeSlots();
+    definition.variableNames = this.variableNames();
+    definition.scripts = [];
+    definition.editorDimensions = this.bounds.copy();
+    definition.cachedIsRecursive = null; // flush the cache, don't update
 
 
     // Copy IDs when copying blocks, rather than making new block IDs
@@ -2055,22 +2060,22 @@ BlockEditorMorph.prototype.updateDefinition = function () {
             element = morph.fullCopy();
             element.parent = null;
             element.setPosition(morph.position().subtract(pos));
-            myself.definition.scripts.push(element);
+            definition.scripts.push(element);
         }
     });
 
     if (head) {
-        this.definition.category = head.blockCategory;
-        this.definition.type = head.type;
+        definition.category = head.blockCategory;
+        definition.type = head.type;
         if (head.comment) {
-            this.definition.comment = head.comment.fullCopy();
-            this.definition.comment.block = true; // serialize in short form
+            definition.comment = head.comment.fullCopy();
+            definition.comment.block = true; // serialize in short form
         } else {
-            this.definition.comment = null;
+            definition.comment = null;
         }
     }
 
-    this.definition.body = this.context(head);
+    definition.body = this.context(head);
     this.refreshAllBlockInstances();
 
     // Make sure to turn copying IDs off when finished

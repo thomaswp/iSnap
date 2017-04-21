@@ -1661,18 +1661,12 @@ StageMorph.prototype.toXML = function (serializer) {
 
     var makeEditingBlock = function() {
         var editingBlocks = BlockEditorMorph.showing.map(function(editor) {
-            var children = editor.allChildren().filter(function (child) {
-                return child instanceof ScriptsMorph;
-            });
-            if (children.length === 0) return '';
-            var editingBlockGuid = '';
-            if (editor.definition) {
-                editingBlockGuid = editor.definition.guid;
+            if (!editor.definition) {
+                return '';
             }
-            return serializer.format('<scripts guid="@">%</scripts>',
-                editingBlockGuid,
-                children[0].toXML(serializer)
-            );
+            var definition = editor.definition.copyAndBindTo();
+            editor.applyToDefinition(definition);
+            return definition.toXML(serializer);
         });
         return serializer.format(
             '<editing>%</editing>',

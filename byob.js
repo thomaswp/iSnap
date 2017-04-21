@@ -744,9 +744,9 @@ CustomCommandBlockMorph.prototype.edit = function () {
             null,
             function (definition) {
                 if (definition) { // temporarily update everything
-                    Trace.log("BlockEditor.changeType", definition ? {
-                        "category": definition.category,
-                        "type": definition.type,
+                    Trace.log('BlockEditor.changeType', definition ? {
+                        'category': definition.category,
+                        'type': definition.type,
                     } : null);
                     hat.blockCategory = definition.category;
                     hat.type = definition.type;
@@ -937,11 +937,11 @@ CustomCommandBlockMorph.prototype.deleteBlockDefinition = function () {
     new DialogBoxMorph(
         this,
         function () {
-            Trace.log("IDE.deleteCustomBlock", myself.definition ? {
-                "spec": myself.definition.spec,
-                "category": myself.definition.category,
-                "type": myself.definition.type,
-                "guid": myself.definition.guid,
+            Trace.log('IDE.deleteCustomBlock', myself.definition ? {
+                'spec': myself.definition.spec,
+                'category': myself.definition.category,
+                'type': myself.definition.type,
+                'guid': myself.definition.guid,
             } : null);
             rcvr = myself.receiver();
             rcvr.deleteAllBlockInstances(myself.definition);
@@ -1348,17 +1348,17 @@ BlockDialogMorph.prototype.init = function (target, action, environment) {
 };
 
 BlockDialogMorph.prototype.prompt = function() {
-    Trace.log("BlockTypeDialog.newBlock");
+    Trace.log('BlockTypeDialog.newBlock');
     BlockDialogMorph.uber.prompt.apply(this, arguments);
 }
 
 BlockDialogMorph.prototype.ok = function() {
-    Trace.log("BlockTypeDialog.ok");
+    Trace.log('BlockTypeDialog.ok');
     BlockDialogMorph.uber.ok.apply(this, arguments);
 }
 
 BlockDialogMorph.prototype.cancel = function() {
-    Trace.log("BlockTypeDialog.cancel");
+    Trace.log('BlockTypeDialog.cancel');
     BlockDialogMorph.uber.cancel.apply(this, arguments);
 }
 
@@ -1370,7 +1370,7 @@ BlockDialogMorph.prototype.openForChange = function (
     pic,
     preventTypeChange // <bool>
 ) {
-    Trace.log("BlockTypeDialog.changeBlockType");
+    Trace.log('BlockTypeDialog.changeBlockType');
 
     var clr = SpriteMorph.prototype.blockColor[category];
     this.key = 'changeABlock';
@@ -1807,11 +1807,11 @@ BlockEditorMorph.prototype.init = function (definition, target) {
         isLive = Process.prototype.enableLiveCoding ||
             Process.prototype.enableSingleStepping;
 
-    Trace.log("BlockEditor.start", definition ? {
-        "spec": definition.spec,
-        "category": definition.category,
-        "type": definition.type,
-        "guid": definition.guid,
+    Trace.log('BlockEditor.start', definition ? {
+        'spec': definition.spec,
+        'category': definition.category,
+        'type': definition.type,
+        'guid': definition.guid,
     } : null);
 
     // additional properties:
@@ -1955,7 +1955,7 @@ BlockEditorMorph.prototype.accept = function (origin) {
 };
 
 BlockEditorMorph.prototype.cancel = function (origin) {
-    Trace.log("BlockEditor.cancel");
+    Trace.log('BlockEditor.cancel');
     if (origin instanceof CursorMorph) {return; }
     //this.refreshAllBlockInstances();
     this.close();
@@ -2518,7 +2518,7 @@ BlockLabelFragmentMorph.prototype.mouseClickLeft = function () {
 };
 
 BlockLabelFragmentMorph.prototype.updateBlockLabel = function (newFragment) {
-    Trace.log("BlockEditor.updateBlockLabel", newFragment)
+    Trace.log('BlockEditor.updateBlockLabel', newFragment)
     var prot = this.parentThatIsA(BlockMorph);
 
     this.fragment = newFragment;

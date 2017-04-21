@@ -1451,7 +1451,7 @@ SpriteMorph.prototype.appearIn = function (ide) {
 SpriteMorph.prototype.setName = function (string) {
     var name = string || this.name;
     if (name != this.name) {
-        Trace.log("Sprite.setName", name);
+        Trace.log('Sprite.setName', name);
     }
     this.name = name;
     this.version = Date.now();
@@ -2303,7 +2303,7 @@ SpriteMorph.prototype.freshPalette = function (category) {
             menu.addItem(
                 'show primitives',
                 function () {
-                    Trace.log("IDE.showPrimitives", ide.currentCategory);
+                    Trace.log('IDE.showPrimitives', ide.currentCategory);
                     var hiddens = StageMorph.prototype.hiddenPrimitives,
                         defs = SpriteMorph.prototype.blocks;
                     Object.keys(hiddens).forEach(function (sel) {

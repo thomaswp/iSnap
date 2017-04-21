@@ -2499,7 +2499,7 @@ BlockMorph.prototype.userMenu = function () {
     menu.addItem(
         "duplicate",
         function () {
-            Trace.log("Block.duplicateAll", myself.blockId());
+            Trace.log('Block.duplicateAll', myself.blockId());
             var dup = myself.fullCopy(),
                 ide = myself.parentThatIsA(IDE_Morph),
                 blockEditor = myself.parentThatIsA(BlockEditorMorph);
@@ -2523,7 +2523,7 @@ BlockMorph.prototype.userMenu = function () {
         menu.addItem(
             (proc ? this.fullCopy() : this).thumbnail(0.5, 60),
             function () {
-                Trace.log("Block.duplicateBlock", myself.blockId());
+                Trace.log('Block.duplicateBlock', myself.blockId());
                 var cpy = myself.fullCopy(),
                     nb = cpy.nextBlock(),
                     ide = myself.parentThatIsA(IDE_Morph);
@@ -2546,7 +2546,7 @@ BlockMorph.prototype.userMenu = function () {
     menu.addItem(
         "script pic...",
         function () {
-            Trace.log("Block.scriptPic", myself.blockId());
+            Trace.log('Block.scriptPic', myself.blockId());
             var ide = myself.parentThatIsA(IDE_Morph) ||
                 myself.parentThatIsA(BlockEditorMorph).target.parentThatIsA(
                     IDE_Morph
@@ -2631,7 +2631,7 @@ BlockMorph.prototype.hidePrimitive = function () {
         dict,
         cat;
     if (!ide) {return; }
-    Trace.log("Block.hidePrimitive", this.blockId());
+    Trace.log('Block.hidePrimitive', this.blockId());
     StageMorph.prototype.hiddenPrimitives[this.selector] = true;
     dict = {
         doWarp: 'control',
@@ -2671,7 +2671,7 @@ BlockMorph.prototype.toggleTransientVariable = function () {
     if (!varFrame) {return; }
     varFrame.vars[this.blockSpec].isTransient =
         !(varFrame.vars[this.blockSpec].isTransient);
-    Trace.log("Block.toggleTransientVariable",
+    Trace.log('Block.toggleTransientVariable',
         varFrame.vars[this.blockSpec].isTransient);
 };
 
@@ -2720,7 +2720,7 @@ BlockMorph.prototype.deleteBlock = function () {
 };
 
 BlockMorph.prototype.ringify = function () {
-    Trace.log("Block.ringify", this.blockId());
+    Trace.log('Block.ringify', this.blockId());
     // wrap a Ring around me
     var ring = new RingMorph(),
         top = this.topBlock(),
@@ -2751,7 +2751,7 @@ BlockMorph.prototype.ringify = function () {
 };
 
 BlockMorph.prototype.unringify = function () {
-    Trace.log("Block.unringify", this.blockId());
+    Trace.log('Block.unringify', this.blockId());
     // remove a Ring around me, if any
     var ring = this.parent.parentThatIsA(RingMorph),
         top = this.topBlock(),
@@ -2794,9 +2794,9 @@ BlockMorph.prototype.relabel = function (alternativeSelectors) {
         menu.addItem(
             block,
             function () {
-                Trace.log("Block.relabel", {
-                    "id": myself.blockId(),
-                    "selector": sel,
+                Trace.log('Block.relabel', {
+                    'id': myself.blockId(),
+                    'selector': sel,
                 });
                 myself.setSelector(sel);
             }
@@ -2879,7 +2879,7 @@ BlockMorph.prototype.restoreInputs = function (oldInputs) {
 };
 
 BlockMorph.prototype.showHelp = function () {
-    Trace.log("Block.showHelp", this.blockId());
+    Trace.log('Block.showHelp', this.blockId());
     var myself = this,
         ide = this.parentThatIsA(IDE_Morph),
         blockEditor,
@@ -3690,7 +3690,7 @@ BlockMorph.prototype.fullCopy = function (forClone) {
 };
 
 BlockMorph.prototype.reactToTemplateCopy = function () {
-    Trace.log("Block.created", this.blockId());
+    Trace.log('Block.created', this.blockId());
     this.forceNormalColoring();
 };
 
@@ -5142,9 +5142,9 @@ ReporterBlockMorph.prototype.mouseClickLeft = function (pos) {
         new DialogBoxMorph(
             this,
             function(arg) {
-                Trace.log("TemplateArg.rename", {
-                    "id": myself.parent.argId(),
-                    "name": arg,
+                Trace.log('TemplateArg.rename', {
+                    'id': myself.parent.argId(),
+                    'name': arg,
                 });
                 myself.userSetSpec(arg);
             },
@@ -6213,7 +6213,7 @@ ScriptsMorph.prototype.cleanUp = function (silently) {
 };
 
 ScriptsMorph.prototype.exportScriptsPicture = function () {
-    Trace.log("Scripts.exportPicture");
+    Trace.log('Scripts.exportPicture');
     var pic = this.scriptsPicture(),
         ide = this.world().children[0];
     if (pic) {
@@ -8429,7 +8429,10 @@ InputSlotMorph.prototype.reactToKeystroke = function () {
 };
 
 InputSlotMorph.prototype.reactToEdit = function () {
-    Trace.log("InputSlot.edited", {"id": this.argId(), "text": this.contents().text})
+    Trace.log('InputSlot.edited', {
+        'id': this.argId(),
+        'text': this.contents().text,
+    });
     this.contents().clearSelection();
 };
 
@@ -11097,9 +11100,9 @@ ColorSlotMorph.prototype.getUserColor = function () {
     hand.processMouseDown = nop;
 
     hand.processMouseUp = function () {
-        Trace.log("ColorArg.changeColor", {
-            "id": myself.argId(),
-            "color": myself.color,
+        Trace.log('ColorArg.changeColor', {
+            'id': myself.argId(),
+            'color': myself.color,
         });
         pal.destroy();
         hand.processMouseMove = mouseMoveBak;
@@ -11472,14 +11475,14 @@ MultiArgMorph.prototype.mouseClickLeft = function (pos) {
     if (rightArrow.bounds.containsPoint(pos)) {
         for (i = 0; i < repetition; i += 1) {
             if (rightArrow.isVisible) {
-                Trace.log("MultiArg.addInput", this.argId());
+                Trace.log('MultiArg.addInput', this.argId());
                 this.addInput();
             }
         }
     } else if (leftArrow.bounds.containsPoint(pos)) {
         for (i = 0; i < repetition; i += 1) {
             if (leftArrow.isVisible) {
-                Trace.log("MultiArg.removeInput", this.argId());
+                Trace.log('MultiArg.removeInput', this.argId());
                 this.removeInput();
             }
         }

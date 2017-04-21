@@ -512,7 +512,8 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
 
     // Regardless of whether we're showing an editing block, we should close
     // any open editor window when loading a new project.
-    BlockEditorMorph.showing.forEach(function(editor) {
+    // We slice the array because close() modifies the original array
+    BlockEditorMorph.showing.slice().forEach(function(editor) {
         editor.close();
     });
 

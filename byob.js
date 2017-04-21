@@ -2029,13 +2029,18 @@ BlockEditorMorph.prototype.refreshAllBlockInstances = function () {
 BlockEditorMorph.prototype.updateDefinition = function () {
     Trace.log('BlockEditor.apply');
     this.applyToDefinition(this.definition);
+
+    this.refreshAllBlockInstances();
+    var ide = this.target.parentThatIsA(IDE_Morph);
+    ide.flushPaletteCache();
+    ide.refreshPalette();
 };
 
 // We want to be able to apply the edits represented in this editor to an
 // arbitrary block definition (e.g. a copy of the original), mainly for
 // logging purposes.
 BlockEditorMorph.prototype.applyToDefinition = function (definition) {
-    var head, ide,
+    var head,
         pos = this.body.contents.position(),
         element;
 
@@ -2076,14 +2081,9 @@ BlockEditorMorph.prototype.applyToDefinition = function (definition) {
     }
 
     definition.body = this.context(head);
-    this.refreshAllBlockInstances();
 
     // Make sure to turn copying IDs off when finished
     BlockMorph.copyIDs = false;
-
-    ide = this.target.parentThatIsA(IDE_Morph);
-    ide.flushPaletteCache();
-    ide.refreshPalette();
 };
 
 BlockEditorMorph.prototype.context = function (prototypeHat) {

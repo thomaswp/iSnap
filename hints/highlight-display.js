@@ -87,7 +87,6 @@ HighlightDisplay.prototype.finishedHints = function() {
             !HighlightDialogBoxMorph.showing.destroyed;
     var hintsShown = this.highlights.length + this.insertButtons.length +
             this.hoverHints.length;
-    console.log(this.highlights);
 
     // If the dialog isn't showing...
     if (!dialogShowing) {
@@ -337,8 +336,11 @@ HighlightDisplay.prototype.showAddCustomBlockHint = function(data) {
     this.addInsertButton(createCustomBlock, HighlightDisplay.RIGHT, callback);
 };
 
-extend(IDE_Morph, 'refreshPalette', function(base, shouldIgnorePosition) {
-    base.call(this, shouldIgnorePosition);
+extend(IDE_Morph, 'changeCategory', function(base, category) {
+    var changed = (category !== this.currentCategory);
+    base.call(this, category);
+    if (!changed) return;
+
     // When the palette changes, if there's a addCustomBlock button, refresh
     // the hints to redraw it (probably a bit overkill, but it's clean)
     if (window.hintProvider.displays.some(function(display) {

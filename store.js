@@ -828,81 +828,87 @@ SnapSerializer.prototype.loadCustomBlocks = function (
     element,
     isGlobal
 ) {
-    // private
-    var myself = this;
-    element.children.forEach(function (child) {
-        var definition, names, inputs, vars, header, code, comment, i;
-        if (child.tag !== 'block-definition') {
-            return;
-        }
-        definition = new CustomBlockDefinition(
-            child.attributes.s || '',
-            object
-        );
-        definition.category = child.attributes.category || 'other';
-        definition.type = child.attributes.type || 'command';
-        if (child.attributes.guid) {
-            definition.guid = child.attributes.guid;
-        }
-        if (child.attributes.isImported) {
-            definition.isImported = child.attributes.isImported === 'true';
-        }
-        definition.isGlobal = (isGlobal === true);
+    element.children.forEach(function(child) {
+        this.loadCustomBlock(object, child, isGlobal);
+    }, this);
+};
+
+SnapSerializer.prototype.loadCustomBlock = function(object, child, isGlobal) {
+    var definition, names, inputs, vars, header, code, comment, i;
+    if (child.tag !== 'block-definition') {
+        return null;
+    }
+    definition = new CustomBlockDefinition(
+        child.attributes.s || '',
+        object
+    );
+    definition.category = child.attributes.category || 'other';
+    definition.type = child.attributes.type || 'command';
+    if (child.attributes.guid) {
+        definition.guid = child.attributes.guid;
+    }
+    if (child.attributes.isImported) {
+        definition.isImported = child.attributes.isImported === 'true';
+    }
+    definition.isGlobal = (isGlobal === true);
+    if (object) {
         if (definition.isGlobal) {
             object.globalBlocks.push(definition);
         } else {
             object.customBlocks.push(definition);
         }
+    }
 
-        names = definition.parseSpec(definition.spec).filter(
-            function (str) {
-                return str.charAt(0) === '%' && str.length > 1;
-            }
-        ).map(function (str) {
-            return str.substr(1);
-        });
-
-        definition.names = names;
-        inputs = child.childNamed('inputs');
-        if (inputs) {
-            i = -1;
-            inputs.children.forEach(function (child) {
-                var options = child.childNamed('options');
-                if (child.tag !== 'input') {
-                    return;
-                }
-                i += 1;
-                definition.declarations[names[i]] = [
-                    child.attributes.type,
-                    child.contents,
-                    options ? options.contents : undefined,
-                    child.attributes.readonly === 'true'
-                ];
-            });
+    names = definition.parseSpec(definition.spec).filter(
+        function (str) {
+            return str.charAt(0) === '%' && str.length > 1;
         }
-
-        vars = child.childNamed('variables');
-        if (vars) {
-            definition.variableNames = myself.loadValue(
-                vars.require('list')
-            ).asArray();
-        }
-
-        header = child.childNamed('header');
-        if (header) {
-            definition.codeHeader = header.contents;
-        }
-
-        code = child.childNamed('code');
-        if (code) {
-            definition.codeMapping = code.contents;
-        }
-
-        comment = child.childNamed('comment');
-        if (comment) {
-            definition.comment = myself.loadComment(comment);
-        }
+    ).map(function (str) {
+        return str.substr(1);
     });
+
+    definition.names = names;
+    inputs = child.childNamed('inputs');
+    if (inputs) {
+        i = -1;
+        inputs.children.forEach(function (child) {
+            var options = child.childNamed('options');
+            if (child.tag !== 'input') {
+                return;
+            }
+            i += 1;
+            definition.declarations[names[i]] = [
+                child.attributes.type,
+                child.contents,
+                options ? options.contents : undefined,
+                child.attributes.readonly === 'true'
+            ];
+        });
+    }
+
+    vars = child.childNamed('variables');
+    if (vars) {
+        definition.variableNames = this.loadValue(
+            vars.require('list')
+        ).asArray();
+    }
+
+    header = child.childNamed('header');
+    if (header) {
+        definition.codeHeader = header.contents;
+    }
+
+    code = child.childNamed('code');
+    if (code) {
+        definition.codeMapping = code.contents;
+    }
+
+    comment = child.childNamed('comment');
+    if (comment) {
+        definition.comment = this.loadComment(comment);
+    }
+
+    return definition;
 };
 
 SnapSerializer.prototype.populateCustomBlocks = function (
@@ -910,38 +916,47 @@ SnapSerializer.prototype.populateCustomBlocks = function (
     element,
     isGlobal
 ) {
-    // private
-    var myself = this;
     element.children.forEach(function (child, index) {
-        var definition, script, scripts;
-        if (child.tag !== 'block-definition') {
-            return;
-        }
-        definition = isGlobal ? object.globalBlocks[index]
-                : object.customBlocks[index];
-        script = child.childNamed('script');
-        if (script) {
-            definition.body = new Context(
-                null,
-                script ? myself.loadScript(script) : null,
-                null,
-                object
-            );
-            definition.body.inputs = definition.names.slice(0);
-        }
-        scripts = child.childNamed('scripts');
-        if (scripts) {
-            definition.scripts = myself.loadScriptsArray(scripts);
-        }
-
-        delete definition.names;
-    });
+        var definition = isGlobal ? object.globalBlocks[index]
+            : object.customBlocks[index];
+        this.populateCustomBlock(object, child, definition);
+    }, this);
 };
 
+SnapSerializer.prototype.populateCustomBlock = function (
+    object,
+    child,
+    definition
+) {
+    var script, scripts;
+    if (child.tag !== 'block-definition') {
+        return;
+    }
+    script = child.childNamed('script');
+    if (script) {
+        definition.body = new Context(
+            null,
+            script ? this.loadScript(script) : null,
+            null,
+            object
+        );
+        definition.body.inputs = definition.names.slice(0);
+    }
+    scripts = child.childNamed('scripts');
+    if (scripts) {
+        definition.scripts = this.loadScriptsArray(scripts);
+    }
 
-SnapSerializer.prototype.loadEditing = function (project, model, defaultGUID) {
+    delete definition.names;
+};
+
+// Loads a custom block definition that the user was in the process of editing
+// when the proejct was saved. This is mainly for viewing log data, but can
+// also function if a project is saved with an edit dialog open.
+SnapSerializer.prototype.loadEditing = function(project, model, defaultGUID) {
     var stage = project.stage;
 
+    // Get all custom blocks in the project
     var allBlocks = [];
     var allSprites = [stage].concat(stage.children);
     allBlocks[0] = stage.customBlocks.concat(stage.globalBlocks);
@@ -951,28 +966,65 @@ SnapSerializer.prototype.loadEditing = function (project, model, defaultGUID) {
 
     // Backwards compatibility for when the guid was stored in <editing>
     var guid = model.attributes.guid || defaultGUID;
-    var editingBlock = null, editingSprite = null;
+    // Find the block definition that matches the editing GUID
+    var originalDefinition = null, editingSprite = null;
     Object.keys(allBlocks).forEach(function(sprite, i) {
         allBlocks[sprite].forEach(function(block) {
             if (block.guid === guid) {
-                editingBlock = block;
+                originalDefinition = block;
                 editingSprite = allSprites[i];
             }
         });
     });
 
-    if (!editingBlock) return;
+    if (!originalDefinition) return;
 
-    // TODO: switch to serializing/loading the block definition, rather than
-    // the ScriptsMorph currently used. Make sure to be able to load both.
-    // The current logging method omits the variable types, so they cannot be
-    // reloaded.
+    // Load the editing definition from XML
+    var editingDefinition;
+    if (model.tag === 'scripts') {
+        editingDefinition = this.loadEditingFromScripts(
+            model, originalDefinition);
+    } else if (model.tag === 'block-definition') {
+        editingDefinition = this.loadCustomBlock(null, model,
+            originalDefinition.isGlobal);
+        this.populateCustomBlock(null, model, editingDefinition);
+        // We passed null as the parent object when constructing the definition,
+        // so we manually define the definition's receiver
+        editingDefinition.receiver = originalDefinition.receiver;
+    } else {
+        Trace.logErrorMessage('Unknown editing tag: ' + model.tag);
+        return;
+    }
+
+    // Next frame, after the project has loaded, pop up the block editor with
+    // editing code
+    setTimeout(function() {
+        Morph.prototype.trackChanges = false;
+        var editor = new BlockEditorMorph(editingDefinition, editingSprite);
+        editor.popUp();
+        Morph.prototype.trackChanges = true;
+        editor.changed();
+
+        // If the user applied changes, we sawp in the original block definition
+        // for the temp copy we've loaded
+        var oldUpdate = editor.updateDefinition;
+        editor.updateDefinition = function() {
+            editor.definition = originalDefinition;
+            oldUpdate.call(editor);
+        };
+    });
+};
+
+// Legacy function to load an editing block from a <scripts> tag, used for
+// backwards compatibility
+SnapSerializer.prototype.loadEditingFromScripts = function(
+    model, originalDefinition
+) {
     var blockInputs = {};
-    var blockSpec = editingBlock.spec;
+    var blockSpec = originalDefinition.spec;
     if (model.children[0] && model.children[0].children) {
         // TODO: This improperly loads non-primary scripts as the main script
-        // when there isn't one. Be better to just fix the representation if
-        // you can (see above)
+        // when there isn't one. Not a priority to fix, since this is legacy
 
         // Get the first item in the script, since it's the weird
         // CustomHatBlockMorph that can't be properly parsed by the
@@ -1005,13 +1057,12 @@ SnapSerializer.prototype.loadEditing = function (project, model, defaultGUID) {
     }
     var scripts = this.loadScriptsArray(model);
 
-    var editingCopy;
     // Clone the editing block, since we don't want to overwrite the
     // original block with the editing changes, in case they're canceled
-    editingCopy = editingBlock.copyAndBindTo();
+    var editingDefinition = originalDefinition.copyAndBindTo();
     if (scripts.length > 0) {
-        if (!editingCopy.body) {
-            editingCopy.body = new Context(
+        if (!editingDefinition.body) {
+            editingDefinition.body = new Context(
                 null,
                 null,
                 null,
@@ -1020,27 +1071,13 @@ SnapSerializer.prototype.loadEditing = function (project, model, defaultGUID) {
         }
         // Set it's experssion to the main script and it's scripts to the
         // rest of them
-        editingCopy.body.expression = scripts.shift();
+        editingDefinition.body.expression = scripts.shift();
     }
-    editingCopy.scripts = scripts;
-    editingCopy.declarations = blockInputs;
-    editingCopy.spec = blockSpec;
+    editingDefinition.scripts = scripts;
+    editingDefinition.declarations = blockInputs;
+    editingDefinition.spec = blockSpec;
 
-    setTimeout(function() {
-        Morph.prototype.trackChanges = false;
-        var editor = new BlockEditorMorph(editingCopy, editingSprite);
-        editor.popUp();
-        Morph.prototype.trackChanges = true;
-        editor.changed();
-
-        // If the user applied changes, we sawp in the original block definition
-        // for the temp copy we've loaded
-        var oldUpdate = editor.updateDefinition;
-        editor.updateDefinition = function() {
-            editor.definition = editingBlock;
-            oldUpdate.call(editor);
-        };
-    });
+    return editingDefinition;
 };
 
 SnapSerializer.prototype.loadScripts = function (scripts, model) {

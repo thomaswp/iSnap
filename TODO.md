@@ -38,3 +38,9 @@ Stretch:
 * Have custom blocks in BlockHints show up as they do on screen (since you
 actually know the spec for those)
 * Log sprite movements in the stage
+
+Berkeley Feedback:
+- Red isn't an ideal color for errors, since it overlaps w/ runtime errors
+- Prompt if people use repeated help
+- Maybe default to clearing highlights
+- Need a simple dashboard

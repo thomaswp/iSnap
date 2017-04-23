@@ -2141,7 +2141,11 @@ SyntaxElementMorph.prototype.endLayout = function () {
 BlockMorph.prototype = new SyntaxElementMorph();
 BlockMorph.prototype.constructor = BlockMorph;
 BlockMorph.uber = SyntaxElementMorph.prototype;
+// ID for the next BlockMorph to be created
 BlockMorph.nextId = 0;
+// Flag for whether copied BlockMorphs should also copy block IDs
+// This should default to false, but is temporarily set to true in special
+// circumstances, such as block relabeling
 BlockMorph.copyIDs = false;
 
 // BlockMorph preferences settings:
@@ -3652,6 +3656,7 @@ BlockMorph.prototype.hasLabels = function () {
 
 // BlockMorph copying
 
+// Override copy so that coppied Blocks get new IDs unless copyIDs is true
 BlockMorph.prototype.copy = function() {
     var copy = BlockMorph.uber.copy.call(this);
     if (!BlockMorph.copyIDs) copy.id = BlockMorph.nextId++;
@@ -6654,17 +6659,18 @@ ArgMorph.prototype.init = function (type, silently) {
     this.setExtent(new Point(50, 50), silently);
 };
 
+// Get a unique ID for the input slot represented by this ArgMorph
 ArgMorph.prototype.argId = function() {
     var block = this.parentThatIsA(BlockMorph);
     if (!block) return null;
     // Get the index of this arg out of all the parent's args
     var index = this.parent.children.filter(function(child) {
-            return child instanceof ArgMorph;
+        return child instanceof ArgMorph;
     }).indexOf(this);
     var id = block.blockId();
     id.argIndex = index;
     return id;
-}
+};
 
 // ArgMorph preferences settings:
 

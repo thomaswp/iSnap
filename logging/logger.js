@@ -98,6 +98,7 @@ Logger.prototype.log = function(message, data, saveImmediately, forceLogCode) {
     this.queue.push(log);
 };
 
+// Log a message as an error
 Logger.prototype.logErrorMessage = function(error) {
     if (!error || !error.length) return;
     var maxLength = 5000;
@@ -112,6 +113,7 @@ Logger.prototype.logErrorMessage = function(error) {
     }
 };
 
+// Log a javascript error
 Logger.prototype.logError = function(error) {
     if (!error) return;
     // eslint-disable-next-line no-console
@@ -170,6 +172,8 @@ Logger.prototype.removeCoordinates = function(xml) {
 };
 
 Logger.prototype.hasCodeChanged = function(xml1, xml2) {
+    // Remove coordinates before comparing code, since we don't need to
+    // log these unimportant changes to the code state
     return this.removeCoordinates(xml1) !== this.removeCoordinates(xml2);
 };
 
@@ -218,5 +222,6 @@ Logger.prototype.start = function(interval) {
 
 Logger.prototype.removeImages = function(xml) {
     if (!xml) return xml;
+    // We don't want to log the stage image every time
     return xml.replace(/data:image\/png;base64[^<\"]*/g, '');
 };

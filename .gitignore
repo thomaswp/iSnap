@@ -1,5 +1,6 @@
 .DS_Store
 *.swp
-.htpasswd
+*.htpasswd
+*.htaccess
 isnap.min.js
 .tern-port

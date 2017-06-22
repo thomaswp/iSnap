@@ -156,3 +156,27 @@ extend(InputSlotMorph, 'mouseDownLeft', function(base, pos) {
         base.call(this, pos);
     }
 });
+
+extend(InputSlotMorph, 'fixLayout', function(base) {
+    base.call(this);
+    var contents = this.contents();
+    if (contents) {
+        contents.isEditable = contents.isEditable && this.onClick == null;
+    }
+});
+
+extend(BooleanSlotMorph, 'mouseEnter', function(base) {
+    BooleanSlotMorph.uber.mouseEnter.call(this);
+    if (!this.onClick) base.call(this);
+});
+
+extend(BooleanSlotMorph, 'mouseLeave', function(base) {
+    BooleanSlotMorph.uber.mouseLeave.call(this);
+    // Call the base either way, since we may need to remove the toggle
+    base.call(this);
+});
+
+extend(BooleanSlotMorph, 'mouseClickLeft', function(base) {
+    BooleanSlotMorph.uber.mouseClickLeft.call(this);
+    if (!this.onClick) base.call(this);
+});

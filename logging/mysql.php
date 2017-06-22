@@ -49,7 +49,9 @@ try {
 
 
         if (!$mysqli->query($query)) {
-            echo ("Logging failed: (" . $mysqli->errno . ") " . $mysqli->error);
+            // No need to retry, so don't return an error, but display the
+            // message to indicate something went wrong
+            die ("Logging failed: (" . $mysqli->errno . ") " . $mysqli->error);
         }
 
     }

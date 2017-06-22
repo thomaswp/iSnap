@@ -17,6 +17,10 @@ HintDisplay.prototype.hide = function() {
 
 };
 
+HintDisplay.prototype.willIgnoreHint = function(hint) {
+    return false;
+};
+
 HintDisplay.prototype.showHint = function(hint) {
     // eslint-disable-next-line no-console
     console.log(hint.from + ' -> ' + hint.to);
@@ -38,6 +42,10 @@ HintDisplay.prototype.finishedHints = function() {
 
 HintDisplay.prototype.getHintType = function() {
     return '';
+};
+
+HintDisplay.prototype.hintDialogShown = function() {
+
 };
 
 HintDisplay.prototype.hasCustomBlock = function(ref) {
@@ -83,6 +91,16 @@ HintDisplay.prototype.getCode = function(ref) {
 
     var nVars, nScripts;
 
+    // ScriptsMorphs can have non-BlockMorphs, e.g. CommentMorphs, so we need
+    // to filter them out
+    var parentScripts = null;
+    var filterBlocks = function(block) {
+        return block instanceof BlockMorph;
+    };
+    if (parent.scripts) {
+        parentScripts = parent.scripts.children.filter(filterBlocks);
+    }
+
     switch (ref.parent.label) {
     case 'snapshot':
         if (label == 'stage')
@@ -95,7 +113,7 @@ HintDisplay.prototype.getCode = function(ref) {
         break;
     case 'stage':
         nVars = Object.keys(parent.variables.vars).length;
-        nScripts = parent.scripts.children.length;
+        nScripts = parentScripts.length;
         var nCustomBlocks = parent.customBlocks.length;
         if (label == 'sprite') {
             return parent.children.filter(function(child) {
@@ -104,11 +122,11 @@ HintDisplay.prototype.getCode = function(ref) {
         }
     case 'sprite':
         nVars = Object.keys(parent.variables.vars).length;
-        nScripts = parent.scripts.children.length;
+        nScripts = parentScripts.length;
         if (label == 'var')
             return parent.variables.vars;
         else if (label == 'script')
-            return parent.scripts.children[index - nVars];
+            return parentScripts[index - nVars];
         else if (label == 'customBlock')
             return this.editingCustomBlock(parent.customBlocks,
                 index - nVars - nScripts);
@@ -130,7 +148,7 @@ HintDisplay.prototype.getCode = function(ref) {
             return null;
         }
         // If we manage to get a hold of it, we return the first script
-        return parent.children[0];
+        return parent.children.filter(filterBlocks)[0];
     default:
         return parent.inputs()[index];
     }
@@ -173,6 +191,15 @@ HintDisplay.prototype.getScriptIndex = function(script, enclosingBlock) {
     return index;
 };
 
+HintDisplay.prototype.parentSelector = function(enclosingBlock) {
+    if (!enclosingBlock) return null;
+    if (enclosingBlock.definition && enclosingBlock.definition.isImported) {
+        // Use the spec as a proxy for the selector of an imported block
+        return enclosingBlock.definition.spec;
+    }
+    return enclosingBlock.selector;
+};
+
 /**
  * Creates a function for logging and showing a script hint.
  *
@@ -192,7 +219,6 @@ HintDisplay.prototype.getScriptIndex = function(script, enclosingBlock) {
  */
 HintDisplay.prototype.createScriptHintCallback = function(simple, root,
         extraRoot, fromList, to, onThumbsDown) {
-
     if (root instanceof PrototypeHatBlockMorph) {
         fromList[0].unshift('prototypeHatBlock');
         to.unshift('prototypeHatBlock');
@@ -206,7 +232,7 @@ HintDisplay.prototype.createScriptHintCallback = function(simple, root,
 
     var rootID = root ? root.id : null;
     var extraRootID = extraRoot ? extraRoot.id : null;
-    var parentSelector = enclosingBlock ? enclosingBlock.selector : null;
+    var parentSelector = this.parentSelector(enclosingBlock);
     var parentID = enclosingBlock ? enclosingBlock.id : null;
 
     var data = {
@@ -229,11 +255,13 @@ HintDisplay.prototype.createScriptHintCallback = function(simple, root,
         'to': to,
     };
 
+    var myself = this;
     return function() {
         Trace.log('SnapDisplay.showScriptHint', data);
         new CodeHintDialogBoxMorph(window.ide, simple)
             .showScriptHint(parentSelector, index, fromList, to)
             .onThumbsDown(onThumbsDown);
+        myself.hintDialogShown();
     };
 };
 
@@ -259,7 +287,7 @@ HintDisplay.prototype.createBlockHintCallback = function(simple, root,
         extraRoot, from, to, otherBlocks, onThumbsDown) {
 
     var enclosingBlock = root.enclosingBlock();
-    var selector = enclosingBlock ? enclosingBlock.selector : null;
+    var selector = this.parentSelector(enclosingBlock);
     var parentID = enclosingBlock ? enclosingBlock.id : null;
     var extraRootID = extraRoot ? extraRoot.id : null;
     var data = {
@@ -280,11 +308,13 @@ HintDisplay.prototype.createBlockHintCallback = function(simple, root,
         'otherBlocks': otherBlocks,
     };
 
+    var myself = this;
     return function() {
         Trace.log('SnapDisplay.showBlockHint', data);
         new CodeHintDialogBoxMorph(window.ide, simple)
             .showBlockHint(selector, from, to, otherBlocks)
             .onThumbsDown(onThumbsDown);
+        myself.hintDialogShown();
     };
 };
 
@@ -382,8 +412,8 @@ HintDisplay.prototype.addHintButton = function(text, onClick) {
 
 extendObject(window, 'onWorldLoaded', function(base) {
     base.call(this);
-    extendObject(ide, 'fixLayout', function(base) {
-        base.call(this);
+    extendObject(ide, 'fixLayout', function(base, situation) {
+        base.call(this, situation);
         var hintButton = this.controlBar.hintButton;
         if (hintButton) {
             hintButton.setPosition(new Point(

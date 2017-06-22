@@ -82,7 +82,7 @@ include '../../logging/config.php';
 					<input type="button" value="Reset" onclick="resetFilter()" >
 				</form>
 				<?php
-if ($enble_viewer) {
+if ($enable_viewer) {
 
 	$mysqli = new mysqli($host, $user, $password, $db);
 	if ($mysqli->connect_errno) {

@@ -111,17 +111,34 @@ function onWorldLoaded() {
 function extendObject(object, functionName, newFunction) {
     if (!object[functionName]) {
         // eslint-disable-next-line no-console
+        console.trace();
+        // eslint-disable-next-line no-console
         console.error('Cannot extend function ' + functionName +
             ' because it does not exist.');
         return;
     }
 
     var oldFunction = object[functionName];
+
+    if (!oldFunction.extended && oldFunction.length != undefined &&
+            oldFunction.length + 1 !== newFunction.length) {
+        var message = 'Extending function with wrong number of arguments: ' +
+            functionName + ' ' +
+            oldFunction.length + ' vs ' + newFunction.length;
+        if (window.Trace) {
+            Trace.logErrorMessage(message);
+        } else {
+            // eslint-disable-next-line no-console
+            console.error(message);
+        }
+    }
+
     object[functionName] = function() {
         var args = [].slice.call(arguments);
         args.unshift(oldFunction);
         return newFunction.apply(this, args);
     };
+    object[functionName].extended = true;
 
     return oldFunction;
 }
@@ -182,4 +199,20 @@ if (!Array.prototype.includes) {
             return false;
         }
     });
+}
+
+// String.prototype.includes polyfill
+if (!String.prototype.includes) {
+    String.prototype.includes = function(search, start) {
+        'use strict';
+        if (typeof start !== 'number') {
+            start = 0;
+        }
+
+        if (start + search.length > this.length) {
+            return false;
+        } else {
+            return this.indexOf(search, start) !== -1;
+        }
+    };
 }

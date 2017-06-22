@@ -22,8 +22,6 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
         window.onunload = function() {
             myself.saveCode();
         };
-
-        myself.loadCode();
     }
 
     if (displays.length == 0) return;
@@ -41,21 +39,27 @@ HintProvider.prototype.init = function(url, displays, reloadCode) {
         this.alwaysHint = true;
     }
 
-    Trace.onCodeChanged = function(code) {
-        myself.code = code;
-        myself.getHintsFromServer();
-    };
-
     Assignment.onChanged(function(assignment) {
         myself.loadAssignment();
     });
 
     extendObject(window, 'onWorldLoaded', function(base) {
         base.call(this);
+        extendObject(Trace, 'onCodeChanged', function(base, code) {
+            base.call(this, code);
+            myself.code = code;
+            myself.getHintsFromServer();
+        });
         myself.displays.forEach(function(display) {
             display.initDisplay();
         });
         myself.loadAssignment();
+
+        // Reload code, but only if the IDE isn't in the middle of loading a
+        // project (e.g. from an '#open:' URL anchor)
+        if (reloadCode && !ide.onNextStep) {
+            myself.loadCode();
+        }
     });
 };
 
@@ -173,6 +177,16 @@ HintProvider.prototype.processHintRequest = function(json, requestNumber) {
 };
 
 HintProvider.prototype.processHints = function(hints) {
+    // Before logging the hints, first see if any of them are ignored by a
+    // display
+    hints.forEach(function(hint) {
+        if (hint.error) return;
+        // We could list individual ignoring displays, but reasonably there
+        // should only ever be one primary display
+        hint.ignored = this.displays.some(function(display) {
+            return display.enabled && display.willIgnoreHint(hint);
+        });
+    }, this);
     Trace.log('HintProvider.processHints', hints);
 
     var nErrors = 0, nHints = 0;
@@ -214,8 +228,10 @@ HintProvider.prototype.processHints = function(hints) {
 };
 
 HintProvider.prototype.saveCode = function() {
-    if (typeof(Storage) !== 'undefined' && localStorage && this.code) {
-        localStorage.setItem('lastCode-' + Assignment.getID(), this.code);
+    var serializer = new SnapSerializer();
+    var code = serializer.serialize(ide.stage);
+    if (typeof(Storage) !== 'undefined' && localStorage && code) {
+        localStorage.setItem('lastCode-' + Assignment.getID(), code);
     }
 };
 
@@ -223,14 +239,7 @@ HintProvider.prototype.loadCode = function() {
     if (typeof(Storage) !== 'undefined' && localStorage) {
         var code = localStorage.getItem('lastCode-' + Assignment.getID());
         if (code) {
-            if (window.ide) {
-                window.ide.droppedText(code);
-            } else {
-                var myself = this;
-                setTimeout(function() {
-                    myself.loadCode();
-                }, 100);
-            }
+            window.ide.droppedText(code);
         }
     }
 };

@@ -394,9 +394,14 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
     if (model.stage.attributes.name) {
         project.stage.name = model.stage.attributes.name;
     }
-    if (model.stage.attributes.guid) {
+    // We store the project guid and assignment in stage because there is no
+    // serialized 'project' object.
+    if (model.project.attributes.guid) {
+        project.stage.guid = model.project.attributes.guid;
+    } else if (model.stage.attributes.guid) {
         project.stage.guid = model.stage.attributes.guid;
     }
+    project.stage.assignment = model.project.attributes.assignment;
     if (model.stage.attributes.scheduled === 'true') {
         project.stage.fps = 30;
         StageMorph.prototype.frameRate = 30;
@@ -520,8 +525,8 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
     model.editing  = model.project.childNamed('editing');
     if (model.editing) {
         var defaultGUID = model.editing.attributes.guid;
-        model.editing.children.forEach(function(scripts) {
-            myself.loadEditing(project, scripts, defaultGUID);
+        model.editing.children.forEach(function(scripts, i) {
+            myself.loadEditing(project, scripts, defaultGUID, i);
         });
     }
 
@@ -954,7 +959,9 @@ SnapSerializer.prototype.populateCustomBlock = function (
 // Loads a custom block definition that the user was in the process of editing
 // when the proejct was saved. This is mainly for viewing log data, but can
 // also function if a project is saved with an edit dialog open.
-SnapSerializer.prototype.loadEditing = function(project, model, defaultGUID) {
+SnapSerializer.prototype.loadEditing = function(
+    project, model, defaultGUID, index
+) {
     var stage = project.stage;
 
     // Get all custom blocks in the project
@@ -1003,6 +1010,8 @@ SnapSerializer.prototype.loadEditing = function(project, model, defaultGUID) {
         Morph.prototype.trackChanges = false;
         var editor = new BlockEditorMorph(editingDefinition, editingSprite);
         editor.popUp();
+        // Offset the editor in case there are multiple
+        editor.setCenter(editor.center().add(index * 15));
         Morph.prototype.trackChanges = true;
         editor.changed();
 
@@ -1714,7 +1723,7 @@ StageMorph.prototype.toXML = function (serializer) {
 
     var projectData = ide ? JSON.stringify(ide.getProjectData()) : '';
     return serializer.format(
-        '<project name="@" app="@" version="@">' +
+        '<project name="@" app="@" version="@" guid="@" assignment="@">' +
             '<data>$</data>' +
             '<notes>$</notes>' +
             '<thumbnail>$</thumbnail>' +
@@ -1742,10 +1751,13 @@ StageMorph.prototype.toXML = function (serializer) {
         (ide && ide.projectName) ? ide.projectName : localize('Untitled'),
         serializer.app,
         serializer.version,
+        this.guid,
+        this.assignment,
         projectData,
         (ide && ide.projectNotes) ? ide.projectNotes : '',
         thumbdata,
         this.name,
+        // put the guid in the stage as well for backwards compatibility
         this.guid,
         StageMorph.prototype.dimensions.x,
         StageMorph.prototype.dimensions.y,

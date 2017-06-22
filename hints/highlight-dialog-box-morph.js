@@ -65,20 +65,33 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
             childBlock);
     }
 
-    addText(
-        "I'm checking your work using previous students' solutions...\n" +
-            '*These are suggestions and do not guarantee a correct solution!*',
+    var link = addText(
+        "I'm checking your work against known solutions...\n" +
+            '*These are suggestions and do not guarantee a correct solution!*' +
+            '\nClick for a demonstration video on Snap! help.',
         true, bodyWrapper
     );
+    link.mouseClickLeft = function() {
+        window.open(
+            'https://drive.google.com/file/d/0B6FuO4eS-VwxNGllNnRwZ0puclk/view',
+            '_blank'
+        );
+    };
+    link.mouseEnter = function() {
+        document.body.style.cursor = 'pointer';
+    };
+    link.mouseLeave = function() {
+        document.body.style.cursor = 'inherit';
+    };
 
     var mainFrame = new AlignmentMorph('column', this.padding);
     mainFrame.alignment = 'left';
 
     addText(
-        "RED highlighted blocks probably don't belong in the solution:",
+        "MAGENTA highlighted blocks probably don't belong in the solution:",
         null, mainFrame
     );
-    addBlock('doSayFor', HighlightDisplay.deleteColor, mainFrame);
+    addBlock('doAsk', HighlightDisplay.deleteColor, mainFrame);
 
     addText(
         'YELLOW highlighted blocks are probably part of ' +
@@ -196,25 +209,45 @@ HighlightDialogBoxMorph.prototype.popUp = function() {
     this.fixLayout();
     this.drawNew();
 
-    // Set the top-left corner to that of the previous dialog or the corralBar
-    var origin = null;
-    if (showing) {
-        origin = showing.bounds.origin;
-    } else if (window.ide && window.ide.corralBar) {
-        var ide = window.ide;
-        origin = ide.corralBar.bounds.origin;
-        // Make sure it doesn't pop up partially offscreen
-        origin.x = Math.min(origin.x, ide.width() - this.width());
-        origin.y = Math.min(origin.y, ide.height() - this.height());
-    }
+    var origin = this.makeOrigin();
 
     HighlightDialogBoxMorph.showing = this;
     HighlightDialogBoxMorph.uber.popUp.call(this, world);
 
+    this.recenter(origin);
+};
+
+HighlightDialogBoxMorph.prototype.makeOrigin = function() {
+    var showing = HighlightDialogBoxMorph.showing;
+
+    // Set the top-left corner to that of the previous dialog or the corralBar
+    var origin = null;
+    // Declare the variable in case it's not defined
+    var ide = window.ide;
+    if (showing) {
+        origin = showing.bounds.origin;
+    } else if (ide && ide.corralBar) {
+        origin = ide.corralBar.bounds.origin;
+    }
+    // Make sure it doesn't pop up partially offscreen
+    if (ide && origin) {
+        origin.x = Math.min(origin.x, ide.width() - this.width());
+        origin.y = Math.min(origin.y, ide.height() - this.height());
+        origin.x = Math.max(origin.x, 0);
+        origin.y = Math.max(origin.y, 0);
+    }
+
+    return origin;
+};
+
+HighlightDialogBoxMorph.prototype.recenter = function(origin) {
+    origin = origin || this.makeOrigin();
     // Wait to set the origin until after popping up
     if (origin) {
         this.setLeft(origin.x);
         this.setTop(origin.y);
+        this.fixLayout();
+        this.drawNew();
     }
 };
 
@@ -316,7 +349,8 @@ HighlightDialogBoxMorph.showHighlights = function() {
 
 extend(StageMorph, 'fireGreenFlagEvent', function(base) {
     var procs = base.call(this);
-    if (HighlightDialogBoxMorph.showOnRun) {
+    if (HighlightDialogBoxMorph.showOnRun &&
+            !HighlightDisplay.isSnapPresenting()) {
         HighlightDialogBoxMorph.showHighlights();
     }
     return procs;

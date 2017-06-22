@@ -239,7 +239,7 @@
 				<?php
 include '../../logging/config.php';
 
-if ($enble_viewer) {
+if ($enable_viewer) {
 
 	$mysqli = new mysqli($host, $user, $password, $db);
 	if ($mysqli->connect_errno) {

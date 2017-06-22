@@ -65,7 +65,7 @@ include '../config.php';
 	<?php
 
 
-		if ($enble_viewer) {
+		if ($enable_viewer) {
 			if (!array_key_exists('assignment', $_GET)) {
 	?>
 			<form method="GET" action="grade.php">

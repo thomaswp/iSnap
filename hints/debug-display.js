@@ -44,7 +44,7 @@ DebugDisplay.prototype.showHint = function(hint) {
     var code = Trace.lastCode;
 
     var hintDiv = document.createElement('div');
-    if (hint.data.caution) {
+    if (hint.data.caution || hint.ignored) {
         hintDiv.innerHTML += '*';
     }
     hintDiv.innerHTML += this.createDiff(hint.from, hint.to) + ' ';

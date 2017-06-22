@@ -1683,6 +1683,9 @@ IDE_Morph.prototype.fixLayout = function (situation) {
             this.corral.setHeight(this.bottom() - this.corral.top());
             this.corral.fixLayout();
         }
+
+        // Update the label again after all the resizing
+        this.controlBar.updateLabel();
     }
 
     Morph.prototype.trackChanges = true;
@@ -1697,7 +1700,7 @@ IDE_Morph.prototype.setProjectName = function (string) {
 
 IDE_Morph.prototype.getProjectData = function() {
     return this.projectData;
-}
+};
 
 IDE_Morph.prototype.setProjectData = function(string) {
     if (!string || !string.length) {
@@ -1711,7 +1714,7 @@ IDE_Morph.prototype.setProjectData = function(string) {
         console.log("Error parsing project data: " + string);
         console.error(e);
     }
-}
+};
 
 // IDE_Morph resizing
 
@@ -4591,6 +4594,14 @@ IDE_Morph.prototype.toggleStageSize = function (isSmall, forcedRatio) {
     }
 };
 
+IDE_Morph.prototype.adjustStageSize = function() {
+    // We use the document.body because the width() won't have updated yet
+    var isSmallClient = document.body.clientWidth < 1200;
+    if (isSmallClient != this.isSmallStage) {
+        ide.toggleStageSize();
+    }
+}
+
 IDE_Morph.prototype.setPaletteWidth = function (newWidth) {
     var msecs = this.isAnimating ? 100 : 0,
         world = this.world(),
@@ -6146,6 +6157,12 @@ ProjectDialogMorph.prototype.shareProject = function () {
             ) + '\n"' + proj.ProjectName + '"?',
             'Share Project',
             function () {
+                Trace.log('ProjectDialogMorph.shareProject', proj.ProjectName);
+                if (proj.ProjectName === ide.projectName) {
+                    // We log this as a separate event so it's easy to detect
+                    // in MySQL, to see which projects have been shared
+                    Trace.log('ProjectDialogMorph.shareThisProject');
+                }
                 myself.ide.showMessage('sharing\nproject...');
                 SnapCloud.reconnect(
                     function () {
@@ -6197,6 +6214,8 @@ ProjectDialogMorph.prototype.unshareProject = function () {
             ) + '\n"' + proj.ProjectName + '"?',
             'Unshare Project',
             function () {
+                Trace.log('ProjectDialogMorph.unshareProject',
+                    proj.ProjectName);
                 myself.ide.showMessage('unsharing\nproject...');
                 SnapCloud.reconnect(
                     function () {

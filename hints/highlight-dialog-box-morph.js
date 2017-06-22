@@ -65,24 +65,11 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
             childBlock);
     }
 
-    var link = addText(
-        "I'm checking your work against known solutions...\n" +
-            '*These are suggestions and do not guarantee a correct solution!*' +
-            '\nClick for a demonstration video on Snap! help.',
+    addText(
+        "I'm checking your work using previous students' solutions...\n" +
+            '*These are suggestions and do not guarantee a correct solution!*',
         true, bodyWrapper
     );
-    link.mouseClickLeft = function() {
-        window.open(
-            'https://drive.google.com/file/d/0B6FuO4eS-VwxNGllNnRwZ0puclk/view',
-            '_blank'
-        );
-    };
-    link.mouseEnter = function() {
-        document.body.style.cursor = 'pointer';
-    };
-    link.mouseLeave = function() {
-        document.body.style.cursor = 'inherit';
-    };
 
     var mainFrame = new AlignmentMorph('column', this.padding);
     mainFrame.alignment = 'left';

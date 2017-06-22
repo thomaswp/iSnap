@@ -4,7 +4,8 @@ require('code-hint-dialog-box-morph');
 require('message-hint-dialog-box-morph');
 require('highlight-dialog-box-morph');
 
-function HighlightDisplay() {
+function HighlightDisplay(hintWarning) {
+    this.hintWarning = hintWarning;
 }
 
 HighlightDisplay.prototype = Object.create(HintDisplay.prototype);
@@ -12,7 +13,7 @@ HighlightDisplay.constructor = HighlightDisplay;
 HighlightDisplay.uber = HintDisplay.prototype;
 
 HighlightDisplay.insertColor = new Color(0, 0, 255);
-HighlightDisplay.deleteColor = new Color(255, 0, 0);
+HighlightDisplay.deleteColor = new Color(255, 0, 255);
 HighlightDisplay.moveColor = new Color(255, 255, 0);
 
 HighlightDisplay.TOP_LEFT = 'top-left';
@@ -38,6 +39,7 @@ HighlightDisplay.prototype.initDisplay = function() {
     this.hoverInsertIndicatorBlocks = [];
     this.hiddenInsertHints = 0;
     this.addCustomBlock = false;
+    this.hintsSinceStarted = 0;
 
     BlockEditorMorph.defaultHatBlockMargin = new Point(35, 20);
 
@@ -52,6 +54,11 @@ HighlightDisplay.prototype.initDisplay = function() {
     });
 };
 
+HighlightDisplay.isSnapPresenting = function() {
+    var hash = window.location.hash;
+    return hash.includes('#present');
+};
+
 HighlightDisplay.prototype.show = function() {
     var myself = this;
     this.enabled = false;
@@ -60,6 +67,16 @@ HighlightDisplay.prototype.show = function() {
         myself.forceShowDialog = true;
         HighlightDisplay.startHighlight();
     });
+    var assignment = Assignment.get();
+    if (assignment.promptHints && !window.hintProvider.reloadCode &&
+            !HighlightDisplay.isSnapPresenting()) {
+        Trace.log('HighlightDisplay.promptHints');
+        var message = localize('Remember, if you get stuck, you can use ' +
+            'the "Check My Work" button in\nthe top-right corner to get ' +
+            'feedback and suggestions on what to do next.');
+        new DialogBoxMorph().inform(localize('Help Available'), message,
+            ide.world());
+    }
 };
 
 HighlightDisplay.prototype.hide = function() {
@@ -74,6 +91,10 @@ HighlightDisplay.prototype.hide = function() {
 
 HighlightDisplay.startHighlight = function() {
     Trace.log('HighlightDisplay.startHighlight');
+    var showing = HighlightDialogBoxMorph.showing;
+    if (showing && !showing.destroyed) {
+        showing.recenter();
+    }
     window.hintProvider.setDisplayEnabled(HighlightDisplay, true);
 };
 
@@ -102,8 +123,7 @@ HighlightDisplay.prototype.finishedHints = function() {
                 if (this.hiddenInsertHints !== 0) {
                     // Show a dialog to confirm they want next-step hints
                     this.promptShowInserts();
-                } else if (this.hiddenCustomBlockHintRoots.length !== 0 &&
-                    !BlockEditorMorph.showing) {
+                } else if (this.hiddenCustomBlockHintRoots.length !== 0) {
                     this.promptShowBlockHints();
                 } else {
                     // Or tell them no hints are available
@@ -113,6 +133,10 @@ HighlightDisplay.prototype.finishedHints = function() {
         }
     }
     this.forceShowDialog = false;
+
+    if (this.hintWarning && this.hintsSinceStarted >= this.hintWarning) {
+        this.showHintWarning();
+    }
 };
 
 HighlightDisplay.prototype.promptShowInserts = function() {
@@ -166,9 +190,30 @@ HighlightDisplay.prototype.informNoHints = function() {
     new DialogBoxMorph(this).inform(
         localize('Check Passed'),
         localize('Everything on the screen looks good so far, but remember ' +
-            "it's\nup to you to make sure everything works before you submit."),
+            "it's\nup to you to make sure everything works before you finish."),
         window.world
     );
+};
+
+HighlightDisplay.prototype.showHintWarning = function() {
+    this.hintsSinceStarted = 0;
+    Trace.log('HighlightDisplay.showHintWarning');
+    new DialogBoxMorph(this, function() {
+        Trace.log('HighlightDisplay.hideHintsFromWarning');
+        HighlightDisplay.stopHighlight();
+    }).askYesNo(
+        localize("How's it Going?"),
+        localize ('Are you feeling stuck?\n') +
+            'If so, you may want to ask someone for help.\n' +
+            'If not, try working on your own for a bit.\n\n' +
+            localize('Should I stop checking your work?'),
+        window.world
+    );
+};
+
+HighlightDisplay.prototype.willIgnoreHint = function(hint) {
+    // If there's no primary hint and no candidate, we ignore the hint entirely
+    return this.ignorePrimaryHint(hint.data) && !this.getCandidate(hint);
 };
 
 HighlightDisplay.prototype.showHint = function(hint) {
@@ -176,17 +221,25 @@ HighlightDisplay.prototype.showHint = function(hint) {
 
     var action = hint.data.action;
 
-    if (!hint.data.missingParent) {
-        var parent = this.getCode(hint.data.parent);
-        if (parent instanceof CustomBlockDefinition) {
-            // For hints that are in hiddent custom blocks, we save the
-            // parents, but don't show it immediately
-            this.hiddenCustomBlockHintRoots.push(parent);
-            // Allow insert hints, since the candidate could be visible
-            if (action !== 'insert') return;
-        }
+    // Show insert candidates before any special handling, since they can't
+    // be ignored and they don't count for hidden custom block hints
+    if (action === 'insert') {
+        this.showInsertCandidate(hint.data);
     }
 
+    // We ignore some hints and keep this logic together
+    if (this.ignorePrimaryHint(hint.data)) return;
+
+    var parent = this.getCode(hint.data.parent);
+    if (parent instanceof CustomBlockDefinition) {
+        // For hints that are in hidden custom blocks, we store the
+        // parents, but don't show it immediately
+        this.hiddenCustomBlockHintRoots.push(parent);
+        // Stop here, since the hint can't be shown
+        return;
+    }
+
+    // Then show the hint
     switch (action) {
     case 'delete' : this.showDeleteHint(hint.data); break;
     case 'reorder': this.showReorderHint(hint.data); break;
@@ -211,7 +264,15 @@ HighlightDisplay.prototype.getHintType = function() {
     return 'highlight';
 };
 
+HighlightDisplay.prototype.hintDialogShown = function() {
+    this.hintsSinceStarted++;
+};
+
 HighlightDisplay.prototype.clear = function() {
+    if (!this.enabled) {
+        this.hintsSinceStarted = 0;
+    }
+
     var dialogShowing = HighlightDialogBoxMorph.showing &&
             !HighlightDialogBoxMorph.showing.destroyed;
     if (!this.enabled && dialogShowing) {
@@ -248,7 +309,7 @@ HighlightDisplay.prototype.clear = function() {
         if (argMorph.contents) {
             var contents = argMorph.contents();
             if (contents instanceof StringMorph) {
-                contents.isEditable = true;
+                contents.isEditable = !argMorph.isReadOnly;
             }
         }
         argMorph.onClick = null;
@@ -299,7 +360,7 @@ HighlightDisplay.prototype.addHighlight = function(block, color, single) {
     this.highlights.push(block);
 };
 
-HighlightDisplay.prototype.showAddCustomBlockHint = function(data) {
+HighlightDisplay.prototype.showInsertCustomBlockDef = function(data) {
     // Only show this hint once
     if (this.addCustomBlock) return;
     if (!this.showInserts) {
@@ -337,8 +398,11 @@ HighlightDisplay.prototype.showAddCustomBlockHint = function(data) {
     this.addInsertButton(createCustomBlock, HighlightDisplay.RIGHT, callback);
 };
 
-extend(IDE_Morph, 'refreshPalette', function(base, shouldIgnorePosition) {
-    base.call(this, shouldIgnorePosition);
+extend(IDE_Morph, 'changeCategory', function(base, category) {
+    var changed = (category !== this.currentCategory);
+    base.call(this, category);
+    if (!changed || !window.hintProvider) return;
+
     // When the palette changes, if there's a addCustomBlock button, refresh
     // the hints to redraw it (probably a bit overkill, but it's clean)
     if (window.hintProvider.displays.some(function(display) {
@@ -348,12 +412,42 @@ extend(IDE_Morph, 'refreshPalette', function(base, shouldIgnorePosition) {
     }
 });
 
-HighlightDisplay.prototype.showDeleteHint = function(data) {
-    // Only delete-highlight things that have a script ancestor
-    if (!this.hasScriptAncestor(data.node)) return;
-    // Ignore variable and literal deletion
-    if (data.node.label === 'var' || data.node.label === 'literal') return;
+HighlightDisplay.prototype.ignorePrimaryHint = function(data) {
+    // Hints without a parent are only for candidate highlighting, and the
+    // primary hint cannot be shown
+    if (data.missingParent) return true;
 
+    if (data.action === 'delete' || data.action === 'reorder') {
+        // Only delete/reorder-highlight things that have a script ancestor
+        if (!this.hasScriptAncestor(data.node)) return true;
+
+        // Don't delete/reorder literals
+        var ignoreLabels = ['literal'];
+        // Don't delete variable declarations or reorder scripts
+        if (data.action === 'delete') ignoreLabels.push('var');
+        if (data.action === 'reorder') ignoreLabels.push('script');
+
+        if (ignoreLabels.includes(data.node.label)) return true;
+    } else if (data.action == 'insert') {
+        // Don't insert scripts or lists
+        if (data.type === 'script' || data.type === 'list') return true;
+        // Don't insert new items into a list or custom block
+        if ((data.parent.label === 'list' ||
+                data.parent.label === 'evaluateCustomBlock') &&
+                    !data.replacement) return true;
+        // The only things we currently support inserting into snapshots/sprites
+        // are custom blocks. We don't show hints for inserting variables,
+        // sprites or scripts.
+        if (data.parent.label === 'snapshot' || data.parent.label === 'stage' ||
+                data.parent.label === 'sprite') {
+            if (data.type !== 'customBlock') return true;
+        }
+    }
+
+    return false;
+};
+
+HighlightDisplay.prototype.showDeleteHint = function(data) {
     var node = this.getCode(data.node);
     if (node == null) {
         Trace.logErrorMessage('Unknown node in delete hint');
@@ -365,11 +459,6 @@ HighlightDisplay.prototype.showDeleteHint = function(data) {
 };
 
 HighlightDisplay.prototype.showReorderHint = function(data) {
-    // Only reorder-highlight things that have a parent with a script ancestor
-    if (!this.hasScriptAncestor(data.node.parent)) return;
-    // Ignore literal and nested-script reorders
-    if (data.node.label === 'literal' || data.node.label === 'script') return;
-
     var node = this.getCode(data.node);
     if (node == null) {
         Trace.logErrorMessage('Unknown node in reorder hint');
@@ -385,108 +474,121 @@ HighlightDisplay.prototype.hasScriptAncestor = function(blockRef) {
     return blockRef != null;
 };
 
-HighlightDisplay.prototype.showInsertHint = function(data) {
-    // Don't worry about inserting scripts or lists
-    if (data.type === 'script' || data.type === 'list') return;
-
-    var parent = null;
-    // The parent may be missing (and null) if this insert is for code that
-    // hasn't been written yet, but we still show the candidate highlight
-    // in this case.
-    if (!data.missingParent) {
-        parent = this.getCode(data.parent);
-        if (parent == null) {
-            Trace.logErrorMessage('Unknown parent in insert hint');
-        }
-    }
-
-    // Show candidate highlighting
-    var candidate = null;
+HighlightDisplay.prototype.getCandidate = function(data) {
     if (data.candidate && data.candidate.label !== 'literal') {
-        candidate = this.getCode(data.candidate);
+        var candidate = this.getCode(data.candidate);
         if (candidate instanceof CustomBlockDefinition) {
             // Don't show hidden candidates, but don't error either
-            candidate = null;
+            return null;
         } else if (!(candidate instanceof BlockMorph)) {
             // Otherwise, if it's null or not a BlockMorph, error
             Trace.logErrorMessage('Unknown candidate for insert hint');
-            candidate = null;
+            return null;
         }
-        if (candidate) {
-            this.addHighlight(candidate, HighlightDisplay.moveColor, true);
-        }
+        return candidate;
     }
+    return null;
+};
 
-    // At this point, we quit if the parent is missing
-    if (!parent) return;
+HighlightDisplay.prototype.showInsertCandidate = function(data) {
+    // Don't highlight scripts or lists for movement
+    if (data.type === 'script' || data.type === 'list') return;
 
-    // If a hint inserts a custom block, handle that separately
-    if (data.parent.label === 'snapshot' && data.type === 'customBlock') {
-        this.showAddCustomBlockHint(data);
+    // Show candidate highlighting
+    var candidate = this.getCandidate(data);
+    if (!candidate) return;
+    this.addHighlight(candidate, HighlightDisplay.moveColor, true);
+};
+
+HighlightDisplay.prototype.showInsertHint = function(data) {
+    var parent = this.getCode(data.parent);
+    if (!parent) {
+        Trace.logErrorMessage('Unknown parent in insert hint');
         return;
     }
 
-    // We can still highlight candidates for hidden custom blocks, but
-    // nothing else
-    if (parent instanceof CustomBlockDefinition) return;
+    var candidate = this.getCandidate(data);
 
-    if (data.replacement) {
-        var replacement = this.getCode(data.replacement);
-        if (replacement) {
-            var isSlot = replacement instanceof ArgMorph;
-            var color = isSlot ? HighlightDisplay.insertColor :
-                    HighlightDisplay.deleteColor;
-            this.addHighlight(replacement, color, true);
-
-            if (isSlot) {
-                var otherBlocks = [];
-                if (candidate) otherBlocks.push(candidate.selector);
-                var onClick = this.createBlockHintCallback(true,
-                    parent.enclosingBlock(), candidate, data.from, data.to,
-                    otherBlocks);
-                this.addHoverHint(replacement, onClick);
-                if (candidate) {
-                    this.addHoverInsertIndicator(candidate,
-                        data.replacement.parent, data.replacement.index);
-                }
-            }
-        } else {
-            Trace.logErrorMessage('Unknown replacement in insert hint: ' +
-                data.replacement.label);
-        }
-    }
-
-    var callback;
-    if (data.parent.label === 'script' &&
+    // Handle all the various things that can be inserted
+    // TODO: what about custom blocks under sprites?
+    if (data.parent.label === 'snapshot' && data.type === 'customBlock') {
+        this.showInsertCustomBlockDef(data);
+    } else if (data.replacement) {
+        this.showInsertReplacement(data, parent, candidate);
+    } else if (data.parent.label === 'script' &&
             !(parent instanceof CustomBlockDefinition)) {
-        var fromList = [data.from];
-        if (data.candidate) fromList.push([data.candidate.label]);
-        callback = this.createScriptHintCallback(true, parent, candidate,
-            fromList, data.to);
-
-        var index = data.index;
-
-        var insertRef = this.getInsertReference(parent, index);
-        // Don't show insert on scripts that are just a ReporterBlockMorph
-        if (!(insertRef.block instanceof ReporterBlockMorph)) {
-            this.addInsertButton(insertRef.block, insertRef.position, callback);
-            if (candidate) {
-                this.addHoverInsertIndicator(candidate, data.parent, index);
-            }
-        }
+        this.showInsertIntoScript(data, parent, candidate);
     } else if (data.parent.label === 'customBlock' &&
             parent instanceof ScriptsMorph) {
-        var message = localize(
-            'You probably need another input for this block. ' +
-            'Add one with the plus button below.'
-        );
-        callback = this.createStructureHintCallback(true, parent, message,
-            data.from, data.to);
-        this.addPlusHintButton(parent, callback);
+        this.showInsertCustomBlockInput(data, parent);
     } else {
-        // console.log(data.parent.label);
-        // TODO: handle list inserts, which won't be in scripts
+        Trace.logErrorMessage('Insert unhandled for parent: ' +
+            data.parent.label + ' <- ' + data.type);
+        // TODO: maybe handle list/custom block inserts
+        // If so, update ignorePrimaryHint() above
     }
+};
+
+// Handle inserting an input to replace another
+HighlightDisplay.prototype.showInsertReplacement = function(
+    data, parent, candidate
+) {
+    var replacement = this.getCode(data.replacement);
+    if (replacement) {
+        // The replacement will be a slot if there's only a literal there
+        // at the moment, as opposed to another block
+        var isSlot = replacement instanceof ArgMorph;
+        var color = isSlot ? HighlightDisplay.insertColor :
+                HighlightDisplay.deleteColor;
+        this.addHighlight(replacement, color, true);
+
+        if (isSlot) {
+            var otherBlocks = [];
+            if (candidate) otherBlocks.push(candidate.selector);
+            var onClick = this.createBlockHintCallback(true,
+                parent.enclosingBlock(), candidate, data.from, data.to,
+                otherBlocks);
+            this.addHoverHint(replacement, onClick);
+            if (candidate) {
+                this.addHoverInsertIndicator(candidate,
+                    data.replacement.parent, data.replacement.index);
+            }
+        }
+    } else {
+        Trace.logErrorMessage('Unknown replacement in insert hint: ' +
+            data.replacement.label);
+    }
+};
+
+// Handle inserting an additional code element, e.g. a block into a script
+HighlightDisplay.prototype.showInsertIntoScript = function(
+    data, parent, candidate
+) {
+    var fromList = [data.from];
+    if (data.candidate) fromList.push([data.candidate.label]);
+    var callback = this.createScriptHintCallback(true, parent, candidate,
+            fromList, data.to);
+
+    var index = data.index;
+
+    var insertRef = this.getInsertReference(parent, index);
+    // Don't show insert on scripts that are just a ReporterBlockMorph
+    if (!(insertRef.block instanceof ReporterBlockMorph)) {
+        this.addInsertButton(insertRef.block, insertRef.position, callback);
+        if (candidate) {
+            this.addHoverInsertIndicator(candidate, data.parent, index);
+        }
+    }
+};
+
+HighlightDisplay.prototype.showInsertCustomBlockInput = function(data, parent) {
+    var message = localize(
+        'You probably need another input for this block. ' +
+        'Add one with the plus button below.'
+    );
+    var callback = this.createStructureHintCallback(true, parent, message,
+        data.from, data.to);
+    this.addPlusHintButton(parent, callback);
 };
 
 HighlightDisplay.prototype.getInsertReference = function(parent, index) {
@@ -538,7 +640,6 @@ function(block, attachPoint, callback, size) {
         this.hiddenInsertHints++;
         return;
     }
-
     // We use CSlotMorphs for positioning, but for consistency, we only use
     // blocks as parents
     var positionMorph = block;
@@ -559,7 +660,7 @@ function(block, attachPoint, callback, size) {
 
 HighlightDisplay.prototype.createInsertButton =
 function(parent, positionMorph, callback, attachPoint, size) {
-    size = size || 10;
+    size = (size || 10) * SyntaxElementMorph.prototype.scale;
     var button = new PushButtonMorph(parent, callback,
         new SymbolMorph('plus', size));
     button.labelColor = HighlightDisplay.insertColor;
@@ -607,14 +708,24 @@ function(parent, positionMorph, callback, attachPoint, size) {
 
 HighlightDisplay.prototype.addPlusHintButton = function(parent, callback) {
     var prototypeHBM = parent.children[0];
-    if (!(prototypeHBM instanceof PrototypeHatBlockMorph)) return;
+    if (!(prototypeHBM instanceof PrototypeHatBlockMorph)) {
+        Trace.logErrorMessage('Custom block without PrototypeHatBlockMorph');
+        return;
+    }
     var customCBM = prototypeHBM.children[0];
-    if (!(customCBM instanceof CustomCommandBlockMorph)) return;
+    if (!instanceOfAny(customCBM,
+            [CustomCommandBlockMorph, CustomReporterBlockMorph])) {
+        Trace.logErrorMessage('Custom block without CustomCommandBlockMorph');
+        return;
+    }
     var pluses = customCBM.children.filter(function (child) {
         return child instanceof BlockLabelPlaceHolderMorph;
     });
+    if (pluses.length === 0) {
+        Trace.logErrorMessage('Custom block without plusses');
+        return;
+    }
     var lastPlus = pluses[pluses.length - 1];
-    if (!lastPlus) return;
     this.addInsertButton(lastPlus, HighlightDisplay.ABOVE, callback);
 };
 

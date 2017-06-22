@@ -36,6 +36,7 @@ modules.cloud = '2015-December-15';
 
 var Cloud;
 var SnapCloud = new Cloud(
+    // Allow the config file to override the Snap Cloud URL
     window.snapCloudURL || 'https://snap.apps.miosoft.com/SnapCloud'
 );
 
@@ -282,7 +283,7 @@ Cloud.prototype.login = function (
                             this.getResponseHeader("miocracker").indexOf("=")
                         );
                     if (myself.api.logout) {
-                        myself.username = username;
+                        myself.setUsername(username);
                         myself.password = password;
                         callBack.call(null, myself.api, 'Snap!Cloud');
                     } else {
@@ -305,6 +306,10 @@ Cloud.prototype.login = function (
     } catch (err) {
         errorCall.call(this, err.toString(), 'Snap!Cloud');
     }
+};
+
+Cloud.prototype.setUsername = function(username) {
+    this.username = username;
 };
 
 Cloud.prototype.reconnect = function (

@@ -111,7 +111,7 @@ function tryGetParam($key, $mysqli) {
 	return array_key_exists($key, $_GET) ? $mysqli->real_escape_string($_GET[$key]) : NULL;
 }
 
-if ($enble_viewer) {
+if ($enable_viewer) {
 
 	$mysqli = new mysqli($host, $user, $password, $db);
 	if ($mysqli->connect_errno) {

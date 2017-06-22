@@ -17,19 +17,19 @@ include '../config.php';
             }
         </style>
     </head>
-    
+
     <body>
         <h1>Recent Errors</h1>
         <table>
             <tr><th>Count</th><th>Time</th><th>Message</th><th>Stack</th><th>Browser</th><th>Assignment</th><th>Project ID</th></tr>
             <?php
-                if (!$enble_viewer) return;
+                if (!$enable_viewer) return;
                 $mysqli = new mysqli($host, $user, $password, $db);
                 if ($mysqli->connect_errno) {
                     die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
                 }
                 $query = "SELECT count(*) as count, MAX(time) AS time, data, assignmentID, projectID FROM $table WHERE message='Error' GROUP BY data, assignmentID, projectID ORDER BY time DESC";
-                $result = $mysqli->query($query); 
+                $result = $mysqli->query($query);
                 if (!$result) {
                     die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
                 }
@@ -37,7 +37,7 @@ include '../config.php';
                     echo "<tr>";
                     echo "<td>" . $row["count"] . "</td>";
                     echo "<td>" . $row["time"] . "</td>";
-                    
+
                     $data = $row["data"];
                     $json = json_decode($data, true);
                     if (is_array($json) && array_key_exists("message", $json)) {
@@ -61,13 +61,13 @@ include '../config.php';
                         echo "<td>" . htmlentities($json) . "</td>";
                         echo "<td></td><td></td>";
                     }
-                    
+
                     $assignmentID = $row["assignmentID"];
                     $projectID = $row["projectID"];
                     echo "<td>$assignmentID</td>";
-                    echo "<td><a target='_blank' href='display.php?id=$projectID&assignment=$assignmentID'>$projectID</a></td>"; 
-                    
-                    echo "</tr>\n";   
+                    echo "<td><a target='_blank' href='display.php?id=$projectID&assignment=$assignmentID'>$projectID</a></td>";
+
+                    echo "</tr>\n";
                 }
             ?>
         </table>

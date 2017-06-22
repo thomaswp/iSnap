@@ -1,6 +1,6 @@
 <?php
 
-$enble_viewer = true;
+$enable_viewer = true;
 $db = "snap";
 $user = "root";
 $password = "testing123";

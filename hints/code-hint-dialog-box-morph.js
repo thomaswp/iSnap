@@ -195,8 +195,8 @@ function(selector, parent, numArgs) {
     } else if (selector == 'prototypeHatBlock') {
         // Create custom block header blocks
         param = this.fakeHatBlock();
-    } else if (selector == 'doCustomBlock' ||
-               selector == 'evaluateCustomBlock') {
+    } else if (selector === 'doCustomBlock' ||
+               selector === 'evaluateCustomBlock') {
         // Create custom blocks
         type = 'command';
         if (parent) {
@@ -213,6 +213,30 @@ function(selector, parent, numArgs) {
     } else {
         // Create everything else
         param = SpriteMorph.prototype.blockForSelector(selector, true);
+        if (!param) {
+            // Check for imported tools that match this selector
+            var defs = ide.stage.globalBlocks.filter(function(def) {
+                if (!def.isImported) return false;
+                var spec = def.spec;
+                // The spec may match exactly if we got the selector from an
+                // existing block
+                if (spec === selector) return true;
+                // Else, we do some substitutions on the spec to turn it into a
+                // selector, which are also performed on the server side
+                spec = spec.replace(/%'([^']*)'/g, '_');
+                spec = spec.replace(/\s/g, '');
+                spec = spec.replace(/[^A-Za-z_]/g, '*');
+                if (spec === selector) return true;
+            });
+            if (defs.length > 1) {
+                Trace.logErrorMessage('Multiple matching tools for selector: ' +
+                    selector);
+            }
+            if (defs.length > 0) {
+                param = defs[0].blockInstance();
+                param.isDraggable = false;
+            }
+        }
     }
     if (param == null) {
         Trace.logErrorMessage('Cannot initialize selector: ' + selector);
@@ -270,7 +294,9 @@ function(list, parentSelector, index) {
         } else {
             // Else, it is parameter input
             // eslint-disable-next-line no-console
-            console.log('DOES THIS EVER HAPPEN?');
+            console.warn('DOES THIS EVER HAPPEN?');
+            // eslint-disable-next-line no-console
+            console.log(parent, index, input);
             input.parent.silentReplaceInput(input, block);
         }
         return parent;

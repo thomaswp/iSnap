@@ -18,7 +18,10 @@ Assignment.initOrRedirect = function() {
     }
 
     // Also check for a userID
-    window.userID = getCookie('snapIDHash');
+    window.userID = getSearchParameters()['user'];
+    if (!window.userID || window.userID.length == 0) {
+        window.userID = window.userID || getCookie('snapIDHash');
+    }
     if (window.requireLogin && !userID && window.assignmentID !== 'view') {
         if (window.assignmentID) {
             redirectURL += '?assignment=' + window.assignmentID;
@@ -50,6 +53,11 @@ Assignment.setID = function(assignmentID) {
     var formerID = Assignment.getID();
     Trace.log('Assignment.setID', assignmentID);
     window.assignmentID = assignmentID;
+    // Update the project's assignment (overwrite it) to the new assignmentID
+    // This will only matter if the project is saved, which presumably implies
+    // the change was intended to be permanent
+    Assignment.updateStageAssignment(true);
+
     // Force the code to be re-logged so that we have an initial code state for
     // the new assignment log
     Trace.log('Assignment.setIDFrom', formerID, false, true);
@@ -71,12 +79,48 @@ Assignment.setID = function(assignmentID) {
     Assignment.onChangedHandlers.forEach(function(handler) {
         if (handler) handler(assignment);
     });
+
+    if (window.ide) ide.fixLayout();
+};
+
+Assignment.updateStageAssignment = function(overwrite) {
+    // If overwriting or the project's assignment is 'none' or null,
+    // update it to match the current assignmentID
+    if (window.ide && ide.stage && (overwrite || ide.stage.assignment == null ||
+            ide.stage.assignment === '' || ide.stage.assignment === 'none')) {
+        ide.stage.assignment = Assignment.getID();
+    }
 };
 
 Assignment.onChanged = function(handler) {
     Assignment.onChangedHandlers.push(handler);
 };
 
+extend(StageMorph, 'init', function(base, globals) {
+    base.call(this, globals);
+    this.assignment = Assignment.getID();
+});
+
+extend(SnapSerializer, 'openProject', function(base, project, ide) {
+    base.call(this, project, ide);
+    Assignment.updateStageAssignment();
+
+    // When a project is opened, update the current assignment to match
+    if (ide.stage && ide.stage.assignment !== Assignment.getID() &&
+            window.assignments) {
+        var currentAssignment = Assignment.get();
+        var projectAssignmentID = ide.stage.assignment;
+        // Make sure the project's assignment is listed and not a prequel of
+        // the current assignment
+        if (window.assignments[projectAssignmentID] &&
+                currentAssignment.prequel !== projectAssignmentID) {
+            // Then update to the project's assignment
+            Trace.log('Assignment.updateAssignmentOnOpen');
+            Assignment.setID(projectAssignmentID);
+        }
+
+    }
+});
 
 extend(IDE_Morph, 'createControlBar', function(baseCreate) {
     baseCreate.call(this);
@@ -86,11 +130,12 @@ extend(IDE_Morph, 'createControlBar', function(baseCreate) {
         if (ide.isAppMode) return;
         var assignment = Assignment.get();
         if (!assignment) return;
+        // A bit of a crude approximation, but it's not worth measuring exactly
+        var maxLength = Math.max(0, (ide.spriteEditor.width() / 6) - 35);
         var text = this.label.text;
-        if (Assignment.getID() !== 'none') {
+        if (Assignment.getID() !== 'none' && (maxLength - text.length) > 5) {
             text += ' - ' + assignment.name;
         }
-        var maxLength = 40;
         if (text.length > maxLength) {
             text = text.slice(0, maxLength) + '...';
         }

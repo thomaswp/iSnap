@@ -327,10 +327,10 @@ function GoalBar(assignment) {
 
 function showModal() {
       document.getElementById('openModal').classList.add('showing');
-      Trace.log("Subgoal.showModal");
+      Trace.log('Subgoal.showModal');
 }
 
 function hideModal() {
       document.getElementById('openModal').classList.remove('showing');
-      Trace.log("Subgoal.hideModal");
+      Trace.log('Subgoal.hideModal');
 }

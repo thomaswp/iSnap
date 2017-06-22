@@ -69,12 +69,15 @@ BlockMorph.prototype.addSingleHighlight = function(color) {
 BlockMorph.prototype.disable = function() {
     noop = function() { return null; };
     this.userMenu = noop;
-    this.allChildren().filter(
-        function (child) {
-            return child instanceof InputSlotMorph ||
-                child instanceof StringMorph;
-        }).forEach(function(child) {
+    this.allChildren().forEach(function (child) {
+        if (instanceOfAny(child,
+                [InputSlotMorph, StringMorph, MultiArgMorph])) {
             child.mouseClickLeft = noop;
             child.mouseDownLeft = noop;
-        });
+        }
+        if (child instanceof BlockMorph) {
+            // TODO: for some reason this doesn't work on vars (e.g. in for)
+            child.isDraggable = false;
+        }
+    });
 };

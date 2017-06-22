@@ -7,7 +7,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2015 by Jens Mönig
+    Copyright (C) 2017 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -74,7 +74,7 @@ HTMLCanvasElement, fontHeight, SymbolMorph, localize, SpeechBubbleMorph,
 ArrowMorph, MenuMorph, isString, isNil, SliderMorph, MorphicPreferences,
 ScrollFrameMorph*/
 
-modules.widgets = '2015-July-27';
+modules.widgets = '2017-January-03';
 
 var PushButtonMorph;
 var ToggleButtonMorph;
@@ -220,8 +220,8 @@ PushButtonMorph.prototype.drawOutline = function (context) {
             0,
             this.height()
         );
-        outlineStyle.addColorStop(1, 'white');
         outlineStyle.addColorStop(0, this.outlineColor.darker().toString());
+        outlineStyle.addColorStop(1, 'white');
     } else {
         outlineStyle = this.outlineColor.toString();
     }
@@ -290,8 +290,8 @@ PushButtonMorph.prototype.drawEdges = function (
         this.corner,
         Math.max(this.corner - this.outline, 0)
     );
-    gradient.addColorStop(1, topColor.toString());
     gradient.addColorStop(0, color.toString());
+    gradient.addColorStop(1, topColor.toString());
 
     context.strokeStyle = gradient;
     context.lineCap = 'round';
@@ -352,8 +352,8 @@ PushButtonMorph.prototype.drawEdges = function (
         h - this.corner,
         Math.max(this.corner - this.outline, 0)
     );
-    gradient.addColorStop(1, bottomColor.toString());
     gradient.addColorStop(0, color.toString());
+    gradient.addColorStop(1, bottomColor.toString());
 
     context.strokeStyle = gradient;
     context.lineCap = 'round';
@@ -585,6 +585,9 @@ ToggleButtonMorph.prototype.mouseLeave = function () {
     if (!this.state) {
         this.image = this.normalImage;
         this.changed();
+    }
+    if (this.schedule) {
+        this.schedule.isActive = false;
     }
     if (this.hint) {
         this.world().hand.destroyTemporaries();
@@ -2524,6 +2527,12 @@ DialogBoxMorph.prototype.fixLayout = function () {
                     + this.buttons.height()
                     + this.padding
         );
+        this.silentSetWidth(Math.max(
+                this.width(),
+                this.buttons.width()
+                        + (2 * this.padding)
+            )
+        );
         this.buttons.setCenter(this.center());
         this.buttons.setBottom(this.bottom() - this.padding);
     }
@@ -2771,11 +2780,11 @@ DialogBoxMorph.prototype.drawNew = function () {
         this.corner,
         0
     );
-    gradient.addColorStop(1, this.color.toString());
     gradient.addColorStop(
         0,
         this.color.lighter(this.contrast).toString()
     );
+    gradient.addColorStop(1, this.color.toString());
 
     context.lineCap = 'butt';
     context.strokeStyle = gradient;
@@ -2792,11 +2801,11 @@ DialogBoxMorph.prototype.drawNew = function () {
         this.corner,
         0
     );
-    gradient.addColorStop(1, this.color.toString());
     gradient.addColorStop(
         0,
         this.color.lighter(this.contrast).toString()
     );
+    gradient.addColorStop(1, this.color.toString());
 
     context.lineCap = 'round';
     context.strokeStyle = gradient;
@@ -2938,6 +2947,7 @@ AlignmentMorph.prototype.fixLayout = function () {
                         ))
                     );
                 }
+                cfb = c.fullBounds();
                 newBounds = newBounds.merge(cfb);
             } else {
                 newBounds = cfb;

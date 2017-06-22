@@ -12,6 +12,8 @@
         "history.txt": true,
         "Examples/*": true,
         "Backgrounds": true,
-        "help": true
+        "help": true,
+        ".vscode/*": true,
+        ".eslintrc.json": true
     }
 }

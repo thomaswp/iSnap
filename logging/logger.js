@@ -11,7 +11,7 @@ Logger.prototype.serializer = new SnapSerializer();
 
 Logger.prototype.init = function(interval) {
     this.queue = [];
-    this.onCodeChanged = null;
+    this.onCodeChanged = function(code) { };
     this.log('Logger.started');
     this.start(interval);
     this.forceLogCode = false;
@@ -98,6 +98,7 @@ Logger.prototype.log = function(message, data, saveImmediately, forceLogCode) {
     this.queue.push(log);
 };
 
+// Log a message as an error
 Logger.prototype.logErrorMessage = function(error) {
     if (!error || !error.length) return;
     var maxLength = 5000;
@@ -112,6 +113,7 @@ Logger.prototype.logErrorMessage = function(error) {
     }
 };
 
+// Log a javascript error
 Logger.prototype.logError = function(error) {
     if (!error) return;
     // eslint-disable-next-line no-console
@@ -152,8 +154,8 @@ Logger.prototype.getBrowser = function() {
 Logger.prototype.addCode = function(log) {
     if (typeof(ide) == 'undefined' || !ide.stage) return;
     log.projectID = ide.stage.guid;
-    var code = this.serializer.serialize(ide.stage);
-    code = this.removeImages(code);
+
+    var code = this.simpleCodeXML();
 
     if (this.forceLogCode || this.hasCodeChanged(this.lastCode, code)) {
         this.forceLogCode = false;
@@ -165,11 +167,13 @@ Logger.prototype.addCode = function(log) {
 
 Logger.prototype.removeCoordinates = function(xml) {
     if (!xml) return xml;
-    // Remove the open sprite tags, since they contain things
-    return xml.replace(/<(sprite|stage|watcher) [^>]*>/g, '');
+    // Remove the tags that have coordinates (and nothing else of interest)
+    return xml.replace(/<(sprite|stage|watcher|script) [^>]*>/g, '');
 };
 
 Logger.prototype.hasCodeChanged = function(xml1, xml2) {
+    // Remove coordinates before comparing code, since we don't need to
+    // log these unimportant changes to the code state
     return this.removeCoordinates(xml1) !== this.removeCoordinates(xml2);
 };
 
@@ -209,14 +213,64 @@ Logger.prototype.start = function(interval) {
     if (!interval) return;
     var myself = this;
     this.storeCallback = setInterval(function() {
-        if (myself.queue.length == 0) return;
-        myself.flushSaveCode();
-        myself.storeMessages(myself.queue);
-        myself.queue = [];
+        myself.sendLogs();
     }, interval);
 };
 
-Logger.prototype.removeImages = function(xml) {
-    if (!xml) return xml;
-    return xml.replace(/data:image\/png;base64[^<\"]*/g, '');
+Logger.prototype.sendLogs = function() {
+    if (this.queue.length === 0) return;
+    this.flushSaveCode();
+    this.storeMessages(this.queue);
+    this.queue = [];
 };
+
+Logger.prototype.simpleCodeXML = function() {
+    // Don't serialize the project while it's still opening
+    if (Logger.openingProject) return this.lastCode || '';
+
+    // Add a special flag to make the VariableFrame omit variable state
+    VariableFrame.dontSerializeVariableState = true;
+    var xml = this.serializer.serialize(ide.stage);
+    // Then make sure to reset it
+    VariableFrame.dontSerializeVariableState = false;
+
+    if (!xml) return xml;
+    // We don't want to log the stage image every time
+    return xml.replace(/data:image\/[^<\"]*/g, '');
+};
+
+extend(VariableFrame, 'toXML', function(base, serializer) {
+    var removeValues = VariableFrame.dontSerializeVariableState;
+    var valueMap = null;
+    var myself = this;
+
+    if (removeValues) {
+        // If needed, we remove the value of non-literal variables first
+        // and store them in a map for later replacement
+        valueMap = { };
+        Object.keys(this.vars).forEach(function(key) {
+            var value = myself.vars[key].value;
+            if (typeof value === 'object') {
+                valueMap[key] = value;
+                myself.vars[key].value = null;
+            }
+        });
+    }
+
+    var value = base.call(this, serializer);
+
+    if (valueMap) {
+        // then we add it back after
+        Object.keys(valueMap).forEach(function(key) {
+            myself.vars[key].value = valueMap[key];
+        });
+    }
+
+    return value;
+});
+
+extend(SnapSerializer, 'openProject', function(base, project, ide) {
+    Logger.openingProject = true;
+    base.call(this, project, ide);
+    Logger.openingProject = false;
+});

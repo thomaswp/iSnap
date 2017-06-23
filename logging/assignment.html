@@ -193,7 +193,7 @@
 			$('#form-flex-Parent').submit(tryLogin);
 
 			if (!window.requireLogin) {
-				$('#back-arrow').addClass('hidden');
+				$('#back-arrow').css('visibility', 'hidden');
 				$('.belt, .state').css('transition', 'none');
 				skipLogIn(false);
 			} else {

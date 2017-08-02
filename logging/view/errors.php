@@ -18,6 +18,7 @@ include '../config.php';
             }
             table.condensed {
                 margin: 0;
+                width: 500px;
             }
             table.condensed th, table.condensed td {
                 padding: 2px;
@@ -29,7 +30,7 @@ include '../config.php';
     <body>
         <h1>Recent Errors</h1>
         <table>
-            <tr><th>Count</th><th>Last Time</th><th>Message</th><th>Stack</th><th>Projects</th></tr>
+            <tr><th>Projs,<br/>Count</th><th>Last Time</th><th>Message</th><th>Stack</th><th>Projects</th></tr>
             <?php
                 if (!$enable_viewer) return;
                 $mysqli = new mysqli($host, $user, $password, $db);
@@ -90,14 +91,14 @@ ORDER BY time DESC";
                 }
                 foreach ($stacks as $row) {
                     echo "<tr>";
-                    echo "<td>" . $row["count"] . '/' . $row['totalCount'] . "</td>";
+                    echo "<td>" . $row["count"] . ',' . $row['totalCount'] . "</td>";
                     echo "<td>" . $row["time"] . "</td>";
 
                     // TODO: JSON
                     echo "<td>" . htmlentities($row["message"]) . "</td>";
                     echo "<td><pre>" . htmlentities($row['stack']) . "</pre></td>";
 
-                    echo '<td><table class="condensed" width="575px">';
+                    echo '<td><table class="condensed"';
                     echo "<tr><th>Count</th><th>Last Time</th><th>Browser</th><th>Assignment</th><th>Project ID</th></tr>";
                     foreach ($row['occurrences'] as $occ) {
                         echo '<tr>';

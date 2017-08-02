@@ -156,7 +156,7 @@ if ($enable_viewer) {
 		$rid = $row['id'];
 		$time = $row['time'];
 		$message = $row['message'];
-		$data = $row['data'];
+		$data = htmlentities($row['data']);
 		$link = $row['link'];
 		$sessionID = $row['sessionID'];
 
@@ -169,11 +169,11 @@ if ($enable_viewer) {
 
 		$link_text = $data;
 		$cutoff = 35;
-		if ($link_text == "\"\"") $link_text = "";
+		if ($link_text == "&quot;&quot;") $link_text = "";
 		if (strlen($link_text) > $cutoff) {
 			$link_text = substr($link_text, 0, $cutoff) . "...";
 		}
-		$link = "<a title='$data' href='#json-$rid' onclick='viewJSON($data)'>$link_text</a>";
+		$link = "<a title=\"$data\" href='#json-$rid' onclick=\"viewJSON($data)\">$link_text</a>";
 
 		echo "<tr><td>$first</td><td class='$class' id='$rid' title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";
 	}

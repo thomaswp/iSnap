@@ -46,12 +46,12 @@ modules.locale = '2017-January-13';
 
 // Global stuff
 
+localize = function(string) {
+    return SnapTranslator.translate(string);
+};
+
 var Localizer;
 var SnapTranslator = new Localizer();
-
-function localize(string) {
-    return SnapTranslator.translate(string);
-}
 
 // Localizer /////////////////////////////////////////////////////////////
 

@@ -131,7 +131,8 @@ HintProvider.prototype.getHintsFromServer = function() {
         this.url + '?assignmentID=' + Assignment.getID() +
         '&hintTypes=' + encodeURIComponent(hintTypes));
     if (!xhr) {
-        myself.showError('CORS not supported on this browser.');
+        // Treat this as a network error because it's unrecoverable
+        myself.showError('CORS not supported on this browser.', true);
         return;
     }
     this.lastXHR = xhr;
@@ -143,17 +144,20 @@ HintProvider.prototype.getHintsFromServer = function() {
     };
 
     xhr.onerror = function(e) {
-        myself.showError('Error contacting hint server!');
+        myself.showError('Error contacting hint server: ' +
+            'Ready State: ' + xhr.readyState + '; Status: ' + xhr.status +
+            '; Has Response: ' + (xhr.responseText !== '') +
+            '; URL: ' + myself.url, true);
     };
 
     xhr.send(this.code);
 };
 
-HintProvider.prototype.showError = function(message) {
+HintProvider.prototype.showError = function(message, isNetwork) {
     Trace.logErrorMessage(message);
     this.displays.forEach(function(display) {
         if (display.enabled) {
-            display.showError(message);
+            display.showError(message, isNetwork);
         }
     });
 };

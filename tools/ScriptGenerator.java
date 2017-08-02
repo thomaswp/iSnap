@@ -60,12 +60,16 @@ public class ScriptGenerator {
 				htmlFile.getName());
 
 		Scanner sc = new Scanner(new FileInputStream(htmlFile));
+		String snapFiles = "";
 		String files = "";
 		while (sc.hasNext()) {
 			String line = sc.nextLine();
 			if (line.contains("<script") && line.contains("</script>")) {
 				if (!line.contains(output)) {
 					// TODO: Use Regex to avoid required attribute order
+					int start = line.indexOf("src=\"") + 5;
+					int end = line.indexOf("\">");
+					snapFiles += " " + getRelativePath(line.substring(start, end), rootPath);
 					writer.println(
 							line.replace("'>", "?v=" + version + "'>")
 							.replace("\">", "?v=" + version + "\">"));
@@ -79,11 +83,15 @@ public class ScriptGenerator {
 				}
 				writer.println();
 				writer.println(indent + "<!-- Begin auto-generated script tags -->");
+				// writer.println(indent + toScript("snap.min.js", rootPath, version));
 				for (Graph.Node node : sorted) {
 					System.out.println("Added script: " + getRelativePath(node.name, rootPath));
-					writer.println(indent + toScript(node.name, rootPath, version));
-					files += " " + getRelativePath(node.name, rootPath);
+					if (!node.name.contains("config.js")) {
+						writer.println(indent + toScript(node.name, rootPath, version));
+						files += " " + getRelativePath(node.name, rootPath);
+					}
 				}
+				// writer.println(indent + toScript("isnap.min.js", rootPath, version));
 				writer.println(indent + "<!-- End auto-generated script tags -->");
 				writer.println();
 			} else if (line.contains(badLine)){
@@ -101,7 +109,9 @@ public class ScriptGenerator {
 		sc.close();
 		writer.close();
 
-		String command = "uglifyjs" + files + " -b -o isnap.min.js";
+		// TODO: make work on unix :(
+		String command = "uglifyjs" + snapFiles + " --source-map url=snap.min.js.map -o snap.min.js && ^\n" +
+			"uglifyjs" + files + " --source-map url=isnap.min.js.map -o isnap.min.js\n";
 		writeFile(new File(root, "tools/uglify.bat"), command);
 		writeFile(new File(root, "tools/uglify.sh"), command);
 	}

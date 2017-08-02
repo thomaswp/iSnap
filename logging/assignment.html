@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Select an assignment</title>
-        <link rel="stylesheet" type="text/css" href="login/assignment.css?v=2.1.6">
+        <link rel="stylesheet" type="text/css" href="login/assignment.css">
 		<link rel="stylesheet" type="text/css" href="login/css/font-awesome.min.css">
 	</head>
 
@@ -58,9 +58,9 @@
 			</div>
 		</div>
 
-        <script type="text/javascript" src="jquery-3.1.1.min.js"></script>
-		<script type="text/javascript" src="../isnap/util.js?v=2.1.6"></script>
-		<script type="text/javascript" src="config.js"></script>
+        <script type="text/javascript" src="jquery-3.1.1.min.js?"></script>
+		<script type="text/javascript" src="../isnap/util.js?v=2.4.0"></script>
+		<script type="text/javascript" src="config.js?v=2.4.0"></script>
 		<script type="text/javascript" src="jquery.cookie.js"></script>
 
 		<script type="text/javascript">
@@ -191,6 +191,7 @@
 			}
 
 			$('#form-flex-Parent').submit(tryLogin);
+			$('#form-assignment')[0].action += document.location.hash;
 
 			if (!window.requireLogin) {
 				$('#back-arrow').css('visibility', 'hidden');

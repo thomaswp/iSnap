@@ -247,7 +247,7 @@ HighlightDisplay.prototype.showHint = function(hint) {
     }
 };
 
-HighlightDisplay.prototype.showError = function(error) {
+HighlightDisplay.prototype.showError = function(error, isNetwork) {
     if (this.forceShowDialog) {
         new DialogBoxMorph(this).inform(
             localize('Error'),
@@ -257,6 +257,13 @@ HighlightDisplay.prototype.showError = function(error) {
         );
         this.forceShowDialog = false;
         HighlightDisplay.stopHighlight();
+    }
+    if (isNetwork) {
+        // If this is a network problem, disable the hint provider until an
+        // explicit request is made again, and stop checking on run
+        HighlightDisplay.stopHighlight();
+        HighlightDialogBoxMorph.showOnRun = false;
+        HighlightDialogBoxMorph.firstShowOnRun = false;
     }
 };
 
@@ -772,6 +779,12 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
     } else if (parent instanceof BlockMorph ||
             parent instanceof MultiArgMorph) {
         var input = parent.inputs()[index];
+        if (input instanceof ReporterBlockMorph) {
+            // There is a block already in this input slot, so we cannot add
+            // an insert indicator. Simply return, since another hints should
+            // have highlighted this block for move/deletion.
+            return;
+        }
         if (!input || !(input instanceof ArgMorph)) {
             Trace.logErrorMessage('Bad index in insert indicator');
             return;

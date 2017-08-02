@@ -1,13 +1,7 @@
-window.assignments.polygonMakerLab.hints = true;
-window.assignments.squiralHW.hints = true;
-window.assignments.squiralHW.promptHints = true;
-window.assignments.guess1Lab.hints = true;
-window.assignments.guess1Lab.promptHints = true;
-window.assignments.guess2HW.hints = true;
-window.assignments.guess2HW.promptHints = true;
 
 function getHintURL() {
-    return location.protocol + '//' + location.hostname + ':8080/HintServer/hints';
+    return location.protocol + '//' + location.hostname +
+        ':8080/HintServer/hints';
 }
 
 function getHintProvider() {

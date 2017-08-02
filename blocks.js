@@ -3338,7 +3338,6 @@ BlockMorph.prototype.refactorThisVar = function (justTheTemplate) {
         Trace.log('Block.refactorVarError', {
             'id': myself.blockId(),
             'oldName': oldName,
-            'newName': newName,
             'where': where,
         });
         ide.inform(

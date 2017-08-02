@@ -14,18 +14,22 @@ window.assignments = {
     'polygonMakerLab': {
         name: 'Polygon Maker',
         hint: 'In Lab Activity 2',
+        hints: true,
     },
     'squiralHW': {
         name: 'Squiral',
         hint: 'Homework 2',
+        hints: true,
     },
     'guess1Lab': {
         name: 'Guessing Game Part 1',
         hint: 'In Lab Activity 3',
+        hints: true,
     },
     'guess2HW': {
         name: 'Guessing Game Part 2',
         hint: 'Homework 3',
+        hints: true,
     },
     'guess3Lab': {
         name: 'Guessing Game Part 3',

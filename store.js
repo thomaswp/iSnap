@@ -1862,7 +1862,8 @@ Costume.prototype.toXML = function (serializer) {
         this.name,
         this.rotationCenter.x,
         this.rotationCenter.y,
-        this instanceof SVG_Costume ? this.contents.src
+        this instanceof SVG_Costume ?
+                (this.contents ? this.contents.src : '')
                 : normalizeCanvas(this.contents).toDataURL('image/png')
     );
 };

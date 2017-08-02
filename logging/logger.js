@@ -236,7 +236,9 @@ Logger.prototype.simpleCodeXML = function() {
 
     if (!xml) return xml;
     // We don't want to log the stage image every time
-    return xml.replace(/data:image\/[^<\"]*/g, '');
+    xml = xml.replace(/data:image\/[^<\"]*/g, '');
+    xml = xml.replace(/data:audio\/[^<\"]*/g, '');
+    return xml;
 };
 
 extend(VariableFrame, 'toXML', function(base, serializer) {

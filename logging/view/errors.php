@@ -43,11 +43,12 @@ include '../config.php';
                     if (is_array($json) && array_key_exists("message", $json)) {
                         echo "<td>" . htmlentities($json["message"]) . "</td>";
                         if (array_key_exists("stack", $json)) {
-                            echo "<td><pre>" . $json["stack"] . "</pre></td>";
+                            echo "<td><pre>" . htmlentities($json["stack"]) . "</pre></td>";
                         } else {
                             echo "<td><pre>";
                             foreach ($json as $key => $value) {
                                 if ($key == "message" || $key == "browser") continue;
+                                $value = htmlentities($value);
                                 echo "$key: $value\n";
                             }
                             echo "</pre></td>";

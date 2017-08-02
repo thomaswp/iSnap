@@ -15,6 +15,7 @@ include '../config.php';
             table td {
                 text-align: left;
                 padding: 10px;
+                max-width: 900px;
             }
             table.condensed {
                 margin: 0;
@@ -23,6 +24,9 @@ include '../config.php';
             table.condensed th, table.condensed td {
                 padding: 2px;
                 text-align: left;
+            }
+            pre {
+                white-space: pre-wrap;
             }
         </style>
     </head>

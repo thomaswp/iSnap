@@ -204,8 +204,8 @@ HintDisplay.prototype.parentSelector = function(enclosingBlock) {
  * Creates a function for logging and showing a script hint.
  *
  * @this HintDisplay
- * @param {bool} simple Whether or not the CodeHintDialogBoxMorph should display
- * simple UI, or display the full rating UI.
+ * @param {boolean} simple Whether or not the CodeHintDialogBoxMorph should
+ * display simple UI, or display the full rating UI.
  * @param {SyntaxElementMorph} root The node whose children are being edited
  * @param {BlockMorph} extraRoot Another block or script which is also being
  * displayed as part of the hint.
@@ -269,8 +269,8 @@ HintDisplay.prototype.createScriptHintCallback = function(simple, root,
  * Creates a function for logging and showing a block hint.
  *
  * @this HintDisplay
- * @param {bool} simple Whether or not the CodeHintDialogBoxMorph should display
- * simple UI, or display the full rating UI.
+ * @param {boolean} simple Whether or not the CodeHintDialogBoxMorph should
+ * display simple UI, or display the full rating UI.
  * @param {SyntaxElementMorph} root The node whose children are being edited
  * @param {BlockMorph} extraRoot Another block or script which is also being
  * displayed as part of the hint.
@@ -358,7 +358,7 @@ HintDisplay.prototype.createStructureHintCallback = function(simple, root,
     };
 };
 
-// Static method - shows a logged hints retreived from the database
+// Static method - shows a logged hints retrieved from the database
 HintDisplay.showLoggedHint = function(data) {
     var type = data.type;
     var fromList;

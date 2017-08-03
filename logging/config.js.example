@@ -30,10 +30,12 @@ window.assignments = {
         name: 'Guessing Game Part 2',
         hint: 'Homework 3',
         hints: true,
+        prequel: 'guess1Lab',
     },
     'guess3Lab': {
         name: 'Guessing Game Part 3',
         hint: 'In Lab Activity 4',
+        prequel: 'guess2HW',
     },
     'project': {
         name: 'SNAP Project',

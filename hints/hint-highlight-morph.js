@@ -1,6 +1,8 @@
 
 function HintHighlightMorph() {
     this.init();
+    // Never copy a HintHighlightMorph
+    this.doNotCopy = true;
 }
 
 HintHighlightMorph.prototype = new Morph();
@@ -83,12 +85,13 @@ extend(SyntaxElementMorph, 'fixHighlight', function(base) {
     if (oldHighlight) this.addHintHighlight(oldHighlight.color);
 });
 
-extend(SyntaxElementMorph, 'copy', function(base) {
-    var copy = base.call(this);
-    setTimeout(function() {
-        copy.removeHintHighlight();
-        copy.cachedFullImage = null;
-        copy.cachedFullBounds = null;
+// Remove any copied morphic that was not supposed to be copied
+// It would be ideal to simply not copy these morphs in the first place,
+// but that would involve editing the original code, so we use this solution.
+extend(Morph, 'copyRecordingReferences', function(base, map) {
+    var copy = base.call(this, map);
+    copy.children = copy.children.filter(function(child) {
+        return !child.doNotCopy;
     });
     return copy;
 });

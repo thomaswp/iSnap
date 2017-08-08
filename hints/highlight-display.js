@@ -709,6 +709,9 @@ function(parent, positionMorph, callback, attachPoint, size) {
     };
 
     parent.add(button);
+    // Prevent the buttons from being copied (e.g. when their parent is copied
+    // or stored when a custom block is serialized)
+    button.doNotCopy = true;
     layoutBlock.fixLayout();
     return button;
 };

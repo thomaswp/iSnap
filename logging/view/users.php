@@ -97,10 +97,12 @@ if ($enable_viewer) {
   SELECT COUNT(*) AS n, SUM(message='IDE.exportProject' OR message='ProjectDialogMorph.shareThisProject') > 0 AS exported,
     SUM(message = 'HighlightDisplay.checkMyWork') AS hintChecks, SUM(message LIKE 'SnapDisplay.show%Hint') AS hintDialogs,
 	SUM(message = 'Error') AS errors,
+	MIN(time) AS start,
   	userID, projectID, assignmentID
   FROM trace WHERE projectID <> '' GROUP BY userID, projectID, assignmentID HAVING n > 5
 ) AS grouped
-GROUP BY userID";
+GROUP BY userID
+ORDER BY start ASC";
 
 	$result = $mysqli->query($query);
 	if (!$result) {

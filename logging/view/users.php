@@ -102,7 +102,7 @@ if ($enable_viewer) {
   FROM trace WHERE projectID <> '' GROUP BY userID, projectID, assignmentID HAVING n > 5
 ) AS grouped
 GROUP BY userID
-ORDER BY start ASC";
+ORDER BY MIN(start) ASC";
 
 	$result = $mysqli->query($query);
 	if (!$result) {

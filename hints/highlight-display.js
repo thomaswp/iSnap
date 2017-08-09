@@ -556,10 +556,13 @@ HighlightDisplay.prototype.showInsertReplacement = function(
                 parent.enclosingBlock(), candidate, data.from, data.to,
                 otherBlocks);
             this.addHoverHint(replacement, onClick);
-            if (candidate) {
-                this.addHoverInsertIndicator(candidate,
-                    data.replacement.parent, data.replacement.index);
-            }
+        }
+        // Add a hover indicator if the replacement is a slot (optionally with
+        // a block filling it)
+        if (candidate &&
+                (isSlot || replacement instanceof ReporterBlockMorph)) {
+            this.addHoverInsertIndicator(candidate,
+                data.replacement.parent, data.replacement.index);
         }
     } else {
         Trace.logErrorMessage('Unknown replacement in insert hint: ' +
@@ -739,9 +742,9 @@ HighlightDisplay.prototype.addPlusHintButton = function(parent, callback) {
     this.addInsertButton(lastPlus, HighlightDisplay.ABOVE, callback);
 };
 
-HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
-        index) {
-
+HighlightDisplay.prototype.addHoverInsertIndicator = function(
+    block, parentRef, index
+) {
     var parent = this.getCode(parentRef);
     if (!parent) {
         Trace.logErrorMessage('Unknown parent in hover insert indicator');
@@ -782,13 +785,10 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(block, parentRef,
     } else if (parent instanceof BlockMorph ||
             parent instanceof MultiArgMorph) {
         var input = parent.inputs()[index];
-        if (input instanceof ReporterBlockMorph) {
-            // There is a block already in this input slot, so we cannot add
-            // an insert indicator. Simply return, since another hints should
-            // have highlighted this block for move/deletion.
-            return;
-        }
-        if (!input || !(input instanceof ArgMorph)) {
+        // Only ArgMorphs (empty input slots) or ReporterBlockMorphs (filled
+        // input slots) are valid feedbackInput targets
+        if (!(input instanceof ArgMorph ||
+                input instanceof ReporterBlockMorph)) {
             Trace.logErrorMessage('Bad index in insert indicator');
             return;
         }

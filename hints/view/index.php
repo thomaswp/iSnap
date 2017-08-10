@@ -47,9 +47,14 @@ include '../../logging/config.php';
 						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
 						data = JSON.parse(data);
-						data.type = type;
+						if (data) {
+							data.type = type;
+						}
 						window.setTimeout(function() {
 							contentWindow.HintDisplay.showLoggedHint(data);
+							if (contentWindow.hintProvider) {
+								contentWindow.hintProvider.getHintsFromServer();
+							}
 						}, 100);
 					}
 				};
@@ -90,7 +95,9 @@ if ($enable_viewer) {
 	}
 
 	// Allow for filtering by a set of space-separated ids
-	$where = "WHERE message LIKE 'SnapDisplay.show%Hint'";
+	$where = "WHERE (message='HighlightDisplay.checkMyWork' OR
+		message='HighlightDialogBoxMorph.toggleInsert' AND data='true' OR
+		message LIKE 'SnapDisplay.show%Hint')";
 	if (array_key_exists('ids', $_GET)) {
 		$ids = $_GET['ids'];
 		$ids = explode(' ', $ids);
@@ -101,6 +108,14 @@ if ($enable_viewer) {
 		}
 		$list .= ')';
 		$where .= " AND id IN $list";
+	}
+	if (array_key_exists('assignment', $_GET)) {
+		$assignment = $mysqli->escape_string($_GET['assignment']);
+		$where .= " AND assignmentID = '$assignment'";
+	}
+	if (array_key_exists('project', $_GET)) {
+		$project = $mysqli->escape_string($_GET['project']);
+		$where .= " AND projectID = '$project'";
 	}
 
 	$query = "SELECT * FROM `trace` $where
@@ -119,9 +134,13 @@ if ($enable_viewer) {
 		$projectID = $row['projectID'];
 		$displayID = substr($projectID, 0, strpos($projectID, '-'));
 		$type = $row['message'];
+		$hasHint = strpos($type, 'SnapDisplay.show') !== false;
 		$type = str_replace('SnapDisplay.show', '', $type);
+		$type = str_replace('HighlightDisplay.', '', $type);
+		$type = str_replace('HighlightDialogBoxMorph.', '', $type);
 		$time = $row['time'];
 		$data = json_encode($row['data']);
+		if (!$hasHint) $data = "null";
 		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\", $data, \"$type\")";
 		$onclick = htmlspecialchars($onclick);
 		$contextLink = "../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$id";

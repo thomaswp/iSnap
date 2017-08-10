@@ -360,6 +360,15 @@ HintDisplay.prototype.createStructureHintCallback = function(simple, root,
 
 // Static method - shows a logged hints retrieved from the database
 HintDisplay.showLoggedHint = function(data) {
+
+    if (!data) {
+        // If we have no hint data, clear any showing hints
+        if (HintDialogBoxMorph.showing) {
+            HintDialogBoxMorph.showing.destroy();
+        }
+        return;
+    }
+
     var type = data.type;
     var fromList;
     if (type === 'StructureHint') {

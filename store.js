@@ -991,7 +991,7 @@ SnapSerializer.prototype.loadEditing = function(
     var editingDefinition;
     if (model.tag === 'scripts') {
         editingDefinition = this.loadEditingFromScripts(
-            model, originalDefinition);
+            model, originalDefinition, editingSprite);
     } else if (model.tag === 'block-definition') {
         editingDefinition = this.loadCustomBlock(null, model,
             originalDefinition.isGlobal);
@@ -1028,7 +1028,7 @@ SnapSerializer.prototype.loadEditing = function(
 // Legacy function to load an editing block from a <scripts> tag, used for
 // backwards compatibility
 SnapSerializer.prototype.loadEditingFromScripts = function(
-    model, originalDefinition
+    model, originalDefinition, editingSprite
 ) {
     var blockInputs = {};
     var blockSpec = originalDefinition.spec;

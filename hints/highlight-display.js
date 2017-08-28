@@ -324,12 +324,13 @@ HighlightDisplay.prototype.clear = function() {
     this.hoverHints = [];
 
     this.hoverInsertIndicatorBlocks.forEach(function(block) {
-        block.feedbackBlock = null;
-        block.feedbackInput = null;
+        delete block.feedbackBlock;
+        delete block.feedbackInput;
+        delete block.feedbackShowing;
     });
     window.ide.allChildren().forEach(function(child) {
         if (child instanceof ScriptsMorph) {
-            child.hoverBlocks = null;
+            delete child.hoverBlocks;
         }
     });
     this.hoverInsertIndicatorBlocks = [];
@@ -779,7 +780,17 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(
                     type: attachType,
                     location: attachLocation,
                 };
-            }
+            },
+            blockId: function() {
+                // Attached above/below a block
+                if (attachBlock.blockId) return attachBlock.blockId();
+                // Attached in a CSlot morph
+                if (attachBlock.argId) return attachBlock.argId();
+                Trace.logErrorMessage('Unknow attachBlock: ' +
+                        typeof attachBlock);
+                return null;
+            },
+            showBelowTarget: isBottom,
         };
         scriptParent = attachBlock.parentThatIsA(ScriptsMorph);
     } else if (parent instanceof BlockMorph ||
@@ -807,6 +818,60 @@ HighlightDisplay.prototype.addHoverInsertIndicator = function(
     this.hoverInsertIndicatorBlocks.push(block);
 };
 
+HighlightDisplay.logHoverInsertIndicator = function(block, showing) {
+    var isScriptHint = block.feedbackBlock != null;
+    var target = block.feedbackBlock || block.feedbackInput;
+    if (target == null) {
+        Trace.logErrorMessage('Insert indicator without target');
+        return;
+    }
+    if (!block.blockId) {
+        Trace.logErrorMessage('Non-block insert indicator: ' + typeof block);
+        return;
+    }
+    var id;
+    if (target.blockId) {
+        id = target.blockId();
+    } else if (target.argId) {
+        id = target.argId();
+    } else {
+        Trace.logErrorMessage('Insert indicator without ID: ' + typeof target);
+        return;
+    }
+    var args = {
+        // ID of the block being hovered over
+        candidate: block.blockId(),
+        // ID of the block/arg (sibling) where the candidate should be inserted
+        // For script hints, this is a sibling the candidates hould be inserted
+        // above or below, or a CSlot the candidate should be inserted into.
+        // For block hints, this is an InputSlot where the candidate should be
+        // inserted, or a block it should replace.
+        // This is a bit convoluted because script parents have no ID, so it's
+        // not trivial just to give a parent ID and insert index, so instead we
+        // descrive the location of the insert indicator itself.
+        target: id,
+    };
+    if (isScriptHint) {
+        // Whether the insert indicator is below the target block
+        args.showBelowTarget = target.showBelowTarget;
+        // Whether the target is a CSlotMorph (with argIndex)
+        args.inCSlotTarget = id.argIndex != undefined;
+        if (showing) {
+            Trace.log('HighlightDisplay.showHoverScriptInsert', args);
+        } else {
+            Trace.log('HighlightDisplay.hideHoverScriptInsert', args);
+        }
+    } else {
+        // Whether the target is a block (inside the target arg) to be replaced
+        args.isReplacement = target.argId == null;
+        if (showing) {
+            Trace.log('HighlightDisplay.showHoverBlockInsert', args);
+        } else {
+            Trace.log('HighlightDisplay.hideHoverBlockInsert', args);
+        }
+    }
+};
+
 extend(ScriptsMorph, 'step', function(base) {
     base.call(this);
     // If the hand is grabbing, don't show hover feedback
@@ -814,13 +879,13 @@ extend(ScriptsMorph, 'step', function(base) {
     if (!this.hoverBlocks) return;
 
     // For each block with a hover action...
-    this.hoverBlocks.some(function(block) {
+    var hoveringBlock = this.hoverBlocks.find(function(block) {
         // Find the top-child under the cursor
         var topMorph = block.topMorphAt(window.world.hand.position());
         // And ensure it exists, it's not a button and it is the hover block,
         // not some child block
         if (!topMorph || topMorph.parentThatIsA(PushButtonMorph) ||
-            block != topMorph.parentThatIsA(BlockMorph)) {
+                block != topMorph.parentThatIsA(BlockMorph)) {
             return false;
         }
         // Then show the appropriate feedback
@@ -834,4 +899,12 @@ extend(ScriptsMorph, 'step', function(base) {
         }
         return false;
     }, this);
+
+    this.hoverBlocks.forEach(function(block) {
+        var feedbackShowing = (block == hoveringBlock);
+        if (!!block.feedbackShowing !== feedbackShowing) {
+            HighlightDisplay.logHoverInsertIndicator(block, feedbackShowing);
+        }
+        block.feedbackShowing = feedbackShowing;
+    });
 });

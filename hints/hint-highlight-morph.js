@@ -40,6 +40,7 @@ SyntaxElementMorph.prototype.addSingleHintHighlight = function(color) {
     var children = this.children;
     this.children = [];
     var highlight = this.addHintHighlight(color);
+    highlight.isSingle = true;
     children.push(highlight);
     this.children = children;
     this.fullChanged();
@@ -79,10 +80,20 @@ SyntaxElementMorph.prototype.getHintHighlight = function () {
     return null;
 };
 
-extend(SyntaxElementMorph, 'fixHighlight', function(base) {
-    base.call(this);
+SyntaxElementMorph.prototype.fixHintHighlight = function() {
     var oldHighlight = this.removeHintHighlight();
-    if (oldHighlight) this.addHintHighlight(oldHighlight.color);
+    if (oldHighlight) {
+        if (oldHighlight.isSingle) {
+            this.addSingleHintHighlight(oldHighlight.color);
+        } else {
+            this.addHintHighlight(oldHighlight.color);
+        }
+    }
+};
+
+extend(SyntaxElementMorph, 'fixLayout', function(base) {
+    base.call(this);
+    this.fixHintHighlight();
 });
 
 // Remove any copied morphic that was not supposed to be copied

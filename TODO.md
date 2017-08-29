@@ -1,17 +1,12 @@
 Highlight:
 * Bugs:
-  * Duplicating a single block with a full-script highlight has a graphical bug
-  * Duplicating a full script with a plus button creates graphical lag
   * Some artifacts show up when dragging highlighted blocks
   * Something is trying to highlight ScriptsMorphs and SpriteMorphs
   * Hint buttons can overlap too much
   * reifyScript block isn't handled by getCode
   * Hover feedback still shows when a dialog is in between mouse and block
-  * require() statements shouldn't be needed in the config, since this isn't VCd
   * CommandBlock wrapping on highlighted blocks makes the CSlot too big
   * Clicking on empty inputs with insert hints sometimes just edits the input
-  * Sometimes a block highlight will include nextBlocks (only when next steps
-    are shown, though...)
   * When zooming blocks, highlight dialog doesn't resize appropriately
 * TODO:
   * Hide highlights on other sprites and show dialog if they're the only ones

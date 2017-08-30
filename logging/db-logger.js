@@ -15,15 +15,23 @@ DBLogger.prototype.storeMessages = function(logs) {
         'logs': logs,
     };
     // Approximate max length of a TEXT field in MySQL
-    var maxLength = 65000;
+    var maxCodeLength = 65000;
+    var maxMessageLength = 64;
     logs.forEach(function(log) {
-        if (log.code && JSON.stringify(log.code).length > maxLength) {
-            Trace.logErrorMessage(
-                'Attempted to log code with length > ' + maxLength + '. ' +
+        if (log.code && JSON.stringify(log.code).length > maxCodeLength) {
+            Trace.logErrorMessageLater(
+                'Attempted to log code with length > ' + maxCodeLength + '. ' +
                 'Log was truncated.');
-            log.code = log.code.substring(0, maxLength / 2);
+            // divide by 2, since the JSON encoding can add length
+            log.code = log.code.substring(0, maxCodeLength / 2);
         }
-    });
+        if (log.message && log.message.length > maxMessageLength) {
+            this.logErrorMessageLater('Log messages must be < 64 characters: ' +
+                log.message);
+            log.message = log.message.substring(0, maxMessageLength - 3) +
+                '...';
+        }
+    }, this);
     this.sendToServer(JSON.stringify(data), 0);
 };
 
@@ -41,11 +49,8 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
         // there was an error saving these logs, but we should not retry sending
         if (xhr.status === 200 && xhr.readyState === 4 &&
                xhr.responseText.length > 0) {
-            // Send logs before and after to ensure that this message goes by
-            // itself
-            Trace.sendLogs();
-            Trace.logErrorMessage('Failed to log data: ' + xhr.responseText);
-            Trace.sendLogs();
+            myself.logErrorMessageNow('Failed to log data: ' +
+                xhr.responseText);
         }
         // If there was a non-200 status, that means there was another error,
         // like connecting to MySQL, and we should retry sending
@@ -58,4 +63,19 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
     };
     xhr.open('POST', 'logging/mysql.php', true);
     xhr.send(data);
+};
+
+DBLogger.prototype.logErrorMessageNow = function(message) {
+    // Send logs before and after to ensure that this message goes by itself
+    this.sendLogs();
+    this.logErrorMessage(message);
+    this.sendLogs();
+};
+
+DBLogger.prototype.logErrorMessageLater = function(message) {
+    var myself = this;
+    // Delay the message so we can finish processing the current logs
+    window.setTimeout(function() {
+        myself.logErrorMessageNow(message);
+    });
 };

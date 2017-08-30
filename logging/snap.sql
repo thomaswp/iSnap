@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS `trace`;
 CREATE TABLE IF NOT EXISTS `trace` (
   `id` int NOT NULL AUTO_INCREMENT,
   `time` datetime NOT NULL,
-  `message` varchar(40) NOT NULL,
+  `message` varchar(64) NOT NULL,
   `data` text NOT NULL,
   `assignmentID` varchar(40) NOT NULL,
   `userID` varchar(255),

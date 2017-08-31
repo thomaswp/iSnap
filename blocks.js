@@ -2883,7 +2883,12 @@ BlockMorph.prototype.restoreInputs = function (oldInputs) {
 };
 
 BlockMorph.prototype.showHelp = function () {
-    Trace.log('Block.showHelp', this.blockId());
+    Trace.log('Block.showHelp',
+        // Since some buttons duplicate the showHelp function, we can show their
+        // selector in lieu of a full blockID (so they all have a selector)
+        (this.blockId ? this.blockId() : null) || {
+            selector: this.selector,
+        });
     var myself = this,
         ide = this.parentThatIsA(IDE_Morph),
         blockEditor,

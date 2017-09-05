@@ -228,6 +228,7 @@ HighlightDialogBoxMorph.prototype.makeOrigin = function() {
 };
 
 HighlightDialogBoxMorph.prototype.recenter = function(origin) {
+    if (!this.isVisible) return;
     origin = origin || this.makeOrigin();
     // Wait to set the origin until after popping up
     if (origin) {

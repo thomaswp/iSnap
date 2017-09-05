@@ -412,6 +412,13 @@ HintDisplay.prototype.addHintButton = function(text, onClick) {
     hintButton.drawNew();
     hintButton.fixLayout();
 
+    extendObject(window.ide, 'toggleAppMode', function(base, appMode) {
+        base.call(this, appMode);
+        if (hintButton.parent == null) return;
+        if (this.isAppMode) hintButton.hide();
+        else hintButton.show();
+    });
+
     window.ide.controlBar.add(hintButton);
     window.ide.controlBar.hintButton = hintButton;
     window.ide.fixLayout();

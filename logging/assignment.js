@@ -5,16 +5,19 @@ var Assignment = {
 
 };
 
+Assignment.redirectURL = 'logging/assignment.html';
+
 Assignment.initOrRedirect = function() {
     // Get the assignment passed via GET parameter
     window.assignmentID = getSearchParameters()['assignment'];
 
-    var redirectURL = 'logging/assignment.html';
+    var redirectURL = Assignment.redirectURL;
 
     if (window.requireAssignment && (!window.assignments ||
             !window.assignments[assignmentID])) {
         // redirect if no assignment is listed
         window.location.replace(redirectURL);
+        return false;
     }
 
     // Also check for a userID
@@ -28,7 +31,9 @@ Assignment.initOrRedirect = function() {
         }
         // redirect if the user isn't logged in
         window.location.replace(redirectURL);
+        return false;
     }
+    return true;
 };
 
 Assignment.onChangedHandlers = [];

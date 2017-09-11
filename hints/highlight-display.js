@@ -552,7 +552,15 @@ HighlightDisplay.prototype.showInsertReplacement = function(
 
         if (isSlot) {
             var otherBlocks = [];
-            if (candidate) otherBlocks.push(candidate.selector);
+            if (candidate) {
+                var type = candidate.selector;
+                if (type === 'reportGetVar' && candidate.blockSpec) {
+                    // For variables, add their spec (name)
+                    type += ':' + candidate.blockSpec;
+                }
+                otherBlocks.push(type);
+                console.log(type, candidate, otherBlocks);
+            }
             var onClick = this.createBlockHintCallback(true,
                 parent.enclosingBlock(), candidate, data.from, data.to,
                 otherBlocks);

@@ -150,7 +150,10 @@ function(selector, params) {
     }
     this.clearParameter(block);
     for (var i = 0; i < params.length; i++) {
-        if (params[i] === 'script' || params[i] === 'literal') continue;
+        if (!params[i] || params[i].startsWith('script') ||
+                params[i].startsWith('literal')) {
+            continue;
+        }
         var param = this.createBlock(params[i], inputs[i]);
         this.clearParameter(param);
         var input = inputs[i];
@@ -186,11 +189,17 @@ CodeHintDialogBoxMorph.prototype.fakeHatBlock = function () {
 
 CodeHintDialogBoxMorph.prototype.createBlock =
 function(selector, parent, numArgs) {
-    numArgs = numArgs | 0;
+    numArgs = numArgs || 0;
     var param;
+    var valueIndex = selector.indexOf(':');
+    var value = null;
+    if (valueIndex >= 0) {
+        value = selector.substring(valueIndex + 1);
+        selector = selector.substring(0, valueIndex);
+    }
     if (selector === 'var' || selector === 'reportGetVar') {
         // Create variable (getter) blocks
-        param = SpriteMorph.prototype.variableBlock('var');
+        param = SpriteMorph.prototype.variableBlock(value || 'var');
         param.isDraggable = false;
     } else if (selector == 'prototypeHatBlock') {
         // Create custom block header blocks

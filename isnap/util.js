@@ -2,7 +2,7 @@
 // Helper functions
 
 /* exported newGuid createCORSRequest extend extendObject getSearchParameters
- * getCookie onWorldLoaded instanceOfAny
+ * getCookie onWorldLoaded instanceOfAny escapeHtml
 */
 
 // Generates a random GUID to help us keep track of things across sessions
@@ -93,6 +93,15 @@ if (!String.prototype.format) {
         });
     };
 }
+
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, '&amp;')
+         .replace(/</g, '&lt;')
+         .replace(/>/g, '&gt;')
+         .replace(/"/g, '&quot;')
+         .replace(/'/g, '&#039;');
+ }
 
 function extend(clazz, functionName, newFunction) {
     if (!clazz || !clazz.prototype) {

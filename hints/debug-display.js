@@ -132,7 +132,7 @@ DebugDisplay.prototype.createDiff = function(from, to) {
         '=': 'equals',
         '-': 'minus',
     };
-    var matchRegex = /{|}|:|\[|\]|,|\s|\w*/g;
+    var matchRegex = /{|}|:|\[|\]|,|\s|%|\w*/g;
     var code0 = from.match(matchRegex);
     var code1 = to.match(matchRegex);
     var codeDiff = window.diff(code0, code1);

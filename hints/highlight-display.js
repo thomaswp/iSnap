@@ -432,7 +432,11 @@ HighlightDisplay.prototype.ignorePrimaryHint = function(data) {
         // Don't delete/reorder literals
         var ignoreLabels = ['literal'];
         // Don't delete variable declarations or reorder scripts
-        if (data.action === 'delete') ignoreLabels.push('var');
+        if (data.action === 'delete' &&
+                // Unless this is a var block inside a script
+                !this.refHasAncestor(data.node, 'script')) {
+            ignoreLabels.push('var');
+        }
         if (data.action === 'reorder') ignoreLabels.push('script');
 
         if (ignoreLabels.includes(data.node.label)) return true;
@@ -559,7 +563,6 @@ HighlightDisplay.prototype.showInsertReplacement = function(
                     type += ':' + candidate.blockSpec;
                 }
                 otherBlocks.push(type);
-                console.log(type, candidate, otherBlocks);
             }
             var onClick = this.createBlockHintCallback(true,
                 parent.enclosingBlock(), candidate, data.from, data.to,

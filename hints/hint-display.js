@@ -74,6 +74,10 @@ HintDisplay.prototype.editingCustomBlock = function(storedBlocks, index) {
     })[0];
 };
 
+HintDisplay.prototype.refHasAncestor = function(ref, type) {
+    return ref && (ref.label === type || this.refHasAncestor(ref.parent, type));
+};
+
 HintDisplay.prototype.getCode = function(ref) {
     if (ref.parent == null) {
         return window.ide;

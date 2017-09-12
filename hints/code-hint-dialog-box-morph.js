@@ -212,7 +212,7 @@ function(selector, parent, numArgs) {
             type = parent instanceof BooleanSlotMorph ?
                 'predicate' : 'reporter';
         }
-        spec = 'Custom Block';
+        spec = value || 'Custom Block';
         if (numArgs) {
             spec += ':' ;
             for (var i = 0; i < numArgs; i++) spec += ' %s';

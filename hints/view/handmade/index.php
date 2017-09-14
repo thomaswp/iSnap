@@ -48,6 +48,7 @@
 						var contentWindow = document.getElementById('snap').contentWindow;
 						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
+						loadHintTable(id);
 						if (callback) callback();
 					}
 				};
@@ -57,6 +58,25 @@
 				window.index = rows.findIndex(function(a) {
 					return a.dataset.rid == id;
 				});
+			}
+
+			function loadHintTable(id) {
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState==4 && xhr.status==200) {
+						var logTable = document.getElementById('logTable');
+						// Clean the newly added table
+						var next = logTable.nextSibling;
+						while (next) {
+							next.remove();
+							next = logTable.nextSibling;;
+						}
+
+						logTable.insertAdjacentHTML('afterend', xhr.responseText);
+					}
+				};
+				xhr.open("GET", "handmade-hintTable.php?user=" + user + "&logID=" + id, true);
+				xhr.send();
 			}
 
 			function addHint(rowID, projectID, assignment) {
@@ -95,6 +115,10 @@
 			}
 
 			function deleteHint(hintID) {
+				if (document.getElementById("hintTable").rows.length <= 2) {
+					alert("You are not allowed to delete the last row.");
+					return;
+				}
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
@@ -209,8 +233,8 @@ if ($enable_viewer) {
 			echo "<tr>";
 		}
 		echo "
-			<td>
-				<a href='./?user=$user&logID=$id'>$id</a><br />
+			<td id='$id'>
+				<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$id</a>
 			</td>
 			<td>$assignmentID </br>
 				<a href='$contextLink' target='_blank' title='See the full logs for this attempt...'>$displayID</a></td>";
@@ -220,90 +244,6 @@ if ($enable_viewer) {
 		$cnt = $cnt + 1;
 	}
 	echo "</table>";
-
-	$logID = false;
-	if (!empty($_GET['logID'])) {
-		$logID = $_GET['logID'];
-	}
-
-	// Shows specific rows for adding handmade hints.
-	if ($logID) {
-		$query = "SELECT *
-		FROM handmade_hints JOIN trace ON handmade_hints.rowID=trace.id
-		WHERE handmade_hints.userID='$user' AND handmade_hints.rowID=$logID
-		ORDER BY handmade_hints.priority DESC";
-
-		$result = $mysqli->query($query);
-		if (!$result) {
-			die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
-		}
-
-		function hintCell($row) {
-			$updated = $row["updatedTime"];
-			$hintID=$row['hid'];
-			$id=$row['rowID'];
-			if (!$updated) $updated = "<i>No hint saved</i>";
-			$code = $row["hintCode"];
-			$assignment = $row["assignmentID"];
-			$projectID = $row["projectID"];
-			$loadClass = $code ? '' : 'disabled';
-			$load = "<a id='l$hintID' class='$loadClass' href='javascript:void(0)' onclick='loadHint($hintID, \"$assignment\")'>Load</a>";
-			$save = "<a href='javascript:void(0)' onclick='saveHint($hintID, \"$projectID\")'>Save</a>";
-			return "<span id='d$hintID'>$updated</span><br/>$load<br/><br />$save";
-		}
-
-		function editsLink($row, $id, $projectID, $assignmentID) {
-			$edits = $row["hintEdits"];
-			if ($edits == null) return "<i>Edits</i>";
-			$onclick = "showEdits($edits, \"$id\", \"$projectID\", \"$assignmentID\")";
-			$onclick = htmlspecialchars($onclick);
-			return "<a href='javascript:void(0)' onclick=\"$onclick\">Edits</a>";
-		}
-
-		$row = mysqli_fetch_array($result);
-		$assignmentID = $row['assignmentID'];
-		$projectID = $row['projectID'];
-		$onclick = "loadSnap(\"$logID\", \"$projectID\", \"$assignmentID\")";
-		$onclick = htmlspecialchars($onclick);
-		echo "<table cellspacing='0'>";
-		echo "<thead><th>Log ID<br /></th><th>Project ID</th></thead>";
-		echo "<tr>
-				<td id='$id'><a class='rlink' data-rid='$logID' href='#' onclick=\"$onclick\">$logID</a></td>
-				<td>$assignmentID </br>
-					<a href='$contextLink' target='_blank' title='See the full logs for this attempt...'>$displayID</a></td>
-			</tr>";
-		echo "</table>";
-
-		echo "<table id='hintTable' cellspacing='0'>";
-		echo "<thead><th>View</th><th>Hint ID</th><th>Hint</th><th>Priority</th></thead>";
-
-		// Move result pointer back
-		mysqli_data_seek($result, 0);
-		while($row = mysqli_fetch_array($result)) {
-			$id=$row['rowID'];
-			$hintID = $row['hid'];
-			$assignmentID = $row['assignmentID'];
-			$type = $row['message'];
-			$type = str_replace('SnapDisplay.show', '', $type);
-			$time = $row['time'];
-			$data = json_encode($row['data']);
-			$priority = $row['priority'];
-			$hint = hintCell($row);
-			$edit = editsLink($row, $id, $projectID, $assignmentID);
-
-			echo "<tr id='r$hintID'>
-				<td>$edit<br /></td>
-				<td>$hintID<br /><button onclick='deleteHint($hintID)'>Delete</button></td>
-				<td>$hint</td>
-				<td><input id='p$hintID' type='text' value='$priority'></td>
-			</tr>";
-		}
-		echo "</table>";
-
-		// Button for adding more hints.
-		echo "<button onclick='addHint($logID, \"$projectID\", \"$assignmentID\")'>Add Hint</button>";
-	}
-
 } else {
 	echo "You do not have permission to view this page";
 }
@@ -311,7 +251,7 @@ if ($enable_viewer) {
 				</div>
 			</div>
 			<div id="cleared"></div>
-			<script type="text/javascript">
+			<script type = "text/javascript">
 				var rows = [].slice.call(
 					document.getElementsByClassName("rlink"));
 				var index = 0;

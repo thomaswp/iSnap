@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         WHERE hid=$hintID";
     $result = $mysqli->query($query);
     if (!$result) {
-        die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
+        die ("Failed to update data: (" . $mysqli->errno . ") " . $mysqli->error);
     }
     echo $date;
     return;

@@ -157,6 +157,16 @@
 					}, 300);
 				});
 			}
+
+			function toggleLogTable() {
+				var logTable = document.getElementById('logTable');
+				if (logTable.style.display === "block") {
+					logTable.style.display = "none";
+				} else {
+					logTable.style.display = "block";
+				}
+			}
+
 		</script>
 	</head>
 
@@ -183,7 +193,8 @@ if ($enable_viewer) {
 	WHERE handmade_hints.userID='$user' ORDER BY rowID";
 
 	$logIDs = $mysqli->query($query);
-	echo "<table cellspacing='0'>";
+	echo "<button onclick='toggleLogTable()'>Toggle Log Table</button>";
+	echo "<table id='logTable' cellspacing='0' style='display:block'>";
 	echo "<thead><th>Log ID</th><th>Project ID</th><th>Log ID</th><th>Project ID</th><th>Log ID</th><th>Project ID</th></thead>";
 	$cnt = 0;
 	while($row = mysqli_fetch_array($logIDs)) {

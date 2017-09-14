@@ -35,30 +35,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo $row[0];
         return;
     }
-
 } else if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $priority = $mysqli->escape_string($_GET['priority']);
     $code = $mysqli->escape_string(file_get_contents('php://input'));
     $date = date('Y-m-d H:i:s');
     $query = "UPDATE handmade_hints SET $hintCode='$code', $updatedTime='$date', priority='$priority'
         WHERE hid=$hintID";
+    $result = $mysqli->query($query);
+    if (!$result) {
+        die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
+    }
+    echo $date;
+    return;
 } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $query = "SELECT $hintCode FROM handmade_hints
             WHERE hid=$hintID";
-}
 
-$result = $mysqli->query($query);
-if (!$result) {
-    die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
-}
+    $result = $mysqli->query($query);
+    if (!$result) {
+        die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
+    }
+    while($row = mysqli_fetch_array($result)) {
+        echo $row[$hintCode];
+        return;
+    }
 
-if ($date) {
-    echo $date;
+} else if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    $query = "DELETE FROM handmade_hints
+            WHERE hid=$hintID";
+    $result = $mysqli->query($query);
+    if (!$result) {
+        die ("Failed to delete data: (" . $mysqli->errno . ") " . $mysqli->error);
+    }
     return;
 }
 
-while($row = mysqli_fetch_array($result)) {
-    echo $row[$hintCode];
-    break;
-}
+
+
 ?>

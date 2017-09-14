@@ -68,8 +68,6 @@
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
-						console.log('add hint successfully!');
-						console.log(xhr.responseText);
 						addNewHintRow(xhr.responseText, projectID, assignment);
 					}
 				};
@@ -80,19 +78,33 @@
 			function addNewHintRow(hintID, projectID, assignment) {
 				var hintTable = document.getElementById("hintTable");
 				var row = hintTable.insertRow();
+				row.id = "r"+hintID;
 				var viewCell = row.insertCell(0);
 				viewCell.innerHTML = "<i>Edits</i>";
 
 				var hintIDCell = row.insertCell(1);
-				hintIDCell.innerHTML = hintID;
+				hintIDCell.innerHTML = hintID + "<br /><button onclick='deleteHint(" + hintID + ")'>Delete</button>";
 
 				var hintCell = row.insertCell(2);
-				var load = "<a id='l" + hintId + "' class='disabled' href='javascript:void(0)' onclick='loadHint(" + hintID + ",\"" + assignment + "\")'>Load</a>";
+				var load = "<a id='l" + hintID + "' class='disabled' href='javascript:void(0)' onclick='loadHint(" + hintID + ",\"" + assignment + "\")'>Load</a>";
 				var save = "<a href='javascript:void(0)' onclick='saveHint(" + hintID + ",\"" + projectID + "\")'>Save</a>";
 				hintCell.innerHTML = "<span id='d" + hintID + "'><i>No hint saved</i></span><br/>" + load + "<br/><br />" + save;
 
 				var priorityCell = row.insertCell(3);
 				priorityCell.innerHTML = "<input id='p" + hintID +"' type='text' value=''>";
+			}
+
+			function deleteHint(hintID) {
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState==4 && xhr.status==200) {
+						var hintRow = document.getElementById("r" + hintID);
+						hintRow.parentNode.removeChild(hintRow);
+					}
+				};
+				var priority = document.getElementById('p' + hintID).value;
+				xhr.open("DELETE", "handmade-hint.php?hintID=" + hintID, true);
+				xhr.send();
 			}
 
 			function saveHint(hintID, projectID) {
@@ -268,9 +280,9 @@ if ($enable_viewer) {
 			$hint = hintCell($row);
 			$edit = editsLink($row, $id, $projectID, $assignmentID);
 
-			echo "<tr>
+			echo "<tr id='r$hintID'>
 				<td>$edit<br /></td>
-				<td>$hintID</td>
+				<td>$hintID<br /><button onclick='deleteHint($hintID)'>Delete</button></td>
 				<td>$hint</td>
 				<td><input id='p$hintID' type='text' value='$priority'></td>
 			</tr>";

@@ -59,6 +59,42 @@
 				});
 			}
 
+			function addHint(rowID, projectID, assignment) {
+				var contentWindow = document.getElementById('snap').contentWindow;
+				if (contentWindow.ide.stage.guid !== projectID) {
+					alert("Project ID does not match original code. Make sure you pressed the right save button.");
+					return;
+				}
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState==4 && xhr.status==200) {
+						console.log('add hint successfully!');
+						console.log(xhr.responseText);
+						addNewHintRow(xhr.responseText, projectID, assignment);
+					}
+				};
+				xhr.open("POST", "handmade-hint.php?rowID=" + rowID + "&user=" + user, true);
+				xhr.send();
+			}
+
+			function addNewHintRow(hintID, projectID, assignment) {
+				var hintTable = document.getElementById("hintTable");
+				var row = hintTable.insertRow();
+				var viewCell = row.insertCell(0);
+				viewCell.innerHTML = "<i>Edits</i>";
+
+				var hintIDCell = row.insertCell(1);
+				hintIDCell.innerHTML = hintID;
+
+				var hintCell = row.insertCell(2);
+				var load = "<a id='l" + hintId + "' class='disabled' href='javascript:void(0)' onclick='loadHint(" + hintID + ",\"" + assignment + "\")'>Load</a>";
+				var save = "<a href='javascript:void(0)' onclick='saveHint(" + hintID + ",\"" + projectID + "\")'>Save</a>";
+				hintCell.innerHTML = "<span id='d" + hintID + "'><i>No hint saved</i></span><br/>" + load + "<br/><br />" + save;
+
+				var priorityCell = row.insertCell(3);
+				priorityCell.innerHTML = "<input id='p" + hintID +"' type='text' value=''>";
+			}
+
 			function saveHint(hintID, projectID) {
 				var contentWindow = document.getElementById('snap').contentWindow;
 				if (contentWindow.ide.stage.guid !== projectID) {
@@ -77,7 +113,7 @@
 					}
 				};
 				var priority = document.getElementById('p' + hintID).value;
-				xhr.open("POST", "handmade-hint.php?hintID=" + hintID + "&priority=" + priority, true);
+				xhr.open("PUT", "handmade-hint.php?hintID=" + hintID + "&priority=" + priority, true);
 				xhr.send(code);
 			}
 
@@ -172,7 +208,7 @@ if ($enable_viewer) {
 		$query = "SELECT *
 		FROM handmade_hints JOIN trace ON handmade_hints.rowID=trace.id
 		WHERE handmade_hints.userID='$user' AND handmade_hints.rowID=$logID
-		ORDER BY handmade_hints.priority";
+		ORDER BY handmade_hints.priority DESC";
 
 		$result = $mysqli->query($query);
 		if (!$result) {
@@ -215,7 +251,7 @@ if ($enable_viewer) {
 			</tr>";
 		echo "</table>";
 
-		echo "<table cellspacing='0'>";
+		echo "<table id='hintTable' cellspacing='0'>";
 		echo "<thead><th>View</th><th>Hint ID</th><th>Hint</th><th>Priority</th></thead>";
 
 		// Move result pointer back
@@ -241,8 +277,8 @@ if ($enable_viewer) {
 		}
 		echo "</table>";
 
-		// Widgets for adding more hints.
-		echo "<button>Add Hint</button>";
+		// Button for adding more hints.
+		echo "<button onclick='addHint($logID, \"$projectID\", \"$assignmentID\")'>Add Hint</button>";
 	}
 
 } else {

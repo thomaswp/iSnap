@@ -48,7 +48,7 @@ $row = mysqli_fetch_array($result);
 $assignmentID = $row['assignmentID'];
 $projectID = $row['projectID'];
 $displayID = substr($projectID, 0, strpos($projectID, '-'));
-$onclick = "loadSnap(\"$logID\", \"$projectID\", \"$assignmentID\")";
+$onclick = "loadSnap(\"$logID\", \"$projectID\", \"$assignmentID\"); loadHintTable($logID);";
 $onclick = htmlspecialchars($onclick);
 $contextLink = "../../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$logID";
 

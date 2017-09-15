@@ -59,32 +59,37 @@
 				});
 			}
 
+			function cleanStatusText(elementID) {
+				var statusText = document.getElementById(elementID);
+				if (statusText) {
+					statusText.remove();
+				}
+			}
+
+			function showRowLoadedText(id) {
+				cleanStatusText('log-loaded-2');
+				// Shows which row is loaded
+				var loadedLogIDCell = document.getElementById('log-'+id);
+				loadedLogIDCell.children[0].innerHTML += "<b id='log-loaded-2' style='color:green'>Loaded</b>";
+				cleanStatusText('log-loaded');
+				// Shows which row is loaded
+				var loadedLogIDCell = document.getElementById(id);
+				loadedLogIDCell.children[0].innerHTML += "<b id='log-loaded' style='color:green'>Loaded</b>";
+			}
+
 			function loadHintTable(id) {
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
 						var logTable = document.getElementById('logTable');
-						// Clean the newly added table
+						// Cleans the newly added table
 						var next = logTable.nextSibling;
 						while (next) {
 							next.remove();
 							next = logTable.nextSibling;;
 						}
 						logTable.insertAdjacentHTML('afterend', xhr.responseText);
-						var statusText = document.getElementById('log-loaded-2');
-						if (statusText) {
-							statusText.remove();
-						}
-						// Show which row is loaded
-						var loadedLogIDCell = document.getElementById('log-'+id);
-						loadedLogIDCell.children[0].innerHTML += "<b id='log-loaded-2' style='color:green'>Loaded</b>";
-						var statusText = document.getElementById('log-loaded');
-						if (statusText) {
-							statusText.remove();
-						}
-						// Show which row is loaded
-						var loadedLogIDCell = document.getElementById(id);
-						loadedLogIDCell.children[0].innerHTML += "<b id='log-loaded' style='color:green'>Loaded</b>";
+						showRowLoadedText(id);
 					}
 				};
 				xhr.open("GET", "handmade-hintTable.php?user=" + user + "&logID=" + id, true);
@@ -186,10 +191,7 @@
 			}
 
 			function showHintEditingText(hintID) {
-				var statusText = document.getElementById('hint-editing');
-				if (statusText) {
-					statusText.remove();
-				}
+				cleanStatusText('hint-editing');
 				var loadedHintRow = document.getElementById('r'+hintID);
 				loadedHintRow.children[0].innerHTML += "<b id='hint-editing' style='color:green'></br>Editing...</b>";
 			}

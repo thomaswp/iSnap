@@ -15,7 +15,7 @@ $user = $_GET['user'];
 $query = "SELECT *
 FROM handmade_hints JOIN trace ON handmade_hints.rowID=trace.id
 WHERE handmade_hints.userID='$user' AND handmade_hints.rowID=$logID
-ORDER BY handmade_hints.priority DESC";
+ORDER BY handmade_hints.priority";
 
 $result = $mysqli->query($query);
 if (!$result) {
@@ -55,7 +55,7 @@ $contextLink = "../../../logging/view/display.php?id=$projectID&assignment=$assi
 echo "<table cellspacing='0'>";
 echo "<thead><th>Log ID<br /></th><th>Project ID</th></thead>";
 echo "<tr>
-        <td id='$logID'><a class='rlink' data-rid='$logID' href='#' onclick=\"$onclick\">$logID</a></td>
+        <td id='log-$logID'><a class='rlink' data-rid='$logID' href='#' onclick=\"$onclick\">$logID</br></a> </td>
         <td>$assignmentID </br>
             <a href='$contextLink' target='_blank' title='See the full logs for this attempt...'>$displayID</a></td>
     </tr>";
@@ -82,7 +82,25 @@ while($row = mysqli_fetch_array($result)) {
         <td>$edit<br /></td>
         <td>$hintID<br /><button onclick='deleteHint($hintID)'>Delete</button></td>
         <td>$hint</td>
-        <td><input id='p$hintID' type='text' value='$priority'></td>
+        <td>
+            <select id='p$hintID'>";
+    if ($priority == 1) {
+        echo "<option value='1' selected>1 - Higest</option>";
+    } else {
+        echo "<option value='1'>1 - Higest</option>";
+    }
+    if ($priority == 2) {
+        echo "<option value='2' selected>2 - High</option>";
+    } else {
+        echo "<option value='2'>2 - High</option>";
+    }
+    if ($priority == 3) {
+        echo "<option value='3' selected>3 - Normal</option>";
+    } else {
+        echo "<option value='3'>3 - Normal</option>";
+    }
+    echo "</select>
+        </td>
     </tr>";
 }
 echo "</table>";

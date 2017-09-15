@@ -48,7 +48,6 @@
 						var contentWindow = document.getElementById('snap').contentWindow;
 						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
-						loadHintTable(id);
 						if (callback) callback();
 					}
 				};
@@ -71,8 +70,21 @@
 							next.remove();
 							next = logTable.nextSibling;;
 						}
-
 						logTable.insertAdjacentHTML('afterend', xhr.responseText);
+						var statusText = document.getElementById('log-loaded-2');
+						if (statusText) {
+							statusText.remove();
+						}
+						// Show which row is loaded
+						var loadedLogIDCell = document.getElementById('log-'+id);
+						loadedLogIDCell.children[0].innerHTML += "<b id='log-loaded-2' style='color:green'>Loaded</b>";
+						var statusText = document.getElementById('log-loaded');
+						if (statusText) {
+							statusText.remove();
+						}
+						// Show which row is loaded
+						var loadedLogIDCell = document.getElementById(id);
+						loadedLogIDCell.children[0].innerHTML += "<b id='log-loaded' style='color:green'>Loaded</b>";
 					}
 				};
 				xhr.open("GET", "handmade-hintTable.php?user=" + user + "&logID=" + id, true);
@@ -88,6 +100,7 @@
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
+						loadSnap(rowID, projectID, assignment);
 						addNewHintRow(xhr.responseText, projectID, assignment);
 					}
 				};
@@ -111,7 +124,12 @@
 				hintCell.innerHTML = "<span id='d" + hintID + "'><i>No hint saved</i></span><br/>" + load + "<br/><br />" + save;
 
 				var priorityCell = row.insertCell(3);
-				priorityCell.innerHTML = "<input id='p" + hintID +"' type='text' value=''>";
+				priorityCell.innerHTML = "<select id='p" + hintID +"'>" +
+				"<option value='1'>1 - Higest</option>" +
+				"<option value='2'>2 - High</option>" +
+				"<option value='3'>3 - Normal</option></select>";
+
+				showHintEditingText(hintID);
 			}
 
 			function deleteHint(hintID) {
@@ -138,7 +156,21 @@
 					return;
 				}
 				var code = contentWindow.Trace.lastCode;
-				if (!code || code.length == 0) alert("No code to save");
+				if (!code || code.length == 0) alert("No code to save"); //NEED TO FIX: This does not work.
+
+				// If overwrite another row instead of current row, alert the user
+				var statusText = document.getElementById('hint-editing');
+				if (statusText && statusText.parentNode.parentNode.id !== ('r'+hintID)) {
+					if (!confirm("You are not editing your current hint!!!Are you sure you want to overwrite another hint?")) return;
+				}
+
+				// If already has hints, alerts the user
+				var load = document.getElementById('l' + hintID);
+				if (!load.classList.contains('disabled')) {
+					if (!confirm("This hint already has record, are you sure you want to overwrite it?")) return;
+				}
+
+				showHintEditingText(hintID);
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
@@ -153,6 +185,15 @@
 				xhr.send(code);
 			}
 
+			function showHintEditingText(hintID) {
+				var statusText = document.getElementById('hint-editing');
+				if (statusText) {
+					statusText.remove();
+				}
+				var loadedHintRow = document.getElementById('r'+hintID);
+				loadedHintRow.children[0].innerHTML += "<b id='hint-editing' style='color:green'></br>Editing...</b>";
+			}
+
 			function loadHint(hintID, assignment) {
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
@@ -160,6 +201,7 @@
 						var contentWindow = document.getElementById('snap').contentWindow;
 						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
+						showHintEditingText(hintID);
 					}
 				};
 				xhr.open("GET", "handmade-hint.php?hintID=" + hintID, true);
@@ -226,7 +268,7 @@ if ($enable_viewer) {
 		$assignmentID = $row["assignmentID"];
 		$projectID = $row["projectID"];
 		$displayID = substr($projectID, 0, strpos($projectID, '-'));
-		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\")";
+		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\"); loadHintTable($id);";
 		$onclick = htmlspecialchars($onclick);
 		$contextLink = "../../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$id";
 		if ($cnt%3 == 0) {
@@ -234,7 +276,7 @@ if ($enable_viewer) {
 		}
 		echo "
 			<td id='$id'>
-				<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$id</a>
+				<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$id</br></a>
 			</td>
 			<td>$assignmentID </br>
 				<a href='$contextLink' target='_blank' title='See the full logs for this attempt...'>$displayID</a></td>";

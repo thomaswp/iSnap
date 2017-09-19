@@ -22,8 +22,9 @@ $date = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $mysqli->escape_string($_GET['user']);
     $rowID = $mysqli->escape_string($_GET['rowID']);
-    $query = "INSERT INTO handmade_hints (userID, rowID)
-        VALUES ('$user', $rowID)";
+    $trueAssignmentID = $mysqli->escape_string($_GET['assignment']);
+    $query = "INSERT INTO handmade_hints (userID, rowID, trueAssignmentID)
+        VALUES ('$user', $rowID, '$trueAssignmentID')";
     $result = $mysqli->query($query);
     if (!$result) {
         die ("Failed to insert data: (" . $mysqli->errno . ") " . $mysqli->error);

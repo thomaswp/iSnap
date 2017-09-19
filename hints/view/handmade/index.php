@@ -96,7 +96,7 @@
 				xhr.send();
 			}
 
-			function addHint(rowID, projectID, assignment) {
+			function addHint(rowID, projectID, assignment, trueAssignmentID) {
 				var contentWindow = document.getElementById('snap').contentWindow;
 				if (contentWindow.ide.stage.guid !== projectID) {
 					alert("Project ID does not match original code. Make sure you pressed the right save button.");
@@ -109,7 +109,7 @@
 						addNewHintRow(xhr.responseText, projectID, assignment);
 					}
 				};
-				xhr.open("POST", "handmade-hint.php?rowID=" + rowID + "&user=" + user, true);
+				xhr.open("POST", "handmade-hint.php?rowID=" + rowID + "&user=" + user + "&assignment=" + trueAssignmentID, true);
 				xhr.send();
 			}
 
@@ -256,9 +256,9 @@ if ($enable_viewer) {
 	$user = $mysqli->escape_string($_GET['user']);
 
 	// Shows all the available logs which request hint.
-	$query = "SELECT DISTINCT rowID, assignmentID, projectID
+	$query = "SELECT rowID, assignmentID, trueAssignmentID, projectID
 	FROM handmade_hints JOIN trace ON handmade_hints.rowID=trace.id
-	WHERE handmade_hints.userID='$user' ORDER BY rowID";
+	WHERE handmade_hints.userID='$user' GROUP BY rowID ORDER BY rowID";
 
 	$logIDs = $mysqli->query($query);
 	echo "<button onclick='toggleLogTable()'>Toggle Log Table</button>";
@@ -268,6 +268,7 @@ if ($enable_viewer) {
 	while($row = mysqli_fetch_array($logIDs)) {
 		$id=$row['rowID'];
 		$assignmentID = $row["assignmentID"];
+		$trueAssignmentID = $row["trueAssignmentID"];
 		$projectID = $row["projectID"];
 		$displayID = substr($projectID, 0, strpos($projectID, '-'));
 		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\"); loadHintTable($id);";
@@ -280,7 +281,7 @@ if ($enable_viewer) {
 			<td id='$id'>
 				<a class='rlink' data-rid='$id' href='#' onclick=\"$onclick\">$id</br></a>
 			</td>
-			<td>$assignmentID </br>
+			<td>$trueAssignmentID </br>
 				<a href='$contextLink' target='_blank' title='See the full logs for this attempt...'>$displayID</a></td>";
 		if (($cnt+1)%3 == 0) {
 			echo "</tr>";

@@ -46,6 +46,7 @@ function editsLink($row, $id, $projectID, $assignmentID) {
 
 $row = mysqli_fetch_array($result);
 $assignmentID = $row['assignmentID'];
+$trueAssignmentID = $row['trueAssignmentID'];
 $projectID = $row['projectID'];
 $displayID = substr($projectID, 0, strpos($projectID, '-'));
 $onclick = "loadSnap(\"$logID\", \"$projectID\", \"$assignmentID\"); loadHintTable($logID);";
@@ -56,7 +57,7 @@ echo "<table cellspacing='0'>";
 echo "<thead><th>Log ID<br /></th><th>Project ID</th></thead>";
 echo "<tr>
         <td id='log-$logID'><a class='rlink' data-rid='$logID' href='#' onclick=\"$onclick\">$logID</br></a> </td>
-        <td>$assignmentID </br>
+        <td>$trueAssignmentID </br>
             <a href='$contextLink' target='_blank' title='See the full logs for this attempt...'>$displayID</a></td>
     </tr>";
 echo "</table>";
@@ -70,6 +71,7 @@ while($row = mysqli_fetch_array($result)) {
     $id = $row['rowID'];
     $hintID = $row['hid'];
     $assignmentID = $row['assignmentID'];
+    $trueAssignmentID = $row['trueAssignmentID'];
     $type = $row['message'];
     $type = str_replace('SnapDisplay.show', '', $type);
     $time = $row['time'];
@@ -106,5 +108,5 @@ while($row = mysqli_fetch_array($result)) {
 echo "</table>";
 
 // Button for adding more hints.
-echo "<button onclick='addHint($logID, \"$projectID\", \"$assignmentID\")'>Add Hint</button>";
+echo "<button onclick='addHint($logID, \"$projectID\", \"$assignmentID\", \"$trueAssignmentID\")'>Add Hint</button>";
 ?>

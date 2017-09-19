@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS `handmade_hints` (
   `hid` int(11) NOT NULL,
   `userID` varchar(24) NOT NULL,
   `rowID` int(11) NOT NULL,
+  `trueAssignmentID` varchar(40) NOT NULL,
   `priority` int(11) DEFAULT NULL,
   `hintCode` text DEFAULT NULL,
   `hintEdits` text DEFAULT NULL,

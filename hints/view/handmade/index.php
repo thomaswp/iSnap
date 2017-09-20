@@ -19,12 +19,12 @@
 			}
 			#content {
 				float: right;
-				width: 550px;
+				width: 605px;
 				display: block;
 				height: 100%;
 			}
 			#sidebar {
-				width: calc(100% - 560px);
+				width: calc(100% - 610px);
 				height: 100%;
 				float: left;
 			}

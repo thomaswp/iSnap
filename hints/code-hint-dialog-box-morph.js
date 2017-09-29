@@ -150,14 +150,26 @@ function(selector, params) {
     }
     this.clearParameter(block);
     for (var i = 0; i < params.length; i++) {
-        if (!params[i] || params[i].startsWith('script') ||
-                params[i].startsWith('literal')) {
-            continue;
-        }
-        var param = this.createBlock(params[i], inputs[i]);
-        this.clearParameter(param);
+        var paramSelector = params[i];
+        if (!paramSelector || paramSelector.startsWith('script')) continue;
+        var value = this.parseValue(params[i]);
+        paramSelector = this.parseType(paramSelector);
         var input = inputs[i];
-        input.parent.silentReplaceInput(input, param);
+        if (paramSelector === 'literal') {
+            if (input.setContents && value) {
+                input.setContents(value);
+            }
+        } else if (paramSelector === 'var' && input.choices != null && value) {
+            // If this is a drop-down menu input slot, and the replacement is
+            // a variable, we create and select a menu item instead
+            input.choices = [value];
+            input.setContents(value);
+        } else {
+            // Otherwise just insert the child
+            var param = this.createBlock(params[i], inputs[i]);
+            this.clearParameter(param);
+            input.parent.silentReplaceInput(input, param);
+        }
     }
     return block;
 };
@@ -187,16 +199,28 @@ CodeHintDialogBoxMorph.prototype.fakeHatBlock = function () {
     return hat;
 };
 
+CodeHintDialogBoxMorph.prototype.parseValue = function(selector) {
+    var colonIndex = selector.indexOf(':');
+    if (colonIndex >= 0) {
+        return selector.substring(colonIndex + 1);
+    }
+    return null;
+};
+
+CodeHintDialogBoxMorph.prototype.parseType = function(selector) {
+    var colonIndex = selector.indexOf(':');
+    if (colonIndex >= 0) {
+        return selector.substring(0, colonIndex);
+    }
+    return selector;
+};
+
 CodeHintDialogBoxMorph.prototype.createBlock =
 function(selector, parent, numArgs) {
     numArgs = numArgs || 0;
     var param;
-    var valueIndex = selector.indexOf(':');
-    var value = null;
-    if (valueIndex >= 0) {
-        value = selector.substring(valueIndex + 1);
-        selector = selector.substring(0, valueIndex);
-    }
+    var value = this.parseValue(selector);
+    selector = this.parseType(selector);
     if (selector === 'var' || selector === 'reportGetVar') {
         // Create variable (getter) blocks
         param = SpriteMorph.prototype.variableBlock(value || 'var');

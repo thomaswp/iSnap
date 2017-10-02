@@ -205,7 +205,6 @@ if ($enable_viewer) {
 				});
 				var hash = parseInt(window.location.hash.replace("#", ""));
 				if (!isNaN(hash)) {
-					index = rowIDs.indexOf(hash);
 					index = binarySearch(rowIDs, hash);
 					if (index >= rowIDs.length) {
 						index = rowIDs.length - 1;

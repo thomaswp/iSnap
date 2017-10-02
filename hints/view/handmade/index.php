@@ -273,7 +273,7 @@ if ($enable_viewer) {
 		$displayID = substr($projectID, 0, strpos($projectID, '-'));
 		$onclick = "loadSnap(\"$id\", \"$projectID\", \"$assignmentID\"); loadHintTable($id);";
 		$onclick = htmlspecialchars($onclick);
-		$contextLink = "../../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$id";
+		$contextLink = "../../../logging/view/display.php?id=$projectID&end=$id&assignment=$assignmentID#$id";
 		if ($cnt%3 == 0) {
 			echo "<tr>";
 		}

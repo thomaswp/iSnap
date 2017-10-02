@@ -10,7 +10,6 @@ if ($enable_viewer) {
 
 	$id = $mysqli->real_escape_string($_GET['id']);
 	$project = $mysqli->real_escape_string($_GET['project']);
-
 	$query = "SELECT code FROM $table WHERE id <= $id AND projectID = '$project' AND code <> '' ORDER BY id DESC LIMIT 1;";
 	$result = $mysqli->query($query);
 	if (!$result) {

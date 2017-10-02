@@ -51,7 +51,7 @@ $projectID = $row['projectID'];
 $displayID = substr($projectID, 0, strpos($projectID, '-'));
 $onclick = "loadSnap(\"$logID\", \"$projectID\", \"$assignmentID\"); loadHintTable($logID);";
 $onclick = htmlspecialchars($onclick);
-$contextLink = "../../../logging/view/display.php?id=$projectID&assignment=$assignmentID#$logID";
+$contextLink = "../../../logging/view/display.php?id=$projectID&end=$logID&assignment=$assignmentID#$logID";
 
 echo "<table cellspacing='0'>";
 echo "<thead><th>Log ID<br /></th><th>Project ID</th></thead>";

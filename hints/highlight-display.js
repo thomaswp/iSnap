@@ -429,20 +429,15 @@ HighlightDisplay.prototype.ignorePrimaryHint = function(data) {
         // Only delete/reorder-highlight things that have a script ancestor
         if (!this.hasScriptAncestor(data.node)) return true;
 
-        // Don't delete/reorder literals
-        var ignoreLabels = ['literal'];
-        // Don't delete variable declarations or reorder scripts
-        if (data.action === 'delete' &&
-                // Unless this is a var block inside a script
-                !this.refHasAncestor(data.node, 'script')) {
-            ignoreLabels.push('var');
-        }
+        // Don't delete/reorder literals or variable declarations
+        var ignoreLabels = ['literal', 'varDec'];
+        // Don't reorder scripts
         if (data.action === 'reorder') ignoreLabels.push('script');
 
         if (ignoreLabels.includes(data.node.label)) return true;
     } else if (data.action == 'insert') {
         // Don't insert scripts or lists
-        if (data.type === 'script' || data.type === 'list') return true;
+        if (['list', 'script'].includes(data.node.label)) return true;
         // Don't insert new items into a list or custom block
         if ((data.parent.label === 'list' ||
                 data.parent.label === 'evaluateCustomBlock') &&

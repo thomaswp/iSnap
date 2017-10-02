@@ -112,7 +112,7 @@ HintDisplay.prototype.getCode = function(ref) {
         else if (label == 'customBlock')
             return this.editingCustomBlock(parent.stage.globalBlocks,
                 index - 1);
-        else if (label == 'var')
+        else if (label == 'varDec')
             return parent.globalVariables.vars;
         break;
     case 'stage':
@@ -127,7 +127,7 @@ HintDisplay.prototype.getCode = function(ref) {
     case 'sprite':
         nVars = Object.keys(parent.variables.vars).length;
         nScripts = parentScripts.length;
-        if (label == 'var')
+        if (label == 'varDec')
             return parent.variables.vars;
         else if (label == 'script')
             return parentScripts[index - nVars];

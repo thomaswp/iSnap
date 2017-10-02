@@ -159,7 +159,8 @@ function(selector, params) {
             if (input.setContents && value) {
                 input.setContents(value);
             }
-        } else if (paramSelector === 'var' && input.choices != null && value) {
+        } else if (paramSelector === 'varMenu' &&
+                input.choices != null && value) {
             // If this is a drop-down menu input slot, and the replacement is
             // a variable, we create and select a menu item instead
             input.choices = [value];

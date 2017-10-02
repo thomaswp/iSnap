@@ -240,7 +240,7 @@ function(hint, scripts, map, postfix, color) {
 
 SnapDisplay.prototype.showSnapshotHint = function(hint) {
     this.showStructureHint(hint, window.ide.currentSprite.scripts, {
-        'var': 'variable',
+        'varDec': 'variable',
         'customBlock': 'custom block'
     }, ' (for all sprites)');
 };
@@ -253,7 +253,7 @@ SnapDisplay.prototype.showStageHint = function(hint) {
 
 SnapDisplay.prototype.showSpriteHint = function(hint) {
     this.showStructureHint(hint, hint.root.scripts, {
-        'var': 'variable',
+        'varDec': 'variable',
         // 'script': 'script',
         'customBlock': 'custom block'
     }, ' (in this sprite)');
@@ -267,7 +267,7 @@ SnapDisplay.prototype.showCustomBlockHint = function(hint) {
         return;
     }
     this.showStructureHint(hint, realRoot, {
-        'var': 'input'
+        'varDec': 'input'
     }, ' in this block', this.hintColorCustomBlock);
 };
 

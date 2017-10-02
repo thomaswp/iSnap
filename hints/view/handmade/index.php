@@ -256,9 +256,9 @@ if ($enable_viewer) {
 	$user = $mysqli->escape_string($_GET['user']);
 
 	// Shows all the available logs which request hint.
-	$query = "SELECT rowID, assignmentID, trueAssignmentID, projectID
+	$query = "SELECT DISTINCT rowID, assignmentID, trueAssignmentID, projectID
 	FROM handmade_hints JOIN trace ON handmade_hints.rowID=trace.id
-	WHERE handmade_hints.userID='$user' GROUP BY rowID ORDER BY rowID";
+	WHERE handmade_hints.userID='$user' ORDER BY rowID";
 
 	$logIDs = $mysqli->query($query);
 	echo "<button onclick='toggleLogTable()'>Toggle Log Table</button>";

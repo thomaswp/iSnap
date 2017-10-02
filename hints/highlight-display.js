@@ -437,7 +437,7 @@ HighlightDisplay.prototype.ignorePrimaryHint = function(data) {
         if (ignoreLabels.includes(data.node.label)) return true;
     } else if (data.action == 'insert') {
         // Don't insert scripts or lists
-        if (['list', 'script'].includes(data.node.label)) return true;
+        if (['list', 'script'].includes(data.type)) return true;
         // Don't insert new items into a list or custom block
         if ((data.parent.label === 'list' ||
                 data.parent.label === 'evaluateCustomBlock') &&

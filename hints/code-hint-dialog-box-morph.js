@@ -160,14 +160,14 @@ function(selector, params) {
                 input.setContents(value);
             }
         } else if (paramSelector === 'varMenu' &&
-                input.choices != null && value) {
+                input.choices != null && value !== null) {
             // If this is a drop-down menu input slot, and the replacement is
             // a variable, we create and select a menu item instead
             input.choices = [value];
             input.setContents(value);
         } else {
             // Otherwise just insert the child
-            var param = this.createBlock(params[i], inputs[i]);
+            var param = this.createBlock(params[i], input);
             this.clearParameter(param);
             input.parent.silentReplaceInput(input, param);
         }
@@ -474,7 +474,7 @@ CodeHintDialogBoxMorph.prototype.clearParameter = function (blck, num) {
         inputs = inputs[0].inputs();
     }
 
-    // if num is left empty,or input other than number, clear all parameters
+    // if num is left empty, or input other than number, clear all parameters
     if (num === null || typeof num === 'undefined' || typeof num === 'string' ||
             typeof num === 'boolean') {
         inputs.forEach(function (input) {

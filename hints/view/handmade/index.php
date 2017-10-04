@@ -96,7 +96,26 @@
 				xhr.send();
 			}
 
+			function hasEmptyHintRow() {
+				//Check whether the user has unsaved changes
+				var hintTable = document.getElementById('hintTable');
+				var tbody = hintTable.children[1];
+				for (var i = 0; i < tbody.children.length; i++) {
+					var loadCell = tbody.children[i].children[2];
+					var loadTextContainer = loadCell.children[0];
+					if (loadTextContainer.children[0] &&
+						loadTextContainer.children[0].innerText === "No hint saved") {
+							return true;
+						}
+				}
+				return false;
+			}
+
 			function addHint(rowID, projectID, assignment, trueAssignmentID) {
+				if (hasEmptyHintRow()) {
+					alert("Please save your current edits to an empty hint row before creating a new one!");
+					return;
+				}
 				var contentWindow = document.getElementById('snap').contentWindow;
 				if (contentWindow.ide.stage.guid !== projectID) {
 					alert("Project ID does not match original code. Make sure you pressed the right save button.");

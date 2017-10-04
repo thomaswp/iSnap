@@ -338,14 +338,14 @@ if ($enable_viewer) {
 					var cw = snap.contentWindow;
 					cw.ide.toggleStageSize();
 					cw.hintProvider.forcedHints = [];
-					if (!cw.hintProvider.displays.some(function(display) {
-						return display instanceof cw.DebugDisplay;
-					})) {
-						var debugDisplay = new cw.DebugDisplay();
-						console.log(debugDisplay);
-						cw.hintProvider.displays.push(debugDisplay);
-						debugDisplay.show();
-					}
+					// if (!cw.hintProvider.displays.some(function(display) {
+					// 	return display instanceof cw.DebugDisplay;
+					// })) {
+					// 	var debugDisplay = new cw.DebugDisplay();
+					// 	console.log(debugDisplay);
+					// 	cw.hintProvider.displays.push(debugDisplay);
+					// 	debugDisplay.show();
+					// }
 					cw.hintProvider.displays.forEach(function(display) {
 						if (display instanceof cw.HighlightDisplay) {
 							display.showInserts = true;

@@ -81,6 +81,8 @@ SyntaxElementMorph.prototype.getHintHighlight = function () {
 };
 
 SyntaxElementMorph.prototype.fixHintHighlight = function() {
+    // TODO: This isn't triggered when input slots are edited, e.g. when a
+    // user clicks twice to edit an input slot with a blue outline
     var oldHighlight = this.removeHintHighlight();
     if (oldHighlight) {
         if (oldHighlight.isSingle) {
@@ -134,8 +136,17 @@ ArgMorph.prototype.highlightImageFull = function (color) {
     return hi;
 };
 
+ArgMorph.prototype.isHintClickable = function() {
+    return this.onClick != null && !this.isHoverHintShowing();
+}
+
+ArgMorph.prototype.isHoverHintShowing = function() {
+    return HintDialogBoxMorph.showing &&
+        HintDialogBoxMorph.showing.sourceArgMorph === this;
+}
+
 ArgMorph.prototype.mouseEnter = function() {
-    if (this.onClick) {
+    if (this.isHintClickable()) {
         this.fullHighlight =
 			this.addFullHintHighlight(new Color(255, 255, 0, 0.7));
         document.body.style.cursor = 'pointer';
@@ -149,16 +160,25 @@ ArgMorph.prototype.mouseLeave = function() {
         this.fullChanged();
     }
     document.body.style.cursor = 'inherit';
+    this.fixEditable();
 };
 
+ArgMorph.prototype.fixEditable = function() {
+    if (!this.contents) return;
+    var contents = this.contents();
+    if (contents) {
+        contents.isEditable = contents.isEditable && !this.isHintClickable();
+    }
+}
+
 ArgMorph.prototype.mouseClickLeft = function(pos) {
-    if (this.onClick) {
+    if (this.isHintClickable()) {
         this.onClick.call(this);
     }
 };
 
 extend(InputSlotMorph, 'mouseClickLeft', function(base, pos) {
-    if (this.onClick) {
+    if (this.isHintClickable()) {
         InputSlotMorph.uber.mouseClickLeft.call(this, pos);
     } else {
         base.call(this, pos);
@@ -166,22 +186,19 @@ extend(InputSlotMorph, 'mouseClickLeft', function(base, pos) {
 });
 
 extend(InputSlotMorph, 'mouseDownLeft', function(base, pos) {
-    if (!this.onClick) {
+    if (!this.isHintClickable()) {
         base.call(this, pos);
     }
 });
 
 extend(InputSlotMorph, 'fixLayout', function(base) {
     base.call(this);
-    var contents = this.contents();
-    if (contents) {
-        contents.isEditable = contents.isEditable && this.onClick == null;
-    }
+    this.fixEditable();
 });
 
 extend(BooleanSlotMorph, 'mouseEnter', function(base) {
     BooleanSlotMorph.uber.mouseEnter.call(this);
-    if (!this.onClick) base.call(this);
+    if (!this.isHintClickable()) base.call(this);
 });
 
 extend(BooleanSlotMorph, 'mouseLeave', function(base) {
@@ -192,5 +209,5 @@ extend(BooleanSlotMorph, 'mouseLeave', function(base) {
 
 extend(BooleanSlotMorph, 'mouseClickLeft', function(base) {
     BooleanSlotMorph.uber.mouseClickLeft.call(this);
-    if (!this.onClick) base.call(this);
+    if (!this.isHintClickable()) base.call(this);
 });

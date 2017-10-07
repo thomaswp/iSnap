@@ -640,7 +640,24 @@ HighlightDisplay.prototype.addHoverHint = function(argMorph, onClick) {
             contents.isEditable = false;
         }
     }
-    argMorph.onClick = onClick;
+    var myself = this;
+    argMorph.onClick = function() {
+        onClick();
+        // After the callback, set the hint dialog box's source ArgMorph
+        // so that the input slot knows it should be clickable while the
+        // dialog is showing
+        if (HintDialogBoxMorph.showing) {
+            HintDialogBoxMorph.showing.sourceArgMorph = argMorph;
+        }
+        // Also clear any highlight/mouse cursor from the current hover
+        argMorph.mouseLeave();
+        argMorph.fixLayout();
+
+        // Make sure all other input slots are properly uneditable
+        myself.hoverHints.forEach(function(arg) {
+            arg.fixEditable();
+        });
+    };
 
     this.hoverHints.push(argMorph);
 };

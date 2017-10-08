@@ -201,6 +201,12 @@ HintProvider.prototype.processHints = function(hints) {
             nErrors++;
             continue;
         }
+        if (hint.debug)  {
+            this.displays.forEach(function(display) {
+                display.showDebugInfo(hint);
+            });
+            continue;
+        }
         this.displays.forEach(function(display) {
             if (display.enabled) {
                 try {

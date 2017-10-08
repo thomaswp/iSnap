@@ -26,6 +26,10 @@ HintDisplay.prototype.showHint = function(hint) {
     console.log(hint.from + ' -> ' + hint.to);
 };
 
+HintDisplay.prototype.showDebugInfo = function(info) {
+
+};
+
 HintDisplay.prototype.showError = function(error, isNetwork) {
     // eslint-disable-next-line no-console
     console.error(error);

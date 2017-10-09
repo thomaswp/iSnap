@@ -184,7 +184,7 @@ HintProvider.prototype.processHints = function(hints) {
     // Before logging the hints, first see if any of them are ignored by a
     // display
     hints.forEach(function(hint) {
-        if (hint.error) return;
+        if (hint.error || hint.debug) return;
         // We could list individual ignoring displays, but reasonably there
         // should only ever be one primary display
         hint.ignored = this.displays.some(function(display) {

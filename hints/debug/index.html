@@ -12,37 +12,39 @@
 </head>
 
 <body>
-    <h1>iSnap Debug Console</h1>
-    <div class="code-compare">
+    <div id="left">
+        <h2>iSnap Debug Console</h2>
         <input id="values-checkbox" type="checkbox" checked>Show Values</input>
         <div>
             <div class="container from">
-                <h2>Student's Code</h2>
+                <h3>Student's Code</h3>
                 <div class="code" id="from-container"></div>
             </div>
             <div class="container to">
-                <h2>Target Solution Code</h2>
+                <h3>Target Solution Code</h3>
                 <div class="code" id="to-container"></div>
             </div>
         </div>
+        <div>
+            <h3 class="header">Value Pairings</h3>
+            <table id="values-container" class="table">
+                <tr><th>Type</th><th>Student Value</th><th>Solution Value</th></tr>
+            </table>
+        </div>
     </div>
-    <div>
-        <h2 class="header">Hints</h2>
-        <table id="hints-container" class="table">
-            <tr><th>Type</th><th>Parent</th><th>Edit</th><th>Using</th></tr>
-        </table>
-    </div>
-    <div>
-        <h2 class="header">Reward Calculation</h2>
-        <table id="cost-container" class="table">
-            <tr><th>Reward</th><th>Type</th><th>Node</th><th>Explanation</th></tr>
-        </table>
-    </div>
-    <div>
-        <h2 class="header">Value Pairings</h2>
-        <table id="values-container" class="table">
-            <tr><th>Type</th><th>Student Value</th><th>Solution Value</th></tr>
-        </table>
+    <div id="right">
+        <div>
+            <h3 class="header">Hints</h3>
+            <table id="hints-container" class="table">
+                <tr><th>Type</th><th>Parent</th><th>Edit</th><th>Using</th></tr>
+            </table>
+        </div>
+        <div>
+            <h3 class="header">Reward Calculation</h3>
+            <table id="cost-container" class="table">
+                <tr><th>Reward</th><th>Type</th><th>Node</th><th>Explanation</th></tr>
+            </table>
+        </div>
     </div>
     <script type="text/javascript" src="debug.js"></script>
 </body>

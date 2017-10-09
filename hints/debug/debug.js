@@ -2,7 +2,6 @@ showDebugInfo = function(info) {
 
     if (localStorage) localStorage.setItem('last-info', JSON.stringify(info));
 
-    console.log(info);
     $('#from-container').html('<pre id="debug-from">{0}</pre>'.format(
         prettyPrintNode(info.from, true)));
     $('#to-container').html('<pre id="debug-to">{0}</pre>'.format(
@@ -82,14 +81,17 @@ showHints = function(edits, fromMap) {
 
         $row.append($('<td>').append(getDiff(edit.from, edit.to)));
 
+        var nodeIDs = edit.parent;
         var using = edit.candidate || edit.node;
         if (using) {
             $using = $(makeNodeSpan(fromMap[using]));
             $using.addClass('paired');
             $row.append($('<td>').append($('<pre>').append($using)));
+            nodeIDs += ' ' + using;
         } else {
             $row.append($('<td>'));
         }
+        $row.data('node-ids', nodeIDs);
 
         $table.append($row);
     });
@@ -114,6 +116,7 @@ showCostCalculation = function(info, fromMap, toMap) {
         var from = fromMap[item.fromID], to = toMap[item.toID];
 
         $row = $('<tr>');
+        $row.data('node-ids', item.fromID + ' ' + item.toID);
         $row.append($('<td>').html(-item.cost));
         $row.append($('<td>').html(item.type));
         $node = $(makeNodeSpan(from));
@@ -228,6 +231,25 @@ updateNodes = function() {
         }, function() {
             $(selector).removeClass('hover');
         });
+        // $(span).click(function() {
+        //     if (window.filterID === id) window.filterID = null;
+        //     else window.filterID = id;
+        //     updateRows();
+        // });
+    });
+};
+
+updateRows = function() {
+    $('tr').each(function(i, row) {
+        $row = $(row);
+        var ids = $row.data('node-ids');
+        if (!ids) return;
+        var showing = !window.filterID || ids.indexOf(window.filterID) >= 0;
+        if (showing) {
+            $row.removeClass('hidden');
+        } else {
+            $row.addClass('hidden');
+        }
     });
 };
 

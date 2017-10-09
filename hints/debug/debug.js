@@ -30,13 +30,6 @@ showDebugInfo = function(info) {
         $(toSpan).attr('data-pair-id', fromID);
     });
 
-    showCostCalculation(info, fromDic, toDic);
-    showValueMapping(info);
-
-    updateNodes();
-};
-
-showCostCalculation = function(info, fromDic, toDic) {
     var fromMap = {}, toMap = {};
 
     function addToMap(node, map) {
@@ -51,6 +44,59 @@ showCostCalculation = function(info, fromDic, toDic) {
 
     addToMap(info.from, fromMap);
     addToMap(info.to, toMap);
+
+    showHints(info.edits, fromMap);
+    showCostCalculation(info, fromMap, toMap);
+    showValueMapping(info);
+
+    updateNodes();
+};
+
+showHints = function(edits, fromMap) {
+    $table = $('#hints-container');
+    $table.find('tr:gt(0)').remove();
+
+    function capitalizeFirstLetter(string) {
+        if (!string) return string;
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function getDiff(from, to) {
+        function getArray(children) {
+            return '[' + children.join(', ') + ']';
+        }
+        return DebugDisplay.prototype.createDiff(
+            getArray(from), getArray(to));
+    }
+
+    edits.forEach(function(edit) {
+        $row = $('<tr>');
+
+        var action = edit.action;
+        if (action === 'insert' && edit.candidate) action = 'move';
+        $row.append($('<td>').html(capitalizeFirstLetter(action)));
+
+        $parent = $(makeNodeSpan(fromMap[edit.parent]));
+        $parent.addClass('paired');
+        $row.append($('<td>').append($('<pre>').append($parent)));
+
+        $row.append($('<td>').append(getDiff(edit.from, edit.to)));
+
+        var using = edit.candidate || edit.node;
+        if (using) {
+            $using = $(makeNodeSpan(fromMap[using]));
+            $using.addClass('paired');
+            $row.append($('<td>').append($('<pre>').append($using)));
+        } else {
+            $row.append($('<td>'));
+        }
+
+        $table.append($row);
+    });
+
+};
+
+showCostCalculation = function(info, fromMap, toMap) {
 
     function getDiff(from, to) {
         getChildren = function(node) {
@@ -74,12 +120,6 @@ showCostCalculation = function(info, fromDic, toDic) {
 
         $node.addClass('paired');
         $node.data('data-pair-id', item.toID);
-        var fromSpan = fromDic[item.fromID], toSpan = toDic[item.toID];
-        $node.hover(function() {
-            showInfo(fromSpan, toSpan);
-        }, function() {
-            hideInfo(fromSpan, toSpan);
-        });
 
         $row.append($('<td>').append($('<pre>').append($node)));
 

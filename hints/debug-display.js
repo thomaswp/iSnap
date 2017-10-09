@@ -39,6 +39,14 @@ DebugDisplay.prototype.hide = function() {
     document.body.removeChild(this.outer);
 };
 
+DebugDisplay.prototype.getHintType = function() {
+    return 'debug';
+};
+
+DebugDisplay.prototype.showDebugInfo = function(info) {
+    console.log(info);
+};
+
 DebugDisplay.prototype.showHint = function(hint) {
     var myself = this;
     var code = Trace.lastCode;

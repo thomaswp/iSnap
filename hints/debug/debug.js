@@ -1,6 +1,6 @@
 showDebugInfo = function(info) {
 
-    localStorage.setItem('last-info', JSON.stringify(info));
+    if (localStorage) localStorage.setItem('last-info', JSON.stringify(info));
 
     console.log(info);
     $('#from-container').html('<pre id="debug-from">{0}</pre>'.format(
@@ -31,6 +31,7 @@ showDebugInfo = function(info) {
     });
 
     showCostCalculation(info, fromDic, toDic);
+    showValueMapping(info);
 
     updateNodes();
 };
@@ -96,6 +97,21 @@ showCostCalculation = function(info, fromDic, toDic) {
     $table.append($('<tr>')
         .append($('<th>').html(-info.mapping.cost))
         .append($('<th>').html('Total Reward')));
+};
+
+showValueMapping = function(info) {
+    $table = $('#values-container');
+    $table.find('tr:gt(0)').remove();
+    var mappings = info.mapping.valueMappings;
+    Object.keys(mappings).forEach(function(type) {
+        Object.keys(mappings[type]).forEach(function(key) {
+            value = mappings[type][key];
+            $table.append($('<tr>')
+                .append($('<td>').html(type))
+                .append($('<td>').html(key))
+                .append($('<td>').html(value)));
+        });
+    });
 };
 
 makeNodeSpan = function(node) {
@@ -176,8 +192,10 @@ updateNodes = function() {
 };
 
 (function() {
-    var last = localStorage.getItem('last-info');
-    if (last != null) showDebugInfo(JSON.parse(last));
+    if (localStorage) {
+        var last = localStorage.getItem('last-info');
+        if (last != null) showDebugInfo(JSON.parse(last));
+    }
 
     $('#values-checkbox').change(function() {
         updateNodes();

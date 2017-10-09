@@ -4,26 +4,39 @@ require('../isnap/lib/simplediff.min');
 // DebugDisplay: outputs hints to a div
 
 function DebugDisplay() {
+    var myself = this;
     this.savedHints = {};
 
     var outer = document.createElement('div');
     outer.classList.add('debug');
     this.outer = outer;
 
-    var button = document.createElement('button');
-    button.classList.add('debugToggle');
-    button.innerHTML = 'Hide';
+    var showButton = document.createElement('button');
+    showButton.classList.add('debugToggle');
+    showButton.innerHTML = 'Hide';
     var hidden = false;
-    button.onclick = outer.ondblclick = function() {
+    showButton.onclick = outer.ondblclick = function() {
         hidden = !hidden;
         if (hidden) {
             outer.classList.add('hidden');
         } else {
             outer.classList.remove('hidden');
         }
-        button.innerHTML = hidden ? 'Show' : 'Hide';
+        showButton.innerHTML = hidden ? 'Show' : 'Hide';
     };
-    outer.appendChild(button);
+    outer.appendChild(showButton);
+
+    var moreButton = document.createElement('button');
+    moreButton.classList.add('debugToggle');
+    moreButton.innerHTML = 'More';
+    moreButton.onclick = function() {
+        myself.window = window.open('hints/debug/index.html',
+            null, null, true);
+        myself.window.onload = function() {
+            myself.showDebugInfo(myself.lastDebugInfo);
+        };
+    };
+    outer.appendChild(moreButton);
 
     this.div = document.createElement('div');
     outer.appendChild(this.div);
@@ -44,7 +57,9 @@ DebugDisplay.prototype.getHintType = function() {
 };
 
 DebugDisplay.prototype.showDebugInfo = function(info) {
-    console.log(info);
+    if (!info) return;
+    if (this.window) this.window.showDebugInfo(info);
+    this.lastDebugInfo = info;
 };
 
 DebugDisplay.prototype.showHint = function(hint) {

@@ -1,0 +1,86 @@
+body {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.code-compare {
+    margin-top: 20px;
+    border: #333 solid thin;
+    width: fit-content;
+}
+
+div.container {
+    width: 500px;
+    overflow-x: auto;
+    padding: 5px;
+}
+
+div.from {
+    float: left;
+}
+
+div.to {
+    margin-left: 550px;
+}
+
+div.code {
+    background-color: #eee;
+    padding: 5px;
+}
+
+h2.header {
+    margin-top: 1em;
+}
+
+span.paired {
+    border: thin solid #ddd;
+    cursor: pointer;
+    padding: 1px;
+}
+
+span.hover {
+    font-weight: bold;
+    background-color: #ddd;
+}
+
+span.unpaired {
+    font-style: italic;
+}
+
+#values-checkbox {
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+span.literal {
+    color: #33e;
+}
+
+span.snapshot, span.sprite, span.stage, span.script {
+    color: #b3b;
+}
+
+span.var, span.varDec, span.varMenu {
+    color: #e63;
+}
+
+span.customBlock {
+    color: #383;
+}
+
+code.plus {
+    color: green;
+}
+
+code.minus {
+    color: red;
+}
+
+code.equals {
+    color: inherit;
+}
+
+code {
+    padding: 0;
+}

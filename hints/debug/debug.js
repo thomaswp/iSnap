@@ -44,14 +44,14 @@ showDebugInfo = function(info) {
     addToMap(info.from, fromMap);
     addToMap(info.to, toMap);
 
-    showHints(info.edits, fromMap);
+    showHints(info.edits, fromMap, toMap);
     showCostCalculation(info, fromMap, toMap);
     showValueMapping(info);
 
     updateNodes();
 };
 
-showHints = function(edits, fromMap) {
+showHints = function(edits, fromMap, toMap) {
     $table = $('#hints-container');
     $table.find('tr:gt(0)').remove();
 
@@ -75,9 +75,14 @@ showHints = function(edits, fromMap) {
         if (action === 'insert' && edit.candidate) action = 'move';
         $row.append($('<td>').html(capitalizeFirstLetter(action)));
 
-        $parent = $(makeNodeSpan(fromMap[edit.parent]));
-        $parent.addClass('paired');
-        $row.append($('<td>').append($('<pre>').append($parent)));
+        var parent = fromMap[edit.parent] || toMap[edit.parent];
+        if (parent) {
+            $parent = $(makeNodeSpan(parent));
+            $parent.addClass('paired');
+            $row.append($('<td>').append($('<pre>').append($parent)));
+        } else {
+            $row.append($('<td>').html('Missing Parent'));
+        }
 
         $row.append($('<td>').append(getDiff(edit.from, edit.to)));
 

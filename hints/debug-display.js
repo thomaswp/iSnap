@@ -63,8 +63,8 @@ DebugDisplay.prototype.showDebugInfo = function(info) {
 };
 
 DebugDisplay.prototype.showHint = function(hint) {
-    var myself = this;
-    var code = Trace.lastCode;
+    // var myself = this;
+    // var code = Trace.lastCode;
 
     var hintDiv = document.createElement('div');
     if (hint.data.caution || hint.ignored) {
@@ -76,30 +76,31 @@ DebugDisplay.prototype.showHint = function(hint) {
                 hint.data.goal.join(', ') + ']</code> ';
     }
 
-    var hintSaved = this.savedHints[this.savedHintKey(hint, code)];
+    // var hintSaved = this.savedHints[this.savedHintKey(hint, code)];
 
-    var texts = ['Good', 'Bad'];
-    var links = [];
-    for (var i = 0; i < texts.length; i++) {
-        var link = document.createElement('a');
-        link.innerHTML = '<small>' +
-            (hintSaved ? '[' + hintSaved + ']' : texts[i]) + '</small>';
-        link.href = '#';
-        links.push(link);
-        var space = document.createElement('span');
-        space.innerHTML = ' ';
-        hintDiv.appendChild(space);
-        hintDiv.appendChild(link);
-        this.div.appendChild(hintDiv);
-        if (!hintSaved) {
-            (function (fi) {
-                link.onclick = function(e) {
-                    myself.saveHint(hint, code, links, fi == 0);
-                    e.preventDefault();
-                };
-            })(i);
-        }
-    }
+    // var texts = ['Good', 'Bad'];
+    // var links = [];
+    // for (var i = 0; i < texts.length; i++) {
+    //     var link = document.createElement('a');
+    //     link.innerHTML = '<small>' +
+    //         (hintSaved ? '[' + hintSaved + ']' : texts[i]) + '</small>';
+    //     link.href = '#';
+    //     links.push(link);
+    //     var space = document.createElement('span');
+    //     space.innerHTML = ' ';
+    //     hintDiv.appendChild(space);
+    //     hintDiv.appendChild(link);
+    //     if (!hintSaved) {
+    //         (function (fi) {
+    //             link.onclick = function(e) {
+    //                 myself.saveHint(hint, code, links, fi == 0);
+    //                 e.preventDefault();
+    //             };
+    //         })(i);
+    //     }
+    // }
+
+    this.div.appendChild(hintDiv);
 };
 
 DebugDisplay.prototype.savedHintKey = function(hint, code) {
@@ -146,7 +147,8 @@ DebugDisplay.prototype.showError = function(error) {
 };
 
 DebugDisplay.prototype.clear = function() {
-    this.div.innerHTML = '';
+    this.div.innerHTML =
+        '<b>Debug Console</b>: Press "More" for more information.<hr />';
 };
 
 DebugDisplay.prototype.createDiff = function(from, to) {

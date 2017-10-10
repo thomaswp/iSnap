@@ -169,7 +169,7 @@ ArgMorph.prototype.fixEditable = function() {
     if (contents) {
         contents.isEditable = contents.isEditable && !this.isHintClickable();
     }
-}
+};
 
 ArgMorph.prototype.mouseClickLeft = function(pos) {
     if (this.isHintClickable()) {
@@ -197,8 +197,11 @@ extend(InputSlotMorph, 'fixLayout', function(base) {
 });
 
 extend(BooleanSlotMorph, 'mouseEnter', function(base) {
+    // Determine whether to call the base first, since calling the uber, the
+    // dialog will be showing and it will always be true
+    var callBase = !this.isHintClickable();
     BooleanSlotMorph.uber.mouseEnter.call(this);
-    if (!this.isHintClickable()) base.call(this);
+    if (callBase) base.call(this);
 });
 
 extend(BooleanSlotMorph, 'mouseLeave', function(base) {
@@ -208,6 +211,7 @@ extend(BooleanSlotMorph, 'mouseLeave', function(base) {
 });
 
 extend(BooleanSlotMorph, 'mouseClickLeft', function(base) {
+    var callBase = !this.isHintClickable();
     BooleanSlotMorph.uber.mouseClickLeft.call(this);
-    if (!this.isHintClickable()) base.call(this);
+    if (callBase) base.call(this);
 });

@@ -223,9 +223,8 @@ updateNodes = function() {
     });
 
     $('span.paired').unbind('mouseenter mouseleave').each(function(i, span) {
-        var id = $(span).data('id');
-        var selector = 'span[data-id="{0}"], span[data-pair-id="{0}"]'.format(
-            id, id);
+        var selector = 'span[data-id="{0}"], span[data-id="{1}"]'.format(
+            $(span).data('id'), $(span).data('pair-id'));
         $(span).hover(function() {
             $(selector).addClass('hover');
         }, function() {

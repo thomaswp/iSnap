@@ -2,6 +2,10 @@
     height: 100%;
 }
 
+body {
+    min-width: 1600px;
+}
+
 #right {
     margin-left: 1020px;
     height: 100%;
@@ -24,7 +28,7 @@ div.from {
 }
 
 div.to {
-    margin-left: 460px;
+    margin-left: 510px;
 }
 
 div.code {
@@ -37,14 +41,14 @@ div.code {
 }
 
 span.paired {
-    border: thin solid #ddd;
+    border: thin solid #ccc;
     cursor: default;
     padding: 1px;
 }
 
 span.hover {
     font-weight: bold;
-    background-color: #ddd;
+    background-color: #ccc;
 }
 
 span.unpaired {

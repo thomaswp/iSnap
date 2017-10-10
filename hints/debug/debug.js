@@ -102,7 +102,8 @@ showCostCalculation = function(info, fromMap, toMap) {
 
     function getDiff(from, to) {
         getChildren = function(node) {
-            return '[' + node.children.map(function(child) {
+            var children = (node.children || []);
+            return '[' + children.map(function(child) {
                 return child.type;
             }).join(', ') + ']';
         };

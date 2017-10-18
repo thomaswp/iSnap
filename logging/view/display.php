@@ -55,7 +55,6 @@ include '../config.php';
 				window.index = rowIDs.indexOf(parseInt(id));
 			}
 			function copy(inp) {
-
 				// is element selectable?
 				if (inp) {
 					if (window.getSelection) {
@@ -143,7 +142,7 @@ if ($enable_viewer) {
 		// grabs
 		$where .= " AND message <> 'Block.grabbed'";
 	}
-	$query = "SELECT id, time, message, data, code <> '' AS link, sessionID FROM $table $where";
+	$query = "SELECT id, time, message, data, code <> '' AS link, sessionID FROM $table $where ORDER BY id";
 	$result = $mysqli->query($query);
 	if (!$result) {
 		die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
@@ -206,14 +205,34 @@ if ($enable_viewer) {
 				});
 				var hash = parseInt(window.location.hash.replace("#", ""));
 				if (!isNaN(hash)) {
-					index = rowIDs.indexOf(hash);
+					index = binarySearch(rowIDs, hash);
+					if (index >= rowIDs.length) {
+						index = rowIDs.length - 1;
+					}
 				}
 				var snap = document.getElementById("snap");
 				snap.onload = function() {
 					snap.contentWindow.ide.toggleStageSize();
-					if (index > 0 && rowIDs.length > 0) {
+					if (index >= 0 && rowIDs.length > 0) {
 						loadSnap(rowIDs[index], projectID);
 					}
+				}
+
+				function binarySearch(array, key) {
+					var low = 0;
+					var high = array.length - 1;
+					while (low <= high) {
+						var mid = (low + high) >> 1;
+						if (array[mid] === key) {
+							return mid;
+						}
+						if (array[mid] < key) {
+							low = mid + 1;
+						} else {
+							high = mid - 1;
+						}
+					}
+					return high + 1;
 				}
 			</script>
 		</div>

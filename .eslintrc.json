@@ -12,10 +12,6 @@
             "warn",
             4
         ],
-        "linebreak-style": [
-            "warn",
-            "windows"
-        ],
         "quotes": [
             "warn",
             "single",

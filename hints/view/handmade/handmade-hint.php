@@ -38,10 +38,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 } else if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $priority = $mysqli->escape_string($_GET['priority']);
+
     $code = $mysqli->escape_string(file_get_contents('php://input'));
     $date = date('Y-m-d H:i:s');
-    $query = "UPDATE handmade_hints SET $hintCode='$code', $updatedTime='$date', priority='$priority'
-        WHERE hid=$hintID";
+    $query = "UPDATE handmade_hints SET $hintCode='$code', $updatedTime='$date'";
+    if ($priority !== '') {
+        $query .= ", priority='$priority'";
+    }
+    $query .= " WHERE hid=$hintID";
+
     $result = $mysqli->query($query);
     if (!$result) {
         die ("Failed to update data: (" . $mysqli->errno . ") " . $mysqli->error);

@@ -86,6 +86,11 @@ while($row = mysqli_fetch_array($result)) {
         <td>$hint</td>
         <td>
             <select id='p$hintID'>";
+    if (!!!$priority) {
+        echo "<option value='' selected> -- priority -- </option>";
+    } else {
+        echo "<option value='' > -- priority -- </option>";
+    }
     if ($priority == 1) {
         echo "<option value='1' selected>1 - Higest</option>";
     } else {

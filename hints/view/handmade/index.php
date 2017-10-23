@@ -149,6 +149,7 @@
 
 				var priorityCell = row.insertCell(3);
 				priorityCell.innerHTML = "<select id='p" + hintID +"'>" +
+				"<option value=''> -- priority -- </option>" +
 				"<option value='1'>1 - Higest</option>" +
 				"<option value='2'>2 - High</option>" +
 				"<option value='3'>3 - Normal</option></select>";
@@ -277,7 +278,7 @@ if ($enable_viewer) {
 	// Shows all the available logs which request hint.
 	$query = "SELECT DISTINCT rowID, assignmentID, trueAssignmentID, projectID
 	FROM handmade_hints JOIN trace ON handmade_hints.rowID=trace.id
-	WHERE handmade_hints.userID='$user' ORDER BY rowID";
+	WHERE handmade_hints.userID='$user' ORDER BY trueAssignmentID, rowID";
 
 	$logIDs = $mysqli->query($query);
 	echo "<button onclick='toggleLogTable()'>Toggle Log Table</button>";

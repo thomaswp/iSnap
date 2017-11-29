@@ -37,6 +37,31 @@
 				font-weight: normal;
 				font-style: italic;
 			}
+			.hidden {
+				display: none;
+			}
+			#popup {
+				position: absolute;
+				left: 50px;
+				top: 50%;
+				max-width: calc(100% - 650px);
+				max-height: 40%;
+				overflow: auto;
+				padding: 20px;
+				border: thin solid black;
+				background-color: white;
+				z-index: 100;
+				cursor: move;
+			}
+			#diff {
+				white-space: pre;
+			}
+			.code-add {
+				color: green;
+			}
+			.code-delete {
+				color: red;
+			}
 		</style>
 		<script type="text/javascript">
 			var user = "<?php echo $_GET['user']; ?>";
@@ -45,6 +70,7 @@
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
+						document.getElementById('popup').classList.add('hidden');
 						var contentWindow = document.getElementById('snap').contentWindow;
 						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
@@ -220,14 +246,43 @@
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState==4 && xhr.status==200) {
-						var contentWindow = document.getElementById('snap').contentWindow;
-						contentWindow.Assignment.setID(assignment);
-						contentWindow.ide.droppedText(xhr.responseText);
+						if (xhr.responseText.startsWith('<project')) {
+							var contentWindow =
+								document.getElementById('snap').contentWindow;
+							contentWindow.Assignment.setID(assignment);
+							contentWindow.ide.droppedText(xhr.responseText);
+						} else {
+							loadDiff(xhr.responseText);
+						}
 						showHintEditingText(hintID);
 					}
 				};
 				xhr.open("GET", "handmade-hint.php?hintID=" + hintID, true);
 				xhr.send();
+			}
+
+			function loadDiff(diff) {
+				var popup = document.getElementById('popup');
+				popup.classList.remove('hidden');
+				document.getElementById('diff').innerHTML = diff;
+			}
+
+			function mouseUp() {
+				window.removeEventListener('mousemove', divMove, true);
+			}
+
+			function mouseDown(e) {
+				window.addEventListener('mousemove', divMove, true);
+				var div = document.getElementById('popup');
+				window.dragOffX = div.getBoundingClientRect().left - e.clientX;
+				window.dragOffY = div.getBoundingClientRect().top - e.clientY;
+			}
+
+			function divMove(e) {
+				var div = document.getElementById('popup');
+				div.style.position = 'absolute';
+				div.style.top = (e.clientY + window.dragOffY) + 'px';
+				div.style.left = (e.clientX + window.dragOffX) + 'px';
 			}
 
 			function showEdits(edits, id, project, assignment, callback) {
@@ -262,6 +317,9 @@
 		<div id="wrapper">
 			<div id="sidebar">
 				 <iframe id="snap" width="100%" height="100%" src="../../../snap.html?assignment=view&hints=true"></iframe>
+			</div>
+			<div id="popup" class="hidden">
+				<code id="diff"></code>
 			</div>
 			<div id="content">
 				<div style="overflow: scroll; height: 100%;">
@@ -358,6 +416,8 @@ if ($enable_viewer) {
 						rows[index].onclick();
 					}
 				}
+				document.getElementById('popup').addEventListener('mousedown', mouseDown, false);
+    			window.addEventListener('mouseup', mouseUp, false);
 			</script>
 		</div>
 	</body>

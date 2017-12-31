@@ -106,6 +106,11 @@ while($row = mysqli_fetch_array($result)) {
     } else {
         echo "<option value='3'>3 - Normal</option>";
     }
+    if ($priority == 4) {
+        echo "<option value='4' selected>4 - Too Soon</option>";
+    } else {
+        echo "<option value='4'>4 - Too Soon</option>";
+    }
     echo "</select>
         </td>
     </tr>";

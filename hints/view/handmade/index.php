@@ -178,7 +178,8 @@
 				"<option value=''> -- priority -- </option>" +
 				"<option value='1'>1 - Higest</option>" +
 				"<option value='2'>2 - High</option>" +
-				"<option value='3'>3 - Normal</option></select>";
+				"<option value='3'>3 - Normal</option>" +
+				"<option value='4'>4 - Too Soon</option></select>";
 
 				showHintEditingText(hintID);
 			}

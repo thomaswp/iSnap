@@ -17,7 +17,7 @@ FROM $table AS logs JOIN (
   WHERE id = $id
 ) AS target
 WHERE logs.projectID = target.projectID AND code <> '' AND
-	logs.time <= target.time AND (logs.time <> target.time OR logs.id < target.id)
+	logs.time <= target.time AND (logs.time <> target.time OR logs.id <= target.id)
 ORDER BY logs.time DESC, logs.id DESC LIMIT 1;";
 
 	$result = $mysqli->query($query);

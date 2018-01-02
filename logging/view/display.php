@@ -142,7 +142,7 @@ if ($enable_viewer) {
 		// grabs
 		$where .= " AND message <> 'Block.grabbed'";
 	}
-	$query = "SELECT id, time, message, data, code <> '' AS link, sessionID FROM $table $where ORDER BY time";
+	$query = "SELECT id, time, message, data, code <> '' AS link, sessionID FROM $table $where ORDER BY time, id";
 	$result = $mysqli->query($query);
 	if (!$result) {
 		die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);

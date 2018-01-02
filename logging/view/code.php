@@ -9,9 +9,16 @@ if ($enable_viewer) {
 	}
 
 	$id = $mysqli->real_escape_string($_GET['id']);
-	$project = $mysqli->real_escape_string($_GET['project']);
 
-	$query = "SELECT code FROM $table WHERE id <= $id AND projectID = '$project' AND code <> '' ORDER BY id DESC LIMIT 1;";
+	$query =
+"SELECT code
+FROM $table AS logs JOIN (
+  SELECT id, time, projectID FROM $table
+  WHERE id = $id
+) AS target
+WHERE logs.time <= target.time AND logs.projectID = target.projectID AND code <> ''
+ORDER BY logs.time DESC LIMIT 1;";
+
 	$result = $mysqli->query($query);
 	if (!$result) {
 		die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);

@@ -130,6 +130,9 @@ if ($enable_viewer) {
 	if ($assignment) {
 		$where .= " AND assignmentID = '$assignment'";
 	}
+	// TODO: If IDs are out of order, this can omit rows that should be included
+	// If we use the start and end as bookend, we also have to require them to
+	// be real IDs in the result set, which isn't ideal either...
 	if ($start) {
 		$where .= " AND id >= $start";
 	}

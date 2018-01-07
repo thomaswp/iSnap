@@ -12,11 +12,11 @@ Assignment.initOrRedirect = function() {
     window.assignmentID = getSearchParameters()['assignment'];
 
     var redirectURL = Assignment.redirectURL;
-    redirectURL += window.location.hash;
 
     if (window.requireAssignment && (!window.assignments ||
             !window.assignments[assignmentID])) {
         // redirect if no assignment is listed
+        redirectURL += window.location.hash;
         window.location.replace(redirectURL);
         return false;
     }
@@ -30,6 +30,7 @@ Assignment.initOrRedirect = function() {
         if (window.assignmentID) {
             redirectURL += '?assignment=' + window.assignmentID;
         }
+        redirectURL += window.location.hash;
         // redirect if the user isn't logged in
         window.location.replace(redirectURL);
         return false;

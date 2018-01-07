@@ -12,6 +12,7 @@ Assignment.initOrRedirect = function() {
     window.assignmentID = getSearchParameters()['assignment'];
 
     var redirectURL = Assignment.redirectURL;
+    redirectURL += window.location.hash;
 
     if (window.requireAssignment && (!window.assignments ||
             !window.assignments[assignmentID])) {

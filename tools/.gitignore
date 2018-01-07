@@ -1,3 +1,5 @@
 *.class
 uglify.bat
 uglify.sh
+starters/*
+!starters/.holder

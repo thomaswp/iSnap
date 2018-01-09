@@ -191,7 +191,10 @@ HintProvider.prototype.processHints = function(hints) {
             return display.enabled && display.willIgnoreHint(hint);
         });
     }, this);
-    Trace.log('HintProvider.processHints', hints);
+    Trace.log('HintProvider.processHints', hints.filter(function(hint) {
+        // Don't log debug information (at least for now)
+        return !hint.debug;
+    }));
 
     var nErrors = 0, nHints = 0;
     for (var i = 0; i < hints.length; i++) {

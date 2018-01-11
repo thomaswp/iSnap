@@ -270,3 +270,15 @@ HintProvider.prototype.setDisplayEnabled = function(displayType, enabled) {
     });
     if (refresh) this.getHintsFromServer();
 };
+
+HintProvider.prototype.isDisplayEnabled = function(displayType) {
+    return this.displays.some(function(display) {
+        return display instanceof displayType && display.enabled;
+    });
+};
+
+HintProvider.prototype.containsDisplay = function(displayType) {
+    return this.displays.some(function(display) {
+        return display instanceof displayType;
+    });
+};

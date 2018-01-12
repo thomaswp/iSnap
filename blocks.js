@@ -2188,6 +2188,10 @@ BlockMorph.prototype.init = function (silently) {
     this.cashedInputs = null;
 };
 
+BlockMorph.prototype.getNewID = function() {
+    this.id = BlockMorph.nextId++;
+};
+
 BlockMorph.prototype.receiver = function () {
     // answer the object to which I apply (whose method I represent)
     var up = this.parent;

@@ -1350,17 +1350,17 @@ BlockDialogMorph.prototype.init = function (target, action, environment) {
 BlockDialogMorph.prototype.prompt = function() {
     Trace.log('BlockTypeDialog.newBlock');
     BlockDialogMorph.uber.prompt.apply(this, arguments);
-}
+};
 
 BlockDialogMorph.prototype.ok = function() {
     Trace.log('BlockTypeDialog.ok');
     BlockDialogMorph.uber.ok.apply(this, arguments);
-}
+};
 
 BlockDialogMorph.prototype.cancel = function() {
     Trace.log('BlockTypeDialog.cancel');
     BlockDialogMorph.uber.cancel.apply(this, arguments);
-}
+};
 
 BlockDialogMorph.prototype.openForChange = function (
     title,
@@ -1955,8 +1955,8 @@ BlockEditorMorph.prototype.accept = function (origin) {
 };
 
 BlockEditorMorph.prototype.cancel = function (origin) {
-    Trace.log('BlockEditor.cancel');
     if (origin instanceof CursorMorph) {return; }
+    Trace.log('BlockEditor.cancel');
     //this.refreshAllBlockInstances();
     this.close();
 };
@@ -2006,10 +2006,12 @@ BlockEditorMorph.prototype.close = function () {
     }
 
     this.destroy();
+    this.deduplicateBlockIDs();
 };
 
 BlockEditorMorph.prototype.consolidateDoubles = function () {
     this.target.replaceDoubleDefinitionsFor(this.definition);
+    this.deduplicateBlockIDs();
     this.destroy();
 };
 
@@ -2024,6 +2026,41 @@ BlockEditorMorph.prototype.refreshAllBlockInstances = function () {
     if (template) {
         template.refreshDefaults();
     }
+};
+
+// It is possible for blocks to get duplicated by dragging them out of a block
+// editor and then cancelling the edit. This checks for any duplicate block IDs
+// in the just-closed block definition and then assigns new IDs to those blocks.
+BlockEditorMorph.prototype.deduplicateBlockIDs = function() {
+    var definition = this.definition;
+    function findBlockIDs(root, array) {
+        array = array || [];
+        // Ignore any children of this definition
+        if (root == definition || root == null) return array;
+        if (root instanceof BlockMorph) array.push(root.id);
+        // Include custom block definitions in Sprites and the Stage
+        if (root instanceof SpriteMorph) findBlockIDs(root.customBlocks);
+        if (root instanceof StageMorph) findBlockIDs(root.globalBlocks);
+        var children = root.children || root;
+        if (!(children instanceof Array)) return array;
+        children.forEach(function(child) {
+            if (child instanceof Morph) {
+                findBlockIDs(child, array);
+            }
+        });
+        return array;
+    }
+    var blockIDs = findBlockIDs(this.root());
+
+    var scripts = definition.scripts.slice();
+    if (this.definition.body) scripts.push(this.definition.body.expression);
+    scripts.forEach(function(script) {
+        if (script == null || !script.allChildren) return;
+        script.allChildren().forEach(function(block) {
+            if (!(block instanceof BlockMorph)) return;
+            if (blockIDs.includes(block.id)) block.getNewID();
+        });
+    });
 };
 
 BlockEditorMorph.prototype.updateDefinition = function () {

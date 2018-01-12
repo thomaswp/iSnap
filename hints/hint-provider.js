@@ -127,9 +127,15 @@ HintProvider.prototype.getHintsFromServer = function() {
         return display.getHintType();
     }).join(';');
 
-    var xhr = createCORSRequest('POST',
-        this.url + '?assignmentID=' + Assignment.getID() +
-        '&hintTypes=' + encodeURIComponent(hintTypes));
+    var url = this.url +
+        '?assignmentID=' + encodeURIComponent(Assignment.getID()) +
+        '&hintTypes=' + encodeURIComponent(hintTypes);
+    // If this assignment has a specific dataset to use, append that to the url
+    var assignment = Assignment.get();
+    if (assignment && assignment.dataset) {
+        url += '&dataset=' + encodeURIComponent(assignment.dataset);
+    }
+    var xhr = createCORSRequest('POST', url);
     if (!xhr) {
         // Treat this as a network error because it's unrecoverable
         myself.showError('CORS not supported on this browser.', true);

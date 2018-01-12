@@ -15,6 +15,7 @@ Highlight:
   * Hints for script insertions (just show a plus in the script area)
   * Clicking check my work when no hints are available should show the messages
     regardless of whether the instructions are showing
+  * Allow assignments to have multiple prequels
 * Reach:
   * Save preferences
   * Show list insert hints as a dialog

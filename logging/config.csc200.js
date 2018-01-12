@@ -24,12 +24,12 @@ window.assignments = {
     'pong1Lab': {
         name: 'Pong - 1 Player',
         hint: 'In Lab 3 Activity',
-        hints: false,
+        hints: true,
     },
     'pong2HW': {
         name: 'Pong - 2 Players',
         hint: 'Homework 3',
-        hints: false,
+        hints: true,
     },
     'guess1Lab': {
         name: 'Guessing Game Part 1',
@@ -39,6 +39,7 @@ window.assignments = {
     'guess2Lab': {
         name: 'Guessing Game Part 2',
         hint: 'In Lab 5 Activity',
+        hints: true,
         prequel: 'guess1Lab',
     },
     'project': {

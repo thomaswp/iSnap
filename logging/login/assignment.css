@@ -55,7 +55,7 @@
                 -webkit-align-items: center;
 				    -ms-flex-align: center;
 				        align-items: center;
-				
+
 			}
 			#blackBar img{
 			    width: 190px;
@@ -164,11 +164,12 @@
 			#snapLogo img{
 			 max-width: 32%;
 				border-radius: 5px;
-				
+
 			}
 			h1{
 			    margin: 0px;
 				color: #8F56E3;
+				font-size: 1.8em;
 			}
 			#unityID-hint{
 			 font-weight: 200;
@@ -248,7 +249,7 @@
 				margin-top: 0.2em;
 				margin-bottom: 0.2em
 			}
-	
+
 			#confirm-new ul li:first-child{
 			    margin-bottom: 5px;
 				margin-right: 7px;

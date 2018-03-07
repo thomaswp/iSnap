@@ -350,7 +350,7 @@ extend(StageMorph, 'fireGreenFlagEvent', function(base) {
 extend(BlockMorph, 'mouseClickLeft', function(base) {
     base.call(this);
     var top = this.topBlock(),
-        receiver = top.receiver();
+        receiver = top.scriptTarget();
     if (!receiver) return;
 
     var children = top.allChildren().filter(function(child) {
@@ -360,7 +360,7 @@ extend(BlockMorph, 'mouseClickLeft', function(base) {
     // Limit click-run checking to 3-block scripts
     if (children < 3) return;
 
-    var stage = top.receiver().parentThatIsA(StageMorph);
+    var stage = top.scriptTarget().parentThatIsA(StageMorph);
     if (stage && HighlightDialogBoxMorph.showOnRun) {
         var process = stage.threads.findProcess(top);
         if (process && !process.readyToTerminate) {

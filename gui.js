@@ -5498,7 +5498,7 @@ IDE_Morph.prototype.exportProjectMedia = function (name) {
 };
 
 IDE_Morph.prototype.exportProjectNoMedia = function (name) {
-    Trace.log('IDE.exportProjectMedia', name);
+    Trace.log('IDE.exportProjectNoMedia', name);
     var menu, str;
     this.serializer.isCollectingMedia = true;
     if (name) {

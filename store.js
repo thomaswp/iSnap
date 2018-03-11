@@ -917,6 +917,8 @@ SnapSerializer.prototype.loadCustomBlocks = function (
 SnapSerializer.prototype.loadCustomBlock = function(
     object, child, isGlobal, isDispatch
 ) {
+    // private
+    var myself = this;
     var definition, names, inputs, vars, header, code, trans, comment, i;
     if (child.tag !== 'block-definition') {
         return null;
@@ -1002,11 +1004,6 @@ SnapSerializer.prototype.loadCustomBlock = function(
     code = child.childNamed('code');
     if (code) {
         definition.codeMapping = code.contents;
-    }
-
-    comment = child.childNamed('comment');
-    if (comment) {
-        definition.comment = this.loadComment(comment);
     }
 
     trans = child.childNamed('translations');

@@ -183,6 +183,8 @@ function (type, category, spec) {
         type: type,
         category: category,
         blockSpec: function() { return spec; },
+        // HACK(rzhi): temporarily fix the localizedSpec not defined bug
+        localizedSpec: function() {return spec;},
         variableNames: [],
         inputOptionsOfIdx: function() { return inputs; }
     };

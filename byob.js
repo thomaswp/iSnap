@@ -2375,15 +2375,6 @@ BlockEditorMorph.prototype.applyToDefinition = function (definition) {
         pos = this.body.contents.position(),
         element;
 
-    definition.receiver = this.target; // only for serialization
-    definition.spec = this.prototypeSpec();
-    definition.declarations = this.prototypeSlots();
-    definition.variableNames = this.variableNames();
-    definition.scripts = [];
-    definition.editorDimensions = this.bounds.copy();
-    definition.cachedIsRecursive = null; // flush the cache, don't update
-
-
     // Copy IDs when copying blocks, rather than making new block IDs
     // as we would do for duplicating a block
     BlockMorph.copyIDs = true;

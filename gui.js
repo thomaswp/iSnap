@@ -5686,7 +5686,9 @@ IDE_Morph.prototype.getURL = function (url, callback, responseType) {
         async = callback instanceof Function,
         myself = this,
         rsp;
-    request.responseType = responseType || 'text';
+    if (async) {
+        request.responseType = responseType || 'text';
+    }
     rsp = (request.responseType === 'text') ? 'responseText' : 'response';
     try {
         request.open('GET', url, async);

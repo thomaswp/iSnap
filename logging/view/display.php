@@ -110,6 +110,10 @@ include '../config.php';
 				button.innerHTML = compact ? "&#8592" : "&#8594";
 				if (compact) wrapper.classList.add("compact");
 				else wrapper.classList.remove("compact");
+
+				if (typeof(Storage) !== "undefined") {
+					localStorage.compact = compact;
+				}
 			}
 		</script>
 	</head>
@@ -119,6 +123,11 @@ include '../config.php';
 			<button id="compact" style="position: absolute; right: 30px; top: 3px" onclick="toggleCompact()">
 				&#8594
 			</button>
+			<script type="text/javascript">
+				if (typeof(Storage) !== "undefined") {
+					if (localStorage.compact === 'true') toggleCompact();
+				}
+			</script>
 			<div id="sidebar">
 				 <iframe id="snap" width="100%" height="100%" src="../../snap.html?assignment=view"></iframe>
 			</div>

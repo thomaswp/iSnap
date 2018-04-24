@@ -15,7 +15,7 @@ $user = $_GET['user'];
 $query = "SELECT *
 FROM handmade_hints JOIN trace ON handmade_hints.rowID=trace.id
 WHERE handmade_hints.userID='$user' AND handmade_hints.rowID=$logID
-ORDER BY handmade_hints.priority";
+ORDER BY handmade_hints.priority, handmade_hints.hid";
 
 $result = $mysqli->query($query);
 if (!$result) {

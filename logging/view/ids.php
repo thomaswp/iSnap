@@ -15,6 +15,7 @@ if (array_key_exists('ids', $_POST)) {
 
     $ids = $_POST['ids'];
     $ids = preg_split('/[\s,]+/', $ids);
+    asort($ids);
     foreach ($ids as $id) {
         $id = strtolower(trim($id));
         if (strlen($id) == 0) continue;

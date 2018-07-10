@@ -8,6 +8,7 @@ function Logger(interval) {
 
 Logger.sessionID = newGuid();
 Logger.prototype.serializer = new SnapSerializer();
+Logger.prototype.serializer.excludeMedia = true;
 
 Logger.prototype.init = function(interval) {
     this.queue = [];

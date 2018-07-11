@@ -1801,16 +1801,18 @@ Array.prototype.toXML = function (serializer) {
 // Sprites
 
 StageMorph.prototype.toXML = function (serializer) {
-    var thumbnail = normalizeCanvas(
-            this.thumbnail(SnapSerializer.prototype.thumbnailSize),
-            true
-        ),
+    var thumbnail = serializer.excludeMedia ? '' :
+            normalizeCanvas(
+                this.thumbnail(SnapSerializer.prototype.thumbnailSize),
+                true
+            ),
         thumbdata,
         ide = this.parentThatIsA(IDE_Morph);
 
     // catch cross-origin tainting exception when using SVG costumes
     try {
-        thumbdata = thumbnail.toDataURL('image/png');
+        thumbdata =  serializer.excludeMedia ? null :
+            thumbnail.toDataURL('image/png');
     } catch (error) {
         thumbdata = null;
     }
@@ -1903,7 +1905,8 @@ StageMorph.prototype.toXML = function (serializer) {
         this.enableInheritance,
         this.enableSublistIDs,
         StageMorph.prototype.frameRate !== 0,
-        normalizeCanvas(this.trailsCanvas, true).toDataURL('image/png'),
+        serializer.excludeMedia ? '' :
+            normalizeCanvas(this.trailsCanvas, true).toDataURL('image/png'),
         serializer.store(this.costumes, this.name + '_cst'),
         serializer.store(this.sounds, this.name + '_snd'),
         serializer.store(this.variables),
@@ -2008,7 +2011,8 @@ Costume.prototype.toXML = function (serializer) {
         this.name,
         this.rotationCenter.x,
         this.rotationCenter.y,
-        this instanceof SVG_Costume ?
+        serializer.excludeMedia ? '' :
+            this instanceof SVG_Costume ?
                 (this.contents ? this.contents.src : '')
                 : normalizeCanvas(this.contents).toDataURL('image/png')
     );
@@ -2020,7 +2024,7 @@ Sound.prototype.toXML = function (serializer) {
     return serializer.format(
         '<sound name="@" sound="@" ~/>',
         this.name,
-        this.toDataURL()
+        serializer.excludeMedia ? '' : this.toDataURL()
     );
 };
 

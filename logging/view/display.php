@@ -23,11 +23,17 @@ include '../config.php';
 			#wrapper {
 				height: 100%;
 			}
+			.compact #content {
+				width: 200px;
+			}
 			#content {
 				float: right;
 				width: 800px;
 				display: block;
 				height: 100%;
+			}
+			.compact #sidebar {
+				width: calc(100% - 210px);
 			}
 			#sidebar {
 				width: calc(100% - 810px);
@@ -95,16 +101,38 @@ include '../config.php';
 				form.submit();
 				document.body.removeChild(form);
 			}
+
+			var compact = false;
+			function toggleCompact() {
+				var button = document.getElementById("compact");
+				var wrapper = document.getElementById("wrapper");
+				compact = !compact;
+				button.innerHTML = compact ? "&#8592" : "&#8594";
+				if (compact) wrapper.classList.add("compact");
+				else wrapper.classList.remove("compact");
+
+				if (typeof(Storage) !== "undefined") {
+					localStorage.compact = compact;
+				}
+			}
 		</script>
 	</head>
 
 	<body>
 		<div id="wrapper">
+			<button id="compact" style="position: absolute; right: 30px; top: 3px" onclick="toggleCompact()">
+				&#8594
+			</button>
+			<script type="text/javascript">
+				if (typeof(Storage) !== "undefined") {
+					if (localStorage.compact === 'true') toggleCompact();
+				}
+			</script>
 			<div id="sidebar">
 				 <iframe id="snap" width="100%" height="100%" src="../../snap.html?assignment=view"></iframe>
 			</div>
 			<div id="content">
-				<div style="overflow: scroll; height: 100%;">
+				<div style="overflow-y: scroll; height: 100%;">
 				<?php
 function tryGetParam($key, $mysqli) {
 	return array_key_exists($key, $_GET) ? $mysqli->real_escape_string($_GET[$key]) : NULL;

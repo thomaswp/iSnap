@@ -113,7 +113,8 @@ ORDER BY MIN(start) ASC";
 	echo "<thead><th>User Hash</th>";
 	foreach ($keys as $key) {
 		$name = $assignments[$key]['name'];
-		$title = $assignments[$key]['hint'];
+		$title = array_key_exists('hint', $assignments[$key]) ?
+			$assignments[$key]['hint'] : '';
 		echo "<th title='$title'>$key</th>";
 	}
 	echo "</thead>";

@@ -11,36 +11,43 @@ window.assignments = {
         name: 'Lights, Camera, Action!',
         hint: 'Homework 1',
     },
-    'polygonMakerLab': {
-        name: 'Polygon Maker',
-        hint: 'In Lab 2 Activity',
-        hints: true,
-    },
     'squiralHW': {
         name: 'Squiral',
+        hint: 'In Lab 2 Activity',
+        hints: true,
+        database: 'template',
+    },
+    'polygonMakerLab': {
+        name: 'Polygon Maker',
         hint: 'Homework 2',
         hints: true,
+        database: 'template',
     },
     'pong1Lab': {
         name: 'Pong - 1 Player',
         hint: 'In Lab 3 Activity',
         hints: true,
+        database: 'template',
     },
     'pong2HW': {
         name: 'Pong - 2 Players',
         hint: 'Homework 3',
         hints: true,
+        prequel: 'pong1Lab',
+        database: 'template',
     },
     'guess1Lab': {
         name: 'Guessing Game Part 1',
         hint: 'In Lab 4 Activity',
         hints: true,
+        database: 'template',
     },
     'guess2Lab': {
         name: 'Guessing Game Part 2',
         hint: 'In Lab 5 Activity',
         hints: true,
         prequel: 'guess1Lab',
+        database: 'template',
     },
     'project': {
         name: 'SNAP Project',

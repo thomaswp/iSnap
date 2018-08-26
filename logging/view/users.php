@@ -93,7 +93,7 @@ if ($enable_viewer) {
     }
 
 	$query =
-"SELECT RIGHT(userID, 10) AS userID $columns FROM (
+"SELECT userID $columns FROM (
   SELECT COUNT(*) AS n, SUM(message='IDE.exportProject' OR message='ProjectDialogMorph.shareThisProject') > 0 AS exported,
     SUM(message = 'HighlightDisplay.checkMyWork') AS hintChecks, SUM(message LIKE 'SnapDisplay.show%Hint') AS hintDialogs,
 	SUM(message = 'Error') AS errors,
@@ -121,10 +121,9 @@ ORDER BY MIN(start) ASC";
 	$columns = array("userID");
 	while($row = mysqli_fetch_array($result)) {
 		echo "<tr>";
-		foreach ($columns as $column) {
-			$value = $row[$column];
-			echo "<td>$value</td>";
-		}
+		$userID = $row['userID'];
+		$shortUID = substr($userID, max(0, strlen($userID) - 10));
+		echo "<td>$shortUID</td>";
 		foreach ($keys as $key) {
 			$projects = $row[$key];
 			if ($projects == null) {
@@ -168,7 +167,8 @@ ORDER BY MIN(start) ASC";
 				$br = true;
 
 				$text = substr($project, 0, 4);
-				$link = "display.php?id=$project&assignment=$key";
+				$encodedUserID = urlencode($userID);
+				$link = "display.php?id=$project&assignment=$key&userID=$encodedUserID";
 				echo "<a href='$link' target='_blank'>$text</a>";
 			}
 			echo "</td>";

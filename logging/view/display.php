@@ -150,6 +150,7 @@ if ($enable_viewer) {
 	$start = tryGetParam('start', $mysqli);
 	$end = tryGetParam('end', $mysqli);
 	$snapshots = tryGetParam('snapshots', $mysqli);
+	$userID = tryGetParam('userID', $mysqli);
 
 	echo "<h3>Project: $id</h3>";
 	echo "<p>This lists all logs for this project. Click on a date to see the code at that time, or click here and then use the A and D keys to scroll through snapshots. Loads quickest on Chrome.</p>";
@@ -157,6 +158,9 @@ if ($enable_viewer) {
 	$where = "WHERE projectID='$id'";
 	if ($assignment) {
 		$where .= " AND assignmentID = '$assignment'";
+	}
+	if ($userID) {
+		$where .= " AND userID = '$userID'";
 	}
 	// TODO: If IDs are out of order, this can omit rows that should be included
 	// If we use the start and end as bookend, we also have to require them to

@@ -60,14 +60,14 @@ if ($enable_viewer) {
 
     // Convert the javascript literal object into JSON:
     // Add quotes around keys
-    $config = preg_replace('/([a-zA-Z_]+)([ ]*:)/', "'$1'$2",
+    $config = preg_replace('/^(\s*)([a-zA-Z_]+)([ ]*:)/m', "$1'$2'$3",
         $config);
     // Convert single quotes to double
     $config = preg_replace("/'([^']*)'/", '"$1"', $config);
     // Remove additional commas
     $config = preg_replace('/,([\s|\n]*})/', "$1", $config);
 	// Remove comments
-    $config = preg_replace('/\/\/.*/', "", $config);
+    $config = preg_replace('/^([^"\n]|"[^"\n]*")*\/\/.*$/m', "$1", $config);
 
     // Convert to a PHP associative array
     $assignments = json_decode($config, true);

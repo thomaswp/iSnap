@@ -1,7 +1,10 @@
 
 function getHintURL() {
+    // Note: tomcat run on :8080 by default. It can be tempting to just use this
+    // port, but many firewalls will block it. Make sure to use mod_proxy to
+    // proxy :8080 to :80.
     return location.protocol + '//' + location.hostname +
-        ':8080/HintServer/hints';
+        'HintServer/hints';
 }
 
 function getHintProvider() {

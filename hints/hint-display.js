@@ -227,10 +227,6 @@ HintDisplay.prototype.parentSelector = function(enclosingBlock) {
  */
 HintDisplay.prototype.createScriptHintCallback = function(simple, root,
         extraRoot, fromList, to, onThumbsDown) {
-    if (root instanceof PrototypeHatBlockMorph) {
-        fromList[0].unshift('prototypeHatBlock');
-        to.unshift('prototypeHatBlock');
-    }
 
     // For logging, we find the parent block this script is inside of, or null
     var enclosingBlock = this.getEnclosingParentBlock(root);
@@ -242,6 +238,20 @@ HintDisplay.prototype.createScriptHintCallback = function(simple, root,
     var extraRootID = extraRoot ? extraRoot.id : null;
     var parentSelector = this.parentSelector(enclosingBlock);
     var parentID = enclosingBlock ? enclosingBlock.id : null;
+
+    if (root instanceof PrototypeHatBlockMorph) {
+        fromList[0].unshift('prototypeHatBlock');
+        to.unshift('prototypeHatBlock');
+
+        // We can't use the PrototypeHatBlockMorph's id, since it is not logged
+        // so we use the GUID of the custom block and set index to 0 to indicate
+        // it's first (and only) script
+        var blockEditor = root.parentThatIsA(BlockEditorMorph);
+        if (blockEditor && blockEditor.definition) {
+            parentID = blockEditor.definition.guid;
+            index = 0;
+        }
+    }
 
     var data = {
         // For unnested scripts, the ID of the first block in the edited script

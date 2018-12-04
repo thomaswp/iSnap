@@ -25,16 +25,17 @@ SET time_zone = "+00:00";
 DROP TABLE IF EXISTS `trace`;
 
 CREATE TABLE IF NOT EXISTS `trace` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `time` datetime NOT NULL,
-  `message` varchar(64) NOT NULL,
-  `data` text NOT NULL,
-  `assignmentID` varchar(40) NOT NULL,
-  `userID` varchar(255),
-  `projectID` varchar(40) NOT NULL,
-  `sessionID` varchar(40) NOT NULL,
-  `browserID` varchar(40) NOT NULL,
-  `code` text NOT NULL,
+  `id` int(11) NOT NULL COMMENT 'A unique row ID for this event.',
+  `time` datetime NOT NULL COMMENT 'The client-side time at which the event was logged. This may be inaccurate if the browser clock was wrong.',
+  `serverTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'An auto-generated timestamp when this row was created, which may be after the event actually occurred.',
+  `message` varchar(40) NOT NULL COMMENT 'The type of event that occurred.',
+  `data` text NOT NULL COMMENT 'Any additional parameters associated with the event.',
+  `assignmentID` varchar(40) NOT NULL COMMENT 'The ID of the assignment being worked on.',
+  `userID` varchar(255) DEFAULT NULL COMMENT 'A hashed ID for the user.',
+  `projectID` varchar(40) NOT NULL COMMENT 'A GUID for the Snap project.',
+  `sessionID` varchar(40) NOT NULL COMMENT 'A GUID for the browser session.',
+  `browserID` varchar(40) NOT NULL COMMENT 'A GUID for the browser.',
+  `code` text NOT NULL COMMENT 'A snapshot of the xml of the Snap project, if changed from the last log.',
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

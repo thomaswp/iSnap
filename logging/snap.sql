@@ -25,7 +25,7 @@ SET time_zone = "+00:00";
 DROP TABLE IF EXISTS `trace`;
 
 CREATE TABLE IF NOT EXISTS `trace` (
-  `id` int(11) NOT NULL COMMENT 'A unique row ID for this event.',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'A unique row ID for this event.',
   `time` datetime NOT NULL COMMENT 'The client-side time at which the event was logged. This may be inaccurate if the browser clock was wrong.',
   `serverTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'An auto-generated timestamp when this row was created, which may be after the event actually occurred.',
   `message` varchar(40) NOT NULL COMMENT 'The type of event that occurred.',

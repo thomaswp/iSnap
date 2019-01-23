@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `trace` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'A unique row ID for this event.',
   `time` datetime NOT NULL COMMENT 'The client-side time at which the event was logged. This may be inaccurate if the browser clock was wrong.',
   `serverTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'An auto-generated timestamp when this row was created, which may be after the event actually occurred.',
-  `message` varchar(40) NOT NULL COMMENT 'The type of event that occurred.',
+  `message` varchar(64) NOT NULL COMMENT 'The type of event that occurred.',
   `data` text NOT NULL COMMENT 'Any additional parameters associated with the event.',
   `assignmentID` varchar(40) NOT NULL COMMENT 'The ID of the assignment being worked on.',
   `userID` varchar(255) DEFAULT NULL COMMENT 'A hashed ID for the user.',

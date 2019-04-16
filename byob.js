@@ -2130,7 +2130,8 @@ BlockEditorMorph.prototype.init = function (definition, target) {
     scripts.cleanUpMargin = 10;
 
     proto = new PrototypeHatBlockMorph(this.definition);
-    proto.setPosition(scripts.position().add(10));
+    proto.setPosition(scripts.position().add(
+        BlockEditorMorph.defaultHatBlockMargin));
     if (definition.comment !== null) {
         comment = definition.comment.fullCopy();
         proto.comment = comment;
@@ -2178,7 +2179,8 @@ BlockEditorMorph.prototype.init = function (definition, target) {
         this.addButton('cancel', 'Cancel');
     }
 
-    this.setExtent(new Point(375, 300)); // normal initial extent
+    this.setExtent(new Point(400, 350).add(
+        BlockEditorMorph.defaultHatBlockMargin)); // normal initial extent
     this.fixLayout();
     scripts.fixMultiArgs();
 

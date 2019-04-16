@@ -114,6 +114,7 @@ SymbolMorph.prototype.names = [
     'line',
     'cross',
     'crosshairs',
+    'plus',
     'paintbucket',
     'eraser',
     'pipette',
@@ -283,6 +284,8 @@ SymbolMorph.prototype.symbolCanvasColored = function (aColor) {
         return this.drawSymbolCross(canvas, aColor);
     case 'crosshairs':
         return this.drawSymbolCrosshairs(canvas, aColor);
+    case 'plus':
+        return this.drawSymbolPlus(canvas, aColor);
     case 'paintbucket':
         return this.drawSymbolPaintbucket(canvas, aColor);
     case 'eraser':
@@ -1096,6 +1099,23 @@ SymbolMorph.prototype.drawSymbolCrosshairs = function (canvas, color) {
     ctx.stroke();
     ctx.moveTo(w / 2, h / 2);
     ctx.arc(w / 2, w / 2, w / 3 - l, radians(0), radians(360), false);
+    ctx.stroke();
+    return canvas;
+};
+
+SymbolMorph.prototype.drawSymbolPlus = function (canvas, color) {
+    // answer a canvas showing a plus
+    var ctx = canvas.getContext('2d'),
+        w = canvas.width,
+        h = canvas.height;
+
+    ctx.strokeStyle = color.toString();
+    ctx.lineWidth = h * 0.2;
+    ctx.moveTo(0, h / 2);
+    ctx.lineTo(w, h / 2);
+    ctx.stroke();
+    ctx.moveTo(w / 2, 0);
+    ctx.lineTo(w / 2, h);
     ctx.stroke();
     return canvas;
 };

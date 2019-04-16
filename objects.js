@@ -6320,6 +6320,7 @@ function StageMorph(globals) {
 
 StageMorph.prototype.init = function (globals) {
     this.name = localize('Stage');
+    this.guid = newGuid();
     this.instrument = null;
     this.threads = new ThreadManager();
     this.variables = new VariableFrame(globals || null, this);

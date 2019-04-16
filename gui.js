@@ -1057,11 +1057,7 @@ IDE_Morph.prototype.createCategories = function () {
             colors,
             myself, // the IDE is the target
             function () {
-                myself.currentCategory = category;
-                myself.categories.children.forEach(function (each) {
-                    each.refresh();
-                });
-                myself.refreshPalette(true);
+                myself.changeCategory(category);
             },
             category[0].toUpperCase().concat(category.slice(1)), // label
             function () {  // query
@@ -5201,7 +5197,7 @@ IDE_Morph.prototype.languageMenu = function () {
 IDE_Morph.prototype.setLanguage = function (lang, callback, noSave) {
     Trace.log('IDE.setLanguage', lang);
     var translation = document.getElementById('language'),
-        src = this.resourceURL('locale', 'lang-' + lang + '.js'),
+        src = this.resourceURL('lang-' + lang + '.js'),
         myself = this;
     SnapTranslator.unload();
     if (translation) {

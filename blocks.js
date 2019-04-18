@@ -782,7 +782,7 @@ SyntaxElementMorph.prototype.setLabelColor = function (
                     && morph.isReadOnly)) {
             morph.setLabelColor(textColor, shadowColor, shadowOffset);
         } else if (morph.isLoop) { // C-shaped slot with loop arrow symbol
-            morph.loop().setLabelColor(textColor, shadowColor, shadowOffset);
+            // morph.loop().setLabelColor(textColor, shadowColor, shadowOffset); //HACK(rzhi): disable for showing hint
         }
     });
 };
@@ -1482,22 +1482,22 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
             part.isStatic = true; // rejects reporter drops
             part.isLambda = true; // auto-reifies nested script
             part.isLoop = true; // has a loop symbol
-            part.add(this.labelPart('%loopArrow'));
+            // part.add(this.labelPart('%loopArrow')); //HACK(rzhi): for displaying hint correctly
             break;
         case '%loop':
             part = new CSlotMorph();
             part.isStatic = true;
             part.isLoop = true; // has a loop symbol
-            part.add(this.labelPart('%loopArrow'));
+            // part.add(this.labelPart('%loopArrow')); //HACK(rzhi): for displaying hint correctly
             break;
         case '%loopArrow':
-            part = new SymbolMorph('loop');
-            part.size = this.fontSize * 0.7;
-            part.color = new Color(255, 255, 255);
-            part.shadowColor = this.color.darker(this.labelContrast);
-            part.shadowOffset = MorphicPreferences.isFlat ?
-                    new Point() : this.embossing;
-            part.drawNew();
+            // part = new SymbolMorph('loop'); //HACK(rzhi): for displaying hint correctly
+            // part.size = this.fontSize * 0.7;
+            // part.color = new Color(255, 255, 255);
+            // part.shadowColor = this.color.darker(this.labelContrast);
+            // part.shadowOffset = MorphicPreferences.isFlat ?
+            //         new Point() : this.embossing;
+            // part.drawNew();
             break;
         case '%clr':
             part = new ColorSlotMorph();

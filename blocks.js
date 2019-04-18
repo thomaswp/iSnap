@@ -312,14 +312,12 @@ SyntaxElementMorph.prototype.isNonPartMorph = function(child) {
 
 SyntaxElementMorph.prototype.parts = function () {
     // answer my non-crontrol submorphs
-    var nb = null;
+    var nb = null, myself = this;;
     if (this.nextBlock) { // if I am a CommandBlock or a HatBlock
         nb = this.nextBlock();
     }
     return this.children.filter(function (child) {
-        return (child !== nb)
-            && !(child instanceof ShadowMorph)
-            && !(child instanceof BlockHighlightMorph);
+        return (child !== nb) && !myself.isNonPartMorph(child);
     });
 };
 

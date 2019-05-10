@@ -1853,6 +1853,9 @@ IDE_Morph.prototype.fixLayout = function (situation) {
         }
     }
 
+    // Update the label again after all the resizing
+    this.controlBar.updateLabel();
+
     Morph.prototype.trackChanges = true;
     this.changed();
 };

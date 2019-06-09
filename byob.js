@@ -881,10 +881,7 @@ CustomCommandBlockMorph.prototype.edit = function () {
             null,
             function (definition) {
                 if (definition) { // temporarily update everything
-                    Trace.log('BlockEditor.changeType', definition ? {
-                        'category': definition.category,
-                        'type': definition.type,
-                    } : null);
+                    Trace.log('BlockEditor.changeType', this.getDefinitionID());
                     hat.blockCategory = definition.category;
                     hat.type = definition.type;
                     myself.refreshPrototype();
@@ -2072,7 +2069,7 @@ function BlockEditorMorph(definition, target) {
 }
 
 BlockEditorMorph.prototype.ok = function() {
-    Trace.log('BlockEditor.ok');
+    Trace.log('BlockEditor.ok', this.getDefinitionJSON());
     BlockEditorMorph.uber.ok.apply(this, arguments);
 };
 
@@ -2086,22 +2083,27 @@ BlockEditorMorph.prototype.destroy = function() {
 
 BlockEditorMorph.defaultHatBlockMargin = new Point(10, 10);
 
+BlockEditorMorph.prototype.getDefinitionJSON = function() {
+    var definition = this.definition;
+    return definition ? {
+        'spec': definition.spec,
+        'category': definition.category,
+        'type': definition.type,
+        'guid': definition.guid,
+    } : null;
+};
+
 BlockEditorMorph.prototype.init = function (definition, target) {
     var scripts, proto, scriptsFrame, block, comment, myself = this,
         isLive = Process.prototype.enableLiveCoding ||
             Process.prototype.enableSingleStepping;
 
-    Trace.log('BlockEditor.start', definition ? {
-        'spec': definition.spec,
-        'category': definition.category,
-        'type': definition.type,
-        'guid': definition.guid,
-    } : null);
-
     // additional properties:
     this.definition = definition;
     this.translations = definition.translationsAsText();
     this.handle = null;
+
+    Trace.log('BlockEditor.start', this.getDefinitionJSON());
 
     // initialize inherited properties:
     BlockEditorMorph.uber.init.call(
@@ -2242,7 +2244,7 @@ BlockEditorMorph.prototype.accept = function (origin) {
 
 BlockEditorMorph.prototype.cancel = function (origin) {
     if (origin instanceof CursorMorph) {return; }
-    Trace.log('BlockEditor.cancel');
+    Trace.log('BlockEditor.cancel', this.getDefinitionJSON());
     //this.refreshAllBlockInstances();
     this.close();
 };
@@ -2361,7 +2363,7 @@ BlockEditorMorph.prototype.deduplicateBlockIDs = function() {
 };
 
 BlockEditorMorph.prototype.updateDefinition = function () {
-    Trace.log('BlockEditor.apply');
+    Trace.log('BlockEditor.apply', this.getDefinitionJSON());
     var oldSpec = this.definition.blockSpec();
     this.applyToDefinition(this.definition);
     this.refreshAllBlockInstances(oldSpec);

@@ -897,6 +897,7 @@ HighlightDisplay.logHoverInsertIndicator = function(block, showing) {
 
 extend(ScriptsMorph, 'step', function(base) {
     base.call(this);
+    if (!window.world.hand) return;
     // If the hand is grabbing, don't show hover feedback
     if (window.world.hand.children.length > 0) return;
     if (!this.hoverBlocks) return;

@@ -64,9 +64,9 @@ if ($mysqli->connect_errno) {
 		$where .= " AND message='Block.grabbed'";
 	}
 
-	$query = "SELECT count(*) FROM `$table` $where";
+	$query = "SELECT count(*) AS N FROM `$table` $where";
 	$result = $mysqli->query($query);
-	if (mysqli_num_rows($result) > 1000000) {
+	if (mysqli_fetch_array($result)['N'] > 1000000) {
 		echo "Too many results: please filter";
 		return;
 	}

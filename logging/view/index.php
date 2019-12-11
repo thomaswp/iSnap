@@ -25,11 +25,13 @@ if ($enable_viewer) {
 		die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
 	}
 
-	$user = isset($_GET['user']) ? $_GET['user'] : null;
 	$where = "WHERE projectID <> ''";
-	if ($user) {
-		$user = $mysqli->escape_string($user);
-		$where = "$where AND userID = '$user'";
+	foreach (['userID', 'assignmentID', 'projectID'] as $filter) {
+		$value = isset($_GET[$filter]) ? $_GET[$filter] : null;
+		if ($value) {
+			$value = $mysqli->escape_string($value);
+			$where = "$where AND $filter = '$value'";
+		}
 	}
 
 	$query = "SELECT projectID, assignmentID, userID, min(time) as start, max(time) as end, count(*) as logs FROM `$table` " .

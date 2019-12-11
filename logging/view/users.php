@@ -64,14 +64,17 @@ if ($enable_viewer) {
         $config);
     // Convert single quotes to double
     $config = preg_replace("/'([^']*)'/", '"$1"', $config);
+	// Remove comments
+	$config = preg_replace('/^([^"\n]|"[^"\n]*")*\/\/.*$/m', "$1", $config);
     // Remove additional commas
     $config = preg_replace('/,([\s|\n]*})/', "$1", $config);
-	// Remove comments
-    $config = preg_replace('/^([^"\n]|"[^"\n]*")*\/\/.*$/m', "$1", $config);
+	// Remove other nonsense that may cause PHP to error
+	$config = preg_replace('/\s+/', ' ', $config);
+	$config = stripslashes(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $config));
 
     // Convert to a PHP associative array
     $assignments = json_decode($config, true);
-    if (!$assignments) die ('Invalid assignments: ' . $config);
+    if (!$assignments) die ('Invalid assignments: ' . json_last_error() . ': ' . $config);
 
 	$mysqli = new mysqli($host, $user, $password, $db);
 	if ($mysqli->connect_errno) {
@@ -99,7 +102,10 @@ if ($enable_viewer) {
 	SUM(message = 'Error') AS errors,
 	MIN(time) AS start,
   	userID, projectID, assignmentID
-  FROM trace WHERE projectID <> '' GROUP BY userID, projectID, assignmentID HAVING n > 5
+  FROM trace WHERE projectID <> '' AND
+  	(message IN ('IDE.exportProject', 'ProjectDialogMorph.shareThisProject', 'HighlightDisplay.checkMyWork', 'Error', 'Block.grabbed')
+		OR message LIKE 'SnapDisplay.show%Hint')
+  GROUP BY userID, projectID, assignmentID HAVING n > 5
 ) AS grouped
 GROUP BY userID
 ORDER BY MIN(start) ASC";

@@ -2,6 +2,15 @@
 
 include '../config.php';
 
+if (!$enable_viewer) {
+	die ("You do not have permission to view this page");
+}
+
+$mysqli = new mysqli($host, $user, $password, $db);
+if ($mysqli->connect_errno) {
+	die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
+}
+
 ?>
 
 <!doctype html>
@@ -12,6 +21,27 @@ include '../config.php';
 		<meta charset="UTF-8">
 		<title>List Projects</title>
 		<link rel="stylesheet" type="text/css" href="table.css">
+		<form method="GET">
+			Assignment:
+			<select name="assignmentID">
+				<option value=''>All</option>
+<?php
+
+	$query = "SELECT DISTINCT assignmentID FROM `$table`";
+	$result = $mysqli->query($query);
+	while($row = mysqli_fetch_array($result)) {
+		$assignmentID = $row['assignmentID'];
+		$selected = (isset($_GET['assignmentID']) &&
+			$_GET['assignmentID'] == $assignmentID) ? 'selected' : '';
+		echo "<option $selected>$assignmentID</option>";
+	}
+	$editsOnly = isset($_GET['editsOnly']);
+	$editsOnlyChecked = $editsOnly ? 'checked' : '';
+?>
+			</select>
+			<input type="checkbox" name="editsOnly" value="True"  <?php echo $editsOnlyChecked ?> /> Edits only
+			<input type="submit" value="Update"/>
+		</form>
 	</head>
 
 	<body>
@@ -19,19 +49,26 @@ include '../config.php';
 		<p>Please select a project to view:</p>
 		<?php
 
-if ($enable_viewer) {
-	$mysqli = new mysqli($host, $user, $password, $db);
-	if ($mysqli->connect_errno) {
-		die ("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
-	}
+	$result = $mysqli->query($query);
 
 	$where = "WHERE projectID <> ''";
 	foreach (['userID', 'assignmentID', 'projectID'] as $filter) {
 		$value = isset($_GET[$filter]) ? $_GET[$filter] : null;
+		if ($value == '') continue;
 		if ($value) {
 			$value = $mysqli->escape_string($value);
 			$where = "$where AND $filter = '$value'";
 		}
+	}
+	if ($editsOnly) {
+		$where .= " AND message='Block.grabbed'";
+	}
+
+	$query = "SELECT count(*) FROM `$table` $where";
+	$result = $mysqli->query($query);
+	if (mysqli_num_rows($result) > 1000000) {
+		echo "Too many results: please filter";
+		return;
 	}
 
 	$query = "SELECT projectID, assignmentID, userID, min(time) as start, max(time) as end, count(*) as logs FROM `$table` " .
@@ -42,7 +79,8 @@ if ($enable_viewer) {
 	}
 
 	echo "<table cellspacing='0'>";
-	echo "<thead><th>Project ID</th><th>Assignment</th><th>User</th><th>Start</th><th>End</th><th>Logs</th><th>Hints</th></thead>";
+	$logsLabel = $editsOnly ? "Edits" : "Logs";
+	echo "<thead><th>Project ID</th><th>Assignment</th><th>User</th><th>Start</th><th>End</th><th>$logsLabel</th><th>Hints</th></thead>";
 	while($row = mysqli_fetch_array($result)) {
 		$projectID = $row['projectID'];
 		$assignmentID = $row['assignmentID'];
@@ -59,10 +97,6 @@ if ($enable_viewer) {
 			<td>$logs</td><td><a target='_blank'  href='$hints'>Hints</a></td></tr>";
 	}
 	echo "</table>";
-
-} else {
-	echo "You do not have permission to view this page";
-}
 
 		?>
 	</body>

@@ -92,7 +92,7 @@ IntentionDialogMorph.prototype.addOption = function(text) {
     };
     option.selected = selected;
 
-    option.drawNew();
+    option.rerender();
     option.fixLayout();
 
     this.body.add(option);
@@ -180,7 +180,7 @@ IntentionDialogMorph.prototype.createLabels = function() {
             this.titleBarColor.darker(this.contrast)
         );
     this.labels.color = new Color(0, 0, 0);
-    this.labels.drawNew();
+    this.labels.rerender();
     this.add(this.labels);
 };
 

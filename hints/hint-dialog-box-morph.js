@@ -45,7 +45,7 @@ HintDialogBoxMorph.prototype.createThumbButtons = function () {
         14,
         this.fontStyle
     );
-    txt.drawNew();
+    txt.rerender();
     container.add(txt);
 
     // Button container
@@ -61,7 +61,7 @@ HintDialogBoxMorph.prototype.createThumbButtons = function () {
         myself.newHint,
         localize('Pick Another')
     );
-    button.drawNew();
+    button.rerender();
     button.fixLayout();
     this.thumbButtons.add(button);
 

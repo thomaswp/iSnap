@@ -86,7 +86,7 @@ function (parentSelector, from, to, otherFromBlocks) {
     this.body.orientation = 'col'; //set alignment to vertical
     // change padding to 2 times of original padding
     this.body.padding = 2 * this.padding;
-    this.body.drawNew(); //re-draw alignmentMorph
+    this.body.rerender(); //re-draw alignmentMorph
 
     if (!parentSelector) {
         Trace.logErrorMessage('bad parentSelector in ' +
@@ -290,7 +290,7 @@ CodeHintDialogBoxMorph.prototype.showScriptHint =
 function (parentSelector, index, from, to) {
     //set HintDialogBox body alignment to horizontal alignment
     this.body.orientation = 'row'; //set alignment to horizontal
-    this.body.drawNew(); //re-draw alignmentMorph
+    this.body.rerender(); //re-draw alignmentMorph
 
     // Create the from and to blocks and put them in the ScriptMorphs
     var fromBlock = this.createBlockFromList(from[0], parentSelector, index);
@@ -529,7 +529,7 @@ CodeHintDialogBoxMorph.prototype.createLabels = function() {
 
     this.labels.forEach(function(label) {
         label.color = new Color(0, 0, 0);
-        label.drawNew();
+        label.rerender();
         myself.add(label);
     });
 };

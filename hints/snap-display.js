@@ -13,7 +13,7 @@ function setHintsActive(active) {
     hintButton.active = active;
     hintButton.labelString =
         ' ' + localize(active ? 'Hide Help' : 'Get Help') + ' ';
-    hintButton.drawNew();
+    hintButton.rerender();
     hintButton.fixLayout();
     ide.fixLayout();
 }

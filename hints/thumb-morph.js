@@ -77,9 +77,9 @@ ThumbMorph.prototype.init = function (
     );
     this.refresh();
 
-    this.drawNew();
+    this.rerender();
     this.fixLayout();
-    this.drawNew();
+    this.rerender();
 };
 
 ThumbMorph.prototype.fixLayout = function () {
@@ -185,7 +185,7 @@ ThumbMorph.prototype.createTick = function () {
         }
     };
 
-    this.tick.drawNew = function () {
+    this.tick.rerender = function () {
         this.image = newCanvas(this.extent());
         var context = this.image.getContext('2d'),
             isFlat = MorphicPreferences.isFlat && !this.is3D;
@@ -207,7 +207,7 @@ ThumbMorph.prototype.createTick = function () {
     };
 
     this.tick.setTexture(this.state);
-    this.tick.drawNew();
+    this.tick.rerender();
     this.tick.setExtent(new Point(18, 18));
     this.tick.setCenter(this.center());
 
@@ -240,7 +240,7 @@ ThumbMorph.prototype.refresh = function () {
     }
 
     this.tick.setTexture(this.state);
-    this.tick.drawNew();
+    this.tick.rerender();
 
     if (this.toggleElement && this.toggleElement.refresh) {
         this.toggleElement.refresh();

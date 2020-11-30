@@ -39,7 +39,7 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     function addText(text, bold, parent) {
         var textMorph = new TextMorph(localize(text), fontSize,
             null, bold, null, null, width);
-        textMorph.drawNew();
+        textMorph.rerender();
         (parent || body).add(textMorph);
         return textMorph;
     }
@@ -162,7 +162,7 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
     bodyWrapper.add(body);
     bodyWrapper.fixLayout();
     this.addBody(bodyWrapper);
-    bodyWrapper.drawNew();
+    bodyWrapper.rerender();
 };
 
 HighlightDialogBoxMorph.prototype.destroy = function() {
@@ -194,7 +194,7 @@ HighlightDialogBoxMorph.prototype.popUp = function() {
     }
 
     this.fixLayout();
-    this.drawNew();
+    this.rerender();
 
     var origin = this.makeOrigin();
 
@@ -235,7 +235,7 @@ HighlightDialogBoxMorph.prototype.recenter = function(origin) {
         this.setLeft(origin.x);
         this.setTop(origin.y);
         this.fixLayout();
-        this.drawNew();
+        this.rerender();
     }
 };
 
@@ -259,9 +259,9 @@ HighlightDialogBoxMorph.prototype.toggleInsert = function() {
     this.insertButton.fixLayout();
     this.setDisplayShowInserts(this.showInserts);
     this.body.fixLayout();
-    this.body.drawNew();
+    this.body.rerender();
     this.fixLayout();
-    this.drawNew();
+    this.rerender();
 };
 
 HighlightDialogBoxMorph.prototype.minimizeButtonText = function() {
@@ -277,9 +277,9 @@ HighlightDialogBoxMorph.prototype.toggleMinimized = function() {
     this.minimizeButton.fixLayout();
     this.bodyFrame.isVisible = !minimized;
     this.body.fixLayout();
-    this.body.drawNew();
+    this.body.rerender();
     this.fixLayout();
-    this.drawNew();
+    this.rerender();
 };
 
 HighlightDialogBoxMorph.prototype.toggleShowOnRun = function() {

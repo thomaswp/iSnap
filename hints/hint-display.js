@@ -427,7 +427,7 @@ HintDisplay.prototype.addHintButton = function(text, onClick) {
     hintButton.outlineGradient = false;
     hintButton.padding = DialogBoxMorph.prototype.buttonPadding;
     hintButton.contrast = DialogBoxMorph.prototype.buttonContrast;
-    hintButton.drawNew();
+    hintButton.rerender();
     hintButton.fixLayout();
 
     extendObject(window.ide, 'toggleAppMode', function(base, appMode) {

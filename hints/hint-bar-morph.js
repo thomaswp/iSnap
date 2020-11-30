@@ -16,7 +16,7 @@ HintBarMorph.prototype.init = function(parent, maxAdjacent) {
 };
 
 // Makes the morph itself draw transparently
-HintBarMorph.prototype.drawNew = function() {
+HintBarMorph.prototype.rerender = function() {
     this.image = newCanvas(this.extent());
 };
 

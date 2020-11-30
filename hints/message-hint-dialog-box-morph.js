@@ -52,7 +52,7 @@ function (target, simple, message, title) {
 
 MessageHintDialogBoxMorph.prototype.popUp = function() {
     this.fixLayout();
-    this.drawNew();
+    this.rerender();
     this.fixLayout();
     MessageHintDialogBoxMorph.uber.popUp.call(this);
 };

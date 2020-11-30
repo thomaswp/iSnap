@@ -137,31 +137,36 @@ extend(IDE_Morph, 'createControlBar', function(baseCreate) {
         if (ide.isAppMode) return;
         var assignment = Assignment.get();
         if (!assignment) return;
+        if (!this.label || this.label.children.length == 0) return;
+
+        // The StringMorph is now inside of a FrameMorph
+        var label = this.label.children[0];
+        var text = label.text;
+
         // A bit of a crude approximation, but it's not worth measuring exactly
         var maxLength = Math.max(0, (ide.spriteEditor.width() / 6) - 35);
-        var text = this.label.text;
         if (Assignment.getID() !== 'none' && (maxLength - text.length) > 5) {
             text += ' - ' + assignment.name;
         }
         if (text.length > maxLength) {
             text = text.slice(0, maxLength) + '...';
         }
-        this.label.text = text;
-        this.label.parent = null;
-        this.label.drawNew();
-        this.label.parent = this;
+        label.text = text;
+        label.changed();
+        label.fixLayout();
+        label.rerender();
 
         if (!window.allowChangeAssignment) return;
 
-        this.label.mouseEnter = function() {
+        label.mouseEnter = function() {
             document.body.style.cursor = 'pointer';
         };
 
-        this.label.mouseLeave = function() {
+        label.mouseLeave = function() {
             document.body.style.cursor = 'inherit';
         };
 
-        this.label.mouseClickLeft = function() {
+        label.mouseClickLeft = function() {
             var menu = new MenuMorph(ide);
             var pos = ide.controlBar.label.bottomLeft();
             menu.addItem(

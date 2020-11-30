@@ -93,8 +93,8 @@ SyntaxElementMorph.prototype.fixHintHighlight = function() {
     }
 };
 
-extend(SyntaxElementMorph, 'fixLayout', function(base, silently) {
-    base.call(this, silently);
+extend(SyntaxElementMorph, 'fixLayout', function(base) {
+    base.call(this);
     this.fixHintHighlight();
 });
 

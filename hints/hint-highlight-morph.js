@@ -3,6 +3,7 @@ function HintHighlightMorph() {
     this.init();
     // Never copy a HintHighlightMorph
     this.doNotCopy = true;
+    this.isCachingImage = true;
 }
 
 HintHighlightMorph.prototype = new Morph();
@@ -16,6 +17,9 @@ HintHighlightMorph.prototype.topMorphAt = function(point) {
 SyntaxElementMorph.prototype.highlightImage =
     BlockMorph.prototype.highlightImage;
 
+SyntaxElementMorph.prototype.outline =
+    BlockMorph.prototype.outline;
+
 SyntaxElementMorph.prototype.addHintHighlight = function(color) {
     var isHidden = !this.isVisible,
         highlight;
@@ -28,7 +32,7 @@ SyntaxElementMorph.prototype.addHintHighlight = function(color) {
     });
     highlight = this.hintHighlight(color, 2);
     // After highlighting, manually add the morph and reset the children
-    children.push(highlight);
+    // children.push(highlight);
     this.children = children;
     this.fullChanged();
     if (isHidden) {this.hide(); }
@@ -59,11 +63,12 @@ SyntaxElementMorph.prototype.removeHintHighlight = function () {
 SyntaxElementMorph.prototype.hintHighlight = function (color, border) {
     var highlight = new HintHighlightMorph(),
         fb = this.fullBounds();
-    highlight.setExtent(fb.extent().add(border * 2));
+    highlight.bounds.setExtent(fb.extent().add(border * 2));
+    highlight.holes = [highlight.bounds]; // make the highlight untouchable
     highlight.color = color;
-    highlight.image = this.highlightImage(color, border);
+    highlight.cachedImage = this.highlightImage(color, border);
     highlight.setPosition(fb.origin.subtract(new Point(border, border)));
-    highlight.parent = this;
+    // highlight.parent = this;
     return highlight;
 };
 

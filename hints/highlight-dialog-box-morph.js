@@ -61,7 +61,7 @@ HighlightDialogBoxMorph.prototype.init = function(target, showInserts,
         childHighlightColor, parent) {
         var parentBlock = addBlock(parentSelector, null, parent || body);
         var childBlock = createBlock(childSelector, childHighlightColor);
-        parentBlock.silentReplaceInput(parentBlock.inputs()[childIndex],
+        parentBlock.replaceInput(parentBlock.inputs()[childIndex],
             childBlock);
     }
 

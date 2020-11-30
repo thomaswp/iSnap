@@ -169,7 +169,7 @@ function(selector, params) {
             // Otherwise just insert the child
             var param = this.createBlock(params[i], input);
             this.clearParameter(param);
-            input.parent.silentReplaceInput(input, param);
+            input.parent.replaceInput(input, param);
         }
     }
     return block;
@@ -333,7 +333,7 @@ function(list, parentSelector, index) {
             console.warn('DOES THIS EVER HAPPEN?');
             // eslint-disable-next-line no-console
             console.log(parent, index, input);
-            input.parent.silentReplaceInput(input, block);
+            input.parent.replaceInput(input, block);
         }
         return parent;
     }

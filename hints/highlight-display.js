@@ -692,6 +692,31 @@ function(block, attachPoint, callback, size) {
     this.insertButtons.push(button);
 };
 
+// Create the + symbol draw function for hints
+SymbolMorph.prototype.renderSymbolPlus = function (ctx, color) {
+    // answer a canvas showing a plus
+    var w = this.size,
+        h = this.size;
+
+    ctx.strokeStyle = color.toString();
+    ctx.lineWidth = h * 0.2;
+    ctx.moveTo(0, h / 2);
+    ctx.lineTo(w, h / 2);
+    ctx.stroke();
+    ctx.moveTo(w / 2, 0);
+    ctx.lineTo(w / 2, h);
+    ctx.stroke();
+};
+
+// And make sure it can actually call it
+extend(SymbolMorph, 'renderShape', function(base, ctx, aColor) {
+    if (this.name == 'plus') {
+        this.renderSymbolPlus(ctx, aColor);
+    } else {
+        base.call(this, ctx, aColor);
+    }
+});
+
 HighlightDisplay.prototype.createInsertButton =
 function(parent, positionMorph, callback, attachPoint, size) {
     size = (size || 10) * SyntaxElementMorph.prototype.scale;

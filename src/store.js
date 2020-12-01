@@ -561,9 +561,9 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode, remixID) {
     model.editing  = model.project.childNamed('editing');
     if (model.editing) {
         var defaultGUID = model.editing.attributes.guid;
-        model.editing.children.forEach(function(scripts, i) {
-            myself.loadEditing(project, scripts, defaultGUID, i);
-        });
+        model.editing.children.forEach((scripts, i) => {
+            this.loadEditing(project, scripts, defaultGUID, i);
+        }, this);
     }
 
     /* Global Variables */
@@ -1055,6 +1055,8 @@ SnapSerializer.prototype.loadCustomBlock = function(
     if (comment) {
         definition.comment = this.loadComment(comment);
     }
+
+    return definition;
 };
 
 SnapSerializer.prototype.populateCustomBlocks = function (
@@ -1345,7 +1347,7 @@ SnapSerializer.prototype.loadComment = function (model) {
 };
 
 SnapSerializer.prototype.setBlockId = function (model, block) {
-    var id = parseInt(model.attributes['id']);
+    var id = parseInt(model.attributes['blockID']);
     if (isNaN(id)) return;
     block.id = id;
     BlockMorph.nextId = Math.max(BlockMorph.nextId, id + 1);
@@ -2256,7 +2258,7 @@ BlockMorph.prototype.toXML = BlockMorph.prototype.toScriptXML = function (
 
 BlockMorph.prototype.toBlockXML = function (serializer) {
     return serializer.format(
-        '<block id="@" s="@">%%</block>',
+        '<block blockID="@" s="@">%%</block>',
         this.id,
         this.selector,
         serializer.store(this.inputs()),

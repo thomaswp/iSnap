@@ -2477,11 +2477,6 @@ BlockEditorMorph.prototype.applyToDefinition = function (definition) {
         count += 1;
         this.definition.spec = this.definition.spec + ' (' + count + ')';
     }
-
-    this.refreshAllBlockInstances(oldSpec);
-    ide = this.target.parentThatIsA(IDE_Morph);
-    ide.flushPaletteCache();
-    ide.refreshPalette();
 };
 
 BlockEditorMorph.prototype.context = function (prototypeHat) {

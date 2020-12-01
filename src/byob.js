@@ -2422,7 +2422,7 @@ BlockEditorMorph.prototype.updateDefinition = function () {
 // arbitrary block definition (e.g. a copy of the original), mainly for
 // logging purposes.
 BlockEditorMorph.prototype.applyToDefinition = function (definition) {
-    var head, ide,
+    var head,
         pos = this.body.contents.position(),
         count = 1,
         element;
@@ -2431,15 +2431,15 @@ BlockEditorMorph.prototype.applyToDefinition = function (definition) {
     // as we would do for duplicating a block
     BlockMorph.copyIDs = true;
 
-    this.definition.receiver = this.target; // only for serialization
-    this.definition.spec = this.prototypeSpec();
-    this.definition.declarations = this.prototypeSlots();
-    this.definition.variableNames = this.variableNames();
-    this.definition.scripts = [];
-    this.definition.updateTranslations(this.translations);
-    this.definition.cachedTranslation = null;
-    this.definition.editorDimensions = this.bounds.copy();
-    this.definition.cachedIsRecursive = null; // flush the cache, don't update
+    definition.receiver = this.target; // only for serialization
+    definition.spec = this.prototypeSpec();
+    definition.declarations = this.prototypeSlots();
+    definition.variableNames = this.variableNames();
+    definition.scripts = [];
+    definition.updateTranslations(this.translations);
+    definition.cachedTranslation = null;
+    definition.editorDimensions = this.bounds.copy();
+    definition.cachedIsRecursive = null; // flush the cache, don't update
 
     this.body.contents.children.forEach(morph => {
         if (morph instanceof PrototypeHatBlockMorph) {
@@ -2449,7 +2449,7 @@ BlockEditorMorph.prototype.applyToDefinition = function (definition) {
             element = morph.fullCopy();
             element.parent = null;
             element.setPosition(morph.position().subtract(pos));
-            this.definition.scripts.push(element);
+            definition.scripts.push(element);
         }
     });
 
@@ -2467,7 +2467,7 @@ BlockEditorMorph.prototype.applyToDefinition = function (definition) {
         }
     }
 
-    this.definition.body = this.context(head);
+    definition.body = this.context(head);
 
     // Make sure to turn copying IDs off when finished
     BlockMorph.copyIDs = false;

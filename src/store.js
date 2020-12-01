@@ -1099,7 +1099,7 @@ SnapSerializer.prototype.populateCustomBlock = function (
 };
 
 // Loads a custom block definition that the user was in the process of editing
-// when the proejct was saved. This is mainly for viewing log data, but can
+// when the project was saved. This is mainly for viewing log data, but can
 // also function if a project is saved with an edit dialog open.
 SnapSerializer.prototype.loadEditing = function(
     project, model, defaultGUID, index

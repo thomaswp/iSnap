@@ -334,9 +334,8 @@ SyntaxElementMorph.prototype.parts = function () {
         nb = this.nextBlock();
     }
     return this.children.filter(child =>
-        (child !== nb) &&
-            !(child instanceof ShadowMorph) &&
-                !(child instanceof BlockHighlightMorph)
+        // Edit(Thomas): use isNonPartMorph
+        (child !== nb) && !this.isNonPartMorph(child)
     );
 };
 
@@ -1866,7 +1865,8 @@ SyntaxElementMorph.prototype.fixLayout = function () {
             } else {
                 lines.push([part]);
             }
-        } else if (part instanceof BlockHighlightMorph) {
+        // Edit(Thomas): use isNonPartMorph
+        } else if (this.isNonPartMorph(part)) {
             nop(); // should be redundant now
             // this.fullChanged();
             // this.removeChild(part);
@@ -6122,7 +6122,8 @@ ReporterBlockMorph.prototype.determineSlotSpec = function () {
     var parts, idx;
     if (this.parent instanceof BlockMorph) {
         parts = this.parent.parts().filter(part =>
-            !(part instanceof BlockHighlightMorph)
+            // Edit(Thomas) use isNonPartMorph
+            !this.isNonPartMorph(part)
         );
         idx = parts.indexOf(this);
         if (idx !== -1) {

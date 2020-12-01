@@ -699,13 +699,17 @@ SymbolMorph.prototype.renderSymbolPlus = function (ctx, color) {
         h = this.size;
 
     ctx.strokeStyle = color.toString();
+    ctx.beginPath();
     ctx.lineWidth = h * 0.2;
+
     ctx.moveTo(0, h / 2);
     ctx.lineTo(w, h / 2);
     ctx.stroke();
     ctx.moveTo(w / 2, 0);
     ctx.lineTo(w / 2, h);
     ctx.stroke();
+
+    ctx.closePath();
 };
 
 // And make sure it can actually call it
@@ -760,7 +764,7 @@ function(parent, positionMorph, callback, attachPoint, size) {
         layout(button);
     };
 
-    parent.add(button);
+    parent.addBack(button);
     // Prevent the buttons from being copied (e.g. when their parent is copied
     // or stored when a custom block is serialized)
     button.doNotCopy = true;

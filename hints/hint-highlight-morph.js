@@ -6,29 +6,13 @@ function HintHighlightMorph() {
     this.isCachingImage = true;
 }
 
-// HintHighlightMorph should extend BlockHighlightMorph so that blocks and
-// their subclasses play nice when it's added as a child.
-HintHighlightMorph.prototype = new BlockHighlightMorph();
+HintHighlightMorph.prototype = new Morph();
 HintHighlightMorph.prototype.constructor = HintHighlightMorph;
-HintHighlightMorph.uber = BlockHighlightMorph.prototype;
+HintHighlightMorph.uber = Morph.prototype;
 
 HintHighlightMorph.prototype.topMorphAt = function(point) {
     return null;
 };
-
-// We have to override getHighlight so that HintHighlightMorphs won't get
-// returned (and recreated as block highlights)
-extend(BlockMorph, 'getHighlight', function(base) {
-    var highlights;
-    highlights = this.children.slice(0).reverse().filter(child =>
-        child instanceof BlockHighlightMorph &&
-            !(child instanceof HintHighlightMorph)
-    );
-    if (highlights.length !== 0) {
-        return highlights[0];
-    }
-    return null;
-})
 
 SyntaxElementMorph.prototype.highlightImage =
     BlockMorph.prototype.highlightImage;

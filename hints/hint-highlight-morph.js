@@ -127,109 +127,110 @@ extend(Morph, 'copyRecordingReferences', function(base, map) {
     return copy;
 });
 
-// ArgMorph.prototype.addFullHintHighlight = function(color) {
-//     var highlight = new HintHighlightMorph(),
-//         fb = this.fullBounds();
-//     highlight.setExtent(fb.extent());
-//     highlight.color = color;
-//     highlight.image = this.highlightImageFull(color);
-//     highlight.setPosition(fb.origin);
-//     this.addBack(highlight);
-//     this.fullChanged();
-//     return highlight;
-// };
+ArgMorph.prototype.addFullHintHighlight = function(color) {
+    var highlight = new HintHighlightMorph(),
+        fb = this.fullBounds();
+    highlight.bounds.setExtent(fb.extent());
+    highlight.color = color;
+    highlight.cachedImage = this.highlightImageFull(color);
+    highlight.setPosition(fb.origin);
+    this.addBack(highlight);
+    this.fullChanged();
+    return highlight;
+};
 
-// ArgMorph.prototype.highlightImageFull = function (color) {
-//     var fb, img, hi, ctx;
-//     fb = this.fullBounds().extent();
-//     img = this.fullImage();
+ArgMorph.prototype.highlightImageFull = function (color) {
+    var fb, img, hi, ctx;
+    fb = this.fullBounds().extent();
+    this.doWithAlpha(1, () => img = this.fullImage());
 
-//     hi = newCanvas(fb);
-//     ctx = hi.getContext('2d');
-//     ctx.fillStyle = color.toString();
-//     ctx.fillRect(0, 0, fb.x, fb.y);
+    hi = newCanvas(fb);
+    ctx = hi.getContext('2d');
+    ctx.fillStyle = color.toString();
+    ctx.fillRect(0, 0, fb.x, fb.y);
 
-//     ctx.globalCompositeOperation = 'destination-in';
-//     ctx.drawImage(img, 0, 0);
-//     return hi;
-// };
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.drawImage(img, 0, 0);
+    console.log(hi);
+    return hi;
+};
 
-// ArgMorph.prototype.isHintClickable = function() {
-//     return this.onClick != null && !this.isHoverHintShowing();
-// }
+ArgMorph.prototype.isHintClickable = function() {
+    return this.onClick != null && !this.isHoverHintShowing();
+}
 
-// ArgMorph.prototype.isHoverHintShowing = function() {
-//     return HintDialogBoxMorph.showing &&
-//         HintDialogBoxMorph.showing.sourceArgMorph === this;
-// }
+ArgMorph.prototype.isHoverHintShowing = function() {
+    return HintDialogBoxMorph.showing &&
+        HintDialogBoxMorph.showing.sourceArgMorph === this;
+}
 
-// ArgMorph.prototype.mouseEnter = function() {
-//     if (this.isHintClickable()) {
-//         this.fullHighlight =
-// 			this.addFullHintHighlight(new Color(255, 255, 0, 0.7));
-//         document.body.style.cursor = 'pointer';
-//     }
-// };
+ArgMorph.prototype.mouseEnter = function() {
+    if (this.isHintClickable()) {
+        this.fullHighlight =
+			this.addFullHintHighlight(new Color(255, 255, 0, 0.7));
+        document.body.style.cursor = 'pointer';
+    }
+};
 
-// ArgMorph.prototype.mouseLeave = function() {
-//     if (this.fullHighlight) {
-//         this.fullHighlight.destroy();
-//         this.fullHighlight = null;
-//         this.fullChanged();
-//     }
-//     document.body.style.cursor = 'inherit';
-//     this.fixEditable();
-// };
+ArgMorph.prototype.mouseLeave = function() {
+    if (this.fullHighlight) {
+        this.fullHighlight.destroy();
+        this.fullHighlight = null;
+        this.fullChanged();
+    }
+    document.body.style.cursor = 'inherit';
+    this.fixEditable();
+};
 
-// ArgMorph.prototype.fixEditable = function() {
-//     if (!this.contents) return;
-//     var contents = this.contents();
-//     if (contents) {
-//         contents.isEditable = contents.isEditable && !this.isHintClickable();
-//     }
-// };
+ArgMorph.prototype.fixEditable = function() {
+    if (!this.contents) return;
+    var contents = this.contents();
+    if (contents) {
+        contents.isEditable = contents.isEditable && !this.isHintClickable();
+    }
+};
 
-// ArgMorph.prototype.mouseClickLeft = function(pos) {
-//     if (this.isHintClickable()) {
-//         this.onClick.call(this);
-//     }
-// };
+ArgMorph.prototype.mouseClickLeft = function(pos) {
+    if (this.isHintClickable()) {
+        this.onClick.call(this);
+    }
+};
 
-// extend(InputSlotMorph, 'mouseClickLeft', function(base, pos) {
-//     if (this.isHintClickable()) {
-//         InputSlotMorph.uber.mouseClickLeft.call(this, pos);
-//     } else {
-//         base.call(this, pos);
-//     }
-// });
+extend(InputSlotMorph, 'mouseClickLeft', function(base, pos) {
+    if (this.isHintClickable()) {
+        InputSlotMorph.uber.mouseClickLeft.call(this, pos);
+    } else {
+        base.call(this, pos);
+    }
+});
 
-// extend(InputSlotMorph, 'mouseDownLeft', function(base, pos) {
-//     if (!this.isHintClickable()) {
-//         base.call(this, pos);
-//     }
-// });
+extend(InputSlotMorph, 'mouseDownLeft', function(base, pos) {
+    if (!this.isHintClickable()) {
+        base.call(this, pos);
+    }
+});
 
-// extend(InputSlotMorph, 'fixLayout', function(base) {
-//     base.call(this);
-//     this.fixEditable();
-// });
+extend(InputSlotMorph, 'fixLayout', function(base) {
+    base.call(this);
+    this.fixEditable();
+});
 
-// extend(BooleanSlotMorph, 'mouseEnter', function(base) {
-//     // Determine whether to call the base first, since calling the uber, the
-//     // dialog will be showing and it will always be true
-//     var callBase = !this.isHintClickable();
-//     BooleanSlotMorph.uber.mouseEnter.call(this);
-//     if (callBase) base.call(this);
-// });
+extend(BooleanSlotMorph, 'mouseEnter', function(base) {
+    // Determine whether to call the base first, since calling the uber, the
+    // dialog will be showing and it will always be true
+    var callBase = !this.isHintClickable();
+    BooleanSlotMorph.uber.mouseEnter.call(this);
+    if (callBase) base.call(this);
+});
 
-// extend(BooleanSlotMorph, 'mouseLeave', function(base) {
-//     BooleanSlotMorph.uber.mouseLeave.call(this);
-//     // Call the base either way, since we may need to remove the toggle
-//     base.call(this);
-// });
+extend(BooleanSlotMorph, 'mouseLeave', function(base) {
+    BooleanSlotMorph.uber.mouseLeave.call(this);
+    // Call the base either way, since we may need to remove the toggle
+    base.call(this);
+});
 
-// extend(BooleanSlotMorph, 'mouseClickLeft', function(base) {
-//     var callBase = !this.isHintClickable();
-//     BooleanSlotMorph.uber.mouseClickLeft.call(this);
-//     if (callBase) base.call(this);
-// });
+extend(BooleanSlotMorph, 'mouseClickLeft', function(base) {
+    var callBase = !this.isHintClickable();
+    BooleanSlotMorph.uber.mouseClickLeft.call(this);
+    if (callBase) base.call(this);
+});

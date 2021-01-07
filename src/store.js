@@ -1132,8 +1132,10 @@ SnapSerializer.prototype.loadEditing = function(
     // Load the editing definition from XML
     var editingDefinition;
     if (model.tag === 'scripts') {
-        editingDefinition = this.loadEditingFromScripts(
-            model, originalDefinition, editingSprite);
+        Trace.logErrorMessage(
+            'Skipping legacy version of editing code using script tags. ' +
+            'No longer supported. To load, use an older version of iSnap.');
+        return;
     } else if (model.tag === 'block-definition') {
         editingDefinition = this.loadCustomBlock(null, model,
             originalDefinition.isGlobal);
@@ -1165,77 +1167,6 @@ SnapSerializer.prototype.loadEditing = function(
             oldUpdate.call(editor);
         };
     });
-};
-
-// Legacy function to load an editing block from a <scripts> tag, used for
-// backwards compatibility
-SnapSerializer.prototype.loadEditingFromScripts = function(
-    model, originalDefinition, editingSprite
-) {
-    var blockInputs = {};
-    var blockSpec = originalDefinition.spec;
-    if (model.children[0] && model.children[0].children) {
-        // TODO: This improperly loads non-primary scripts as the main script
-        // when there isn't one. Not a priority to fix, since this is legacy
-
-        // Get the first item in the script, since it's the weird
-        // CustomHatBlockMorph that can't be properly parsed by the
-        // loadScriptsArray method
-        var header = model.children[0].children.shift();
-        while (header && header.tag !== 'custom-block' &&
-                    header.children.length > 0) {
-            header = header.children[0];
-        }
-        if (header && header.tag === 'custom-block') {
-            var spec = header.attributes['s'];
-            if (spec) blockSpec = spec;
-            header.children.forEach(function(child) {
-                if (child.tag === 'l') {
-                    var varName = child.contents;
-                    BlockLabelFragment.suffixes.forEach(function(suffix) {
-                        if (varName.endsWith(suffix)) {
-                            varName = varName.substring(
-                                0, varName.length - suffix.length);
-                        }
-                    });
-                    // Create a default variable type
-                    // (It's not clear that this is used for anything other than
-                    // determining the varaible type, so these default
-                    // declarations may not be needed. Still better safe...)
-                    blockInputs[varName] = ['%s', '', undefined, false];
-                }
-            });
-        }
-    }
-    var scripts = this.loadScriptsArray(model);
-
-    // Clone the editing block, since we don't want to overwrite the
-    // original block with the editing changes, in case they're canceled
-    var editingDefinition = originalDefinition.copyAndBindTo();
-    if (scripts.length > 0) {
-        if (!editingDefinition.body) {
-            editingDefinition.body = new Context(
-                null,
-                script ? this.loadScript(script, object) : null,
-                null,
-                null,
-                editingSprite
-            );
-            definition.body.inputs = definition.names.slice(0);
-        }
-        scripts = child.childNamed('scripts');
-        if (scripts) {
-            definition.scripts = this.loadScriptsArray(scripts, object);
-        }
-        // Set it's expression to the main script and it's scripts to the
-        // rest of them
-        editingDefinition.body.expression = scripts.shift();
-    }
-    editingDefinition.scripts = scripts;
-    editingDefinition.declarations = blockInputs;
-    editingDefinition.spec = blockSpec;
-
-    return editingDefinition;
 };
 
 SnapSerializer.prototype.loadScripts = function (object, scripts, model) {

@@ -900,7 +900,7 @@ HighlightDisplay.logHoverInsertIndicator = function(block, showing) {
         // inserted, or a block it should replace.
         // This is a bit convoluted because script parents have no ID, so it's
         // not trivial just to give a parent ID and insert index, so instead we
-        // descrive the location of the insert indicator itself.
+        // describe the location of the insert indicator itself.
         target: id,
     };
     if (isScriptHint) {

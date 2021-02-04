@@ -4187,14 +4187,6 @@ SpriteMorph.prototype.setVisibility = function (bool, noShadow) {
         } else {
             bubble.hide();
         }
-    } else {
-        n = Math.min(100, Math.max(0, n));
-    }
-    if (idx === 3) {
-        this.color.a = 1 - n / 100;
-    } else {
-        this.cachedHSV[idx] = n / 100;
-        this.color.set_hsv.apply(this.color, this.cachedHSV);
     }
 
     // progagate to parts

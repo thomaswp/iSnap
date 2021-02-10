@@ -229,11 +229,15 @@ Logger.prototype.simpleCodeXML = function() {
     // Don't serialize the project while it's still opening
     if (Logger.openingProject) return this.lastCode || '';
 
-    // Add a special flag to make the VariableFrame omit variable state
-    VariableFrame.dontSerializeVariableState = true;
-    var xml = this.serializer.serialize(ide.stage);
-    // Then make sure to reset it
-    VariableFrame.dontSerializeVariableState = false;
+    // Add a special flag for logging serialization, which should be lighter and
+    // without side-effects
+    Logger.isSerializing = true;
+    try {
+        var xml = this.serializer.serialize(ide.stage);
+    } finally {
+        // Then make sure to reset it, no matter what happens
+        Logger.isSerializing = false;
+    }
 
     if (!xml) return xml;
     // We don't want to log the stage image every time
@@ -242,8 +246,24 @@ Logger.prototype.simpleCodeXML = function() {
     return xml;
 };
 
+extend(SpriteMorph, 'toXML', function(base, serializer) {
+    // Since we do not remove clones during logging serialization, we need to
+    // make sure they're not included in the logs themselves.
+    if (Logger.isSerializing && this instanceof SpriteMorph &&
+            this.isTemporary) {
+        return '';
+    }
+    return base.call(this, serializer);
+});
+
+extend(StageMorph, 'removeAllClones', function(base) {
+    // Don't remove clones if this is just for logging purposes
+    if (Logger.isSerializing) return;
+    base.call(this);
+});
+
 extend(VariableFrame, 'toXML', function(base, serializer) {
-    var removeValues = VariableFrame.dontSerializeVariableState;
+    var removeValues = Logger.isSerializing;
     var valueMap = null;
     var myself = this;
 

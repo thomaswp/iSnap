@@ -45,7 +45,7 @@ include '../config.php';
 			}
 		</style>
 		<script type="text/javascript">
-			function loadSnap(id, project) {
+			function loadSnap(id, project, currSpriteName) {
 				var assignment = "<?php echo $_GET['assignment']; ?>";
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
@@ -54,13 +54,24 @@ include '../config.php';
 						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
 						// Hack-y fix for losing focus when custom blocks show
-						window.setTimeout(function() { window.focus(); }, 350);
+						window.setTimeout(function() {
+							window.focus();
+							selectSprite(contentWindow, currSpriteName);
+						}, 50);
 					}
 				};
 				xhr.open("GET", "code.php?id=" + id + "&project=" + project, true);
 				xhr.send();
 				window.location.hash = id;
 				window.index = rowIDs.indexOf(parseInt(id));
+			}
+			function selectSprite(contentWindow, currSpriteName) {
+			  console.log('selectSprite', contentWindow, currSpriteName);
+				var sprite = contentWindow.ide.getSpriteByName(currSpriteName);
+				console.log(currSpriteName);
+				if (sprite) {
+					contentWindow.ide.selectSprite(sprite);
+				}
 			}
 			function copy(inp) {
 				// is element selectable?
@@ -136,10 +147,20 @@ include '../config.php';
 			<div id="content">
 				<div style="overflow-y: scroll; height: 100%;">
 				<?php
+$current_sprite_name = '';
+$sprite_selection = array(0 => 'Sprite' );
 function tryGetParam($key, $mysqli) {
 	return array_key_exists($key, $_GET) ? $mysqli->real_escape_string($_GET[$key]) : NULL;
 }
-
+function searchSprite($key) {
+	$keys = array_keys($sprite_selection);
+	for ($i = 0; $i < count($sprite_selection); $i++) {
+		if ($keys[i] < $key && $key < $keys[i+1]) {
+			return $sprite_selection[$keys[i]];
+		}
+	}
+	return NULL;
+}
 if ($enable_viewer) {
 
 	$mysqli = new mysqli($host, $user, $password, $db);
@@ -200,7 +221,7 @@ if ($enable_viewer) {
 		$first = $time;
 		$class = "";
 		if ($link) {
-			$first = "<a href='#$rid' onclick='loadSnap(\"$rid\", \"$id\")'>$first</a>";
+			$first = "<a href='#$rid' onclick='loadSnap(\"$rid\", \"$id\", $current_sprite_name)'>$first</a>";
 			$class = "rid";
 		}
 
@@ -211,6 +232,11 @@ if ($enable_viewer) {
 			$link_text = substr($link_text, 0, $cutoff) . "...";
 		}
 		$link = "<a title=\"$data\" href='#json-$rid' onclick=\"viewJSON($data)\">$link_text</a>";
+
+		if ($message == 'IDE.selectSprite') {
+			$current_sprite_name = $link_text;
+			$sprite_selection[(int)rid] = $current_sprite_name;
+		}
 
 		echo "<tr><td>$first</td><td class='$class' id='$rid' title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";
 	}
@@ -230,9 +256,11 @@ if ($enable_viewer) {
 				document.addEventListener('keypress', function(event) {
 					var code = event.which || event.keyCode;
 					if (code === 100 && index < rowIDs.length - 1) {
-						loadSnap(rowIDs[++index], projectID);
+						// loadSnap(rowIDs[++index], projectID);
+						document.getElementById(rowIDs[++index]).previousSibling.children[0].click();
 					} else if (code === 97 && index > 0) {
-						loadSnap(rowIDs[--index], projectID);
+						document.getElementById(rowIDs[--index]).previousSibling.children[0].click();
+						// loadSnap(rowIDs[--index], projectID);
 					} else if (code === 99) {
 						var td = document.getElementById("" + rowIDs[index]);
 						console.log(td);
@@ -250,12 +278,12 @@ if ($enable_viewer) {
 				}
 				var snap = document.getElementById("snap");
 				snap.onload = function() {
+					var spriteName = "Sprite";
 					snap.contentWindow.ide.toggleStageSize();
 					if (index >= 0 && rowIDs.length > 0) {
-						loadSnap(rowIDs[index], projectID);
+						loadSnap(rowIDs[index], projectID, spriteName);
 					}
 				}
-
 				function binarySearch(array, key) {
 					var low = 0;
 					var high = array.length - 1;

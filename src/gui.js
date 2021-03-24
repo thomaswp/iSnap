@@ -5193,6 +5193,16 @@ IDE_Morph.prototype.switchToUserMode = function () {
     this.showMessage('entering user mode', 1);
 };
 
+IDE_Morph.prototype.getSpriteByName = function (name) {
+  const sprites = this.sprites.contents.filter(function (sprite) {
+    return sprite.name === name;
+  });
+  if (sprites && sprites.length !== 0) {
+    return sprites[0];
+  }
+  return null;
+}
+
 IDE_Morph.prototype.switchToDevMode = function () {
     var world = this.world();
 

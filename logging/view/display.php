@@ -235,7 +235,7 @@ if ($enable_viewer) {
 
 		if ($message == 'IDE.selectSprite') {
 			$current_sprite_name = $link_text;
-			$sprite_selection[(int)rid] = $current_sprite_name;
+			$sprite_selection[(int)$rid] = $current_sprite_name;
 		}
 
 		echo "<tr><td>$first</td><td class='$class' id='$rid' title='Session ID: $sessionID'>$rid</td><td>$message</td><td>$link</td></tr>";

@@ -7465,35 +7465,39 @@ ScriptsMorph.prototype.redrop = function () {
         'action': this.dropRecord.action,
         'block': this.dropRecord.lastDroppedBlock.blockId()
     });
-    if (this.dropRecord.action === 'delete') {
-        this.recoverLastDrop(true);
-        this.dropRecord.lastDroppedBlock.destroy();
+    this.playDropRecord(this.dropRecord);
+};
+
+ScriptsMorph.prototype.playDropRecord = function(dropRecord) {
+    if (dropRecord.action === 'delete') {
+        this.recoverLastDrop(true, dropRecord);
+        dropRecord.lastDroppedBlock.destroy();
         this.updateToolbar();
     } else {
         this.isAnimating = true;
-        if (this.dropRecord.action === 'extract') {
-            this.dropRecord.lastDroppedBlock.extract();
+        if (dropRecord.action === 'extract') {
+            dropRecord.lastDroppedBlock.extract();
         }
-        this.dropRecord.lastDroppedBlock.slideBackTo(
-            this.dropRecord.situation,
+        dropRecord.lastDroppedBlock.slideBackTo(
+            dropRecord.situation,
             null,
-            this.recoverLastDrop(true),
+            this.recoverLastDrop(true, dropRecord),
             () => {
                 this.updateToolbar();
                 this.isAnimating = false;
             }
         );
     }
-};
+}
 
-ScriptsMorph.prototype.recoverLastDrop = function (forRedrop) {
+ScriptsMorph.prototype.recoverLastDrop = function (forRedrop, rec) {
     // retrieve the block last touched by the user and answer a function
     // to be called after the animation that moves it back right before
     // dropping it into its former situation
-    var rec = this.dropRecord,
-        dropped,
+    var dropped,
         onBeforeDrop,
         parent;
+    if (!rec) rec = this.dropRecord;
 
     if (!rec || !rec.lastDroppedBlock) {
         throw new Error('nothing to undrop');

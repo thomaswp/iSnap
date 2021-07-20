@@ -4039,6 +4039,7 @@ Morph.prototype.slideBackTo = function (
     onComplete
 ) {
     var pos = situation.origin.position().add(situation.position);
+    console.log(pos);
     this.glideTo(
         pos,
         msecs,

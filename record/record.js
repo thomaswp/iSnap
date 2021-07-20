@@ -2,10 +2,43 @@ require('isnap/util.js')
 
 extend(ScriptsMorph, 'recordDrop', function(base, lastGrabOrigin) {
     base.call(this, lastGrabOrigin);
+    // Record the situation now instead of waiting to undo
+    if (this.dropRecord.lastDroppedBlock) {
+        this.dropRecord.situation =
+                this.dropRecord.lastDroppedBlock.situation();
+    }
     window.recorder.record(this.dropRecord);
 });
 
+extend(BlockMorph, 'init', function(base) {
+    base.call(this);
+    Recorder.registerBlock(this);
+});
+
 class Recorder {
+
+    static blockMap = new Map();
+
+    static registerBlock(block) {
+        this.blockMap.set(block.id, block);
+    }
+
+    static getOrCreateBlock(blockDef) {
+        let block = this.blockMap.get(blockDef.id);
+        if (block) return block;
+        block = window.ide.currentSprite.blockForSelector(
+            blockDef.selector, true);
+        block.id = blockDef.id;
+        block.parent = this.getFrameMorph();
+        block.isDraggable = true;
+        BlockMorph.nextId = Math.max(BlockMorph.nextId, blockDef.id + 1);
+        this.blockMap.set(blockDef.id, block);
+        return block;
+    }
+
+    static getFrameMorph() {
+        return ide.palette.children[0];
+    }
 
     constructor() {
         this.records = [];
@@ -30,7 +63,7 @@ class Recorder {
         console.log('Playing:', dropRecord);
         let sprite = window.ide.currentSprite;
         let scripts = sprite.scripts;
-        scripts.redrop(dropRecord);
+        scripts.playDropRecord(dropRecord);
     }
 
     record(dropRecord) {
@@ -40,37 +73,13 @@ class Recorder {
         this.records.splice(this.index++, 0, record);
     }
 
-    getBlockMap() {
-        let map = {};
-        let scripts = []
-        editor.sprites.contents.forEach(sprite => {
-            scripts.push(sprite.scripts);
-        });
-
-    }
-
-    static findBlock(parent, id) {
-        if (parent instanceof BlockMorph && parent.id === id) {
-            return parent;
-        }
-        if (parent == null || !parent.children ||
-                parent instanceof FrameMorph) {
-            return null;
-        }
-        for (child in parent.children) {
-            let block = Recorder.findBlock(child, id);
-            if (block) return block;
-        };
-        return null;
-    }
-
     deserialize(record) {
 
         let dropRecord = Object.assign({}, record);
-        if (dropRecord.lastOrigin) {
-            var lastOrigin = dropRecord.lastOrigin =
-                this.deserialize(dropRecord.lastOrigin);
-        }
+        // if (dropRecord.lastOrigin) {
+        //     var lastOrigin = dropRecord.lastOrigin =
+        //         this.deserialize(dropRecord.lastOrigin);
+        // }
 
         Object.keys(dropRecord).forEach(prop => {
             if (!record.hasOwnProperty(prop)) return;
@@ -82,35 +91,35 @@ class Recorder {
                 return;
             }
 
-            let type = value.type;
+            let type = value.objType;
             // console.log(prop, value);
-            if (value.type === BlockMorph.name) {
-                record[prop] = Recorder.findBlock(lastOrigin, value.id);
-                // TODO: create if missing
-            } else if (value.type === ArgMorph.name) {
-                let block = Recorder.findBlock(lastOrigin, value.blockId);
-                if (block == null) {
-                    // TODO
-                    record[prop] = null;
-                }
+            if (type === BlockMorph.name) {
+                record[prop] = Recorder.getOrCreateBlock(value);
+            } else if (type === ArgMorph.name) {
+                let block = Recorder.getOrCreateBlock(value.blockId);
                 record[prop] = block.inputs()[value.index];
-            } else if (value.type === ScriptsMorph.name) {
+            } else if (type === ScriptsMorph.name) {
                 record[prop] = null;
                 if (value.source === 'Sprite') {
-                    window.ide.sprite.contents.forEach(sprite => {
-                        if (sprite.name === value.name) {
+                    window.ide.sprites.contents.forEach(sprite => {
+                        if (sprite.name === value.spriteName) {
                             record[prop] = sprite.scripts;
                         }
                     });
                 } else if (value.source === 'Editor') {
-                    // TODO
-                } else if (value.source === 'Palette') {
-                    // TODO
+                    BlockEditorMorph.showing.forEach(editor => {
+                        if (editor.definition.guid === value.guid) {
+                            record[prop] = editor.body.children[0];
+                        }
+                    });
                 }
-            } else if (value.type == FrameMorph.name) {
-                // TODO?
-            } else if (value.type === Point.name) {
-                // nothing to do
+                if (!record[prop]) {
+                    console.warn('Cannot find ScriptsMorph', prop, value);
+                }
+            } else if (type === FrameMorph.name) {
+                record[prop] = Recorder.getFrameMorph();
+            } else if (type === Point.name) {
+                record[prop] = new Point(value.x, value.y);
             } else if (type === 'Object') {
                 record[prop] = this.deserialize(value);
             } else {
@@ -143,7 +152,7 @@ class Recorder {
             // console.log(prop, value);
             if (value instanceof BlockMorph) {
                 record[prop] = value.blockId();
-                record[prop].type = BlockMorph.name;
+                record[prop].objType = BlockMorph.name;
             } else if (value instanceof ArgMorph) {
                 record[prop] = value.argId();
             } else if (value instanceof ScriptsMorph) {
@@ -178,8 +187,8 @@ class Recorder {
             } else if (value === Object(value)) {
                 console.error('Unknown object in record!', prop, value);
             }
-            if (!record[prop].type && value === Object(value)) {
-                record[prop].type = type;
+            if (!record[prop].objType && value === Object(value)) {
+                record[prop].objType = type;
             }
         });
         return record;

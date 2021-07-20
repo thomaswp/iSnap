@@ -44,6 +44,14 @@ class Recorder {
         this.records = [];
         this.recording = true;
         this.index = 0;
+
+        let blockChangedHandler = (m, data) => {
+            console.log(m, data, this);
+        };
+        Trace.addLoggingHandler('InputSlot.edited',
+            blockChangedHandler);
+        Trace.addLoggingHandler('InputSlot.menuItemSelected',
+            blockChangedHandler);
     };
 
     save() {

@@ -12,6 +12,7 @@ Logger.prototype.serializer.excludeMedia = true;
 
 Logger.prototype.init = function(interval) {
     this.queue = [];
+    this.loggingHandlers = {};
     this.onCodeChanged = function(code) { };
     this.log('Logger.started');
     this.start(interval);
@@ -47,6 +48,14 @@ Logger.prototype.flushSaveCode = function() {
     }
 };
 
+Logger.prototype.addLoggingHandler = function(message, handler) {
+    let handlers = this.loggingHandlers[message];
+    if (!handlers) {
+        handlers = this.loggingHandlers[message] = [];
+    }
+    handlers.push(handler);
+};
+
 /**
  * Logs a message. Depending on the logger being used, the message
  * may be output to the console or sent to be stored in a database.
@@ -68,6 +77,12 @@ Logger.prototype.flushSaveCode = function() {
  */
 Logger.prototype.log = function(message, data, saveImmediately, forceLogCode) {
     if (!(message || data)) return;
+
+    if (this.loggingHandlers[message]) {
+        this.loggingHandlers[message].forEach(handler => {
+            handler(message, data);
+        });
+    }
 
     this.flushSaveCode();
 

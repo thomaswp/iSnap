@@ -432,7 +432,8 @@ SyntaxElementMorph.prototype.replaceInput = function (oldArg, newArg) {
         replacement = newArg,
         idx = this.children.indexOf(oldArg),
         i = 0;
-
+    console.log('Index: ' + idx);
+    console.trace();
     // try to find the ArgLabel embedding the newArg,
     // used for the undrop() feature
     if (idx === -1 && newArg instanceof MultiArgMorph) {
@@ -7920,11 +7921,10 @@ ArgMorph.prototype.argId = function() {
     var block = this.parentThatIsA(BlockMorph);
     if (!block) return null;
     // Get the index of this arg out of all the parent's args
-    var index = this.parent.children.filter(function(child) {
-        return child instanceof ArgMorph;
-    }).indexOf(this);
+    var index = this.parent.inputs().indexOf(this);
     var id = block.blockId();
     id.argIndex = index;
+    id.argType = typeof(this);
     return id;
 };
 

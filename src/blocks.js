@@ -6018,7 +6018,6 @@ ReporterBlockMorph.prototype.init = function (isPredicate) {
 ReporterBlockMorph.prototype.snap = function (hand) {
     // passing the hand is optional (for when blocks are dragged & dropped)
     var scripts = this.parent,
-        nb,
         target;
 
     this.cachedSlotSpec = null;
@@ -6026,10 +6025,20 @@ ReporterBlockMorph.prototype.snap = function (hand) {
         return null;
     }
 
+    target = scripts.closestInput(this, hand);
+    this.snapToInput(target);
+    if (hand) {
+        scripts.recordDrop(hand.grabOrigin);
+    }
+};
+
+ReporterBlockMorph.prototype.snapToInput = function(target) {
+    var scripts = this.parentThatIsA(ScriptsMorph),
+        nb;
+
     scripts.clearDropInfo();
     scripts.lastDroppedBlock = this;
 
-    target = scripts.closestInput(this, hand);
     if (target !== null) {
         scripts.lastReplacedInput = target;
         scripts.lastDropTarget = target.parent;
@@ -6054,10 +6063,7 @@ ReporterBlockMorph.prototype.snap = function (hand) {
     }
     this.fixBlockColor();
     ReporterBlockMorph.uber.snap.call(this);
-    if (hand) {
-        scripts.recordDrop(hand.grabOrigin);
-    }
-};
+}
 
 ReporterBlockMorph.prototype.prepareToBeGrabbed = function (handMorph) {
     var oldPos = this.position();
@@ -7478,6 +7484,18 @@ ScriptsMorph.prototype.playDropRecord = function(dropRecord) {
         this.isAnimating = true;
         if (dropRecord.action === 'extract') {
             dropRecord.lastDroppedBlock.extract();
+        }
+        if (dropRecord.lastDroppedBlock instanceof ReporterBlockMorph &&
+            dropRecord.lastDropTarget
+        ) {
+            console.log("!!!", dropRecord);
+            // dropRecord.lastDropTarget.replaceInput(
+            //     dropRecord.lastReplacedInput,
+            //     dropRecord.lastDroppedBlock
+            // );
+            dropRecord.lastDroppedBlock.snapToInput(
+                dropRecord.lastReplacedInput);
+            return;
         }
         dropRecord.lastDroppedBlock.slideBackTo(
             dropRecord.situation,

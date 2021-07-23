@@ -1,0 +1,289 @@
+{
+  "transcripts": [
+    {
+      "confidence": -208.7477569580078,
+      "words": [
+        {
+          "word": "this",
+          "start_time": 1.34,
+          "duration": 0.14
+        },
+        {
+          "word": "amiable",
+          "start_time": 1.54,
+          "duration": 1.18
+        },
+        {
+          "word": "lassen",
+          "start_time": 3.6,
+          "duration": 0.6
+        },
+        {
+          "word": "that",
+          "start_time": 4.3,
+          "duration": 0.14
+        },
+        {
+          "word": "one",
+          "start_time": 4.58,
+          "duration": 0.12
+        },
+        {
+          "word": "could",
+          "start_time": 4.78,
+          "duration": 0.18
+        },
+        {
+          "word": "record",
+          "start_time": 5.04,
+          "duration": 1.14
+        },
+        {
+          "word": "the",
+          "start_time": 6.3,
+          "duration": 0.12
+        },
+        {
+          "word": "various",
+          "start_time": 6.46,
+          "duration": 0.38
+        },
+        {
+          "word": "blocks",
+          "start_time": 6.94,
+          "duration": 1.26
+        },
+        {
+          "word": "all",
+          "start_time": 8.3,
+          "duration": 0.12
+        },
+        {
+          "word": "working",
+          "start_time": 8.44,
+          "duration": 1.26
+        },
+        {
+          "word": "in",
+          "start_time": 10.02,
+          "duration": 4.38
+        },
+        {
+          "word": "and",
+          "start_time": 14.48,
+          "duration": 0.1
+        },
+        {
+          "word": "recording",
+          "start_time": 14.64,
+          "duration": 0.42
+        },
+        {
+          "word": "mariotte",
+          "start_time": 15.14,
+          "duration": 0.98
+        },
+        {
+          "word": "same",
+          "start_time": 16.18,
+          "duration": 0.26
+        },
+        {
+          "word": "time",
+          "start_time": 16.56,
+          "duration": 0.14
+        }
+      ]
+    },
+    {
+      "confidence": -208.9951934814453,
+      "words": [
+        {
+          "word": "this",
+          "start_time": 1.34,
+          "duration": 0.14
+        },
+        {
+          "word": "amiable",
+          "start_time": 1.54,
+          "duration": 1.18
+        },
+        {
+          "word": "lesson",
+          "start_time": 3.6,
+          "duration": 0.6
+        },
+        {
+          "word": "that",
+          "start_time": 4.3,
+          "duration": 0.14
+        },
+        {
+          "word": "one",
+          "start_time": 4.58,
+          "duration": 0.12
+        },
+        {
+          "word": "could",
+          "start_time": 4.78,
+          "duration": 0.18
+        },
+        {
+          "word": "record",
+          "start_time": 5.04,
+          "duration": 1.14
+        },
+        {
+          "word": "the",
+          "start_time": 6.3,
+          "duration": 0.12
+        },
+        {
+          "word": "various",
+          "start_time": 6.46,
+          "duration": 0.38
+        },
+        {
+          "word": "blocks",
+          "start_time": 6.94,
+          "duration": 1.26
+        },
+        {
+          "word": "all",
+          "start_time": 8.3,
+          "duration": 0.12
+        },
+        {
+          "word": "working",
+          "start_time": 8.44,
+          "duration": 1.26
+        },
+        {
+          "word": "in",
+          "start_time": 10.02,
+          "duration": 4.38
+        },
+        {
+          "word": "and",
+          "start_time": 14.48,
+          "duration": 0.1
+        },
+        {
+          "word": "recording",
+          "start_time": 14.64,
+          "duration": 0.42
+        },
+        {
+          "word": "mariotte",
+          "start_time": 15.14,
+          "duration": 0.98
+        },
+        {
+          "word": "same",
+          "start_time": 16.18,
+          "duration": 0.26
+        },
+        {
+          "word": "time",
+          "start_time": 16.56,
+          "duration": 0.14
+        }
+      ]
+    },
+    {
+      "confidence": -210.4384765625,
+      "words": [
+        {
+          "word": "this",
+          "start_time": 1.34,
+          "duration": 0.14
+        },
+        {
+          "word": "amiable",
+          "start_time": 1.54,
+          "duration": 1.18
+        },
+        {
+          "word": "lassen",
+          "start_time": 3.6,
+          "duration": 0.6
+        },
+        {
+          "word": "that",
+          "start_time": 4.3,
+          "duration": 0.14
+        },
+        {
+          "word": "one",
+          "start_time": 4.58,
+          "duration": 0.12
+        },
+        {
+          "word": "could",
+          "start_time": 4.78,
+          "duration": 0.18
+        },
+        {
+          "word": "record",
+          "start_time": 5.04,
+          "duration": 1.14
+        },
+        {
+          "word": "the",
+          "start_time": 6.3,
+          "duration": 0.12
+        },
+        {
+          "word": "various",
+          "start_time": 6.46,
+          "duration": 0.38
+        },
+        {
+          "word": "blocks",
+          "start_time": 6.94,
+          "duration": 1.26
+        },
+        {
+          "word": "all",
+          "start_time": 8.3,
+          "duration": 0.12
+        },
+        {
+          "word": "working",
+          "start_time": 8.44,
+          "duration": 1.26
+        },
+        {
+          "word": "in",
+          "start_time": 10.02,
+          "duration": 4.38
+        },
+        {
+          "word": "and",
+          "start_time": 14.48,
+          "duration": 0.1
+        },
+        {
+          "word": "recording",
+          "start_time": 14.64,
+          "duration": 0.42
+        },
+        {
+          "word": "baudette",
+          "start_time": 15.14,
+          "duration": 0.98
+        },
+        {
+          "word": "same",
+          "start_time": 16.18,
+          "duration": 0.26
+        },
+        {
+          "word": "time",
+          "start_time": 16.56,
+          "duration": 0.14
+        }
+      ]
+    }
+  ]
+}

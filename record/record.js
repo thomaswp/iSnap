@@ -1,4 +1,5 @@
 require('isnap/util.js')
+require('record/record-audio.js')
 
 extend(ScriptsMorph, 'recordDrop', function(base, lastGrabOrigin) {
     base.call(this, lastGrabOrigin);
@@ -89,6 +90,7 @@ class Recorder {
         this.index = 0;
         this.lastTime = new Date().getTime();
         this.isRecording = true;
+        this.audioRecorder = new AudioRecorder();
 
         let blockChangedHandler = (m, data) => {
             data = Object.assign({}, data)
@@ -127,13 +129,19 @@ class Recorder {
     }
 
     save() {
-        window.localStorage.setItem('playback', JSON.stringify(this.records));
+        const json = JSON.stringify(this.records, null, 4);
+        window.localStorage.setItem('playback', json);
+        saveData(new Blob([json]), this.recordingName + '.json');
+        this.audioRecorder.stop(this.recordingName);
     }
 
     start(keepOldRecords) {
         if (!keepOldRecords) this.records = []
-        this.startTime = new Date().getTime();
+        let date = new Date();
+        this.startTime = date.getTime();
+        this.recordingName = '' + this.startTime;
         this.isRecording = true;
+        this.audioRecorder.start();
     }
 
     load() {
@@ -285,9 +293,3 @@ class Recorder {
 
 window.recorder = new Recorder();
 window.recorder.load();
-
-setTimeout(() => {
-    window.onbeforeunload = function() {
-        window.recorder.save();
-    };
-}, 1000);

@@ -138,8 +138,8 @@ class Recorder {
     start(keepOldRecords) {
         if (!keepOldRecords) this.records = []
         let date = new Date();
-        this.startTime = date.getTime();
-        this.recordingName = '' + this.startTime;
+        this.lastTime = date.getTime();
+        this.recordingName = '' + this.lastTime;
         this.isRecording = true;
         this.audioRecorder.start();
     }

@@ -7475,7 +7475,7 @@ ScriptsMorph.prototype.redrop = function () {
     this.playDropRecord(this.dropRecord);
 };
 
-ScriptsMorph.prototype.playDropRecord = function(dropRecord) {
+ScriptsMorph.prototype.playDropRecord = function(dropRecord, callback) {
     if (dropRecord.action === 'delete') {
         this.recoverLastDrop(true, dropRecord);
         dropRecord.lastDroppedBlock.destroy();
@@ -7504,6 +7504,9 @@ ScriptsMorph.prototype.playDropRecord = function(dropRecord) {
             () => {
                 this.updateToolbar();
                 this.isAnimating = false;
+                if (callback) {
+                    setTimeout(callback, 1)
+                }
             }
         );
     }

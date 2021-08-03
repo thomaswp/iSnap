@@ -31,23 +31,23 @@ class Record {
         this.data = Recorder.serialize(data);
     }
 
-    replay() {
+    replay(callback) {
         let method = 'replay_' + this.type;
         if (!this[method]) {
             console.warn('Unknown record type: ' + this.type);
         }
         console.log('Playing:', this.data);
         let data = Recorder.deserialize(this.data);
-        this[method].call(this, data);
+        this[method].call(this, data, callback);
     }
 
-    replay_blockDrop(dropRecord) {
+    replay_blockDrop(dropRecord, callback) {
         let sprite = window.ide.currentSprite;
         let scripts = sprite.scripts;
-        scripts.playDropRecord(dropRecord);
+        scripts.playDropRecord(dropRecord, callback);
     }
 
-    replay_inputSlotEdit(data) {
+    replay_inputSlotEdit(data, callback) {
         let block = Recorder.getOrCreateBlock(data.id);
         let input = block.inputs()[data.id.argIndex];
         if (input instanceof ColorSlotMorph) {
@@ -55,6 +55,7 @@ class Record {
         } else if (input instanceof InputSlotMorph) {
             input.setContents(data.value);
         }
+        setTimeout(callback, 1);
     }
 }
 
@@ -82,6 +83,10 @@ class Recorder {
 
     static getFrameMorph() {
         return ide.palette.children[0];
+    }
+
+    resetBlockMap() {
+        Recorder.blockMap.clear();
     }
 
     constructor() {
@@ -164,11 +169,11 @@ class Recorder {
         return records;
     }
 
-    static deserialize(record) {
+    static deserialize(original) {
 
-        let dropRecord = Object.assign({}, record);
+        let record = Object.assign({}, original);
 
-        Object.keys(dropRecord).forEach(prop => {
+        Object.keys(record).forEach(prop => {
             if (!record.hasOwnProperty(prop)) return;
 
             let value = record[prop];

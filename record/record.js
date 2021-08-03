@@ -144,18 +144,24 @@ class Recorder {
         this.audioRecorder.start();
     }
 
-    load() {
+    loadFromCache() {
         try {
-            this.records =
-                JSON.parse(window.localStorage.getItem('playback') || '[]');
-            for (let i = 0; i < this.records.length; i++) {
-                this.records[i] = Object.assign(new Record(), this.records[i]);
-            }
+            let stored = JSON.parse(
+                window.localStorage.getItem('playback') || '[]');
+            this.records = this.loadRecords(stored);
             // TODO: need to figure out if we support re-recording and if so
             // what happens to time/index?
             this.isRecording = false;
             // this.lastTime = new Date().getTime();
         } catch {}
+    }
+
+    loadRecords(json) {
+        let records = json.slice();
+        for (let i = 0; i < records.length; i++) {
+            records[i] = Object.assign(new Record(), records[i]);
+        }
+        return records;
     }
 
     static deserialize(record) {
@@ -292,4 +298,4 @@ class Recorder {
 }
 
 window.recorder = new Recorder();
-window.recorder.load();
+// window.recorder.load();

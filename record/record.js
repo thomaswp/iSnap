@@ -57,6 +57,23 @@ class Record {
         }
         setTimeout(callback, 1);
     }
+
+    replay_run(data, callback) {
+        if (data && data.id) {
+            let block = Recorder.getOrCreateBlock(data);
+            block.mouseClickLeft();
+        } else {
+            ide.runScripts();
+        }
+        let threads = ide.stage.threads;
+        let interval = setInterval(() => {
+            // TODO: this is obviously not ideal...
+            console.log("running...");
+            if (threads.processes.length > 0) return;
+            clearInterval(interval);
+            callback();
+        }, 100);
+    }
 }
 
 class Recorder {
@@ -110,6 +127,14 @@ class Recorder {
             blockChangedHandler);
         Trace.addLoggingHandler('ColorArg.changeColor',
             blockChangedHandler);
+
+        let defaultHandler = (type) => (m, data) => {
+            data = Object.assign({}, data);
+            this.addRecord(new Record(type, data));
+        };
+        let runHandler = defaultHandler('run');
+        Trace.addLoggingHandler('IDE.greenFlag', runHandler);
+        Trace.addLoggingHandler('Block.clickRun', runHandler);
     };
 
     addRecord(record) {
@@ -140,13 +165,13 @@ class Recorder {
         this.audioRecorder.stop(this.recordingName);
     }
 
-    start(keepOldRecords) {
+    start(keepOldRecords, noAudio) {
         if (!keepOldRecords) this.records = []
         let date = new Date();
         this.lastTime = date.getTime();
         this.recordingName = '' + this.lastTime;
         this.isRecording = true;
-        this.audioRecorder.start();
+        if (!noAudio) this.audioRecorder.start();
     }
 
     loadFromCache() {
@@ -210,6 +235,9 @@ class Recorder {
                 }
             } else if (type === FrameMorph.name) {
                 record[prop] = Recorder.getFrameMorph();
+            } else if (type === ScrollFrameMorph.name) {
+                // TODO: This may be overly simplistic...
+                record[prop] = Recorder.getFrameMorph().scrollFrame;
             } else if (type === Point.name) {
                 record[prop] = new Point(value.x, value.y);
             } else if (type === Color.name) {
@@ -303,4 +331,4 @@ class Recorder {
 }
 
 window.recorder = new Recorder();
-// window.recorder.load();
+window.recorder.loadFromCache();

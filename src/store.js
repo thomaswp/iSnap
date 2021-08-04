@@ -392,6 +392,13 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode, remixID) {
     if (model.stage.attributes.name) {
         project.stage.name = model.stage.attributes.name;
     }
+    // We store the project guid and assignment in stage because there is no
+    // serialized 'project' object.
+    if (model.project.attributes.guid) {
+        project.stage.guid = model.project.attributes.guid;
+    } else if (model.stage.attributes.guid) {
+        project.stage.guid = model.stage.attributes.guid;
+    }
     if (model.stage.attributes.color) {
         project.stage.color = this.loadColor(model.stage.attributes.color);
         project.stage.cachedHSV = project.stage.color.hsv();

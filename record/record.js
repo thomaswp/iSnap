@@ -331,4 +331,4 @@ class Recorder {
 }
 
 window.recorder = new Recorder();
-window.recorder.loadFromCache();
+// window.recorder.loadFromCache();

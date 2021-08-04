@@ -31,23 +31,23 @@ class Record {
         this.data = Recorder.serialize(data);
     }
 
-    replay(callback) {
+    replay(callback, fast) {
         let method = 'replay_' + this.type;
         if (!this[method]) {
             console.warn('Unknown record type: ' + this.type);
         }
         console.log('Playing:', this.data);
         let data = Recorder.deserialize(this.data);
-        this[method].call(this, data, callback);
+        this[method].call(this, data, callback, fast);
     }
 
-    replay_blockDrop(dropRecord, callback) {
+    replay_blockDrop(dropRecord, callback, fast) {
         let sprite = window.ide.currentSprite;
         let scripts = sprite.scripts;
-        scripts.playDropRecord(dropRecord, callback);
+        scripts.playDropRecord(dropRecord, callback, fast ? 1 : null);
     }
 
-    replay_inputSlotEdit(data, callback) {
+    replay_inputSlotEdit(data, callback, fast) {
         let block = Recorder.getOrCreateBlock(data.id);
         let input = block.inputs()[data.id.argIndex];
         if (input instanceof ColorSlotMorph) {
@@ -58,7 +58,7 @@ class Record {
         setTimeout(callback, 1);
     }
 
-    replay_run(data, callback) {
+    replay_run(data, callback, fast) {
         if (data && data.id) {
             let block = Recorder.getOrCreateBlock(data);
             block.mouseClickLeft();

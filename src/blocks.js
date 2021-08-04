@@ -7475,7 +7475,7 @@ ScriptsMorph.prototype.redrop = function () {
     this.playDropRecord(this.dropRecord);
 };
 
-ScriptsMorph.prototype.playDropRecord = function(dropRecord, callback) {
+ScriptsMorph.prototype.playDropRecord = function(dropRecord, callback, msecs) {
     if (dropRecord.action === 'delete') {
         this.recoverLastDrop(true, dropRecord);
         dropRecord.lastDroppedBlock.destroy();
@@ -7488,7 +7488,7 @@ ScriptsMorph.prototype.playDropRecord = function(dropRecord, callback) {
         if (dropRecord.lastDroppedBlock instanceof ReporterBlockMorph &&
             dropRecord.lastDropTarget
         ) {
-            console.log("!!!", dropRecord);
+            // console.log("!!!", dropRecord);
             // dropRecord.lastDropTarget.replaceInput(
             //     dropRecord.lastReplacedInput,
             //     dropRecord.lastDroppedBlock
@@ -7499,7 +7499,7 @@ ScriptsMorph.prototype.playDropRecord = function(dropRecord, callback) {
         }
         dropRecord.lastDroppedBlock.slideBackTo(
             dropRecord.situation,
-            null,
+            msecs,
             this.recoverLastDrop(true, dropRecord),
             () => {
                 this.updateToolbar();

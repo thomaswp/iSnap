@@ -4,13 +4,13 @@ class AudioRecorder {
         return navigator.mediaDevices.getUserMedia;
     }
 
-    constructor() {
+    constructor(autostart) {
         this.chunks = [];
         this.fileName = 'audio'
         let onError = function(err) {
             console.error('The following error occurred: ' + err);
         }
-        let onSuccess = (stream) => this.#setup(stream);
+        let onSuccess = (stream) => this.#setup(stream, autostart);
         const constraints = { audio: true };
         navigator.mediaDevices
             .getUserMedia(constraints)
@@ -18,7 +18,10 @@ class AudioRecorder {
     }
 
     start() {
-        if (!this.loaded) return;
+        if (!this.loaded) {
+            console.warn('Attempted to start audio before loaded');
+            return;
+        }
         this.mediaRecorder.start();
         console.log("recorder started");
     }
@@ -29,13 +32,14 @@ class AudioRecorder {
         this.mediaRecorder.stop();
     }
 
-    #setup(stream) {
+    #setup(stream, autostart) {
         this.mediaRecorder = new MediaRecorder(stream);
         this.mediaRecorder.onstop = () => this.#handleStop();
         this.mediaRecorder.ondataavailable = (e) => {
             this.chunks.push(e.data);
         };
         this.loaded = true;
+        if (autostart) this.start();
     }
 
     #handleStop() {

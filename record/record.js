@@ -16,6 +16,29 @@ extend(BlockMorph, 'init', function(base) {
     Recorder.registerBlock(this);
 });
 
+extend(IDE_Morph, 'createProjectMenu', function(base) {
+    var menu = base.call(this);
+    menu.addLine();
+    if (!recorder.isRecording) {
+        menu.addItem(
+            localize('Start recording'),
+            () => {
+                recorder.start();
+            },
+            'Start recording Snap actions and audio.'
+        );
+    } else {
+        menu.addItem(
+            localize('Stop recording'),
+            () => {
+                recorder.stop();
+            },
+            'Stop recording Snap and save.'
+        );
+    }
+    return menu;
+});
+
 class Record {
 
     static fromInputSlotEdit(data) {
@@ -108,11 +131,9 @@ class Recorder {
 
     constructor() {
         this.records = [];
-        this.recording = true;
         this.index = 0;
         this.lastTime = new Date().getTime();
-        this.isRecording = true;
-        this.audioRecorder = new AudioRecorder();
+        this.isRecording = false;
 
         let blockChangedHandler = (m, data) => {
             data = Object.assign({}, data)
@@ -158,11 +179,12 @@ class Recorder {
         this.records[this.index++].replay();
     }
 
-    save() {
+    stop() {
         const json = JSON.stringify(this.records, null, 4);
         window.localStorage.setItem('playback', json);
         saveData(new Blob([json]), this.recordingName + '.json');
-        this.audioRecorder.stop(this.recordingName);
+        if (this.audioRecorder) this.audioRecorder.stop(this.recordingName);
+        this.isRecording = false;
     }
 
     start(keepOldRecords, noAudio) {
@@ -171,7 +193,9 @@ class Recorder {
         this.lastTime = date.getTime();
         this.recordingName = '' + this.lastTime;
         this.isRecording = true;
-        if (!noAudio) this.audioRecorder.start();
+        if (!noAudio) {
+            this.audioRecorder = new AudioRecorder(true);
+        }
     }
 
     loadFromCache() {

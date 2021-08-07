@@ -3640,9 +3640,13 @@ IDE_Morph.prototype.settingsMenu = function () {
 };
 
 IDE_Morph.prototype.projectMenu = function () {
+    let pos = this.controlBar.projectButton.bottomLeft();
+    this.createProjectMenu().popup(world, pos);
+};
+
+IDE_Morph.prototype.createProjectMenu = function () {
     var menu,
         world = this.world(),
-        pos = this.controlBar.projectButton.bottomLeft(),
         graphicsName = this.currentSprite instanceof SpriteMorph ?
                 'Costumes' : 'Backgrounds',
         shiftClicked = (world.currentKey === 16);
@@ -3782,7 +3786,7 @@ IDE_Morph.prototype.projectMenu = function () {
         'Select a sound from the media library'
     );
 
-    menu.popup(world, pos);
+    return menu;
 };
 
 IDE_Morph.prototype.resourceURL = function () {

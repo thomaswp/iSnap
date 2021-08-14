@@ -965,7 +965,7 @@ SnapSerializer.prototype.loadCustomBlocks = function (
     isGlobal,
     isDispatch
 ) {
-    element.children.forEach(function(child) {
+    element.children.forEach(child => {
         this.loadCustomBlock(object, child, isGlobal, isDispatch);
     }, this);
 };
@@ -1002,15 +1002,14 @@ SnapSerializer.prototype.loadCustomBlock = function(
                 object.customBlocks.push(definition);
             }
         }
+    } else {
+        // I don't think we need this guard, but I added it at some point...
+        console.warn('Object is null in loadCustomBlock!');
     }
 
     names = definition.parseSpec(definition.spec).filter(
-        function (str) {
-            return str.charAt(0) === '%' && str.length > 1;
-        }
-    ).map(function (str) {
-        return str.substr(1);
-    });
+        str => str.charAt(0) === '%' && str.length > 1
+    ).map(str => str.substr(1));
 
     definition.names = names;
     inputs = child.childNamed('inputs');
@@ -1071,7 +1070,7 @@ SnapSerializer.prototype.populateCustomBlocks = function (
     element,
     isGlobal
 ) {
-    element.children.forEach(function (child, index) {
+    element.children.forEach((child, index) => {
         var definition = isGlobal ? object.globalBlocks[index]
             : object.customBlocks[index];
         this.populateCustomBlock(object, child, definition);
@@ -1091,7 +1090,7 @@ SnapSerializer.prototype.populateCustomBlock = function (
     if (script) {
         definition.body = new Context(
             null,
-            script ? this.loadScript(script) : null,
+            script ? this.loadScript(script, object) : null,
             null,
             object
         );

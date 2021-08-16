@@ -102,6 +102,7 @@ class Record {
 class Recorder {
 
     static blockMap = new Map();
+    static recordScale = 1;
 
     static registerBlock(block) {
         this.blockMap.set(block.id, block);
@@ -127,6 +128,10 @@ class Recorder {
 
     resetBlockMap() {
         Recorder.blockMap.clear();
+    }
+
+    setRecordScale(scale) {
+        Recorder.recordScale = scale;
     }
 
     constructor() {
@@ -196,6 +201,9 @@ class Recorder {
         if (!noAudio) {
             this.audioRecorder = new AudioRecorder(true);
         }
+        this.addRecord(new Record('setBlockScale', {
+            'scale': SyntaxElementMorph.prototype.scale,
+        }));
     }
 
     loadFromCache() {
@@ -263,7 +271,9 @@ class Recorder {
                 // TODO: This may be overly simplistic...
                 record[prop] = Recorder.getFrameMorph().scrollFrame;
             } else if (type === Point.name) {
-                record[prop] = new Point(value.x, value.y);
+                let recordScale = Recorder.recordScale;
+                let rescale = SyntaxElementMorph.prototype.scale / recordScale;
+                record[prop] = new Point(value.x * rescale, value.y * rescale);
             } else if (type === Color.name) {
                 record[prop] = Object.assign(new Color(), value);
             } else if (type === 'Object') {

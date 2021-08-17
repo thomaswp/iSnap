@@ -1196,7 +1196,7 @@ IDE_Morph.prototype.createControlBar = function () {
 IDE_Morph.prototype.changeCategory = function (category) {
     Trace.log('IDE.changeCategory', category);
     this.currentCategory = category;
-    this.categories.children.forEach(each => 
+    this.categories.children.forEach(each =>
         each.refresh()
     );
     this.refreshPalette(true);

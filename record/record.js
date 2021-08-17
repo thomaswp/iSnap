@@ -126,6 +126,11 @@ class Record {
             callback();
         }, 100); // TODO: This causes a bug when lower - find out why
     }
+
+    replay_stop(data, callback, fast) {
+        window.ide.stopAllScripts();
+        setTimeout(callback, 1);
+    }
 }
 
 class Recorder {
@@ -188,10 +193,13 @@ class Recorder {
             data.message = m;
             this.addRecord(new Record(type, data));
         };
+
         let runHandler = defaultHandler('run');
         Trace.addLoggingHandler('IDE.greenFlag', runHandler);
         Trace.addLoggingHandler('Block.clickRun', runHandler);
         Trace.addLoggingHandler('Block.clickStopRun', runHandler);
+
+        Trace.addLoggingHandler('IDE.stop', defaultHandler('stop'));
     };
 
     addRecord(record) {

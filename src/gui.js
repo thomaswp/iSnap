@@ -1196,9 +1196,9 @@ IDE_Morph.prototype.createControlBar = function () {
 IDE_Morph.prototype.changeCategory = function (category) {
     Trace.log('IDE.changeCategory', category);
     this.currentCategory = category;
-    this.categories.children.forEach(function (each) {
-        each.refresh();
-    });
+    this.categories.children.forEach(each =>
+        each.refresh()
+    );
     this.refreshPalette(true);
 };
 
@@ -1226,11 +1226,7 @@ IDE_Morph.prototype.createCategories = function () {
             colors,
             myself, // the IDE is the target
             () => {
-                myself.currentCategory = category;
-                myself.categories.children.forEach(each =>
-                    each.refresh()
-                );
-                myself.refreshPalette(true);
+                myself.changeCategory(category);
             },
             category[0].toUpperCase().concat(category.slice(1)), // label
             () => myself.currentCategory === category, // query

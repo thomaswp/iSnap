@@ -4737,7 +4737,7 @@ BlockMorph.prototype.mouseClickLeft = function () {
     if (receiver) {
         stage = receiver.parentThatIsA(StageMorph);
         if (stage) {
-            var process = stage.threads.findProcess(top);
+            var process = stage.threads.findProcess(top, receiver);
             if (process && !process.readyToTerminate) {
                 Trace.log('Block.clickStopRun', top.blockId());
             } else {

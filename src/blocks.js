@@ -9256,7 +9256,14 @@ InputSlotMorph.prototype.menuFromDict = function (
         );
 
 	function update(num) {
-    	myself.setContents(num);
+        let contents = myself.contents();
+        if (contents && contents.text && contents.text != num.toString()) {
+            Trace.log('InputSlot.sliderInputEdited', {
+                'id': myself.argId(),
+                'value': num,
+            });
+        }
+        myself.setContents(num);
         myself.reactToSliderEdit();
  	}
 

@@ -75,7 +75,8 @@ class Record {
         let input = block.inputs()[data.id.argIndex];
         if (input instanceof ColorSlotMorph) {
             input.setColor(data.value);
-        } else if (input instanceof InputSlotMorph) {
+        } else if (input instanceof InputSlotMorph ||
+                input instanceof BooleanSlotMorph) {
             input.setContents(data.value);
         }
         setTimeout(callback, 1);
@@ -142,22 +143,34 @@ class Recorder {
 
     static blockMap = new Map();
     static recordScale = 1;
+    // Offset to ensure all blockIDs from logs are unique
+    // TODO: if we ever record snapshots, need to adjust this
+    static ID_OFFSET = 1000;
 
     static registerBlock(block) {
         this.blockMap.set(block.id, block);
     }
 
+    static getBlock(id, isTemplate) {
+        if (!isTemplate) {
+            id += Recorder.ID_OFFSET;
+        }
+        let block = this.blockMap.get(id);
+        return block;
+    }
+
     static getOrCreateBlock(blockDef) {
-        // TODO: May need to worry about overwriting blockIDs
-        let block = this.blockMap.get(blockDef.id);
+        let block = Recorder.getBlock(blockDef.id, blockDef.template);
         if (block) return block;
+        let id = blockDef.id + Recorder.ID_OFFSET
         block = window.ide.currentSprite.blockForSelector(
             blockDef.selector, true);
-        block.id = blockDef.id;
+        block.id = id;
         block.parent = this.getFrameMorph();
         block.isDraggable = true;
-        BlockMorph.nextId = Math.max(BlockMorph.nextId, blockDef.id + 1);
-        this.blockMap.set(blockDef.id, block);
+        // We actually shouldn't update this, so the offset continues to work
+        // BlockMorph.nextId = Math.max(BlockMorph.nextId, blockDef.id + 1);
+        this.blockMap.set(id, block);
         return block;
     }
 
@@ -165,6 +178,7 @@ class Recorder {
         return ide.palette.children[0];
     }
 
+    // TODO: these can actually be static...
     resetBlockMap() {
         Recorder.blockMap.clear();
     }
@@ -193,6 +207,8 @@ class Recorder {
         Trace.addLoggingHandler('ColorArg.changeColor',
             blockChangedHandler);
         Trace.addLoggingHandler('InputSlot.sliderInputEdited',
+            blockChangedHandler);
+        Trace.addLoggingHandler('BooleanSlotMorph.toggleValue',
             blockChangedHandler);
 
         let defaultHandler = (type) => (m, data) => {

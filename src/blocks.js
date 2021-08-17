@@ -432,8 +432,6 @@ SyntaxElementMorph.prototype.replaceInput = function (oldArg, newArg) {
         replacement = newArg,
         idx = this.children.indexOf(oldArg),
         i = 0;
-    console.log('Index: ' + idx);
-    console.trace();
     // try to find the ArgLabel embedding the newArg,
     // used for the undrop() feature
     if (idx === -1 && newArg instanceof MultiArgMorph) {

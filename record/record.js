@@ -82,20 +82,49 @@ class Record {
     }
 
     replay_run(data, callback, fast) {
+        let threads = ide.stage.threads;
+        var stopCondition;
         if (data && data.id) {
+            // Click run or stop run
             let block = Recorder.getOrCreateBlock(data);
             block.mouseClickLeft();
+            let receiver = block.scriptTarget();
+            let proc = threads.findProcess(block, receiver);
+            if (!proc == (data.message === 'Block.clickStopRun')) {
+                // If we're starting or stopping and the script is already 
+                // running/not-running just return
+                setTimeout(callback, 1);
+                return;
+            }
+            stopCondition = () => {
+                // Stop when the thread has stopped running
+                return !receiver || !threads.findProcess(block, receiver);
+            };
         } else {
+            // Green flag
             ide.runScripts();
+            stopCondition = () => {
+                // Stop when all threads have finished
+                return !threads.processes.length == 0;
+            };
         }
-        let threads = ide.stage.threads;
+        if (!fast) {
+            // If playing at normal time, we just trust that the recorder
+            // isn't messing with the running script, and allow actions
+            // to progress.
+            setTimeout(callback, 1);
+            return;
+        }
+
+        let startTime = new Date().getTime();
+        let MAX_RUN = 300; // TODO: make configurable!
         let interval = setInterval(() => {
-            // TODO: this is obviously not ideal...
-            console.log("running...");
-            if (threads.processes.length > 0) return;
+            let passed = new Date().getTime() - startTime;
+            if (passed < MAX_RUN && !stopCondition()) return;
+            console.log("stopping", data);
             clearInterval(interval);
             callback();
-        }, 100);
+        }, 100); // TODO: This causes a bug when lower - find out why
     }
 }
 
@@ -156,11 +185,13 @@ class Recorder {
 
         let defaultHandler = (type) => (m, data) => {
             data = Object.assign({}, data);
+            data.message = m;
             this.addRecord(new Record(type, data));
         };
         let runHandler = defaultHandler('run');
         Trace.addLoggingHandler('IDE.greenFlag', runHandler);
         Trace.addLoggingHandler('Block.clickRun', runHandler);
+        Trace.addLoggingHandler('Block.clickStopRun', runHandler);
     };
 
     addRecord(record) {

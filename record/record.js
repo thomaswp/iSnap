@@ -192,6 +192,8 @@ class Recorder {
             blockChangedHandler);
         Trace.addLoggingHandler('ColorArg.changeColor',
             blockChangedHandler);
+        Trace.addLoggingHandler('InputSlot.sliderInputEdited',
+            blockChangedHandler);
 
         let defaultHandler = (type) => (m, data) => {
             if (data !== Object(data)) {
@@ -328,6 +330,8 @@ class Recorder {
                 record[prop] = Object.assign(new Color(), value);
             } else if (type === 'Object') {
                 record[prop] = this.deserialize(value);
+            } else if (Array.isArray(value)) {
+                record[prop] = value.slice();
             } else {
                 console.error('Unknown object in record!', prop, value);
             }

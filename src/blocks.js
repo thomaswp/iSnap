@@ -9358,12 +9358,12 @@ InputSlotMorph.prototype.menuFromDict = function (
                     menu.addItem(
                         fKey,
                         function() {
+                            var choice = choices[fKey];
+                            if (choice instanceof Function) choice = choice();
                             Trace.log('InputSlot.menuItemSelected', {
                                 'id': myself.argId(),
-                                'item': fKey,
+                                'item': choice,
                             });
-                            var choice = choices[fKey];
-                            if (choice instanceof Function) return choice();
                             return choice;
                         },
                         null, // hint

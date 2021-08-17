@@ -131,6 +131,11 @@ class Record {
         window.ide.stopAllScripts();
         setTimeout(callback, 1);
     }
+
+    replay_changeCategory(data, callback, fast) {
+        window.ide.changeCategory(data.value);
+        setTimeout(callback, 1);
+    }
 }
 
 class Recorder {
@@ -189,6 +194,10 @@ class Recorder {
             blockChangedHandler);
 
         let defaultHandler = (type) => (m, data) => {
+            if (data !== Object(data)) {
+                // Convert to an object if a single value
+                data = {value: data};
+            }
             data = Object.assign({}, data);
             data.message = m;
             this.addRecord(new Record(type, data));
@@ -200,6 +209,8 @@ class Recorder {
         Trace.addLoggingHandler('Block.clickStopRun', runHandler);
 
         Trace.addLoggingHandler('IDE.stop', defaultHandler('stop'));
+
+        Trace.addLoggingHandler('IDE.changeCategory', defaultHandler('changeCategory'));
     };
 
     addRecord(record) {

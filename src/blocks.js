@@ -10667,6 +10667,10 @@ BooleanSlotMorph.prototype.toggleValue = function () {
     }
     ide = this.parentThatIsA(IDE_Morph);
     this.value = this.nextValue();
+    Trace.log('BooleanSlotMorph.toggleValue', {
+        'id': this.argId(),
+        'value': this.value,
+    });
     if (ide && !ide.isAnimating) {
         this.rerender();
         return;

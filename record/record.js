@@ -39,6 +39,55 @@ extend(IDE_Morph, 'createProjectMenu', function(base) {
     return menu;
 });
 
+// extend(MenuMorph, 'popup', function (base, world, pos) {
+//     console.log(this, pos);
+//     if (window.recorder) {
+//     }
+//     base.call(this, world, pos);
+// });
+
+(function() {
+    var menuLogging = function(base) {
+        let menu = base.call(this);
+        // console.log('menu', this);
+        if (!menu) return menu;
+        if (window.recorder) {
+            window.recorder.recordMenu(this, menu, true);
+        }
+        return menu;
+    };
+
+    [BlockMorph, ScriptsMorph, InputSlotMorph].forEach(cls => {
+        extend(cls, 'userMenu', menuLogging);
+    });
+})();
+
+
+extend(MenuItemMorph, 'mouseEnter', function (base) {
+    // console.log('enter', this);
+    if (window.recorder) {
+        window.recorder.recordMenuItem(this, true);
+    }
+    base.call(this);
+});
+
+extend(MenuItemMorph, 'mouseLeave', function (base) {
+    // console.log('leave', this);
+    if (window.recorder) {
+        window.recorder.recordMenuItem(this, false);
+    }
+    base.call(this);
+});
+
+
+extend(MenuMorph, 'destroy', function (base) {
+    // console.log('destroy', this);
+    if (window.recorder) {
+        window.recorder.recordMenu(null, this, false);
+    }
+    base.call(this);
+});
+
 class Record {
 
     static fromInputSlotEdit(data) {
@@ -151,6 +200,40 @@ class Record {
         window.ide.changeCategory(data.value);
         setTimeout(callback, 1);
     }
+
+    replay_menu(data, callback, fast) {
+        let parent = data.parent;
+        let open = data.open;
+        if (fast) {
+            setTimeout(callback, 1);
+            return;
+        }
+        if (open && parent) {
+            Recorder.registerClick(data.position, fast);
+            parent.contextMenu().popup(world, data.position);
+        } else if (!open) {
+            Recorder.openMenu.destroy();
+        }
+        setTimeout(callback, 1);
+    }
+
+    replay_menuItemSelect(data, callback, fast) {
+        if (fast || !Recorder.openMenu) {
+            setTimeout(callback, 1);
+            return;
+        }
+        let index = data.index;
+        let selected = data.highlight;
+        let item = Recorder.openMenu.children[index];
+        if (item && item.mouseEnter) {
+            if (selected) {
+                item.mouseEnter();
+            } else {
+                item.mouseLeave();
+            }
+        }
+        setTimeout(callback, 1);
+    }
 }
 
 class Recorder {
@@ -161,6 +244,7 @@ class Recorder {
     // TODO: if we ever record snapshots, need to adjust this
     static ID_OFFSET = 1000;
     static onClickCallback = null;
+    static openMenu = null;
 
     static registerBlock(block) {
         this.blockMap.set(block.id, block);
@@ -255,6 +339,33 @@ class Recorder {
 
         Trace.addLoggingHandler('IDE.changeCategory', defaultHandler('changeCategory'));
     };
+
+    recordMenu(parent, menu, open) {
+        if (open && Recorder.openMenu) {
+            // TODO: allow multiple menus?
+            if (Recorder.openMenu.parent) {
+                Recorder.openMenu.destroy();
+            }
+            Recorder.openMenu = null;
+        }
+        if (open) {
+            Recorder.openMenu = menu;
+        }
+        this.addRecord(new Record('menu', {
+            parent: parent,
+            open: open,
+            position: world.hand.position(),
+        }));
+    }
+
+    recordMenuItem(item, highlight) {
+        let index = item.parent.children.indexOf(item);
+        if (index < 0) return;
+        this.addRecord(new Record('menuItemSelect', {
+            index: index,
+            highlight: highlight,
+        }));
+    }
 
     addRecord(record) {
         if (!this.isRecording) return false;

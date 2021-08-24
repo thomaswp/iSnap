@@ -7491,8 +7491,20 @@ ScriptsMorph.prototype.playDropRecord = function(dropRecord, callback, msecs) {
             //     dropRecord.lastReplacedInput,
             //     dropRecord.lastDroppedBlock
             // );
-            dropRecord.lastDroppedBlock.snapToInput(
-                dropRecord.lastReplacedInput);
+            // Hack to make redos actually work for input slots, since
+            // they use position rather than input target for some reason
+            let block = dropRecord.lastDroppedBlock;
+            let input = dropRecord.lastReplacedInput;
+            block.parent = input.parentThatIsA(ScriptsMorph);
+            block.prepareToBeGrabbed(this.world().hand);
+            block.parent.reactToGrabOf(block);
+            if (block instanceof ReporterBlockMorph && block.parent instanceof BlockMorph) {
+                block.parent.changed();
+            }
+            block.snapToInput(input);
+            if (callback) {
+                setTimeout(callback, 1)
+            }
             return;
         }
         dropRecord.lastDroppedBlock.slideBackTo(

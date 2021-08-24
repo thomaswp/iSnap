@@ -79,6 +79,7 @@ class Record {
                 input instanceof BooleanSlotMorph) {
             input.setContents(data.value);
         }
+        Recorder.registerClick(input.center(), fast);
         setTimeout(callback, 1);
     }
 
@@ -91,6 +92,8 @@ class Record {
             block.mouseClickLeft();
             let receiver = block.scriptTarget();
             let proc = threads.findProcess(block, receiver);
+            let click = block.center().add(lastRun.position()).divideBy(2);
+            Recorder.registerClick(click, fast);
             if (!proc == (data.message === 'Block.clickStopRun')) {
                 // If we're starting or stopping and the script is already 
                 // running/not-running just return
@@ -103,6 +106,8 @@ class Record {
             };
         } else {
             // Green flag
+            let click = ide.controlBar.startButton.center();
+            Recorder.registerClick(click, fast);
             ide.runScripts();
             stopCondition = () => {
                 // Stop when all threads have finished
@@ -129,11 +134,20 @@ class Record {
     }
 
     replay_stop(data, callback, fast) {
+        let click = ide.controlBar.stopButton.center();
+        Recorder.registerClick(click, fast);
         window.ide.stopAllScripts();
         setTimeout(callback, 1);
     }
 
     replay_changeCategory(data, callback, fast) {
+        let categoryIndex = SpriteMorph.prototype.categories
+            .indexOf(data.value.toLocaleLowerCase());
+        if (categoryIndex >= 0) {
+            let click = ide.categories.children[categoryIndex].center();
+            Recorder.registerClick(click, fast);
+        }
+
         window.ide.changeCategory(data.value);
         setTimeout(callback, 1);
     }
@@ -146,6 +160,7 @@ class Recorder {
     // Offset to ensure all blockIDs from logs are unique
     // TODO: if we ever record snapshots, need to adjust this
     static ID_OFFSET = 1000;
+    static onClickCallback = null;
 
     static registerBlock(block) {
         this.blockMap.set(block.id, block);
@@ -178,12 +193,22 @@ class Recorder {
         return ide.palette.children[0];
     }
 
-    // TODO: these can actually be static...
-    resetBlockMap() {
+    static setOnClickCallback(callback) {
+        this.onClickCallback = callback;
+    }
+
+    static registerClick(point, fast) {
+        if (fast) return;
+        if (this.onClickCallback) {
+            this.onClickCallback(point.x, point.y);
+        }
+    }
+
+    static resetBlockMap() {
         Recorder.blockMap.clear();
     }
 
-    setRecordScale(scale) {
+    static setRecordScale(scale) {
         Recorder.recordScale = scale;
     }
 

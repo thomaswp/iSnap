@@ -1767,16 +1767,7 @@ BlockDialogMorph.prototype.addCategoryButton = function (category) {
         colors,
         this, // this block dialog box is the target
         () => {
-            this.category = category;
-            this.categories.children.forEach(each =>
-                each.refresh()
-            );
-            if (this.types) {
-                this.types.children.forEach(each =>
-                    each.setColor(colors[2])
-                );
-            }
-            this.edit();
+            this.changeCategory(category);
         },
         category[0].toUpperCase().concat(category.slice(1)), // UCase label
         () => this.category === category, // query
@@ -1799,6 +1790,21 @@ BlockDialogMorph.prototype.addCategoryButton = function (category) {
     button.refresh();
     this.categories.add(button);
     return button;
+};
+
+BlockDialogMorph.prototype.changeCategory = function(category) {
+    Trace.log('BlockTypeDialog.changeCategory', category)
+    let color = SpriteMorph.prototype.blockColor[category];
+    this.category = category;
+    this.categories.children.forEach(each =>
+        each.refresh()
+    );
+    if (this.types) {
+        this.types.children.forEach(each =>
+            each.setColor(color)
+        );
+    }
+    this.edit();
 };
 
 BlockDialogMorph.prototype.fixCategoriesLayout = function () {
@@ -1910,6 +1916,9 @@ BlockDialogMorph.prototype.addTypeButton = function (action, label, query) {
 };
 
 BlockDialogMorph.prototype.setType = function (blockType) {
+    if (blockType != this.blockType) {
+        Trace.log('BlockTypeDialog.setType', blockType);
+    }
     this.blockType = blockType || this.blockType;
     this.types.children.forEach(c => c.refresh());
     this.edit();
@@ -1951,7 +1960,11 @@ BlockDialogMorph.prototype.addScopeButton = function (action, label, query) {
 
 
 BlockDialogMorph.prototype.setScope = function (varType) {
-    this.isGlobal = (varType === 'global');
+    let isGlobal = (varType === 'global');
+    if (isGlobal != this.isGlobal) {
+        Trace.log('BlockTypeDialog.setScope', varType);
+    }
+    this.isGlobal = isGlobal;
     this.scopes.children.forEach(c => c.refresh());
     this.edit();
 };

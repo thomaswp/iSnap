@@ -88,6 +88,24 @@ extend(MenuMorph, 'destroy', function (base) {
     base.call(this);
 });
 
+extend(BlockDialogMorph, 'prompt', function(base) {
+    base.apply(this, [].slice.call(arguments, 1));
+    if (!this.body) return;
+    extendObject(this.body, 'reactToInput', function(base) {
+        base.call(this);
+        if (window.recorder) {
+            window.recorder.recordInputTyped('BlockDialogMorph', this.getValue());
+        }
+    });
+});
+
+extend(SpriteMorph, 'makeBlock', function(base) {
+    if (window.recorder) {
+        window.recorder.recordNewBlock();
+    }
+    base.call(this);
+});
+
 class Record {
 
     static fromInputSlotEdit(data) {
@@ -234,6 +252,77 @@ class Record {
         }
         setTimeout(callback, 1);
     }
+
+    replay_blockType_newBlock(data, callback, fast) {
+        ide.currentSprite.makeBlock();
+        let button = ide.palette.toolBar.children[1];
+        if (button) {
+            Recorder.registerClick(button.center(), fast);
+        }
+        setTimeout(callback, 1);
+    }
+
+    replay_blockType_setValue(func, data, callback, fast, shower) {
+        let dialog = Recorder.getBlockDialog();
+        if (dialog) {
+            dialog[func](data.value);
+            if (shower) {
+                let widget = shower(dialog);
+                if (widget) {
+                    Recorder.registerClick(widget.center(), fast);
+                }
+            }
+        }
+        setTimeout(callback, 1);
+    }
+
+    replay_blockType_changeCategory(data, callback, fast) {
+        this.replay_blockType_setValue('changeCategory', data, callback, fast, dialog => {
+            return dialog.categories.children.filter(child => child.query())[0];
+        });
+    }
+
+    replay_blockType_setScope(data, callback, fast) {
+        this.replay_blockType_setValue('setScope', data, callback, fast, dialog => {
+            return dialog.scopes.children.filter(scope => scope.query())[0];
+        });
+    }
+
+    replay_blockType_setType(data, callback, fast) {
+        this.replay_blockType_setValue('setType', data, callback, fast, dialog => {
+            return dialog.types.children.filter(type => type.query())[0];
+        });
+    }
+
+    replay_blockType_ok(data, callback, fast) {
+        let dialog = Recorder.getBlockDialog();
+        if (dialog) {
+            Recorder.registerClick(dialog.buttons.children[0].center());
+            dialog.ok();
+        }
+        setTimeout(callback, 1);
+    }
+
+    replay_blockType_cancel(data, callback, fast) {
+        let dialog = Recorder.getBlockDialog();
+        if (dialog) {
+            Recorder.registerClick(dialog.buttons.children[1].center());
+            dialog.cancel();
+        }
+        setTimeout(callback, 1);
+    }
+
+    replay_inputTyped(data, callback, fast) {
+        if (data.input === 'BlockDialogMorph') {
+            let dialog = Recorder.getBlockDialog();
+            if (dialog) {
+                dialog.body.setContents(data.value);
+            }
+        } else {
+            console.warn('Unknown input type', data.input);
+        }
+        setTimeout(callback, 1);
+    }
 }
 
 class Recorder {
@@ -296,6 +385,16 @@ class Recorder {
         Recorder.recordScale = scale;
     }
 
+    static getDialog(key) {
+        var instances = DialogBoxMorph.prototype.instances[window.world.stamp];
+        if (!instances) return null;
+        return instances[key];
+    }
+
+    static getBlockDialog() {
+        return this.getDialog('makeABlock');
+    }
+
     constructor() {
         this.records = [];
         this.index = 0;
@@ -338,6 +437,10 @@ class Recorder {
         Trace.addLoggingHandler('IDE.stop', defaultHandler('stop'));
 
         Trace.addLoggingHandler('IDE.changeCategory', defaultHandler('changeCategory'));
+
+        ['changeCategory', 'setScope', 'setType', 'ok', 'cancel'].forEach(message => {
+            Trace.addLoggingHandler('BlockTypeDialog.' + message, defaultHandler('blockType_' + message));
+        });
     };
 
     recordMenu(parent, menu, open) {
@@ -365,6 +468,17 @@ class Recorder {
             index: index,
             highlight: highlight,
         }));
+    }
+
+    recordInputTyped(input, value) {
+        this.addRecord(new Record('inputTyped', {
+            input: input,
+            value: value,
+        }));
+    }
+
+    recordNewBlock() {
+        this.addRecord(new Record('blockType_newBlock', {}));
     }
 
     addRecord(record) {

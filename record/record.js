@@ -461,6 +461,10 @@ class Recorder {
         }));
     }
 
+    recordEvent(type, data) {
+        this.addRecord(new Record(type, data));
+    }
+
     recordMenuItem(item, highlight) {
         let index = item.parent.children.indexOf(item);
         if (index < 0) return;

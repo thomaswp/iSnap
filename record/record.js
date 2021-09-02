@@ -39,13 +39,6 @@ extend(IDE_Morph, 'createProjectMenu', function(base) {
     return menu;
 });
 
-// extend(MenuMorph, 'popup', function (base, world, pos) {
-//     console.log(this, pos);
-//     if (window.recorder) {
-//     }
-//     base.call(this, world, pos);
-// });
-
 (function() {
     var menuLogging = function(base) {
         let menu = base.call(this);
@@ -126,7 +119,7 @@ class Record {
         if (!this[method]) {
             console.warn('Unknown record type: ' + this.type);
         }
-        console.log('Playing:', this.data);
+        console.log('Playing:', this.type, this.data);
         let data = Recorder.deserialize(this.data);
         this[method].call(this, data, callback, fast);
     }
@@ -134,6 +127,21 @@ class Record {
     replay_blockDrop(dropRecord, callback, fast) {
         let sprite = window.ide.currentSprite;
         let scripts = sprite.scripts;
+        // Hack to recover the PHBM, which has no spec and is created automatically
+        if (dropRecord.lastDroppedBlock === undefined) {
+            if (dropRecord.situation && dropRecord.situation.origin) {
+                let guid = dropRecord.situation.origin.guid;
+                let editor = Recorder.findShowingBlockEditor(guid);
+                if (editor) {
+                    let blocks = editor.body.children[0].children;
+                    blocks = blocks.filter(b => b instanceof PrototypeHatBlockMorph);
+                    let hat = blocks[0];
+                    if (hat) {
+                        dropRecord.lastDroppedBlock = hat;
+                    }
+                }
+            }
+        }
         scripts.playDropRecord(dropRecord, callback, fast ? 1 : null);
     }
 
@@ -162,7 +170,7 @@ class Record {
             let click = block.center().add(lastRun.position()).divideBy(2);
             Recorder.registerClick(click, fast);
             if (!proc == (data.message === 'Block.clickStopRun')) {
-                // If we're starting or stopping and the script is already 
+                // If we're starting or stopping and the script is already
                 // running/not-running just return
                 setTimeout(callback, 1);
                 return;
@@ -229,7 +237,7 @@ class Record {
         if (open && parent) {
             Recorder.registerClick(data.position, fast);
             parent.contextMenu().popup(world, data.position);
-        } else if (!open) {
+        } else if (!open && Recorder.openMenu) {
             Recorder.openMenu.destroy();
         }
         setTimeout(callback, 1);
@@ -323,6 +331,26 @@ class Record {
         }
         setTimeout(callback, 1);
     }
+
+    replay_blockEditor_start(data, callback, fast) {
+        setTimeout(callback, 1);
+        let blockDef = Recorder.getCustomBlock(data);
+        if (!blockDef) {
+            let editor = BlockEditorMorph.showing
+                .filter(editor => editor.definition.spec === data.spec)[0];
+            if (!editor) {
+                console.warn('Missing block editor for spec: ', data.spec);
+                return;
+            }
+            // If this block was just created, update its guid
+            // console.log('setting', editor.definition.guid, ' to ', data.guid);
+            editor.definition.guid = data.guid;
+            return;
+        }
+
+        // Otherwise just edit the Sprite
+        new BlockEditorMorph(blockDef, window.ide.currentSprite).popUp();
+    }
 }
 
 class Recorder {
@@ -334,6 +362,14 @@ class Recorder {
     static ID_OFFSET = 1000;
     static onClickCallback = null;
     static openMenu = null;
+
+    static resetSnap() {
+        window.ide.newProject();
+        window.ide.changeCategory('motion');
+        window.world.children
+            .filter(c => c instanceof DialogBoxMorph)
+            .forEach(d => d.destroy());
+    }
 
     static registerBlock(block) {
         this.blockMap.set(block.id, block);
@@ -353,6 +389,8 @@ class Recorder {
         let id = blockDef.id + Recorder.ID_OFFSET
         block = window.ide.currentSprite.blockForSelector(
             blockDef.selector, true);
+        if (!block) return undefined;
+        // console.log('Creating', blockDef, block);
         block.id = id;
         block.parent = this.getFrameMorph();
         block.isDraggable = true;
@@ -360,6 +398,19 @@ class Recorder {
         // BlockMorph.nextId = Math.max(BlockMorph.nextId, blockDef.id + 1);
         this.blockMap.set(id, block);
         return block;
+    }
+    static getCustomBlock(guid) {
+        let blocks = [];
+        blocks = blocks.concat(ide.stage.globalBlocks);
+        let sprites = ide.sprites.contents.concat([ide.stage]);
+        sprites.forEach(sprite => {
+            blocks = blocks.concat(sprite.customBlocks);
+        });
+        return blocks.filter(b => b.guid == guid)[0];
+    }
+
+    static findShowingBlockEditor(guid) {
+        return BlockEditorMorph.showing.filter(editor => editor.definition.guid == guid)[0];
     }
 
     static getFrameMorph() {
@@ -441,6 +492,8 @@ class Recorder {
         ['changeCategory', 'setScope', 'setType', 'ok', 'cancel'].forEach(message => {
             Trace.addLoggingHandler('BlockTypeDialog.' + message, defaultHandler('blockType_' + message));
         });
+
+        Trace.addLoggingHandler('BlockEditor.start', defaultHandler('blockEditor_start'));
     };
 
     recordMenu(parent, menu, open) {
@@ -578,11 +631,10 @@ class Recorder {
                         }
                     });
                 } else if (value.source === 'Editor') {
-                    BlockEditorMorph.showing.forEach(editor => {
-                        if (editor.definition.guid === value.guid) {
-                            record[prop] = editor.body.children[0];
-                        }
-                    });
+                    let editor = Recorder.findShowingBlockEditor(value.guid);
+                    if (editor) {
+                        record[prop] = editor.body.children[0];
+                    }
                 }
                 if (!record[prop]) {
                     console.warn('Cannot find ScriptsMorph', prop, value);

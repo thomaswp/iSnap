@@ -1697,11 +1697,6 @@ BlockDialogMorph.prototype.prompt = function() {
     BlockDialogMorph.uber.prompt.apply(this, arguments);
 };
 
-BlockDialogMorph.prototype.ok = function() {
-    Trace.log('BlockTypeDialog.ok');
-    BlockDialogMorph.uber.ok.apply(this, arguments);
-};
-
 BlockDialogMorph.prototype.cancel = function() {
     Trace.log('BlockTypeDialog.cancel');
     BlockDialogMorph.uber.cancel.apply(this, arguments);
@@ -2110,6 +2105,7 @@ BlockDialogMorph.prototype.accept = function () {
             (this.normalizeSpaces(this.body.getValue()) === '')) {
         this.edit();
     } else {
+        Trace.log('BlockTypeDialog.ok');
         BlockDialogMorph.uber.accept.call(this);
     }
 };

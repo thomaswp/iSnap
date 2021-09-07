@@ -124,24 +124,45 @@ class Record {
         this[method].call(this, data, callback, fast);
     }
 
-    replay_blockDrop(dropRecord, callback, fast) {
-        let sprite = window.ide.currentSprite;
-        let scripts = sprite.scripts;
+    replacePHBM(dropRecord, parent, key) {
         // Hack to recover the PHBM, which has no spec and is created automatically
-        if (dropRecord.lastDroppedBlock === undefined) {
+        // console.log('attempting to replace: ', key);
+        if (!parent) return;
+        if (parent[key] === undefined) {
+            // console.log('Undefined key');
             if (dropRecord.situation && dropRecord.situation.origin) {
-                let guid = dropRecord.situation.origin.guid;
-                let editor = Recorder.findShowingBlockEditor(guid);
+                // console.log('Custom origin');
+                let origin = dropRecord.situation.origin;
+                let editor = null;
+                if (origin instanceof ScriptsMorph) {
+                    editor = origin.parentThatIsA(BlockEditorMorph);
+                } else if (origin.guid) {
+                    editor = Recorder.findShowingBlockEditor(origin.guid);
+                } else {
+                    console.warn('Unknown origin for BEM: ', origin);
+                }
                 if (editor) {
+                    // console.log('Editor');
                     let blocks = editor.body.children[0].children;
                     blocks = blocks.filter(b => b instanceof PrototypeHatBlockMorph);
                     let hat = blocks[0];
                     if (hat) {
-                        dropRecord.lastDroppedBlock = hat;
+                        // console.log("Replaced hat block!", key);
+                        parent[key] = hat;
                     }
                 }
             }
         }
+    }
+
+    replay_blockDrop(dropRecord, callback, fast) {
+        let sprite = window.ide.currentSprite;
+        let scripts = sprite.scripts;
+        this.replacePHBM(dropRecord, dropRecord, 'lastDroppedBlock');
+        this.replacePHBM(dropRecord, dropRecord.lastDropTarget, 'element');
+        // console.log('Dropping deserialized', dropRecord);
+        // TODO: Need to update playDropRecord to not use position, since this will
+        // cause issues in a number of situation, especially if block dialogs are moved
         scripts.playDropRecord(dropRecord, callback, fast ? 1 : null);
     }
 
@@ -351,6 +372,26 @@ class Record {
         // Otherwise just edit the Sprite
         new BlockEditorMorph(blockDef, window.ide.currentSprite).popUp();
     }
+
+    replay_blockEditor_ok(data, callback, fast) {
+        setTimeout(callback, 1);
+        let editor = Recorder.findShowingBlockEditor(data.guid);
+        editor.ok();
+    }
+
+    replay_blockEditor_apply(data, callback, fast) {
+        setTimeout(callback, 1);
+        let editor = Recorder.findShowingBlockEditor(data.guid);
+        // There may not be an editor if they hit ok instead of apply
+        if (!editor) return;
+        editor.updateDefinition();
+    }
+
+    replay_blockEditor_cancel(data, callback, fast) {
+        setTimeout(callback, 1);
+        let editor = Recorder.findShowingBlockEditor(data.guid);
+        editor.cancel();
+    }
 }
 
 class Recorder {
@@ -389,6 +430,7 @@ class Recorder {
         let block = Recorder.getBlock(blockDef.id, blockDef.template);
         if (block) return block;
         let id = blockDef.id + Recorder.ID_OFFSET
+        // TODO: Check for custom block specs and use those if present
         block = window.ide.currentSprite.blockForSelector(
             blockDef.selector, true);
         if (!block) return undefined;
@@ -472,7 +514,21 @@ class Recorder {
         Trace.addLoggingHandler('BooleanSlotMorph.toggleValue',
             blockChangedHandler);
 
-        let defaultHandler = (type) => (m, data) => {
+        let runHandler = this.defaultHandler('run');
+        Trace.addLoggingHandler('IDE.greenFlag', runHandler);
+        Trace.addLoggingHandler('Block.clickRun', runHandler);
+        Trace.addLoggingHandler('Block.clickStopRun', runHandler);
+
+        Trace.addLoggingHandler('IDE.stop', this.defaultHandler('stop'));
+
+        Trace.addLoggingHandler('IDE.changeCategory', this.defaultHandler('changeCategory'));
+
+        this.addGroupedHandlers('BlockTypeDialog', ['changeCategory', 'setScope', 'setType', 'ok', 'cancel'], 'blockType');
+        this.addGroupedHandlers('BlockEditor', ['start', 'ok', 'apply', 'cancel'], 'blockEditor');
+    };
+
+    defaultHandler(type) {
+        return (m, data) => {
             if (data !== Object(data)) {
                 // Convert to an object if a single value
                 data = {value: data};
@@ -481,22 +537,13 @@ class Recorder {
             data.message = m;
             this.addRecord(new Record(type, data));
         };
-
-        let runHandler = defaultHandler('run');
-        Trace.addLoggingHandler('IDE.greenFlag', runHandler);
-        Trace.addLoggingHandler('Block.clickRun', runHandler);
-        Trace.addLoggingHandler('Block.clickStopRun', runHandler);
-
-        Trace.addLoggingHandler('IDE.stop', defaultHandler('stop'));
-
-        Trace.addLoggingHandler('IDE.changeCategory', defaultHandler('changeCategory'));
-
-        ['changeCategory', 'setScope', 'setType', 'ok', 'cancel'].forEach(message => {
-            Trace.addLoggingHandler('BlockTypeDialog.' + message, defaultHandler('blockType_' + message));
-        });
-
-        Trace.addLoggingHandler('BlockEditor.start', defaultHandler('blockEditor_start'));
     };
+
+    addGroupedHandlers(group, messages, typePrefix)  {
+        messages.forEach(message => {
+            Trace.addLoggingHandler(group + '.' + message, this.defaultHandler(typePrefix + '_' + message));
+        });
+    }
 
     recordMenu(parent, menu, open) {
         if (open && Recorder.openMenu) {

@@ -364,11 +364,13 @@ class Recorder {
     static openMenu = null;
 
     static resetSnap() {
-        window.ide.newProject();
-        window.ide.changeCategory('motion');
+        // Important: close all dialog boxes *first*; otherwise Snap won't
+        // successfully create a new project.
         window.world.children
             .filter(c => c instanceof DialogBoxMorph)
             .forEach(d => d.destroy());
+        window.ide.newProject();
+        window.ide.changeCategory('motion');
     }
 
     static registerBlock(block) {

@@ -392,6 +392,36 @@ class Record {
         let editor = Recorder.findShowingBlockEditor(data.guid);
         editor.cancel();
     }
+
+    replay_IDE_toggleSingleStepping(data, callback, fast) {
+        setTimeout(callback, 1);
+        // Ignore this if the value is already correct
+        if (data.value == Process.prototype.enableSingleStepping) return;
+        Recorder.registerClick(window.ide.controlBar.steppingButton.center(), fast);
+        window.ide.toggleSingleStepping();
+    }
+
+    replay_IDE_updateSteppingSlider(data, callback, fast) {
+        setTimeout(callback, 1);
+        Process.prototype.flashTime = data.value;
+        window.ide.controlBar.steppingSlider.value = Process.prototype.flashTime * 100 + 1
+        window.ide.controlBar.steppingSlider.fixLayout();
+        Recorder.registerClick(window.ide.controlBar.steppingSlider.button.center(), fast);
+    }
+
+    replay_IDE_pause(data, callback, fast) {
+        setTimeout(callback, 1);
+        if (window.ide.stage.threads.isPaused()) return;
+        Recorder.registerClick(window.ide.controlBar.pauseButton.center(), fast);
+        window.ide.togglePauseResume();
+    }
+
+    replay_IDE_unpause(data, callback, fast) {
+        setTimeout(callback, 1);
+        if (!window.ide.stage.threads.isPaused()) return;
+        Recorder.registerClick(window.ide.controlBar.pauseButton.center(), fast);
+        window.ide.togglePauseResume();
+    }
 }
 
 class Recorder {
@@ -525,6 +555,8 @@ class Recorder {
 
         this.addGroupedHandlers('BlockTypeDialog', ['changeCategory', 'setScope', 'setType', 'ok', 'cancel'], 'blockType');
         this.addGroupedHandlers('BlockEditor', ['start', 'ok', 'apply', 'cancel'], 'blockEditor');
+
+        this.addGroupedHandlers('IDE', ['toggleSingleStepping', 'updateSteppingSlider', 'pause', 'unpause'], 'IDE');
     };
 
     defaultHandler(type) {

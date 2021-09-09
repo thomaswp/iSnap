@@ -988,7 +988,11 @@ IDE_Morph.prototype.createControlBar = function () {
         'horizontal'
     );
     slider.action = (num) => {
+        let lastVal = Process.prototype.flashTime;
         Process.prototype.flashTime = (num - 1) / 100;
+        if (Process.prototype.flashTime != lastVal) {
+            Trace.log('IDE.updateSteppingSlider', Process.prototype.flashTime);
+        }
         this.controlBar.refreshResumeSymbol();
     };
     // slider.alpha = MorphicPreferences.isFlat ? 0.1 : 0.3;
@@ -2313,6 +2317,7 @@ IDE_Morph.prototype.toggleVariableFrameRate = function () {
 };
 
 IDE_Morph.prototype.toggleSingleStepping = function () {
+    Trace.log('IDE.toggleSingleStepping', !Process.prototype.enableSingleStepping);
     this.stage.threads.toggleSingleStepping();
     this.controlBar.steppingButton.refresh();
     this.controlBar.refreshSlider();

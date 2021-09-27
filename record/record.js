@@ -435,6 +435,7 @@ class Recorder {
     static openMenu = null;
 
     static resetSnap() {
+        if (!window.world) return;
         // Important: close all dialog boxes *first*; otherwise Snap won't
         // successfully create a new project.
         window.world.children

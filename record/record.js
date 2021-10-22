@@ -185,14 +185,15 @@ class Record {
         if (data && data.id) {
             // Click run or stop run
             let block = Recorder.getOrCreateBlock(data);
-            block.mouseClickLeft();
             let receiver = block.scriptTarget();
             let proc = threads.findProcess(block, receiver);
+            block.mouseClickLeft();
             let click = block.center().add(lastRun.position()).divideBy(2);
             Recorder.registerClick(click, fast);
             if (!proc == (data.message === 'Block.clickStopRun')) {
                 // If we're starting or stopping and the script is already
                 // running/not-running just return
+                // console.log("already there; running=" + !!proc);
                 setTimeout(callback, 1);
                 return;
             }
@@ -223,7 +224,7 @@ class Record {
         let interval = setInterval(() => {
             let passed = new Date().getTime() - startTime;
             if (passed < MAX_RUN && !stopCondition()) return;
-            console.log("stopping", data);
+            // console.log("stopping", data);
             clearInterval(interval);
             callback();
         }, 100); // TODO: This causes a bug when lower - find out why

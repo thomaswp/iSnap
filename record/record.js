@@ -16,6 +16,12 @@ extend(BlockMorph, 'init', function(base) {
     Recorder.registerBlock(this);
 });
 
+extend(SnapSerializer, 'setBlockId', function(base, model, block) {
+    base.call(this, model, block);
+    Recorder.registerBlock(block);
+});
+
+
 extend(IDE_Morph, 'createProjectMenu', function(base) {
     var menu = base.call(this);
     menu.addLine();
@@ -429,21 +435,27 @@ class Recorder {
 
     static blockMap = new Map();
     static recordScale = 1;
-    // Offset to ensure all blockIDs from logs are unique
-    // TODO: if we ever record snapshots, need to adjust this
-    static ID_OFFSET = 1000;
+    // Offset to ensure all blockIDs not from logs are unique
+    static ID_OFFSET = 10000;
     static onClickCallback = null;
     static openMenu = null;
 
-    static resetSnap() {
+    static resetSnap(startXML) {
         if (!window.world) return;
         // Important: close all dialog boxes *first*; otherwise Snap won't
         // successfully create a new project.
         window.world.children
             .filter(c => c instanceof DialogBoxMorph)
             .forEach(d => d.destroy());
-        window.ide.newProject();
-        window.ide.changeCategory('motion');
+        this.resetBlockMap();
+        BlockMorph.nextId = Recorder.ID_OFFSET;
+        if (!startXML) {
+            window.ide.newProject();
+            window.ide.changeCategory('motion');
+        } else {
+            // TODO: Is this async? Do I need to worry about it not being finished?
+            window.ide.rawOpenProjectString(startXML);
+        }
     }
 
     static registerBlock(block) {
@@ -451,9 +463,6 @@ class Recorder {
     }
 
     static getBlock(id, isTemplate) {
-        if (!isTemplate) {
-            id += Recorder.ID_OFFSET;
-        }
         let block = this.blockMap.get(id);
         return block;
     }
@@ -461,7 +470,7 @@ class Recorder {
     static getOrCreateBlock(blockDef) {
         let block = Recorder.getBlock(blockDef.id, blockDef.template);
         if (block) return block;
-        let id = blockDef.id + Recorder.ID_OFFSET
+        let id = blockDef.id;
         // TODO: Check for custom block specs and use those if present
         block = window.ide.currentSprite.blockForSelector(
             blockDef.selector, true);
@@ -645,13 +654,16 @@ class Recorder {
     stop() {
         const json = JSON.stringify(this.records, null, 4);
         window.localStorage.setItem('playback', json);
-        saveData(new Blob([json]), this.recordingName + '.json');
-        if (this.audioRecorder) this.audioRecorder.stop(this.recordingName);
+        saveData(new Blob([json]), this.recordingName + '-logs.json');
+        saveData(new Blob([this.startXML]), this.recordingName + '-start.xml');
+        if (this.audioRecorder) this.audioRecorder.stop(this.recordingName + '-audio');
         this.isRecording = false;
     }
 
     start(keepOldRecords, noAudio) {
         if (!keepOldRecords) this.records = []
+        let ide = window.ide;
+        this.startXML = ide.serializer.serialize(ide.stage);
         let date = new Date();
         this.lastTime = date.getTime();
         this.recordingName = '' + this.lastTime;

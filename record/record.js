@@ -98,6 +98,23 @@ extend(BlockDialogMorph, 'prompt', function(base) {
     });
 });
 
+extend(StagePrompterMorph, 'init', function(base, question) {
+    base.call(this, question);
+    this.inputField.reactToInput = function() {
+        this.escalateEvent('reactToInput');
+        window.recorder.recordEvent('inputPromptEdited', {
+            value: this.getValue(),
+        });
+    }
+});
+
+extend(StagePrompterMorph, 'accept', function(base) {
+    base.call(this);
+    window.recorder.recordEvent('inputPromptAccept', {
+        value: this.inputField.getValue(),
+    });
+});
+
 extend(SpriteMorph, 'makeBlock', function(base) {
     if (window.recorder) {
         window.recorder.recordNewBlock();
@@ -480,6 +497,32 @@ class Record {
         let sprite = data.sprite;
         if (!sprite) return;
         sprite.silentGotoXY(data.x, data.y);
+    }
+
+    getActivePrompter() {
+        return detect(
+            window.ide.stage.children,
+            morph => morph instanceof StagePrompterMorph
+        );
+    }
+
+    replay_inputPromptEdited(data, callback, fast) {
+        setTimeout(callback, 1);
+        let prompter = this.getActivePrompter();
+        if (!prompter) return;
+        let stringMorph = prompter.inputField.contents().text;
+        stringMorph.text = data.value;
+        stringMorph.changed();
+        stringMorph.fixLayout();
+        stringMorph.rerender();
+    }
+
+    replay_inputPromptAccept(data, callback, fast) {
+        setTimeout(callback, 1);
+        let prompter = this.getActivePrompter();
+        if (!prompter) return;
+        Recorder.registerClick(prompter.button.center(), fast);
+        prompter.accept();
     }
 }
 

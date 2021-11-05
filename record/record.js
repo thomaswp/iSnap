@@ -105,6 +105,31 @@ extend(SpriteMorph, 'makeBlock', function(base) {
     base.call(this);
 });
 
+extend(SpriteMorph, 'justDropped', function(base) {
+    base.call(this);
+    if (window.recorder) {
+        window.recorder.recordEvent('spriteDropped', {
+            sprite: this,
+            x: this.xPosition(),
+            y: this.yPosition(),
+        });
+    }
+});
+
+extend(IDE_Morph, 'addNewSprite', function(base) {
+    base.call(this);
+    if (!window.recorder) return;
+    let sprite = ide.currentSprite;
+    let data = {
+        name: sprite.name,
+        x: sprite.xPosition(),
+        y: sprite.yPosition(),
+        hue: sprite.getColorComponentHSLA(0),
+        lightness: sprite.getColorComponentHSLA(2),
+    };
+    window.recorder.addRecord(new Record('IDE_addSprite', data));
+});
+
 class Record {
 
     static fromInputSlotEdit(data) {
@@ -429,6 +454,33 @@ class Record {
         Recorder.registerClick(window.ide.controlBar.pauseButton.center(), fast);
         window.ide.togglePauseResume();
     }
+
+    replay_IDE_addSprite(data, callback, fast) {
+        setTimeout(callback, 1);
+        Recorder.registerClick(window.ide.corralBar.children[0].center(), fast);
+        window.ide.addNewSprite();
+        let sprite = window.ide.currentSprite;
+        sprite.silentGotoXY(data.x, data.y);
+        sprite.setColorComponentHSVA(0, data.hue);
+        sprite.setColorComponentHSVA(1, 100);
+        sprite.setColorComponentHSVA(2, data.lightness);
+    }
+
+    replay_IDE_selectSprite(data, callback, fast) {
+        setTimeout(callback, 1);
+        let icons = window.ide.corral.allChildren().filter(c => c instanceof SpriteIconMorph);
+        let icon = icons.filter(c => c.labelString === data.value)[0];
+        if (!icon) return;
+        Recorder.registerClick(icon.center(), fast);
+        icon.action();
+    }
+
+    replay_spriteDropped(data, callback, fast) {
+        setTimeout(callback, 1);
+        let sprite = data.sprite;
+        if (!sprite) return;
+        sprite.silentGotoXY(data.x, data.y);
+    }
 }
 
 class Recorder {
@@ -538,7 +590,7 @@ class Recorder {
         this.isRecording = false;
 
         let blockChangedHandler = (m, data) => {
-            data = Object.assign({}, data)
+            data = Object.assign({}, data);
             if (m === 'InputSlot.edited') data.value = data.text;
             if (m === 'InputSlot.menuItemSelected') data.value = data.item;
             if (m === 'ColorArg.changeColor') data.value = data.color;
@@ -567,7 +619,9 @@ class Recorder {
         this.addGroupedHandlers('BlockTypeDialog', ['changeCategory', 'setScope', 'setType', 'ok', 'cancel'], 'blockType');
         this.addGroupedHandlers('BlockEditor', ['start', 'ok', 'apply', 'cancel'], 'blockEditor');
 
-        this.addGroupedHandlers('IDE', ['toggleSingleStepping', 'updateSteppingSlider', 'pause', 'unpause'], 'IDE');
+        this.addGroupedHandlers('IDE', [
+            'toggleSingleStepping', 'updateSteppingSlider', 'pause', 'unpause', 'selectSprite'
+        ], 'IDE');
     };
 
     defaultHandler(type) {
@@ -696,6 +750,10 @@ class Recorder {
         return records;
     }
 
+    static getSprite(name) {
+        return ide.sprites.contents.filter(s => s.name === name)[0];
+    }
+
     static deserialize(original) {
 
         let record = Object.assign({}, original);
@@ -745,6 +803,9 @@ class Recorder {
                 record[prop] = new Point(value.x * rescale, value.y * rescale);
             } else if (type === Color.name) {
                 record[prop] = Object.assign(new Color(), value);
+            } else if (type === 'SpriteMorph') {
+                record[prop] = this.getSprite(value.name);
+                if (!record[prop]) console.warn('Could not find sprite:', value.name);
             } else if (type === 'Object') {
                 record[prop] = this.deserialize(value);
             } else if (Array.isArray(value)) {
@@ -820,6 +881,10 @@ class Recorder {
                 record[prop] = {'source': 'Palette'};
             } else if (value instanceof Point || value instanceof Color) {
                 // nothing to do
+            } else if (value instanceof SpriteMorph) {
+                record[prop] = {
+                    name: value.name,
+                };
             } else if (type === 'Object') {
                 // recurse
                 record[prop] = this.serialize(value);

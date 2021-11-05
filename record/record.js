@@ -230,6 +230,12 @@ class Record {
     replay_run(data, callback, fast) {
         let threads = ide.stage.threads;
         var stopCondition;
+        let stepping = Process.prototype.enableSingleStepping;
+        let prepareToRun = (fast) => {
+            if (!fast) return;
+            Process.prototype.enableSingleStepping = false;
+            window.ide.startFastTracking();
+        }
         if (data && data.id) {
             // Click run or stop run
             let block = Recorder.getOrCreateBlock(data);
@@ -242,6 +248,7 @@ class Record {
                 setTimeout(callback, 1);
                 return;
             }
+            prepareToRun();
             block.mouseClickLeft();
             let click = block.center().add(lastRun.position()).divideBy(2);
             Recorder.registerClick(click, fast);
@@ -253,6 +260,7 @@ class Record {
             // Green flag
             let click = ide.controlBar.startButton.center();
             Recorder.registerClick(click, fast);
+            prepareToRun();
             ide.runScripts();
             stopCondition = () => {
                 // Stop when all threads have finished
@@ -273,9 +281,11 @@ class Record {
             let passed = new Date().getTime() - startTime;
             if (passed < MAX_RUN && !stopCondition()) return;
             // console.log("stopping", data);
+            Process.prototype.enableSingleStepping = stepping;
+            window.ide.stopFastTracking();
             clearInterval(interval);
             callback();
-        }, 100); // TODO: This causes a bug when lower - find out why
+        }, 10); // TODO: This causes a bug when lower - find out why
     }
 
     replay_stop(data, callback, fast) {

@@ -235,9 +235,6 @@ class Record {
             let block = Recorder.getOrCreateBlock(data);
             let receiver = block.scriptTarget();
             let proc = threads.findProcess(block, receiver);
-            block.mouseClickLeft();
-            let click = block.center().add(lastRun.position()).divideBy(2);
-            Recorder.registerClick(click, fast);
             if (!proc == (data.message === 'Block.clickStopRun')) {
                 // If we're starting or stopping and the script is already
                 // running/not-running just return
@@ -245,6 +242,9 @@ class Record {
                 setTimeout(callback, 1);
                 return;
             }
+            block.mouseClickLeft();
+            let click = block.center().add(lastRun.position()).divideBy(2);
+            Recorder.registerClick(click, fast);
             stopCondition = () => {
                 // Stop when the thread has stopped running
                 return !receiver || !threads.findProcess(block, receiver);

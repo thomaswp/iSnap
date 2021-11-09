@@ -231,30 +231,40 @@ class Record {
         let threads = ide.stage.threads;
         var stopCondition;
         let stepping = Process.prototype.enableSingleStepping;
-        let prepareToRun = (fast) => {
+        let prepareToRun = () => {
             if (!fast) return;
-            Process.prototype.enableSingleStepping = false;
+            // console.log("Preparing to run", stepping);
+            if (stepping) {
+                threads.toggleSingleStepping();
+            }
             window.ide.startFastTracking();
         }
+        // Step threads to make sure dead processes are cleaned up
+        threads.step();
         if (data && data.id) {
+            let isFinished = () => {
+                let proc = threads.findProcess(block, receiver);
+                return !proc;
+            }
             // Click run or stop run
             let block = Recorder.getOrCreateBlock(data);
             let receiver = block.scriptTarget();
-            let proc = threads.findProcess(block, receiver);
-            if (!proc == (data.message === 'Block.clickStopRun')) {
+            let procFinished = isFinished();
+            if (procFinished == (data.message === 'Block.clickStopRun')) {
                 // If we're starting or stopping and the script is already
                 // running/not-running just return
-                // console.log("already there; running=" + !!proc);
+                // console.log("already there; running=" + !procFinished);
                 setTimeout(callback, 1);
                 return;
             }
             prepareToRun();
-            block.mouseClickLeft();
-            let click = block.center().add(lastRun.position()).divideBy(2);
+            // console.log('Toggle', fast, procFinished, block);
+            threads.toggleProcess(block, receiver);
+            let click = block.center().add(block.position()).divideBy(2);
             Recorder.registerClick(click, fast);
             stopCondition = () => {
                 // Stop when the thread has stopped running
-                return !receiver || !threads.findProcess(block, receiver);
+                return !receiver || isFinished();
             };
         } else {
             // Green flag
@@ -280,12 +290,16 @@ class Record {
         let interval = setInterval(() => {
             let passed = new Date().getTime() - startTime;
             if (passed < MAX_RUN && !stopCondition()) return;
+            if (passed >= MAX_RUN) console.warn("TIMEOUT", 
+                Process.prototype.enableSingleStepping);
             // console.log("stopping", data);
-            Process.prototype.enableSingleStepping = stepping;
+            if (Process.prototype.enableSingleStepping != stepping) {
+                threads.toggleSingleStepping();
+            }
             window.ide.stopFastTracking();
             clearInterval(interval);
             callback();
-        }, 10); // TODO: This causes a bug when lower - find out why
+        }, 1);
     }
 
     replay_stop(data, callback, fast) {

@@ -16,6 +16,29 @@ extend(BlockMorph, 'init', function(base) {
     Recorder.registerBlock(this);
 });
 
+extend(BlockMorph, 'userMenu', function(base) {
+    let menu = base.call(this);
+    menu.addItem(
+        "copy script pic",
+        () => {
+            let canvas = this.topBlock().scriptPic();
+            canvas.toBlob(blob => {
+                try {
+                    navigator.clipboard.write([
+                        new ClipboardItem({
+                            'image/png': blob,
+                        })
+                    ]);
+                } catch (error) {
+                    console.error(error);
+                }
+            });
+        },
+        'copy a picture\nof this script to the clipboard'
+    );
+    return menu;
+});
+
 extend(SnapSerializer, 'setBlockId', function(base, model, block) {
     base.call(this, model, block);
     Recorder.registerBlock(block);

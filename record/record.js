@@ -121,6 +121,17 @@ extend(BlockDialogMorph, 'prompt', function(base) {
     });
 });
 
+extend(VariableDialogMorph, 'prompt', function(base) {
+    base.apply(this, [].slice.call(arguments, 1));
+    if (!this.body) return;
+    extendObject(this.body, 'reactToInput', function(base) {
+        base.call(this);
+        if (window.recorder) {
+            window.recorder.recordInputTyped('VariableDialogMorph', this.getValue());
+        }
+    }); 
+});
+
 extend(StagePrompterMorph, 'init', function(base, question) {
     base.call(this, question);
     this.inputField.reactToInput = function() {
@@ -387,8 +398,7 @@ class Record {
         setTimeout(callback, 1);
     }
 
-    replay_blockType_setValue(func, data, callback, fast, shower) {
-        let dialog = Recorder.getBlockDialog();
+    replay_dialog_setValue(dialog, func, data, callback, fast, shower) {
         if (dialog) {
             dialog[func](data.value);
             if (shower) {
@@ -399,6 +409,11 @@ class Record {
             }
         }
         setTimeout(callback, 1);
+    }
+
+    replay_blockType_setValue(func, data, callback, fast, shower) {
+        let dialog = Recorder.getBlockDialog();
+        this.replay_dialog_setValue(dialog, func, data, callback, fast, shower);
     }
 
     replay_blockType_changeCategory(data, callback, fast) {
@@ -437,14 +452,53 @@ class Record {
         setTimeout(callback, 1);
     }
 
-    replay_inputTyped(data, callback, fast) {
-        if (data.input === 'BlockDialogMorph') {
-            let dialog = Recorder.getBlockDialog();
-            if (dialog) {
-                dialog.body.setContents(data.value);
+    replay_varDialog_prompt(data, callback, fast) {
+        let varBlocks = ide.currentSprite.blocksCache['variables'];
+        if (varBlocks) {
+            let button = varBlocks[0];
+            if (button instanceof PushButtonMorph) {
+                Recorder.registerClick(button.center(), fast);
+                button.action();
             }
+        }
+        setTimeout(callback, 1);
+    }
+
+    replay_varDialog_setType(data, callback, fast) {
+        this.replay_dialog_setValue(Recorder.getNewVarDialog(), 'setType', data, callback, fast, dialog => {
+            return dialog.types.children.filter(type => type.query())[0];
+        });
+    }
+
+    replay_varDialog_accept(data, callback, fast) {
+        let dialog = Recorder.getNewVarDialog();
+        if (dialog) {
+            Recorder.registerClick(dialog.buttons.children[0].center());
+            dialog.accept();
+        }
+        setTimeout(callback, 1);
+    }
+
+    replay_varDialog_cancel(data, callback, fast) {
+        let dialog = Recorder.getNewVarDialog();
+        if (dialog) {
+            Recorder.registerClick(dialog.buttons.children[1].center());
+            dialog.cancel();
+        }
+        setTimeout(callback, 1);
+    }
+
+    replay_inputTyped(data, callback, fast) {
+        let dialog = null;
+        if (data.input === 'BlockDialogMorph') {
+            dialog = Recorder.getBlockDialog();
+        } else if (data.input === 'VariableDialogMorph') {
+            dialog = Recorder.getNewVarDialog();
         } else {
             console.warn('Unknown input type', data.input);
+        }
+        if (dialog) {
+            dialog.body.setContents(data.value);
         }
         setTimeout(callback, 1);
     }
@@ -614,8 +668,15 @@ class Recorder {
         if (block) return block;
         let id = blockDef.id;
         // TODO: Check for custom block specs and use those if present
-        block = window.ide.currentSprite.blockForSelector(
-            blockDef.selector, true);
+        let sprite = window.ide.currentSprite;
+        if (blockDef.selector === 'reportGetVar') {
+            // Not confident this is the best method for determining locality, but should work
+            let isLocal = !!sprite.variables.vars[blockDef.spec];
+            block = sprite.variableBlock(blockDef.spec, isLocal);
+        } else {
+            block = sprite.blockForSelector(
+                blockDef.selector, true);
+        }
         if (!block) return undefined;
         // console.log('Creating', blockDef, block);
         block.id = id;
@@ -673,6 +734,10 @@ class Recorder {
         return this.getDialog('makeABlock');
     }
 
+    static getNewVarDialog() {
+        return this.getDialog('newVar');
+    }
+
     constructor() {
         this.records = [];
         this.index = 0;
@@ -708,6 +773,8 @@ class Recorder {
 
         this.addGroupedHandlers('BlockTypeDialog', ['changeCategory', 'setScope', 'setType', 'ok', 'cancel'], 'blockType');
         this.addGroupedHandlers('BlockEditor', ['start', 'ok', 'apply', 'cancel'], 'blockEditor');
+
+        this.addGroupedHandlers('VariableDialogMorph', ['setType', 'prompt', 'accept', 'cancel'], 'varDialog');
 
         this.addGroupedHandlers('IDE', [
             'toggleSingleStepping', 'updateSteppingSlider', 'pause', 'unpause', 'selectSprite'

@@ -3929,10 +3929,27 @@ VariableDialogMorph.prototype.init = function (target, action, environment) {
         environment
     );
 
+    this.key = 'newVar';
+
     // override inherited properites:
     this.types = new AlignmentMorph('row', this.padding);
     this.add(this.types);
     this.createTypeButtons();
+};
+
+VariableDialogMorph.prototype.prompt = function() {
+    Trace.log('VariableDialogMorph.prompt');
+    VariableDialogMorph.uber.prompt.apply(this, arguments);
+};
+
+VariableDialogMorph.prototype.cancel = function() {
+    Trace.log('VariableDialogMorph.cancel');
+    VariableDialogMorph.uber.cancel.apply(this, arguments);
+};
+
+VariableDialogMorph.prototype.accept = function() {
+    Trace.log('VariableDialogMorph.accept');
+    VariableDialogMorph.uber.accept.apply(this, arguments);
 };
 
 VariableDialogMorph.prototype.createTypeButtons = function () {
@@ -3952,7 +3969,11 @@ VariableDialogMorph.prototype.addTypeButton
     = BlockDialogMorph.prototype.addTypeButton;
 
 VariableDialogMorph.prototype.setType = function (varType) {
-    this.isGlobal = (varType === 'global');
+    let isGlobal = (varType === 'global');
+    if (isGlobal != this.isGlobal) {
+        Trace.log('VariableDialogMorph.setType', varType);
+    }
+    this.isGlobal = isGlobal;
     this.types.children.forEach(c => c.refresh());
     this.edit();
 };

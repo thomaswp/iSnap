@@ -721,6 +721,7 @@ class Recorder {
     }
 
     static setRecordScale(scale) {
+        ide.setBlocksScale(scale);
         Recorder.recordScale = scale;
     }
 
@@ -932,6 +933,8 @@ class Recorder {
             } else if (type === ArgMorph.name) {
                 let block = Recorder.getOrCreateBlock(value);
                 record[prop] = block.inputs()[value.argIndex];
+                // Add index for new redo system
+                record[prop].indexInParent = value.argIndex;
             } else if (type === ScriptsMorph.name) {
                 record[prop] = null;
                 if (value.source === 'Sprite') {

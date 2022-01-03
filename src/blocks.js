@@ -2581,6 +2581,7 @@ BlockMorph.prototype.init = function () {
     this.color = new Color(102, 102, 102);
     this.cachedInputs = null;
     this.redoAttachTarget = null;
+    this.hasRedoAttachTarget = false;
 };
 
 BlockMorph.prototype.getNewID = function() {
@@ -5191,7 +5192,7 @@ CommandBlockMorph.prototype.closestAttachTarget = function (newParent) {
 };
 
 CommandBlockMorph.prototype.snap = function (hand) {
-    var target = this.redoAttachTarget || this.closestAttachTarget(),
+    var target,
         scripts = this.parentThatIsA(ScriptsMorph),
         before,
         next,
@@ -5199,7 +5200,10 @@ CommandBlockMorph.prototype.snap = function (hand) {
         cslot,
         affected;
 
+    target = this.hasRedoAttachTarget ? this.redoAttachTarget :
+        this.closestAttachTarget();
     this.redoAttachTarget = null;
+    this.hasRedoAttachTarget = false;
 
     scripts.clearDropInfo();
     scripts.lastDroppedBlock = this;
@@ -6028,18 +6032,18 @@ ReporterBlockMorph.prototype.snap = function (hand) {
 
     // Try to read a redoAttachTarget, and get the corresponding input
     target = null;
-    if (this.redoAttachTarget != null) {
-        let raTarget = this.redoAttachTarget;
+    if (this.hasRedoAttachTarget) {
+        target = this.redoAttachTarget;
         // Since the input may have been replaced with a copy
         // (e.g. when a block was added and removed), we need
         // to get the input at the same index.
-        if (raTarget.indexInParent && raTarget.indexInParent >= 0
-                && raTarget.parent && raTarget.parent.inputs) {
-            let inputs = raTarget.parent.inputs();
-            target = inputs[raTarget.indexInParent];
+        if (target && target.indexInParent && target.indexInParent >= 0 &&
+                target.parent && target.parent.children) {
+            target = target.parent.children[target.indexInParent];
         }
     }
     this.redoAttachTarget = null;
+    this.hasRedoAttachTarget = false;
 
     target = target || scripts.closestInput(this, hand);
 
@@ -6061,9 +6065,11 @@ ReporterBlockMorph.prototype.snapToInput = function(target) {
         // we redo this action, the InputSlotMorph itself will have
         // been replaced with a copy.
         target.indexInParent = -1;
-        if (target.parent != null && target.inputs) {
-            let inputs = target.inputs();
-            if (inputs) target.indexInParent = inputs.indexOf(target);
+        if (target.parent != null && target.children) {
+            target.indexInParent = target.parent.children.indexOf(target);
+        }
+        if (target.indexInParent === -1) {
+            console.warn('Could not find index for', target);
         }
 
         scripts.lastReplacedInput = target;
@@ -7545,12 +7551,18 @@ ScriptsMorph.prototype.recoverLastDrop = function (forRedrop, rec) {
     // use it directly rather than recalculating by position,
     // so it works even if blocks have moved
     dropped.redoAttachTarget = null;
-    if (forRedrop && rec.lastDropTarget) {
-        if (dropped instanceof CommandBlockMorph ||
-                dropped instanceof CommentMorph) {
-            dropped.redoAttachTarget = rec.lastDropTarget;
-        } else if (dropped instanceof ReporterBlockMorph) {
-            dropped.redoAttachTarget = rec.lastReplacedInput;
+    dropped.hasRedoAttachTarget = false;
+    if (forRedrop) {
+        // If this is a redo, we should check for a redo target, even
+        // if it's null (in which case we shouldn't attach to anything)
+        dropped.hasRedoAttachTarget = true;
+        if (rec.lastDropTarget) {
+            if (dropped instanceof CommandBlockMorph ||
+                    dropped instanceof CommentMorph) {
+                dropped.redoAttachTarget = rec.lastDropTarget;
+            } else if (dropped instanceof ReporterBlockMorph) {
+                dropped.redoAttachTarget = rec.lastReplacedInput;
+            }
         }
     }
 
@@ -13445,8 +13457,10 @@ CommentMorph.prototype.snap = function (hand) {
     }
     scripts.clearDropInfo();
 
-    target = this.redoAttachTarget || scripts.closestBlock(this, hand);
+    target = this.hasRedoAttachTarget ? this.redoAttachTarget :
+        scripts.closestBlock(this, hand);
     this.redoAttachTarget = null;
+    this.hasRedoAttachTarget = false;
 
     if (target !== null) {
         target.comment = this;

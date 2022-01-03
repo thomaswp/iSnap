@@ -296,8 +296,7 @@ SyntaxElementMorph.prototype.setScale = function (num) {
     this.rfColor = new Color(120, 120, 120);
 };
 
-// TODO: Configure based on script
-SyntaxElementMorph.prototype.setScale(1.5);
+SyntaxElementMorph.prototype.setScale(1);
 SyntaxElementMorph.prototype.isCachingInputs = false;
 SyntaxElementMorph.prototype.alpha = 1;
 

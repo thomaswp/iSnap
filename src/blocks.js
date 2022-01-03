@@ -2581,6 +2581,7 @@ BlockMorph.prototype.init = function () {
     BlockMorph.uber.init.call(this);
     this.color = new Color(102, 102, 102);
     this.cachedInputs = null;
+    this.redoAttachTarget = null;
 };
 
 BlockMorph.prototype.getNewID = function() {
@@ -5191,13 +5192,15 @@ CommandBlockMorph.prototype.closestAttachTarget = function (newParent) {
 };
 
 CommandBlockMorph.prototype.snap = function (hand) {
-    var target = this.closestAttachTarget(),
+    var target = this.redoAttachTarget || this.closestAttachTarget(),
         scripts = this.parentThatIsA(ScriptsMorph),
         before,
         next,
         offsetY,
         cslot,
         affected;
+
+    this.redoAttachTarget = null;
 
     scripts.clearDropInfo();
     scripts.lastDroppedBlock = this;
@@ -6024,7 +6027,23 @@ ReporterBlockMorph.prototype.snap = function (hand) {
         return null;
     }
 
-    target = scripts.closestInput(this, hand);
+    // Try to read a redoAttachTarget, and get the corresponding input
+    target = null;
+    if (this.redoAttachTarget != null) {
+        let raTarget = this.redoAttachTarget;
+        // Since the input may have been replaced with a copy
+        // (e.g. when a block was added and removed), we need
+        // to get the input at the same index.
+        if (raTarget.indexInParent && raTarget.indexInParent >= 0
+                && raTarget.parent && raTarget.parent.inputs) {
+            let inputs = raTarget.parent.inputs();
+            target = inputs[raTarget.indexInParent];
+        }
+    }
+    this.redoAttachTarget = null;
+
+    target = target || scripts.closestInput(this, hand);
+
     this.snapToInput(target);
     if (hand) {
         scripts.recordDrop(hand.grabOrigin);
@@ -6039,6 +6058,15 @@ ReporterBlockMorph.prototype.snapToInput = function(target) {
     scripts.lastDroppedBlock = this;
 
     if (target !== null) {
+        // Record the index of the input in its parent, since when
+        // we redo this action, the InputSlotMorph itself will have
+        // been replaced with a copy.
+        target.indexInParent = -1;
+        if (target.parent != null && target.inputs) {
+            let inputs = target.inputs();
+            if (inputs) target.indexInParent = inputs.indexOf(target);
+        }
+
         scripts.lastReplacedInput = target;
         scripts.lastDropTarget = target.parent;
         if (target instanceof MultiArgMorph) {
@@ -7484,30 +7512,7 @@ ScriptsMorph.prototype.playDropRecord = function(dropRecord, callback, msecs) {
         if (dropRecord.action === 'extract') {
             dropRecord.lastDroppedBlock.extract();
         }
-        if (dropRecord.lastDroppedBlock instanceof ReporterBlockMorph &&
-            dropRecord.lastDropTarget
-        ) {
-            // console.log("!!!", dropRecord);
-            // dropRecord.lastDropTarget.replaceInput(
-            //     dropRecord.lastReplacedInput,
-            //     dropRecord.lastDroppedBlock
-            // );
-            // Hack to make redos actually work for input slots, since
-            // they use position rather than input target for some reason
-            let block = dropRecord.lastDroppedBlock;
-            let input = dropRecord.lastReplacedInput;
-            block.parent = input.parentThatIsA(ScriptsMorph);
-            block.prepareToBeGrabbed(this.world().hand);
-            block.parent.reactToGrabOf(block);
-            if (block instanceof ReporterBlockMorph && block.parent instanceof BlockMorph) {
-                block.parent.changed();
-            }
-            block.snapToInput(input);
-            if (callback) {
-                setTimeout(callback, 1)
-            }
-            return;
-        }
+
         dropRecord.lastDroppedBlock.slideBackTo(
             dropRecord.situation,
             msecs,
@@ -7536,6 +7541,20 @@ ScriptsMorph.prototype.recoverLastDrop = function (forRedrop, rec) {
         throw new Error('nothing to undrop');
     }
     dropped = rec.lastDroppedBlock;
+
+    // Cache the drop target so when the block "snaps" it can
+    // use it directly rather than recalculating by position,
+    // so it works even if blocks have moved
+    dropped.redoAttachTarget = null;
+    if (forRedrop && rec.lastDropTarget) {
+        if (dropped instanceof CommandBlockMorph ||
+                dropped instanceof CommentMorph) {
+            dropped.redoAttachTarget = rec.lastDropTarget;
+        } else if (dropped instanceof ReporterBlockMorph) {
+            dropped.redoAttachTarget = rec.lastReplacedInput;
+        }
+    }
+
     parent = dropped.parent;
     if (dropped instanceof CommandBlockMorph) {
         if (rec.lastNextBlock) {
@@ -7602,10 +7621,13 @@ ScriptsMorph.prototype.recoverLastDrop = function (forRedrop, rec) {
     } else if (dropped instanceof ReporterBlockMorph) {
         if (rec.lastDropTarget) {
             if (forRedrop) {
-                rec.lastDropTarget.replaceInput(
-                    rec.lastReplacedInput,
-                    rec.lastDroppedBlock
-                );
+                // twprice: I don't understand why this is here. When the
+                // reporter is dropped, it will replace the input and doing 
+                // it now just creates errors and messes up the animation.
+                // rec.lastDropTarget.replaceInput(
+                //     rec.lastReplacedInput,
+                //     rec.lastDroppedBlock
+                // );
             } else {
                 rec.lastDropTarget.replaceInput(
                     rec.lastDroppedBlock,
@@ -13423,7 +13445,10 @@ CommentMorph.prototype.snap = function (hand) {
         return null;
     }
     scripts.clearDropInfo();
-    target = scripts.closestBlock(this, hand);
+
+    target = this.redoAttachTarget || scripts.closestBlock(this, hand);
+    this.redoAttachTarget = null;
+
     if (target !== null) {
         target.comment = this;
         this.block = target;

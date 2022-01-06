@@ -65,9 +65,13 @@ DBLogger.prototype.sendToServer = function(data, attempts) {
 };
 
 DBLogger.prototype.logErrorMessageNow = function(message) {
+    // Don't log an error that was caused by logging an error
+    if (this.loggingError) return;
     // Send logs before and after to ensure that this message goes by itself
     this.sendLogs();
+    this.loggingError = true;
     this.logErrorMessage(message);
+    this.loggingError = false;
     this.sendLogs();
 };
 

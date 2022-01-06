@@ -90,7 +90,7 @@ Logger.prototype.log = function(message, data, saveImmediately, forceLogCode) {
         'message': message,
         'data': data,
         'time': Date.now(),
-        'assignmentID': Assignment.getID(),
+        'assignmentID': Assignment.getID() || 'null',
     };
 
     this.forceLogCode |= forceLogCode;

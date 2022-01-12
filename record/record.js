@@ -201,7 +201,7 @@ class Record {
         if (!this[method]) {
             console.warn('Unknown record type: ' + this.type);
         }
-        console.log('Playing:', this.type, this.data);
+        // console.log('Playing:', this.type, this.data);
         let data = Recorder.deserialize(this.data);
         this[method].call(this, data, callback, fast);
     }
@@ -977,6 +977,11 @@ class Recorder {
         return record;
     }
 
+    static debugType(object) {
+        return /function (.{1,})\(/.exec(
+            object.constructor.toString())[1];
+    }
+
     static serialize(dropRecord) {
         let record = Object.assign({}, dropRecord);
         Object.keys(record).forEach(prop => {
@@ -996,7 +1001,7 @@ class Recorder {
             // }
 
             let type = typeof(value);
-            if (type === 'object') type = value.getDebugType();
+            if (type === 'object') type = Recorder.debugType(value);
             // console.log(prop, value);
             if (value instanceof BlockMorph) {
                 record[prop] = value.blockId();

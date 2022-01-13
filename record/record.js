@@ -116,7 +116,8 @@ extend(BlockDialogMorph, 'prompt', function(base) {
     extendObject(this.body, 'reactToInput', function(base) {
         base.call(this);
         if (window.recorder) {
-            window.recorder.recordInputTyped('BlockDialogMorph', this.getValue());
+            window.recorder.recordInputTyped(
+                'BlockDialogMorph',this.getValue());
         }
     });
 });
@@ -127,9 +128,10 @@ extend(VariableDialogMorph, 'prompt', function(base) {
     extendObject(this.body, 'reactToInput', function(base) {
         base.call(this);
         if (window.recorder) {
-            window.recorder.recordInputTyped('VariableDialogMorph', this.getValue());
+            window.recorder.recordInputTyped(
+                'VariableDialogMorph', this.getValue());
         }
-    }); 
+    });
 });
 
 extend(StagePrompterMorph, 'init', function(base, question) {
@@ -207,8 +209,8 @@ class Record {
     }
 
     replacePHBM(dropRecord, parent, key) {
-        // Hack to recover the PHBM, which has no spec and is created automatically
-        // console.log('attempting to replace: ', key);
+        // Hack to recover the PHBM, which has no spec and is created
+        // automatically console.log('attempting to replace: ', key);
         if (!parent) return;
         if (parent[key] === undefined) {
             // console.log('Undefined key');
@@ -226,7 +228,8 @@ class Record {
                 if (editor) {
                     // console.log('Editor');
                     let blocks = editor.body.children[0].children;
-                    blocks = blocks.filter(b => b instanceof PrototypeHatBlockMorph);
+                    blocks = blocks.filter(b =>
+                        b instanceof PrototypeHatBlockMorph);
                     let hat = blocks[0];
                     if (hat) {
                         // console.log("Replaced hat block!", key);
@@ -243,8 +246,6 @@ class Record {
         this.replacePHBM(dropRecord, dropRecord, 'lastDroppedBlock');
         this.replacePHBM(dropRecord, dropRecord.lastDropTarget, 'element');
         // console.log('Dropping deserialized', dropRecord);
-        // TODO: Need to update playDropRecord to not use position, since this will
-        // cause issues in a number of situation, especially if block dialogs are moved
         scripts.playDropRecord(dropRecord, callback, fast ? 1 : null);
     }
 
@@ -324,7 +325,7 @@ class Record {
         let interval = setInterval(() => {
             let passed = new Date().getTime() - startTime;
             if (passed < MAX_RUN && !stopCondition()) return;
-            if (passed >= MAX_RUN) console.warn("TIMEOUT", 
+            if (passed >= MAX_RUN) console.warn("TIMEOUT",
                 Process.prototype.enableSingleStepping);
             // console.log("stopping", data);
             if (Process.prototype.enableSingleStepping != stepping) {
@@ -417,19 +418,22 @@ class Record {
     }
 
     replay_blockType_changeCategory(data, callback, fast) {
-        this.replay_blockType_setValue('changeCategory', data, callback, fast, dialog => {
+        this.replay_blockType_setValue('changeCategory', data, callback, fast,
+        dialog => {
             return dialog.categories.children.filter(child => child.query())[0];
         });
     }
 
     replay_blockType_setScope(data, callback, fast) {
-        this.replay_blockType_setValue('setScope', data, callback, fast, dialog => {
+        this.replay_blockType_setValue('setScope', data, callback, fast,
+        dialog => {
             return dialog.scopes.children.filter(scope => scope.query())[0];
         });
     }
 
     replay_blockType_setType(data, callback, fast) {
-        this.replay_blockType_setValue('setType', data, callback, fast, dialog => {
+        this.replay_blockType_setValue('setType', data, callback, fast,
+        dialog => {
             return dialog.types.children.filter(type => type.query())[0];
         });
     }
@@ -465,7 +469,8 @@ class Record {
     }
 
     replay_varDialog_setType(data, callback, fast) {
-        this.replay_dialog_setValue(Recorder.getNewVarDialog(), 'setType', data, callback, fast, dialog => {
+        this.replay_dialog_setValue(Recorder.getNewVarDialog(), 'setType',
+                data, callback, fast, dialog => {
             return dialog.types.children.filter(type => type.query())[0];
         });
     }
@@ -514,7 +519,6 @@ class Record {
                 return;
             }
             // If this block was just created, update its guid
-            // console.log('setting', editor.definition.guid, ' to ', data.guid);
             editor.definition.guid = data.guid;
             return;
         }
@@ -547,29 +551,34 @@ class Record {
         setTimeout(callback, 1);
         // Ignore this if the value is already correct
         if (data.value == Process.prototype.enableSingleStepping) return;
-        Recorder.registerClick(window.ide.controlBar.steppingButton.center(), fast);
+        Recorder.registerClick(
+            window.ide.controlBar.steppingButton.center(), fast);
         window.ide.toggleSingleStepping();
     }
 
     replay_IDE_updateSteppingSlider(data, callback, fast) {
         setTimeout(callback, 1);
         Process.prototype.flashTime = data.value;
-        window.ide.controlBar.steppingSlider.value = Process.prototype.flashTime * 100 + 1
+        window.ide.controlBar.steppingSlider.value =
+            Process.prototype.flashTime * 100 + 1
         window.ide.controlBar.steppingSlider.fixLayout();
-        Recorder.registerClick(window.ide.controlBar.steppingSlider.button.center(), fast);
+        Recorder.registerClick(
+            window.ide.controlBar.steppingSlider.button.center(), fast);
     }
 
     replay_IDE_pause(data, callback, fast) {
         setTimeout(callback, 1);
         if (window.ide.stage.threads.isPaused()) return;
-        Recorder.registerClick(window.ide.controlBar.pauseButton.center(), fast);
+        Recorder.registerClick(
+            window.ide.controlBar.pauseButton.center(), fast);
         window.ide.togglePauseResume();
     }
 
     replay_IDE_unpause(data, callback, fast) {
         setTimeout(callback, 1);
         if (!window.ide.stage.threads.isPaused()) return;
-        Recorder.registerClick(window.ide.controlBar.pauseButton.center(), fast);
+        Recorder.registerClick(
+            window.ide.controlBar.pauseButton.center(), fast);
         window.ide.togglePauseResume();
     }
 
@@ -586,7 +595,8 @@ class Record {
 
     replay_IDE_selectSprite(data, callback, fast) {
         setTimeout(callback, 1);
-        let icons = window.ide.corral.allChildren().filter(c => c instanceof SpriteIconMorph);
+        let icons = window.ide.corral.allChildren()
+            .filter(c => c instanceof SpriteIconMorph);
         let icon = icons.filter(c => c.labelString === data.value)[0];
         if (!icon) return;
         Recorder.registerClick(icon.center(), fast);
@@ -649,7 +659,8 @@ class Recorder {
             window.ide.newProject();
             window.ide.changeCategory('motion');
         } else {
-            // TODO: Is this async? Do I need to worry about it not being finished?
+            // TODO: Is this async? Do I need to worry about it not being
+            // finished?
             window.ide.rawOpenProjectString(startXML);
         }
     }
@@ -670,7 +681,8 @@ class Recorder {
         // TODO: Check for custom block specs and use those if present
         let sprite = window.ide.currentSprite;
         if (blockDef.selector === 'reportGetVar') {
-            // Not confident this is the best method for determining locality, but should work
+            // Not confident this is the best method for determining locality,
+            // but should work
             let isLocal = !!sprite.variables.vars[blockDef.spec];
             block = sprite.variableBlock(blockDef.spec, isLocal);
         } else {
@@ -698,7 +710,8 @@ class Recorder {
     }
 
     static findShowingBlockEditor(guid) {
-        return BlockEditorMorph.showing.filter(editor => editor.definition.guid == guid)[0];
+        return BlockEditorMorph.showing
+            .filter(editor => editor.definition.guid == guid)[0];
     }
 
     static getFrameMorph() {
@@ -770,16 +783,29 @@ class Recorder {
 
         Trace.addLoggingHandler('IDE.stop', this.defaultHandler('stop'));
 
-        Trace.addLoggingHandler('IDE.changeCategory', this.defaultHandler('changeCategory'));
+        Trace.addLoggingHandler(
+            'IDE.changeCategory',
+            this.defaultHandler('changeCategory'));
 
-        this.addGroupedHandlers('BlockTypeDialog', ['changeCategory', 'setScope', 'setType', 'ok', 'cancel'], 'blockType');
-        this.addGroupedHandlers('BlockEditor', ['start', 'ok', 'apply', 'cancel'], 'blockEditor');
+        this.addGroupedHandlers(
+            'BlockTypeDialog',
+            ['changeCategory', 'setScope', 'setType', 'ok', 'cancel'],
+            'blockType');
+        this.addGroupedHandlers(
+            'BlockEditor',
+            ['start', 'ok', 'apply', 'cancel'],
+            'blockEditor');
 
-        this.addGroupedHandlers('VariableDialogMorph', ['setType', 'prompt', 'accept', 'cancel'], 'varDialog');
+        this.addGroupedHandlers(
+            'VariableDialogMorph',
+            ['setType', 'prompt', 'accept', 'cancel'],
+            'varDialog');
 
-        this.addGroupedHandlers('IDE', [
-            'toggleSingleStepping', 'updateSteppingSlider', 'pause', 'unpause', 'selectSprite'
-        ], 'IDE');
+        this.addGroupedHandlers(
+            'IDE', [
+                'toggleSingleStepping', 'updateSteppingSlider', 'pause',
+                'unpause', 'selectSprite'
+            ], 'IDE');
     };
 
     defaultHandler(type) {
@@ -796,7 +822,9 @@ class Recorder {
 
     addGroupedHandlers(group, messages, typePrefix)  {
         messages.forEach(message => {
-            Trace.addLoggingHandler(group + '.' + message, this.defaultHandler(typePrefix + '_' + message));
+            Trace.addLoggingHandler(
+                group + '.' + message,
+                this.defaultHandler(typePrefix + '_' + message));
         });
     }
 
@@ -868,7 +896,9 @@ class Recorder {
         window.localStorage.setItem('playback', json);
         saveData(new Blob([json]), this.recordingName + '-logs.json');
         saveData(new Blob([this.startXML]), this.recordingName + '-start.xml');
-        if (this.audioRecorder) this.audioRecorder.stop(this.recordingName + '-audio');
+        if (this.audioRecorder) {
+            this.audioRecorder.stop(this.recordingName + '-audio');
+        }
         this.isRecording = false;
     }
 
@@ -965,7 +995,9 @@ class Recorder {
                 record[prop] = Object.assign(new Color(), value);
             } else if (type === 'SpriteMorph') {
                 record[prop] = this.getSprite(value.name);
-                if (!record[prop]) console.warn('Could not find sprite:', value.name);
+                if (!record[prop]) {
+                    console.warn('Could not find sprite:', value.name);
+                }
             } else if (type === 'Object') {
                 record[prop] = this.deserialize(value);
             } else if (Array.isArray(value)) {

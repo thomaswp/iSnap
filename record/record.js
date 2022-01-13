@@ -678,13 +678,21 @@ class Recorder {
         let block = Recorder.getBlock(blockDef.id, blockDef.template);
         if (block) return block;
         let id = blockDef.id;
-        // TODO: Check for custom block specs and use those if present
         let sprite = window.ide.currentSprite;
         if (blockDef.selector === 'reportGetVar') {
             // Not confident this is the best method for determining locality,
             // but should work
             let isLocal = !!sprite.variables.vars[blockDef.spec];
             block = sprite.variableBlock(blockDef.spec, isLocal);
+        } else if (
+            blockDef.selector === 'evaluateCustomBlock' && blockDef.guid
+        ) {
+            let customBlock = Recorder.getCustomBlock(blockDef.guid);
+            if (!customBlock) {
+                console.error('No custom block def for ', blockDef.guid);
+                return null;
+            }
+            block = customBlock.blockInstance();
         } else {
             block = sprite.blockForSelector(
                 blockDef.selector, true);
@@ -699,6 +707,7 @@ class Recorder {
         this.blockMap.set(id, block);
         return block;
     }
+
     static getCustomBlock(guid) {
         let blocks = [];
         blocks = blocks.concat(ide.stage.globalBlocks);
@@ -1037,6 +1046,8 @@ class Recorder {
             // console.log(prop, value);
             if (value instanceof BlockMorph) {
                 record[prop] = value.blockId();
+                const def = value.definition;
+                if (def && def.guid) record[prop].guid = def.guid;
                 record[prop].objType = BlockMorph.name;
             } else if (value instanceof ArgMorph) {
                 record[prop] = value.argId();

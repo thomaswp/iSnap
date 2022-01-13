@@ -2932,6 +2932,11 @@ BlockLabelFragmentMorph.prototype.mouseLeave = function () {
     this.rerender();
 };
 
+BlockLabelFragmentMorph.prototype.index = function() {
+    if (!this.parent || !this.parent.children) return -1;
+    return this.parent.children.indexOf(this);
+}
+
 BlockLabelFragmentMorph.prototype.mouseClickLeft = function () {
 /*
     make a copy of my fragment object and open an InputSlotDialog on it.
@@ -2945,6 +2950,11 @@ BlockLabelFragmentMorph.prototype.mouseClickLeft = function () {
         isPlaceHolder = this instanceof BlockLabelPlaceHolderMorph,
         isOnlyElement = this.parent.parseSpec(this.parent.blockSpec).length
             < 2;
+
+    Trace.log('BlockEditor.startUpdateBlockLabel', {
+        fragment: frag,
+        index: this.index(),
+    });
 
     new InputSlotDialogMorph(
         frag,
@@ -2964,7 +2974,10 @@ BlockLabelFragmentMorph.prototype.mouseClickLeft = function () {
 };
 
 BlockLabelFragmentMorph.prototype.updateBlockLabel = function (newFragment) {
-    Trace.log('BlockEditor.updateBlockLabel', newFragment);
+    Trace.log('BlockEditor.updateBlockLabel', {
+        fragment: newFragment,
+        originalIndex: this.index(),
+    });
     var prot = this.parentThatIsA(BlockMorph);
     this.fragment = newFragment;
     if (prot) {
@@ -3131,6 +3144,9 @@ BlockLabelPlaceHolderMorph.prototype.mouseClickLeft
 BlockLabelPlaceHolderMorph.prototype.updateBlockLabel
     = BlockLabelFragmentMorph.prototype.updateBlockLabel;
 
+BlockLabelPlaceHolderMorph.prototype.index
+    = BlockLabelFragmentMorph.prototype.index;
+
 // BlockInputFragmentMorph ///////////////////////////////////////////////
 
 /*
@@ -3163,6 +3179,9 @@ BlockInputFragmentMorph.prototype.mouseClickLeft
 
 BlockInputFragmentMorph.prototype.updateBlockLabel
     = BlockLabelFragmentMorph.prototype.updateBlockLabel;
+
+BlockInputFragmentMorph.prototype.index
+    = BlockLabelFragmentMorph.prototype.index;
 
 // InputSlotDialogMorph ////////////////////////////////////////////////
 
@@ -3234,6 +3253,16 @@ InputSlotDialogMorph.prototype.init = function (
     this.fixLayout();
 };
 
+InputSlotDialogMorph.prototype.ok = function() {
+    Trace.log('InputSlotDialogMorph.ok');
+    InputSlotDialogMorph.uber.ok.apply(this, arguments);
+}
+
+InputSlotDialogMorph.prototype.cancel = function() {
+    Trace.log('InputSlotDialogMorph.cancel');
+    InputSlotDialogMorph.uber.cancel.apply(this, arguments);
+}
+
 InputSlotDialogMorph.prototype.createTypeButtons = function () {
     var block,
         arrow,
@@ -3304,6 +3333,7 @@ InputSlotDialogMorph.prototype.addBlockTypeButton
     = BlockDialogMorph.prototype.addBlockTypeButton;
 
 InputSlotDialogMorph.prototype.setType = function (fragmentType) {
+    Trace.log('InputSlotDialogMorph.setType', fragmentType);
     this.textfield.choices = fragmentType ? null : this.symbolMenu;
     this.textfield.fixLayout();
     this.fragment.type = fragmentType || null;
@@ -3405,6 +3435,7 @@ InputSlotDialogMorph.prototype.open = function (
     pic,
     noDeleteButton
 ) {
+    this.key = 'blockInput';
     var txt = new InputFieldMorph(defaultString);
 
     if (!this.fragment.type) {
@@ -3447,6 +3478,7 @@ InputSlotDialogMorph.prototype.symbolMenu = function () {
 };
 
 InputSlotDialogMorph.prototype.deleteFragment = function () {
+    Trace.log('InputSlotDialogMorph.deleteFragment');
     this.fragment.isDeleted = true;
     this.accept();
 };

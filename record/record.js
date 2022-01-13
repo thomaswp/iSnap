@@ -110,29 +110,34 @@ extend(MenuMorph, 'destroy', function (base) {
     base.call(this);
 });
 
-extend(BlockDialogMorph, 'prompt', function(base) {
-    base.apply(this, [].slice.call(arguments, 1));
-    if (!this.body) return;
-    extendObject(this.body, 'reactToInput', function(base) {
-        base.call(this);
-        if (window.recorder) {
-            window.recorder.recordInputTyped(
-                'BlockDialogMorph',this.getValue());
-        }
-    });
-});
+(function() {
+    function recordInput(type) {
+        extend(type, 'popUp', function(base) {
+            base.apply(this, [].slice.call(arguments, 1));
+            const body = this.body;
+            if (!body) return;
+            action = () => {
+                if (window.recorder) {
+                    window.recorder.recordInputTyped(
+                        type.name, body.getValue());
+                }
+            }
+            if (body.reactToInput) {
+                extendObject(body, 'reactToInput', function(base) {
+                    base.call(this);
+                    action();
+                });
+            } else {
+                body.reactToInput = action;
+            }
+        }, true);
+    }
 
-extend(VariableDialogMorph, 'prompt', function(base) {
-    base.apply(this, [].slice.call(arguments, 1));
-    if (!this.body) return;
-    extendObject(this.body, 'reactToInput', function(base) {
-        base.call(this);
-        if (window.recorder) {
-            window.recorder.recordInputTyped(
-                'VariableDialogMorph', this.getValue());
-        }
-    });
-});
+    recordInput(BlockDialogMorph);
+    recordInput(VariableDialogMorph);
+    recordInput(InputSlotDialogMorph);
+})();
+
 
 extend(StagePrompterMorph, 'init', function(base, question) {
     base.call(this, question);
@@ -203,7 +208,7 @@ class Record {
         if (!this[method]) {
             console.warn('Unknown record type: ' + this.type);
         }
-        // console.log('Playing:', this.type, this.data);
+        console.log('Playing:', this.type, this.data);
         let data = Recorder.deserialize(this.data);
         this[method].call(this, data, callback, fast);
     }
@@ -547,6 +552,72 @@ class Record {
         editor.cancel();
     }
 
+    replay_blockEditor_startUpdateBlockLabel(data, callback, fast) {
+        setTimeout(callback, 1);
+        const editor = Recorder.findShowingBlockEditor(data.guid);
+        const index = data.index;
+        if (index < 0) return;
+        try {
+            // TODO: Could probably use a more robust system, but this seems
+            // likely to work until code changes...
+            const cbMorph = editor.body.children[0].children[0].children[0];
+            const target = cbMorph.children[index];
+            Recorder.registerClick(target.center(), fast);
+            target.mouseClickLeft();
+        } catch (e) {
+            console.error('Block editor has no labels: ', editor);
+        }
+    }
+
+    replayDialogAction(callback, fast, dialogKey, action, args, buttonFinder) {
+        setTimeout(callback, 1);
+        const dialog = Recorder.getDialog(dialogKey);
+        if (!dialog) {
+            console.warn('Missing dialog for key', dialogKey);
+            return;
+        }
+        dialog[action](...args);
+        if (buttonFinder) {
+            const button = buttonFinder(dialog);
+            if (button) {
+                Recorder.registerClick(button.center(), fast);
+            }
+        }
+    }
+
+    replay_blockInput_setType(data, callback, fast) {
+        this.replayDialogAction(
+            callback, fast, 'blockInput', 'setType', [data.value], dialog => {
+                return dialog.types[data.value ? 1 : 0];
+            }
+        );
+    }
+
+    replay_blockInput_ok(data, callback, fast) {
+        this.replayDialogAction(
+            callback, fast, 'blockInput', 'ok', [], dialog => {
+                return dialog.buttons.children[0];
+            }
+        );
+    }
+
+    replay_blockInput_cancel(data, callback, fast) {
+        this.replayDialogAction(
+            callback, fast, 'blockInput', 'cancel', [], dialog => {
+                const children = dialog.buttons.children;
+                return children[children.length - 1];
+            }
+        );
+    }
+
+    replay_blockInput_deleteFragment(data, callback, fast) {
+        this.replayDialogAction(
+            callback, fast, 'blockInput', 'deleteFragment', [], dialog => {
+                return dialog.buttons.children[1];
+            }
+        );
+    }
+
     replay_IDE_toggleSingleStepping(data, callback, fast) {
         setTimeout(callback, 1);
         // Ignore this if the value is already correct
@@ -802,8 +873,12 @@ class Recorder {
             'blockType');
         this.addGroupedHandlers(
             'BlockEditor',
-            ['start', 'ok', 'apply', 'cancel'],
+            ['start', 'ok', 'apply', 'cancel', 'startUpdateBlockLabel'],
             'blockEditor');
+        this.addGroupedHandlers(
+            'InputSlotDialogMorph',
+            ['setType', 'ok', 'cancel', 'deleteFragment'],
+            'blockInput');
 
         this.addGroupedHandlers(
             'VariableDialogMorph',
@@ -1000,6 +1075,8 @@ class Recorder {
                 let recordScale = Recorder.recordScale;
                 let rescale = SyntaxElementMorph.prototype.scale / recordScale;
                 record[prop] = new Point(value.x * rescale, value.y * rescale);
+            } else if (type == BlockLabelFragment.name) {
+                record[prop] = Object.assign(new BlockLabelFragment(), value);
             } else if (type === Color.name) {
                 record[prop] = Object.assign(new Color(), value);
             } else if (type === 'SpriteMorph') {
@@ -1087,7 +1164,10 @@ class Recorder {
                 }
             } else if (value instanceof FrameMorph) {
                 record[prop] = {'source': 'Palette'};
-            } else if (value instanceof Point || value instanceof Color) {
+            } else if (
+                value instanceof Point || value instanceof Color ||
+                value instanceof BlockLabelFragment
+            ) {
                 // nothing to do
             } else if (value instanceof SpriteMorph) {
                 record[prop] = {

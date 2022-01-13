@@ -103,13 +103,14 @@ function escapeHtml(unsafe) {
          .replace(/'/g, '&#039;');
  }
 
-function extend(clazz, functionName, newFunction) {
+function extend(clazz, functionName, newFunction, ignoreArgumentCount) {
     if (!clazz || !clazz.prototype) {
         // eslint-disable-next-line no-console
         console.error('extend requires a class for its first argument');
         return;
     }
-    return extendObject(clazz.prototype, functionName, newFunction);
+    return extendObject(clazz.prototype, functionName, newFunction,
+        ignoreArgumentCount);
 }
 
 // Called when the Snap world is loaded. No-op allows for extension
@@ -117,7 +118,7 @@ function onWorldLoaded() {
 
 }
 
-function extendObject(object, functionName, newFunction) {
+function extendObject(object, functionName, newFunction, ignoreArgumentCount) {
     if (!object[functionName]) {
         // eslint-disable-next-line no-console
         console.trace();
@@ -129,7 +130,8 @@ function extendObject(object, functionName, newFunction) {
 
     var oldFunction = object[functionName];
 
-    if (!oldFunction.extended && oldFunction.length != undefined &&
+    if (!ignoreArgumentCount && !oldFunction.extended &&
+            oldFunction.length != undefined &&
             oldFunction.length + 1 !== newFunction.length) {
         var message = 'Extending function with wrong number of arguments: ' +
             functionName + ' ' +

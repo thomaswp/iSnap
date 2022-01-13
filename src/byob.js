@@ -951,7 +951,8 @@ CustomCommandBlockMorph.prototype.edit = function () {
             null,
             (definition) => {
                 if (definition) { // temporarily update everything
-                    Trace.log('BlockEditor.changeType', this.getDefinitionID());
+                    Trace.log('BlockEditor.changeType',
+                        this.getDefinitionJSON());
                     hat.blockCategory = definition.category;
                     hat.type = definition.type;
                     this.refreshPrototype();
@@ -2951,9 +2952,11 @@ BlockLabelFragmentMorph.prototype.mouseClickLeft = function () {
         isOnlyElement = this.parent.parseSpec(this.parent.blockSpec).length
             < 2;
 
+    const editor = this.parentThatIsA(BlockEditorMorph);
     Trace.log('BlockEditor.startUpdateBlockLabel', {
         fragment: frag,
         index: this.index(),
+        definition: editor ? editor.getDefinitionJSON() : null,
     });
 
     new InputSlotDialogMorph(
@@ -2974,9 +2977,11 @@ BlockLabelFragmentMorph.prototype.mouseClickLeft = function () {
 };
 
 BlockLabelFragmentMorph.prototype.updateBlockLabel = function (newFragment) {
+    const editor = this.parentThatIsA(BlockEditorMorph);
     Trace.log('BlockEditor.updateBlockLabel', {
         fragment: newFragment,
         originalIndex: this.index(),
+        definition: editor ? editor.getDefinitionJSON() : null,
     });
     var prot = this.parentThatIsA(BlockMorph);
     this.fragment = newFragment;
@@ -3253,9 +3258,9 @@ InputSlotDialogMorph.prototype.init = function (
     this.fixLayout();
 };
 
-InputSlotDialogMorph.prototype.ok = function() {
-    Trace.log('InputSlotDialogMorph.ok');
-    InputSlotDialogMorph.uber.ok.apply(this, arguments);
+InputSlotDialogMorph.prototype.accept = function() {
+    Trace.log('InputSlotDialogMorph.accept');
+    InputSlotDialogMorph.uber.accept.apply(this, arguments);
 }
 
 InputSlotDialogMorph.prototype.cancel = function() {

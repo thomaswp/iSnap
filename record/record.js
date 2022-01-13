@@ -500,10 +500,12 @@ class Record {
 
     replay_inputTyped(data, callback, fast) {
         let dialog = null;
-        if (data.input === 'BlockDialogMorph') {
+        if (data.input === BlockDialogMorph.name) {
             dialog = Recorder.getBlockDialog();
-        } else if (data.input === 'VariableDialogMorph') {
+        } else if (data.input === VariableDialogMorph.name) {
             dialog = Recorder.getNewVarDialog();
+        } else if (data.input === InputSlotDialogMorph.name) {
+            dialog = Recorder.getDialog('blockInput');
         } else {
             console.warn('Unknown input type', data.input);
         }
@@ -554,7 +556,7 @@ class Record {
 
     replay_blockEditor_startUpdateBlockLabel(data, callback, fast) {
         setTimeout(callback, 1);
-        const editor = Recorder.findShowingBlockEditor(data.guid);
+        const editor = Recorder.findShowingBlockEditor(data.definition.guid);
         const index = data.index;
         if (index < 0) return;
         try {
@@ -565,7 +567,7 @@ class Record {
             Recorder.registerClick(target.center(), fast);
             target.mouseClickLeft();
         } catch (e) {
-            console.error('Block editor has no labels: ', editor);
+            console.error('Block editor has no labels: ', editor, index, e);
         }
     }
 
@@ -593,9 +595,9 @@ class Record {
         );
     }
 
-    replay_blockInput_ok(data, callback, fast) {
+    replay_blockInput_accept(data, callback, fast) {
         this.replayDialogAction(
-            callback, fast, 'blockInput', 'ok', [], dialog => {
+            callback, fast, 'blockInput', 'accept', [], dialog => {
                 return dialog.buttons.children[0];
             }
         );
@@ -873,11 +875,12 @@ class Recorder {
             'blockType');
         this.addGroupedHandlers(
             'BlockEditor',
+            // TODO: Should ok be accept?
             ['start', 'ok', 'apply', 'cancel', 'startUpdateBlockLabel'],
             'blockEditor');
         this.addGroupedHandlers(
             'InputSlotDialogMorph',
-            ['setType', 'ok', 'cancel', 'deleteFragment'],
+            ['setType', 'accept', 'cancel', 'deleteFragment'],
             'blockInput');
 
         this.addGroupedHandlers(

@@ -207,6 +207,7 @@ class Record {
         let method = 'replay_' + this.type;
         if (!this[method]) {
             console.warn('Unknown record type: ' + this.type);
+            return;
         }
         console.log('Playing:', this.type, this.data);
         let data = Recorder.deserialize(this.data);
@@ -708,6 +709,61 @@ class Record {
         Recorder.registerClick(prompter.button.center(), fast);
         prompter.accept();
     }
+
+    findWatcherToggle(selectorOrSpec, isVar) {
+        if (!ide.palette || !ide.palette.children[0]) return null;
+        const paletteItems = ide.palette.children[0].children;
+        for (let i = 0; i < paletteItems.length - 1; i++) {
+            const item = paletteItems[i];
+            const nextItem = paletteItems[i + 1];
+            if (!(item instanceof ToggleMorph)) continue;
+            if (!(nextItem instanceof BlockMorph)) continue;
+            if (!isVar && nextItem.selector !== selectorOrSpec) continue;
+            if (isVar && nextItem.blockSpec !== selectorOrSpec) continue;
+            return item;
+        }
+        console.warn('Could not find toggle for:', selectorOrSpec);
+        return null;
+    }
+
+    replay_sprite_toggleWatcher(data, callback, fast) {
+        setTimeout(callback, 1);
+        const sprite = ide.currentSprite, stage = ide.stage;
+        const selector = data.selector;
+        if (!sprite || !stage) return;
+        // Don't toggle if already showing correctly. This can happen, e.g.
+        // when the watcher is first created, which triggers a toggle
+        if (sprite.showingWatcher(selector) == data.visible) return;
+        const toggle = this.findWatcherToggle(selector, false);
+        if (toggle == null) return;
+        toggle.trigger();
+        Recorder.registerClick(toggle.center(), fast);
+        // sprite.toggleWatcher(
+        //     selector, localize(info.spec), sprite.blockColor[info.category]);
+        // const watcher = sprite.watcherFor(stage, selector);
+        // if (watcher) {
+        //     Recorder.registerClick(watcher.center(), fast);
+        // }
+    }
+
+    replay_sprite_toggleVariableWatcher(data, callback, fast) {
+        setTimeout(callback, 1);
+        const sprite = ide.currentSprite, stage = ide.stage;
+        const varName = data.varName;
+        if (!sprite || !stage) return;
+        // Don't toggle if already showing correctly. This can happen, e.g.
+        // when the watcher is first created, which triggers a toggle
+        if (sprite.showingVariableWatcher(varName) == data.visible) return;
+        const toggle = this.findWatcherToggle(varName, true);
+        if (toggle == null) return;
+        toggle.trigger();
+        Recorder.registerClick(toggle.center(), fast);
+        // sprite.toggleVariableWatcher(varName);
+        // const watcher = sprite.findVariableWatcher(varName);
+        // if (watcher) {
+        //     Recorder.registerClick(watcher.center(), fast);
+        // }
+    }
 }
 
 class Recorder {
@@ -893,6 +949,11 @@ class Recorder {
                 'toggleSingleStepping', 'updateSteppingSlider', 'pause',
                 'unpause', 'selectSprite'
             ], 'IDE');
+
+        this.addGroupedHandlers(
+            'SpriteMorph', [
+                'toggleVariableWatcher', 'toggleWatcher',
+            ], 'sprite');
     };
 
     defaultHandler(type) {

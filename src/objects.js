@@ -6090,6 +6090,13 @@ SpriteMorph.prototype.toggleVariableWatcher = function (varName, isGlobal) {
         isGlobal = contains(globals.names(), varName);
     }
     watcher = this.findVariableWatcher(varName);
+
+    Trace.log('SpriteMorph.toggleVariableWatcher', {
+        varName: varName,
+        isGlobal: isGlobal,
+        visible: !(watcher && watcher.isVisible),
+    })
+
     if (watcher !== null) {
         if (watcher.isVisible) {
             watcher.hide();
@@ -6158,6 +6165,12 @@ SpriteMorph.prototype.toggleWatcher = function (selector, label, color) {
         others;
     if (!stage) { return; }
     watcher = this.watcherFor(stage, selector);
+
+    Trace.log('SpriteMorph.toggleWatcher', {
+        selector: selector,
+        visible: !(watcher && watcher.isVisible),
+    });
+
     if (watcher) {
         if (watcher.isVisible) {
             watcher.hide();

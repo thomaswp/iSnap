@@ -788,9 +788,8 @@ class Recorder {
             window.ide.newProject();
             window.ide.changeCategory('motion');
         } else {
-            // TODO: Is this async? Do I need to worry about it not being
-            // finished?
-            window.ide.rawOpenProjectString(startXML);
+            // Queue project opening to avoid sync issues
+            window.ide.openProjectString(startXML);
         }
     }
 

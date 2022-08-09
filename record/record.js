@@ -212,6 +212,24 @@ class Record {
         console.log('Playing:', this.type, this.data);
         let data = Recorder.deserialize(this.data);
         this[method].call(this, data, callback, fast);
+
+        if (!fast) {
+            let point = this.getCursor();
+            if (point) Recorder.clickIfRegistered(point);
+        }
+        Recorder.clickRegistered = false;
+    }
+
+    getCursor() {
+        let cursorMethod = this['cursor_' + this.type];
+        if (!cursorMethod) return null;
+        try {
+            return cursorMethod.call(this, this.data);
+        } catch (e) {
+            // Probably this is ok, but may want to log somehow...
+            console.warn(e);
+        }
+        return null;
     }
 
     replacePHBM(dropRecord, parent, key) {
@@ -246,13 +264,25 @@ class Record {
         }
     }
 
-    replay_blockDrop(dropRecord, callback, fast) {
+    cursor_blockDrop(data) {
+        if (data.lastDropTarget) return data.lastDropTarget.point;
+
+    }
+
+    replay_blockDrop(data, callback, fast) {
         let sprite = window.ide.currentSprite;
         let scripts = sprite.scripts;
-        this.replacePHBM(dropRecord, dropRecord, 'lastDroppedBlock');
-        this.replacePHBM(dropRecord, dropRecord.lastDropTarget, 'element');
-        // console.log('Dropping deserialized', dropRecord);
-        scripts.playDropRecord(dropRecord, callback, fast ? 1 : null);
+        this.replacePHBM(data, data, 'lastDroppedBlock');
+        this.replacePHBM(data, data.lastDropTarget, 'element');
+        // console.log('Dropping deserialized', data);
+        scripts.playDropRecord(data, callback, fast ? 1 : null);
+    }
+
+    cursor_inputSlotEdit(data) {
+        let def = data.id;
+        let block = Recorder.getBlock(def.id, def.template);
+        if (!block) return;
+        return block.inputs()[data.id.argIndex].center();
     }
 
     replay_inputSlotEdit(data, callback, fast) {
@@ -264,8 +294,18 @@ class Record {
                 input instanceof BooleanSlotMorph) {
             input.setContents(data.value);
         }
-        Recorder.registerClick(input.center(), fast);
+        Recorder.registerClick();
         setTimeout(callback, 1);
+    }
+
+    cursor_run(data) {
+        if (data && data.id) {
+            let block = Recorder.getBlock(data.id, data.template);
+            if (!block) return null;
+            return block.center().add(block.position()).divideBy(2);
+        } else {
+            return ide.controlBar.startButton.center();
+        }
     }
 
     replay_run(data, callback, fast) {
@@ -301,16 +341,14 @@ class Record {
             prepareToRun();
             // console.log('Toggle', fast, procFinished, block);
             threads.toggleProcess(block, receiver);
-            let click = block.center().add(block.position()).divideBy(2);
-            Recorder.registerClick(click, fast);
+            Recorder.registerClick();
             stopCondition = () => {
                 // Stop when the thread has stopped running
                 return !receiver || isFinished();
             };
         } else {
             // Green flag
-            let click = ide.controlBar.startButton.center();
-            Recorder.registerClick(click, fast);
+            Recorder.registerClick();
             prepareToRun();
             ide.runScripts();
             stopCondition = () => {
@@ -343,23 +381,34 @@ class Record {
         }, 1);
     }
 
+    cursor_stop(data) {
+        return ide.controlBar.stopButton.center();
+    }
+
     replay_stop(data, callback, fast) {
-        let click = ide.controlBar.stopButton.center();
-        Recorder.registerClick(click, fast);
+        Recorder.registerClick();
         window.ide.stopAllScripts();
         setTimeout(callback, 1);
     }
 
-    replay_changeCategory(data, callback, fast) {
+    cursor_changeCategory(data) {
         let categoryIndex = SpriteMorph.prototype.categories
             .indexOf(data.value.toLocaleLowerCase());
         if (categoryIndex >= 0) {
-            let click = ide.categories.children[categoryIndex].center();
-            Recorder.registerClick(click, fast);
+            return ide.categories.children[categoryIndex].center();
         }
+    }
 
+    replay_changeCategory(data, callback, fast) {
+        Recorder.registerClick();
         window.ide.changeCategory(data.value);
         setTimeout(callback, 1);
+    }
+
+    cursor_menu(data) {
+        if (data.open && data.parent) {
+            return data.position;
+        }
     }
 
     replay_menu(data, callback, fast) {
@@ -370,12 +419,18 @@ class Record {
             return;
         }
         if (open && parent) {
-            Recorder.registerClick(data.position, fast);
+            Recorder.registerClick();
             parent.contextMenu().popup(world, data.position);
         } else if (!open && Recorder.openMenu) {
             Recorder.openMenu.destroy();
         }
         setTimeout(callback, 1);
+    }
+
+    cursor_menuItemSelect(data) {
+        if (!data.highlight || !Record.openMenu) return;
+        let item = Recorder.openMenu.children[data.index];
+        if (item) return item.center();
     }
 
     replay_menuItemSelect(data, callback, fast) {
@@ -396,104 +451,150 @@ class Record {
         setTimeout(callback, 1);
     }
 
+    cursor_blockType_newBlock(data) {
+        let button = ide.palette.toolBar.children[1];
+        if (button) return button.center();
+    }
+
     replay_blockType_newBlock(data, callback, fast) {
         ide.currentSprite.makeBlock();
-        let button = ide.palette.toolBar.children[1];
-        if (button) {
-            Recorder.registerClick(button.center(), fast);
-        }
+        Recorder.registerClick();
         setTimeout(callback, 1);
     }
 
-    replay_dialog_setValue(dialog, func, data, callback, fast, shower) {
+    replay_dialog_setValue(dialog, func, data, callback) {
         if (dialog) {
             dialog[func](data.value);
-            if (shower) {
-                let widget = shower(dialog);
-                if (widget) {
-                    Recorder.registerClick(widget.center(), fast);
-                }
-            }
+            Recorder.registerClick();
         }
         setTimeout(callback, 1);
     }
 
-    replay_blockType_setValue(func, data, callback, fast, shower) {
+    replay_blockType_setValue(func, data, callback) {
         let dialog = Recorder.getBlockDialog();
-        this.replay_dialog_setValue(dialog, func, data, callback, fast, shower);
+        this.replay_dialog_setValue(dialog, func, data, callback);
+    }
+
+    cursor_blockType(childName) {
+        let dialog = Recorder.getBlockDialog();
+        if (!dialog || !dialog[childName]) return null;
+        let child = dialog[childName].children.filter(child => child.query())[0];
+        if (!child) return null;
+        return child.center();
+    }
+
+    cursor_blockType_changeCategory(data) {
+        return this.cursor_blockType('categories');
     }
 
     replay_blockType_changeCategory(data, callback, fast) {
-        this.replay_blockType_setValue('changeCategory', data, callback, fast,
-        dialog => {
-            return dialog.categories.children.filter(child => child.query())[0];
-        });
+        this.replay_blockType_setValue('changeCategory', data, callback);
+    }
+
+    cursor_blockType_setScope(data) {
+        return this.cursor_blockType('scopes');
     }
 
     replay_blockType_setScope(data, callback, fast) {
-        this.replay_blockType_setValue('setScope', data, callback, fast,
-        dialog => {
-            return dialog.scopes.children.filter(scope => scope.query())[0];
-        });
+        this.replay_blockType_setValue('setScope', data, callback);
+    }
+
+    cursor_blockType_setType(data) {
+        return this.cursor_blockType('types');
     }
 
     replay_blockType_setType(data, callback, fast) {
-        this.replay_blockType_setValue('setType', data, callback, fast,
-        dialog => {
-            return dialog.types.children.filter(type => type.query())[0];
-        });
+        this.replay_blockType_setValue('setType', data, callback);
+    }
+
+    cursor_blockType_ok(data) {
+        let dialog = Recorder.getBlockDialog();
+        if (dialog) return dialog.buttons.children[0].center();
     }
 
     replay_blockType_ok(data, callback, fast) {
         let dialog = Recorder.getBlockDialog();
         if (dialog) {
-            Recorder.registerClick(dialog.buttons.children[0].center());
+            Recorder.registerClick();
             dialog.ok();
         }
         setTimeout(callback, 1);
     }
 
+    cursor_blockType_cancel(data) {
+        let dialog = Recorder.getBlockDialog();
+        if (dialog) return dialog.buttons.children[1].center();
+    }
+
     replay_blockType_cancel(data, callback, fast) {
         let dialog = Recorder.getBlockDialog();
         if (dialog) {
-            Recorder.registerClick(dialog.buttons.children[1].center());
+            Recorder.registerClick();
             dialog.cancel();
         }
         setTimeout(callback, 1);
     }
 
-    replay_varDialog_prompt(data, callback, fast) {
+    getVarDialogPromptButton() {
         let varBlocks = ide.currentSprite.blocksCache['variables'];
         if (varBlocks) {
             let button = varBlocks[0];
             if (button instanceof PushButtonMorph) {
-                Recorder.registerClick(button.center(), fast);
-                button.action();
+                return button;
             }
         }
+    }
+
+    cursor_varDialog_prompt(data) {
+        let button = getVarDialogPromptButton();
+        if (button) return button.center();
+    }
+
+    replay_varDialog_prompt(data, callback, fast) {
+        let button = this.getVarDialogPromptButton();
+        if (button) button.action();
         setTimeout(callback, 1);
+    }
+
+    cursor_varDialog_setType(data) {
+
+    }
+
+    cursor_varDialog_setType(data) {
+        let dialog = Recorder.getNewVarDialog();
+        if (!dialog || !dialog.types) return;
+        let child = dialog.types.children.filter(type => type.query())[0];
+        if (child) return child.center();
     }
 
     replay_varDialog_setType(data, callback, fast) {
         this.replay_dialog_setValue(Recorder.getNewVarDialog(), 'setType',
-                data, callback, fast, dialog => {
-            return dialog.types.children.filter(type => type.query())[0];
-        });
+                data, callback);
+    }
+
+    cursor_varDialog_accept(data) {
+        let dialog = Recorder.getNewVarDialog();
+        if (dialog) return dialog.buttons.children[0].center();
     }
 
     replay_varDialog_accept(data, callback, fast) {
         let dialog = Recorder.getNewVarDialog();
         if (dialog) {
-            Recorder.registerClick(dialog.buttons.children[0].center());
+            Recorder.registerClick();
             dialog.accept();
         }
         setTimeout(callback, 1);
     }
 
+    cursor_varDialog_cancel(data) {
+        let dialog = Recorder.getNewVarDialog();
+        if (dialog) return dialog.buttons.children[1].center();
+    }
+
     replay_varDialog_cancel(data, callback, fast) {
         let dialog = Recorder.getNewVarDialog();
         if (dialog) {
-            Recorder.registerClick(dialog.buttons.children[1].center());
+            Recorder.registerClick();
             dialog.cancel();
         }
         setTimeout(callback, 1);
@@ -535,6 +636,11 @@ class Record {
         new BlockEditorMorph(blockDef, window.ide.currentSprite).popUp();
     }
 
+    cursor_blockEditor_ok(data) {
+        let editor = Recorder.findShowingBlockEditor(data.guid);
+        // TODO: find editor ok, apply and cancel buttons!
+    }
+
     replay_blockEditor_ok(data, callback, fast) {
         setTimeout(callback, 1);
         let editor = Recorder.findShowingBlockEditor(data.guid);
@@ -555,8 +661,7 @@ class Record {
         editor.cancel();
     }
 
-    replay_blockEditor_startUpdateBlockLabel(data, callback, fast) {
-        setTimeout(callback, 1);
+    getBlockEditorUpdateBlockLabelButton(data) {
         const editor = Recorder.findShowingBlockEditor(data.definition.guid);
         const index = data.index;
         if (index < 0) return;
@@ -565,14 +670,31 @@ class Record {
             // likely to work until code changes...
             const cbMorph = editor.body.children[0].children[0].children[0];
             const target = cbMorph.children[index];
-            Recorder.registerClick(target.center(), fast);
-            target.mouseClickLeft();
+            return target;
         } catch (e) {
             console.error('Block editor has no labels: ', editor, index, e);
         }
     }
 
-    replayDialogAction(callback, fast, dialogKey, action, args, buttonFinder) {
+    cursor_blockEditor_startUpdateBlockLabel(data) {
+        var button = this.getBlockEditorUpdateBlockLabelButton(data);
+        if (button) return button.center();
+    }
+
+    replay_blockEditor_startUpdateBlockLabel(data, callback, fast) {
+        setTimeout(callback, 1);
+        var button = this.getBlockEditorUpdateBlockLabelButton(data);
+        if (button) return button.mouseClickLeft();
+    }
+
+    cursorDialogAction(dialogKey, buttonFinder) {
+        const dialog = Recorder.getDialog(dialogKey);
+        if (!dialog) return null;
+        const button = buttonFinder(dialog)
+        if (button) return button.center();
+    }
+
+    replayDialogAction(callback, dialogKey, action, args) {
         setTimeout(callback, 1);
         const dialog = Recorder.getDialog(dialogKey);
         if (!dialog) {
@@ -580,54 +702,66 @@ class Record {
             return;
         }
         dialog[action](...args);
-        if (buttonFinder) {
-            const button = buttonFinder(dialog);
-            if (button) {
-                Recorder.registerClick(button.center(), fast);
-            }
-        }
+        Recorder.registerClick();
+    }
+
+    cursor_blockInput_setType(data) {
+        return cursorDialogAction('blockInput',
+            dialog => dialog.types[data.value ? 1 : 0]);
     }
 
     replay_blockInput_setType(data, callback, fast) {
         this.replayDialogAction(
-            callback, fast, 'blockInput', 'setType', [data.value], dialog => {
-                return dialog.types[data.value ? 1 : 0];
-            }
-        );
+            callback, 'blockInput', 'setType', [data.value]);
+    }
+
+    cursor_blockInput_accept(data) {
+        return cursorDialogAction('blockInput',
+            dialog => dialog.buttons.children[0]);
     }
 
     replay_blockInput_accept(data, callback, fast) {
         this.replayDialogAction(
-            callback, fast, 'blockInput', 'accept', [], dialog => {
-                return dialog.buttons.children[0];
-            }
-        );
+            callback, 'blockInput', 'accept', []);
     }
 
-    replay_blockInput_cancel(data, callback, fast) {
-        this.replayDialogAction(
-            callback, fast, 'blockInput', 'cancel', [], dialog => {
+    cursor_blockInput_cancel(data) {
+        return cursorDialogAction('blockInput', dialog => {
                 const children = dialog.buttons.children;
                 return children[children.length - 1];
             }
         );
     }
 
+    replay_blockInput_cancel(data, callback, fast) {
+        this.replayDialogAction(
+            callback, 'blockInput', 'cancel', []);
+    }
+
+    cursor_blockInput_deleteFragment(data) {
+        return cursorDialogAction('blockInput',
+            dialog => dialog.buttons.children[1]);
+    }
+
     replay_blockInput_deleteFragment(data, callback, fast) {
         this.replayDialogAction(
-            callback, fast, 'blockInput', 'deleteFragment', [], dialog => {
-                return dialog.buttons.children[1];
-            }
-        );
+            callback, 'blockInput', 'deleteFragment', []);
+    }
+
+    cursor_IDE_toggleSingleStepping(data) {
+        return window.ide.controlBar.steppingButton.center();
     }
 
     replay_IDE_toggleSingleStepping(data, callback, fast) {
         setTimeout(callback, 1);
         // Ignore this if the value is already correct
         if (data.value == Process.prototype.enableSingleStepping) return;
-        Recorder.registerClick(
-            window.ide.controlBar.steppingButton.center(), fast);
+        Recorder.registerClick();
         window.ide.toggleSingleStepping();
+    }
+
+    cursor_IDE_updateSteppingSlider(data) {
+        return window.ide.controlBar.steppingSlider.button.center();
     }
 
     replay_IDE_updateSteppingSlider(data, callback, fast) {
@@ -636,29 +770,38 @@ class Record {
         window.ide.controlBar.steppingSlider.value =
             Process.prototype.flashTime * 100 + 1
         window.ide.controlBar.steppingSlider.fixLayout();
-        Recorder.registerClick(
-            window.ide.controlBar.steppingSlider.button.center(), fast);
+        Recorder.registerClick();
+    }
+
+    cursor_IDE_pause(data) {
+        return window.ide.controlBar.pauseButton.center();
     }
 
     replay_IDE_pause(data, callback, fast) {
         setTimeout(callback, 1);
         if (window.ide.stage.threads.isPaused()) return;
-        Recorder.registerClick(
-            window.ide.controlBar.pauseButton.center(), fast);
+        Recorder.registerClick();
         window.ide.togglePauseResume();
+    }
+
+    cursor_IDE_unpause(data) {
+        return window.ide.controlBar.pauseButton.center();
     }
 
     replay_IDE_unpause(data, callback, fast) {
         setTimeout(callback, 1);
         if (!window.ide.stage.threads.isPaused()) return;
-        Recorder.registerClick(
-            window.ide.controlBar.pauseButton.center(), fast);
+        Recorder.registerClick();
         window.ide.togglePauseResume();
+    }
+
+    cursor_IDE_addSprite(data) {
+        return window.ide.corralBar.children[0].center();
     }
 
     replay_IDE_addSprite(data, callback, fast) {
         setTimeout(callback, 1);
-        Recorder.registerClick(window.ide.corralBar.children[0].center(), fast);
+        Recorder.registerClick();
         window.ide.addNewSprite();
         let sprite = window.ide.currentSprite;
         sprite.silentGotoXY(data.x, data.y);
@@ -667,14 +810,27 @@ class Record {
         sprite.setColorComponentHSVA(2, data.lightness);
     }
 
+    getSpriteIcon(data) {
+        let icons = window.ide.corral.allChildren()
+        .filter(c => c instanceof SpriteIconMorph);
+        return icons.filter(c => c.labelString === data.value)[0];
+    }
+
+    cursor_IDE_selectSprite(data) {
+        let icon = this.getSpriteIcon(data);
+        if (icon) return icon.center();
+    }
+
     replay_IDE_selectSprite(data, callback, fast) {
         setTimeout(callback, 1);
-        let icons = window.ide.corral.allChildren()
-            .filter(c => c instanceof SpriteIconMorph);
-        let icon = icons.filter(c => c.labelString === data.value)[0];
+        let icon = this.getSpriteIcon(data);
         if (!icon) return;
-        Recorder.registerClick(icon.center(), fast);
+        Recorder.registerClick();
         icon.action();
+    }
+
+    cursor_spriteDropped(data){
+        return new Point(data.x, data.y);
     }
 
     replay_spriteDropped(data, callback, fast) {
@@ -726,6 +882,11 @@ class Record {
         return null;
     }
 
+    cursor_sprite_toggleWatcher(data) {
+        let toggle = this.findWatcherToggle(data.selector, false);
+        if (toggle) return toggle.center();
+    }
+
     replay_sprite_toggleWatcher(data, callback, fast) {
         setTimeout(callback, 1);
         const sprite = ide.currentSprite, stage = ide.stage;
@@ -737,13 +898,18 @@ class Record {
         const toggle = this.findWatcherToggle(selector, false);
         if (toggle == null) return;
         toggle.trigger();
-        Recorder.registerClick(toggle.center(), fast);
+        Recorder.registerClick();
         // sprite.toggleWatcher(
         //     selector, localize(info.spec), sprite.blockColor[info.category]);
         // const watcher = sprite.watcherFor(stage, selector);
         // if (watcher) {
         //     Recorder.registerClick(watcher.center(), fast);
         // }
+    }
+
+    cursor_sprite_toggleVariableWatcher(data) {
+        let toggle = this.findWatcherToggle(data.varName, true);
+        if (toggle) return toggle.center();
     }
 
     replay_sprite_toggleVariableWatcher(data, callback, fast) {
@@ -774,6 +940,7 @@ class Recorder {
     static ID_OFFSET = 10000;
     static onClickCallback = null;
     static openMenu = null;
+    static clickRegistered = false;
 
     static resetSnap(startXML) {
         if (!window.world) return;
@@ -860,11 +1027,15 @@ class Recorder {
         this.onClickCallback = callback;
     }
 
-    static registerClick(point, fast) {
-        if (fast) return;
-        if (this.onClickCallback) {
+    static registerClick() {
+        Recorder.clickRegistered = true;
+    }
+
+    static clickIfRegistered(point) {
+        if (Recorder.clickRegistered && this.onClickCallback) {
             this.onClickCallback(point.x, point.y);
         }
+        Recorder.clickRegistered = false;
     }
 
     static resetBlockMap() {

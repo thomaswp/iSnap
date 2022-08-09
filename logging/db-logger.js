@@ -19,7 +19,7 @@ DBLogger.prototype.storeMessages = function(logs) {
     var maxMessageLength = 64;
     logs.forEach(function(log) {
         if (log.code && log.code.length > maxCodeLength) {
-            Trace.logErrorMessageLater(
+            this.logErrorMessageLater(
                 'Attempted to log code with length ' + log.code.length +
                 ' > ' + maxCodeLength + '. ' + 'Log was truncated.');
             log.code = log.code.substring(0, maxCodeLength);
@@ -36,7 +36,7 @@ DBLogger.prototype.storeMessages = function(logs) {
 
 DBLogger.prototype.sendToServer = function(data, attempts) {
     if (attempts >= 3) {
-        // Trace.log('Log.failure'); // creates a loop, probably not good
+        // this.log('Log.failure'); // creates a loop, probably not good
         return; // max retries if the logging fails
     }
 

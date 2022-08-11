@@ -214,17 +214,26 @@ class Record {
         this[method].call(this, data, callback, fast);
 
         if (!fast) {
-            let point = this.getCursor();
+            let point = this.getCursor(data);
             if (point) Recorder.clickIfRegistered(point);
         }
         Recorder.clickRegistered = false;
     }
 
-    getCursor() {
-        let cursorMethod = this['cursor_' + this.type];
+    getCursor(data) {
+        return this.getCursorOrPreCursor('cursor', data);
+    }
+
+    getPreCursor(data) {
+        return this.getCursorOrPreCursor('precursor', data);
+    }
+
+    getCursorOrPreCursor(type, data) {
+        data = data || Recorder.deserialize(this.data);
+        let cursorMethod = this[type + '_' + this.type];
         if (!cursorMethod) return null;
         try {
-            return cursorMethod.call(this, this.data);
+            return cursorMethod.call(this, data);
         } catch (e) {
             // Probably this is ok, but may want to log somehow...
             console.warn(e);
@@ -264,7 +273,25 @@ class Record {
         }
     }
 
+    getSituationPosition(situation) {
+        if (!situation || !situation.position) return null;
+        let cursor = situation.position;
+        let origin = situation.origin;
+        // console.log('origin', origin);
+        if (cursor && origin && origin.bounds) {
+            cursor = cursor.add(origin.bounds.origin);
+        }
+        cursor = cursor.add(new Point(5, 5));
+        return cursor;
+    }
+
+    precursor_blockDrop(data) {
+        return this.getSituationPosition(data.lastOrigin);
+    }
+
     cursor_blockDrop(data) {
+        let situation = this.getSituationPosition(data.situation);
+        if (situation) return situation;
         if (data.lastDropTarget) return data.lastDropTarget.point;
 
     }

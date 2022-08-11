@@ -307,7 +307,7 @@ class Record {
 
     cursor_inputSlotEdit(data) {
         let def = data.id;
-        let block = Recorder.getBlock(def.id, def.template);
+        let block = Recorder.getBlock(def);
         if (!block) return;
         return block.inputs()[data.id.argIndex].center();
     }
@@ -327,7 +327,7 @@ class Record {
 
     cursor_run(data) {
         if (data && data.id) {
-            let block = Recorder.getBlock(data.id, data.template);
+            let block = Recorder.getBlock(data);
             if (!block) return null;
             return block.center().add(block.position()).divideBy(2);
         } else {
@@ -573,24 +573,24 @@ class Record {
     }
 
     cursor_varDialog_prompt(data) {
-        let button = getVarDialogPromptButton();
+        let button = this.getVarDialogPromptButton();
         if (button) return button.center();
     }
 
     replay_varDialog_prompt(data, callback, fast) {
         let button = this.getVarDialogPromptButton();
-        if (button) button.action();
+        if (button) {
+            button.action();
+            Recorder.registerClick();
+        }
         setTimeout(callback, 1);
-    }
-
-    cursor_varDialog_setType(data) {
-
     }
 
     cursor_varDialog_setType(data) {
         let dialog = Recorder.getNewVarDialog();
         if (!dialog || !dialog.types) return;
-        let child = dialog.types.children.filter(type => type.query())[0];
+        let index = data.value == 'local' ? 1 : 0;
+        let child = dialog.types.children[index];
         if (child) return child.center();
     }
 
@@ -627,20 +627,28 @@ class Record {
         setTimeout(callback, 1);
     }
 
-    replay_inputTyped(data, callback, fast) {
-        let dialog = null;
+    getInputDialog(data) {
         if (data.input === BlockDialogMorph.name) {
-            dialog = Recorder.getBlockDialog();
+            return Recorder.getBlockDialog();
         } else if (data.input === VariableDialogMorph.name) {
-            dialog = Recorder.getNewVarDialog();
+            return Recorder.getNewVarDialog();
         } else if (data.input === InputSlotDialogMorph.name) {
-            dialog = Recorder.getDialog('blockInput');
-        } else {
-            console.warn('Unknown input type', data.input);
+            return Recorder.getDialog('blockInput');
         }
+    }
+
+    cursor_inputTyped(data) {
+        let dialog = this.getInputDialog(data);
+        if (!dialog || !dialog.body) return;
+        return dialog.body.center();
+    }
+
+    replay_inputTyped(data, callback, fast) {
+        let dialog = this.getInputDialog(data);
         if (dialog) {
             dialog.body.setContents(data.value);
         }
+        else console.warn('Unknown input type', data.input);
         setTimeout(callback, 1);
     }
 
@@ -992,13 +1000,18 @@ class Recorder {
         this.blockMap.set(block.id, block);
     }
 
-    static getBlock(id, isTemplate) {
-        let block = this.blockMap.get(id);
-        return block;
+    static getBlock(blockDef) {
+        if (blockDef.template) {
+            let block = [...this.blockMap.values()].filter(
+                block => block.isTemplate && block.selected === blockDef.selected
+            )[0];
+            if (block) return block;
+        }
+        return this.blockMap.get(blockDef.id);
     }
 
     static getOrCreateBlock(blockDef) {
-        let block = Recorder.getBlock(blockDef.id, blockDef.template);
+        let block = Recorder.getBlock(blockDef);
         if (block) return block;
         let id = blockDef.id;
         let sprite = window.ide.currentSprite;

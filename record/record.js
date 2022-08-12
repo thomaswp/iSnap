@@ -210,7 +210,7 @@ class Record {
             return;
         }
         console.log('Playing:', this.type, this.data);
-        let data = Recorder.deserialize(this.data);
+        let data = Recorder.deserialize(this.data, true);
         this[method].call(this, data, callback, fast);
 
         if (!fast) {
@@ -229,7 +229,7 @@ class Record {
     }
 
     getCursorOrPreCursor(type, data) {
-        data = data || Recorder.deserialize(this.data);
+        data = data || Recorder.deserialize(this.data, false);
         let cursorMethod = this[type + '_' + this.type];
         if (!cursorMethod) return null;
         try {
@@ -290,10 +290,7 @@ class Record {
     }
 
     cursor_blockDrop(data) {
-        let situation = this.getSituationPosition(data.situation);
-        if (situation) return situation;
-        if (data.lastDropTarget) return data.lastDropTarget.point;
-
+        return this.getSituationPosition(data.situation);
     }
 
     replay_blockDrop(data, callback, fast) {
@@ -302,10 +299,31 @@ class Record {
         this.replacePHBM(data, data, 'lastDroppedBlock');
         this.replacePHBM(data, data.lastDropTarget, 'element');
         // console.log('Dropping deserialized', data);
-        scripts.playDropRecord(data, callback, fast ? 1 : null);
+        scripts.playDropRecord(data, callback,
+            fast ? 1 : Recorder.BLOCK_DRAG_DURATION_MS);
+    }
+
+    cursor_block_grabbed(data) {
+        // no-op... seems to be buggy and does not improve animation
+
+        // let def = data.id;
+        // let block = Recorder.getBlock(def);
+        // if (!block) return;
+        // let grabPoint = block.bounds.origin.add(new Point(5, 5));
+        // console.log([...Recorder.blockMap.entries()]);
+        // console.log('grabbed', block, grabPoint);
+        // return grabPoint;
+        // return block.center();
+    }
+
+    replay_block_grabbed(data, callback, fast) {
+        // no-op
+        setTimeout(callback, 1);
     }
 
     cursor_inputSlotEdit(data) {
+        // TODO: This can sometime give faulty readings when
+        // editing templates and possibly other blocks...
         let def = data.id;
         let block = Recorder.getBlock(def);
         if (!block) return;
@@ -977,6 +995,8 @@ class Recorder {
     static openMenu = null;
     static clickRegistered = false;
 
+    static BLOCK_DRAG_DURATION_MS = 250;
+
     static resetSnap(startXML) {
         if (!window.world) return;
         // Important: close all dialog boxes *first*; otherwise Snap won't
@@ -1106,6 +1126,10 @@ class Recorder {
         this.index = 0;
         this.lastTime = new Date().getTime();
         this.isRecording = false;
+
+        Trace.addLoggingHandler(
+            'Block.grabbed',
+            this.defaultHandler('block_grabbed'));
 
         let blockChangedHandler = (m, data) => {
             data = Object.assign({}, data);
@@ -1301,7 +1325,7 @@ class Recorder {
         return ide.sprites.contents.filter(s => s.name === name)[0];
     }
 
-    static deserialize(original) {
+    static deserialize(original, createBlocks) {
 
         let record = Object.assign({}, original);
 
@@ -1318,12 +1342,22 @@ class Recorder {
             let type = value.objType;
             // console.log(prop, value);
             if (type === BlockMorph.name) {
-                record[prop] = Recorder.getOrCreateBlock(value);
+                // Only create blocks if this is for an actual replay
+                // Otherwise, just return the ID object
+                if (createBlocks) {
+                    record[prop] = Recorder.getOrCreateBlock(value);
+                } else {
+                    record[prop] = this.deserialize(value, createBlocks);
+                }
             } else if (type === ArgMorph.name) {
-                let block = Recorder.getOrCreateBlock(value);
-                record[prop] = block.inputs()[value.argIndex];
-                // Add index for new redo system
-                record[prop].indexInParent = value.argIndex;
+                if (createBlocks) {
+                    let block = Recorder.getOrCreateBlock(value);
+                    record[prop] = block.inputs()[value.argIndex];
+                    // Add index for new redo system
+                    record[prop].indexInParent = value.argIndex;
+                } else {
+                    record[prop] = this.deserialize(value, createBlocks);
+                }
             } else if (type === ScriptsMorph.name) {
                 record[prop] = null;
                 if (value.source === 'Sprite') {
@@ -1360,7 +1394,7 @@ class Recorder {
                     console.warn('Could not find sprite:', value.name);
                 }
             } else if (type === 'Object') {
-                record[prop] = this.deserialize(value);
+                record[prop] = this.deserialize(value, createBlocks);
             } else if (Array.isArray(value)) {
                 record[prop] = value.slice();
             } else {

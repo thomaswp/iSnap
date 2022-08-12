@@ -129,7 +129,7 @@ extend(VariableDialogMorph, 'prompt', function(base) {
         if (window.recorder) {
             window.recorder.recordInputTyped('VariableDialogMorph', this.getValue());
         }
-    }); 
+    });
 });
 
 extend(StagePrompterMorph, 'init', function(base, question) {
@@ -202,8 +202,35 @@ class Record {
             console.warn('Unknown record type: ' + this.type);
         }
         console.log('Playing:', this.type, this.data);
-        let data = Recorder.deserialize(this.data);
+        let data = Recorder.deserialize(this.data, true);
         this[method].call(this, data, callback, fast);
+
+        if (!fast) {
+            let point = this.getCursor(data);
+            if (point) Recorder.clickIfRegistered(point);
+        }
+        Recorder.clickRegistered = false;
+    }
+
+    getCursor(data) {
+        return this.getCursorOrPreCursor('cursor', data);
+    }
+
+    getPreCursor(data) {
+        return this.getCursorOrPreCursor('precursor', data);
+    }
+
+    getCursorOrPreCursor(type, data) {
+        data = data || Recorder.deserialize(this.data, false);
+        let cursorMethod = this[type + '_' + this.type];
+        if (!cursorMethod) return null;
+        try {
+            return cursorMethod.call(this, data);
+        } catch (e) {
+            // Probably this is ok, but may want to log somehow...
+            console.warn(e);
+        }
+        return null;
     }
 
     replacePHBM(dropRecord, parent, key) {
@@ -237,15 +264,61 @@ class Record {
         }
     }
 
-    replay_blockDrop(dropRecord, callback, fast) {
+    getSituationPosition(situation) {
+        if (!situation || !situation.position) return null;
+        let cursor = situation.position;
+        let origin = situation.origin;
+        // console.log('origin', origin);
+        if (cursor && origin && origin.bounds) {
+            cursor = cursor.add(origin.bounds.origin);
+        }
+        cursor = cursor.add(new Point(5, 5));
+        return cursor;
+    }
+
+    precursor_blockDrop(data) {
+        return this.getSituationPosition(data.lastOrigin);
+    }
+
+    cursor_blockDrop(data) {
+        return this.getSituationPosition(data.situation);
+    }
+
+    replay_blockDrop(data, callback, fast) {
         let sprite = window.ide.currentSprite;
         let scripts = sprite.scripts;
-        this.replacePHBM(dropRecord, dropRecord, 'lastDroppedBlock');
-        this.replacePHBM(dropRecord, dropRecord.lastDropTarget, 'element');
-        // console.log('Dropping deserialized', dropRecord);
-        // TODO: Need to update playDropRecord to not use position, since this will
-        // cause issues in a number of situation, especially if block dialogs are moved
-        scripts.playDropRecord(dropRecord, callback, fast ? 1 : null);
+        this.replacePHBM(data, data, 'lastDroppedBlock');
+        this.replacePHBM(data, data.lastDropTarget, 'element');
+        // console.log('Dropping deserialized', data);
+        scripts.playDropRecord(data, callback,
+            fast ? 1 : Recorder.BLOCK_DRAG_DURATION_MS);
+    }
+
+    cursor_block_grabbed(data) {
+        // no-op... seems to be buggy and does not improve animation
+
+        // let def = data.id;
+        // let block = Recorder.getBlock(def);
+        // if (!block) return;
+        // let grabPoint = block.bounds.origin.add(new Point(5, 5));
+        // console.log([...Recorder.blockMap.entries()]);
+        // console.log('grabbed', block, grabPoint);
+        // return grabPoint;
+        // return block.center();
+    }
+
+    replay_block_grabbed(data, callback, fast) {
+        // no-op
+        setTimeout(callback, 1);
+    }
+
+    cursor_inputSlotEdit(data) {
+        // TODO: This can sometime give faulty readings when
+        // editing templates and possibly other blocks...
+        let def = data.id;
+        let block = Recorder.getBlock(def);
+        if (!block) return;
+        return block.inputs()[data.id.argIndex].center();
     }
 
     replay_inputSlotEdit(data, callback, fast) {
@@ -324,7 +397,7 @@ class Record {
         let interval = setInterval(() => {
             let passed = new Date().getTime() - startTime;
             if (passed < MAX_RUN && !stopCondition()) return;
-            if (passed >= MAX_RUN) console.warn("TIMEOUT", 
+            if (passed >= MAX_RUN) console.warn("TIMEOUT",
                 Process.prototype.enableSingleStepping);
             // console.log("stopping", data);
             if (Process.prototype.enableSingleStepping != stepping) {
@@ -636,6 +709,8 @@ class Recorder {
     static onClickCallback = null;
     static openMenu = null;
 
+    static BLOCK_DRAG_DURATION_MS = 250;
+
     static resetSnap(startXML) {
         if (!window.world) return;
         // Important: close all dialog boxes *first*; otherwise Snap won't
@@ -743,6 +818,10 @@ class Recorder {
         this.index = 0;
         this.lastTime = new Date().getTime();
         this.isRecording = false;
+
+        Trace.addLoggingHandler(
+            'Block.grabbed',
+            this.defaultHandler('block_grabbed'));
 
         let blockChangedHandler = (m, data) => {
             data = Object.assign({}, data);
@@ -911,7 +990,7 @@ class Recorder {
         return ide.sprites.contents.filter(s => s.name === name)[0];
     }
 
-    static deserialize(original) {
+    static deserialize(original, createBlocks) {
 
         let record = Object.assign({}, original);
 
@@ -928,10 +1007,22 @@ class Recorder {
             let type = value.objType;
             // console.log(prop, value);
             if (type === BlockMorph.name) {
-                record[prop] = Recorder.getOrCreateBlock(value);
+                // Only create blocks if this is for an actual replay
+                // Otherwise, just return the ID object
+                if (createBlocks) {
+                    record[prop] = Recorder.getOrCreateBlock(value);
+                } else {
+                    record[prop] = this.deserialize(value, createBlocks);
+                }
             } else if (type === ArgMorph.name) {
-                let block = Recorder.getOrCreateBlock(value);
-                record[prop] = block.inputs()[value.argIndex];
+                if (createBlocks) {
+                    let block = Recorder.getOrCreateBlock(value);
+                    record[prop] = block.inputs()[value.argIndex];
+                    // Add index for new redo system
+                    record[prop].indexInParent = value.argIndex;
+                } else {
+                    record[prop] = this.deserialize(value, createBlocks);
+                }
             } else if (type === ScriptsMorph.name) {
                 record[prop] = null;
                 if (value.source === 'Sprite') {
@@ -964,7 +1055,7 @@ class Recorder {
                 record[prop] = this.getSprite(value.name);
                 if (!record[prop]) console.warn('Could not find sprite:', value.name);
             } else if (type === 'Object') {
-                record[prop] = this.deserialize(value);
+                record[prop] = this.deserialize(value, createBlocks);
             } else if (Array.isArray(value)) {
                 record[prop] = value.slice();
             } else {

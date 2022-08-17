@@ -882,6 +882,7 @@ class Record {
         icon.action();
     }
 
+    // TOOD: Needs a pre-cursor as well
     cursor_spriteDropped(data){
         const stage = ide.stage;
         if (!stage) return;
@@ -1356,9 +1357,10 @@ class Recorder {
             } else if (type === ArgMorph.name) {
                 if (createBlocks) {
                     let block = Recorder.getOrCreateBlock(value);
-                    record[prop] = block.inputs()[value.argIndex];
+                    let input = block.inputs()[value.argIndex];
                     // Add index for new redo system
-                    record[prop].indexInParent = value.argIndex;
+                    input.indexInParent = block.children.indexOf(input);
+                    record[prop] = input;
                 } else {
                     record[prop] = this.deserialize(value, createBlocks);
                 }

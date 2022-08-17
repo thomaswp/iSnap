@@ -883,7 +883,11 @@ class Record {
     }
 
     cursor_spriteDropped(data){
-        return new Point(data.x, data.y);
+        const stage = ide.stage;
+        if (!stage) return;
+        let x = stage.center().x + data.x * stage.scale
+        let y = stage.center().y - data.y * stage.scale
+        return new Point(x, y);
     }
 
     replay_spriteDropped(data, callback, fast) {

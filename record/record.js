@@ -200,6 +200,7 @@ class Record {
 
     constructor(type, data) {
         this.type = type;
+        if (data && !data._recordID) data._recordID = newGuid();
         this.data = Recorder.serialize(data);
     }
 
@@ -241,38 +242,6 @@ class Record {
         return null;
     }
 
-    replacePHBM(dropRecord, parent, key) {
-        // Hack to recover the PHBM, which has no spec and is created
-        // automatically console.log('attempting to replace: ', key);
-        if (!parent) return;
-        if (parent[key] === undefined) {
-            // console.log('Undefined key');
-            if (dropRecord.situation && dropRecord.situation.origin) {
-                // console.log('Custom origin');
-                let origin = dropRecord.situation.origin;
-                let editor = null;
-                if (origin instanceof ScriptsMorph) {
-                    editor = origin.parentThatIsA(BlockEditorMorph);
-                } else if (origin.guid) {
-                    editor = Recorder.findShowingBlockEditor(origin.guid);
-                } else {
-                    console.warn('Unknown origin for BEM: ', origin);
-                }
-                if (editor) {
-                    // console.log('Editor');
-                    let blocks = editor.body.children[0].children;
-                    blocks = blocks.filter(b =>
-                        b instanceof PrototypeHatBlockMorph);
-                    let hat = blocks[0];
-                    if (hat) {
-                        // console.log("Replaced hat block!", key);
-                        parent[key] = hat;
-                    }
-                }
-            }
-        }
-    }
-
     getSituationPosition(situation) {
         if (!situation || !situation.position) return null;
         let cursor = situation.position;
@@ -300,8 +269,6 @@ class Record {
     replay_blockDrop(data, callback, fast) {
         let sprite = window.ide.currentSprite;
         let scripts = sprite.scripts;
-        this.replacePHBM(data, data, 'lastDroppedBlock');
-        this.replacePHBM(data, data.lastDropTarget, 'element');
         // console.log('Dropping deserialized', data);
         scripts.playDropRecord(data, callback,
             fast ? 1 : Recorder.BLOCK_DRAG_DURATION_MS);
@@ -1049,9 +1016,7 @@ class Recorder {
             // but should work
             let isLocal = !!sprite.variables.vars[blockDef.spec];
             block = sprite.variableBlock(blockDef.spec, isLocal);
-        } else if (
-            blockDef.selector === 'evaluateCustomBlock' && blockDef.guid
-        ) {
+        } else if (blockDef.guid) {
             let customBlock = Recorder.getCustomBlock(blockDef.guid);
             if (!customBlock) {
                 console.error('No custom block def for ', blockDef.guid);
@@ -1061,6 +1026,9 @@ class Recorder {
         } else {
             block = sprite.blockForSelector(
                 blockDef.selector, true);
+            if (!block) {
+                console.error('No block selector to create for def', blockDef);
+            }
         }
         if (!block) return undefined;
         // console.log('Creating', blockDef, block);
@@ -1334,6 +1302,22 @@ class Recorder {
         return ide.sprites.contents.filter(s => s.name === name)[0];
     }
 
+
+    static getPHBM(value) {
+        if (!value.guid) {
+            console.error("Deserializing PHBM without guid", value);
+            return null;
+        }
+        let editor = Recorder.findShowingBlockEditor(value.guid);
+        if (!editor) return null;
+
+        // console.log('Editor');
+        let blocks = editor.body.children[0].children;
+        blocks = blocks.filter(b =>
+            b instanceof PrototypeHatBlockMorph);
+        return blocks[0];
+    }
+
     static deserialize(original, createBlocks) {
 
         let record = Object.assign({}, original);
@@ -1350,7 +1334,11 @@ class Recorder {
 
             let type = value.objType;
             // console.log(prop, value);
-            if (type === BlockMorph.name) {
+            if (type === PrototypeHatBlockMorph.name) {
+                // PHBMs are handled separately, since they don't have IDs
+                record[prop] = Recorder.getPHBM(value);
+                // console.log('deserialized PHBM', record[prop]);
+            } else if (type === BlockMorph.name) {
                 // Only create blocks if this is for an actual replay
                 // Otherwise, just return the ID object
                 if (createBlocks) {
@@ -1361,6 +1349,10 @@ class Recorder {
             } else if (type === ArgMorph.name) {
                 if (createBlocks) {
                     let block = Recorder.getOrCreateBlock(value);
+                    if (!block) {
+                        record[prop] = null;
+                        return;
+                    }
                     let input = block.inputs()[value.argIndex];
                     // Add index for new redo system
                     input.indexInParent = block.children.indexOf(input);
@@ -1440,10 +1432,15 @@ class Recorder {
             let type = typeof(value);
             if (type === 'object') type = Recorder.debugType(value);
             // console.log(prop, value);
-            if (value instanceof BlockMorph) {
-                record[prop] = value.blockId();
+            if (value instanceof PrototypeHatBlockMorph) {
                 const def = value.definition;
+                record[prop] = { guid: null };
                 if (def && def.guid) record[prop].guid = def.guid;
+                else console.warn('PHBM without guid!', value);
+                record[prop].objType = PrototypeHatBlockMorph.name;
+                // console.log('PHBM!!!!', record[prop]);
+            } else if (value instanceof BlockMorph) {
+                record[prop] = value.blockId();
                 record[prop].objType = BlockMorph.name;
             } else if (value instanceof ArgMorph) {
                 record[prop] = value.argId();

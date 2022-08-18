@@ -937,6 +937,17 @@ CustomCommandBlockMorph.prototype.mouseClickLeft = function () {
     this.edit();
 };
 
+CustomCommandBlockMorph.prototype.getDefinitionJSON = function(definition) {
+    definition = definition || this.definition;
+    return definition ? {
+        'spec': definition.spec,
+        'category': definition.category,
+        'type': definition.type,
+        'guid': definition.guid,
+        'isGlobal': definition.isGlobal,
+    } : null;
+};
+
 CustomCommandBlockMorph.prototype.edit = function () {
     var def = this.definition,
         editor, block,
@@ -951,8 +962,9 @@ CustomCommandBlockMorph.prototype.edit = function () {
             null,
             (definition) => {
                 if (definition) { // temporarily update everything
+                    console.log(definition);
                     Trace.log('BlockEditor.changeType',
-                        this.getDefinitionJSON());
+                        this.getDefinitionJSON(definition));
                     hat.blockCategory = definition.category;
                     hat.type = definition.type;
                     this.refreshPrototype();
@@ -2143,15 +2155,8 @@ BlockEditorMorph.prototype.destroy = function() {
 
 BlockEditorMorph.defaultHatBlockMargin = new Point(10, 10);
 
-BlockEditorMorph.prototype.getDefinitionJSON = function() {
-    var definition = this.definition;
-    return definition ? {
-        'spec': definition.spec,
-        'category': definition.category,
-        'type': definition.type,
-        'guid': definition.guid,
-    } : null;
-};
+BlockEditorMorph.prototype.getDefinitionJSON =
+    CustomCommandBlockMorph.prototype.getDefinitionJSON;
 
 BlockEditorMorph.prototype.init = function (definition, target) {
     var scripts, proto, scriptsFrame, block, comment,

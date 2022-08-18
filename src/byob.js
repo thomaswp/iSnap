@@ -1287,8 +1287,7 @@ CustomCommandBlockMorph.prototype.deleteBlockDefinition = function () {
     new DialogBoxMorph(
         this,
         () => {
-            Trace.log('IDE.deleteCustomBlock',
-                this.definition ? this.definition.getDefinitionJSON() : null);
+            Trace.log('IDE.deleteCustomBlock', this.getDefinitionJSON());
             rcvr.deleteAllBlockInstances(method);
             if (method.isGlobal) {
                 stage = rcvr.parentThatIsA(StageMorph);

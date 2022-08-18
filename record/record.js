@@ -1357,6 +1357,10 @@ class Recorder {
                         return;
                     }
                     let input = block.inputs()[value.argIndex];
+                    if (!input) {
+                        console.error('Block missing input:', block, value);
+                        return;
+                    }
                     // Add index for new redo system
                     input.indexInParent = block.children.indexOf(input);
                     record[prop] = input;

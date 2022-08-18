@@ -2621,6 +2621,7 @@ BlockMorph.prototype.blockId = function() {
         'id': this.id,
         'template': this.isTemplate,
         'spec': this.blockSpec,
+        'definitionGUID': this.definition ? this.definition.guid : undefined,
     };
 };
 

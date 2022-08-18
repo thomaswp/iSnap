@@ -1016,13 +1016,16 @@ class Recorder {
             // but should work
             let isLocal = !!sprite.variables.vars[blockDef.spec];
             block = sprite.variableBlock(blockDef.spec, isLocal);
-        } else if (blockDef.guid) {
-            let customBlock = Recorder.getCustomBlock(blockDef.guid);
+        } else if (blockDef.definitionGUID) {
+            let customBlock = Recorder.getCustomBlock(blockDef.definitionGUID);
             if (!customBlock) {
-                console.error('No custom block def for ', blockDef.guid);
+                console.error('No custom block def for', blockDef);
                 return null;
             }
             block = customBlock.blockInstance();
+        } else if (blockDef.selector === 'evaluateCustomBlock') {
+            console.error('Custom block without definition GUID! ' +
+                'Is this a legacy recording?');
         } else {
             block = sprite.blockForSelector(
                 blockDef.selector, true);

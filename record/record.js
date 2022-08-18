@@ -220,20 +220,20 @@ class Record {
         Recorder.clickRegistered = false;
     }
 
-    getCursor(data) {
-        return this.getCursorOrPreCursor('cursor', data);
+    getCursor(data, scroll) {
+        return this.getCursorOrPreCursor('cursor', data, scroll);
     }
 
-    getPreCursor(data) {
-        return this.getCursorOrPreCursor('precursor', data);
+    getPreCursor(data, scroll) {
+        return this.getCursorOrPreCursor('precursor', data, scroll);
     }
 
-    getCursorOrPreCursor(type, data) {
+    getCursorOrPreCursor(type, data, scroll) {
         data = data || Recorder.deserialize(this.data, false);
         let cursorMethod = this[type + '_' + this.type];
         if (!cursorMethod) return null;
         try {
-            return cursorMethod.call(this, data);
+            return cursorMethod.call(this, data, scroll);
         } catch (e) {
             // Probably this is ok, but may want to log somehow...
             console.warn(e);
@@ -285,8 +285,12 @@ class Record {
         return cursor;
     }
 
-    precursor_blockDrop(data) {
-        return this.getSituationPosition(data.lastOrigin);
+    precursor_blockDrop(data, scroll) {
+        let pos = this.getSituationPosition(data.lastOrigin);
+        if (scroll) {
+            // TODO?
+        }
+        return pos;
     }
 
     cursor_blockDrop(data) {

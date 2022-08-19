@@ -663,13 +663,23 @@ class Record {
 
     cursor_blockEditor_ok(data) {
         let editor = Recorder.findShowingBlockEditor(data.guid);
-        // TODO: find editor ok, apply and cancel buttons!
+        if (!editor || !editor.children) return;
+        let button = editor.buttons.children[0];
+        if (button) return button.center();
     }
 
     replay_blockEditor_ok(data, callback, fast) {
         setTimeout(callback, 1);
         let editor = Recorder.findShowingBlockEditor(data.guid);
         editor.ok();
+        Recorder.registerClick();
+    }
+
+    cursor_blockEditor_apply(data) {
+        let editor = Recorder.findShowingBlockEditor(data.guid);
+        if (!editor || !editor.children) return;
+        let button = editor.buttons.children[1];
+        if (button) return button.center();
     }
 
     replay_blockEditor_apply(data, callback, fast) {
@@ -678,12 +688,21 @@ class Record {
         // There may not be an editor if they hit ok instead of apply
         if (!editor) return;
         editor.updateDefinition();
+        Recorder.registerClick();
+    }
+
+    cursor_blockEditor_cancel(data) {
+        let editor = Recorder.findShowingBlockEditor(data.guid);
+        if (!editor || !editor.children) return;
+        let button = editor.buttons.children[2];
+        if (button) return button.center();
     }
 
     replay_blockEditor_cancel(data, callback, fast) {
         setTimeout(callback, 1);
         let editor = Recorder.findShowingBlockEditor(data.guid);
         editor.cancel();
+        Recorder.registerClick();
     }
 
     getBlockEditorUpdateBlockLabelButton(data) {

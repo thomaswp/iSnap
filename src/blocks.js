@@ -2621,7 +2621,10 @@ BlockMorph.prototype.blockId = function() {
         'id': this.id,
         'template': this.isTemplate,
         'spec': this.blockSpec,
+        // For custom block instances. We put this here since they don't have
+        // a common superclass other than BlockMorph.
         'definitionGUID': this.definition ? this.definition.guid : undefined,
+        'isPrototype': this.isPrototype || false,
     };
 };
 

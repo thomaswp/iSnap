@@ -237,6 +237,7 @@ class Record {
             return cursorMethod.call(this, data, scroll);
         } catch (e) {
             // Probably this is ok, but may want to log somehow...
+            console.warn('Error during cursor calculation:');
             console.warn(e);
         }
         return null;
@@ -643,12 +644,12 @@ class Record {
 
     replay_blockEditor_start(data, callback, fast) {
         setTimeout(callback, 1);
-        let blockDef = Recorder.getCustomBlock(data);
+        let blockDef = Recorder.getCustomBlock(data.guid);
         if (!blockDef) {
             let editor = BlockEditorMorph.showing
                 .filter(editor => editor.definition.spec === data.spec)[0];
             if (!editor) {
-                console.warn('Missing block editor for spec: ', data.spec);
+                console.warn('Missing block editor for: ', data);
                 return;
             }
             // If this block was just created, update its guid
@@ -730,7 +731,7 @@ class Record {
     }
 
     cursor_blockInput_setType(data) {
-        return cursorDialogAction('blockInput',
+        return this.cursorDialogAction('blockInput',
             dialog => dialog.types[data.value ? 1 : 0]);
     }
 
@@ -740,7 +741,7 @@ class Record {
     }
 
     cursor_blockInput_accept(data) {
-        return cursorDialogAction('blockInput',
+        return this.cursorDialogAction('blockInput',
             dialog => dialog.buttons.children[0]);
     }
 
@@ -1002,13 +1003,45 @@ class Recorder {
                 block => block.isTemplate && block.selected === blockDef.selected
             )[0];
             if (block) return block;
+        } else if (blockDef.isPrototype) {
+            // Get the prototype from the relevant PHBM
+            let phbm = Recorder.getPHBM(blockDef.definitionGUID);
+            if (!phbm) return;
+            return phbm.parts()[0];
         }
         return this.blockMap.get(blockDef.id);
     }
 
+    static updateBlockInBlockEditor(block) {
+        // Check to see if this is nested under a PHBM (i.e. a block definition)
+        let phbm = block.parentThatIsA(PrototypeHatBlockMorph);
+        // If not, it's not in an editor
+        if (!phbm) return block;
+        if (!phbm.definition) {
+            console.warn('PBHM without definition', phbm);
+            return block;
+        }
+        let guid = phbm.definition.guid;
+        // Find the relevant showing block editor
+        let editor = this.findShowingBlockEditor(guid);
+        if (!editor) return block;
+        // If this block is already in that editor, it's up-to-date
+        if (block.parentThatIsA(BlockEditorMorph) == editor) return block;
+        // Otherwise, find the block in that editor that's got the same ID
+        let newBlock = editor.allChildren()
+            .filter(c => c instanceof BlockMorph && c.id === block.id)[0];
+        if (!newBlock) return block;
+        // Update the blockMap
+        this.blockMap.set(newBlock.id, newBlock);
+        return newBlock;
+    }
+
     static getOrCreateBlock(blockDef) {
         let block = Recorder.getBlock(blockDef);
-        if (block) return block;
+        if (block) {
+            // If this is in a custom block definition it may be outdated
+            return Recorder.updateBlockInBlockEditor(block);
+        }
         let id = blockDef.id;
         let sprite = window.ide.currentSprite;
         if (blockDef.selector === 'reportGetVar') {
@@ -1306,12 +1339,12 @@ class Recorder {
     }
 
 
-    static getPHBM(value) {
-        if (!value.guid) {
-            console.error("Deserializing PHBM without guid", value);
+    static getPHBM(guid) {
+        if (!guid) {
+            console.error("Deserializing PHBM without guid", guid);
             return null;
         }
-        let editor = Recorder.findShowingBlockEditor(value.guid);
+        let editor = Recorder.findShowingBlockEditor(guid);
         if (!editor) return null;
 
         // console.log('Editor');
@@ -1339,7 +1372,7 @@ class Recorder {
             // console.log(prop, value);
             if (type === PrototypeHatBlockMorph.name) {
                 // PHBMs are handled separately, since they don't have IDs
-                record[prop] = Recorder.getPHBM(value);
+                record[prop] = Recorder.getPHBM(value.guid);
                 // console.log('deserialized PHBM', record[prop]);
             } else if (type === BlockMorph.name) {
                 // Only create blocks if this is for an actual replay
@@ -1350,23 +1383,38 @@ class Recorder {
                     record[prop] = this.deserialize(value, createBlocks);
                 }
             } else if (type === ArgMorph.name) {
-                if (createBlocks) {
-                    let block = Recorder.getOrCreateBlock(value);
-                    if (!block) {
-                        record[prop] = null;
-                        return;
-                    }
-                    let input = block.inputs()[value.argIndex];
-                    if (!input) {
-                        console.error('Block missing input:', block, value);
-                        return;
-                    }
-                    // Add index for new redo system
-                    input.indexInParent = block.children.indexOf(input);
-                    record[prop] = input;
-                } else {
+                if (!createBlocks) {
                     record[prop] = this.deserialize(value, createBlocks);
+                    return;
                 }
+
+                let block;
+                if (value.parentBlock) {
+                    // Need to wrap in an object to deserialize
+                    block = Recorder.deserialize({
+                        block: value.parentBlock
+                    }, createBlocks).block;
+                } else {
+                    // Legacy deserialization
+                    block = Recorder.getOrCreateBlock(value);
+                }
+
+                if (!block) {
+                    console.error('Could not find parent block for arg', value);
+                    record[prop] = null;
+                    return;
+                }
+
+                let input = block.inputs()[value.argIndex];
+                if (!input) {
+                    console.error('Block missing input:', block, value);
+                    return;
+                }
+
+                // Add index for new redo system
+                input.indexInParent = block.children.indexOf(input);
+                record[prop] = input;
+
             } else if (type === ScriptsMorph.name) {
                 record[prop] = null;
                 if (value.source === 'Sprite') {
@@ -1419,6 +1467,11 @@ class Recorder {
     }
 
     static serialize(dropRecord) {
+        // TODO: Refactor this and deserialize to allow serializing non-objects
+        if (dropRecord && dropRecord.constructor.name !== 'Object') {
+            console.warn('Attempting to serialize non-map', dropRecord);
+        }
+
         let record = Object.assign({}, dropRecord);
         Object.keys(record).forEach(prop => {
             if (!record.hasOwnProperty(prop)) return;
@@ -1451,6 +1504,21 @@ class Recorder {
                 record[prop].objType = BlockMorph.name;
             } else if (value instanceof ArgMorph) {
                 record[prop] = value.argId();
+                if (!record[prop]) {
+                    console.warn("Unable to find arg", value);
+                    return;
+                }
+                let block = value.parentThatIsA(BlockMorph);
+                console.log('Arg parent block!!', block);
+                // Directly serialize the parent. For backwards compatibility
+                // we also save the full argId, which duplicates most of this
+                // informaiton.
+                // Need to wrap it in an object b/c of the weird way serialize
+                // expects only maps
+                record[prop].parentBlock = Recorder.serialize({
+                    block: block
+                }).block;
+
                 if (record[prop].argIndex === -1 &&
                         prop === 'lastReplacedInput') {
                     // Since the arg has been replaced, we actually want the

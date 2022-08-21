@@ -188,6 +188,62 @@ extend(IDE_Morph, 'addNewSprite', function(base) {
     window.recorder.addRecord(new Record('IDE_addSprite', data));
 });
 
+BlockMorph.prototype.scrollIntoView = function (lag, padding) {
+    var leftOff, rightOff, topOff, bottomOff,
+        sf = this.parentThatIsA(ScrollFrameMorph);
+    let lerp = 1 - (lag || 0);
+    padding = padding || 0;
+    if (!sf) {return 0; }
+
+    let remaining = 0;
+    rightOff = Math.min(
+        this.fullBounds().right() + padding - sf.right(),
+        sf.contents.right() - sf.right()
+    );
+    if (rightOff > 0) {
+        sf.contents.moveBy(new Point(-rightOff * lerp, 0));
+        remaining = Math.max(Math.abs(rightOff), remaining);
+    }
+    let left = Math.max(sf.contents.left(), this.fullBounds().left() - padding);
+    leftOff = left - sf.left();
+    if (leftOff < 0) {
+        sf.contents.moveBy(new Point(-leftOff * lerp, 0));
+        remaining = Math.max(Math.abs(leftOff), remaining);
+    }
+    let top =  Math.max(sf.contents.top(), this.fullBounds().top() - padding);
+    topOff = top - sf.top();
+    if (topOff < 0) {
+        sf.contents.moveBy(new Point(0, -topOff * lerp));
+        remaining = Math.max(Math.abs(topOff), remaining);
+    }
+    bottomOff = Math.min(
+        this.fullBounds().bottom() + padding - sf.bottom(),
+        sf.contents.bottom() - sf.bottom()
+    );
+    if (bottomOff > 0) {
+        sf.contents.moveBy(new Point(0, -bottomOff * lerp));
+        remaining = Math.max(Math.abs(bottomOff), remaining);
+    }
+    sf.adjustScrollBars();
+    return remaining
+};
+
+BlockMorph.prototype.scrollIntoViewAnimate = function (lag, padding) {
+    let sf = this.parentThatIsA(ScrollFrameMorph);
+    if (!sf || sf.isAnimatingScroll) return;
+    sf.isAnimatingScroll = true;
+    let maxFrames = 100;
+    let timeout = setInterval(() => {
+        let remaining = this.scrollIntoView(lag, padding);
+        maxFrames--;
+        if (remaining < 1 || maxFrames <= 0) {
+            this.scrollIntoView(0, padding);
+            clearInterval(timeout);
+            sf.isAnimatingScroll = false;
+        }
+    }, 1);
+}
+
 class Record {
 
     static fromInputSlotEdit(data) {
@@ -257,8 +313,18 @@ class Record {
 
     precursor_blockDrop(data, scroll) {
         let pos = this.getSituationPosition(data.lastOrigin);
-        if (scroll) {
-            // TODO?
+        let origin = data.lastOrigin ? data.lastOrigin.origin : null;
+        // TODO: could in theory do this if *any* ancestor is a SFM...
+        if (scroll && origin && origin.parent instanceof ScrollFrameMorph) {
+            if (data.lastDroppedBlock) {
+                // TODO: Need better differentiation between templates and non
+                let template = Recorder.getTemplateBlock(
+                    data.lastDroppedBlock.selector);
+                // console.log("SCROLLING", data.lastDroppedBlock, template);
+                if (template) {
+                    template.scrollIntoViewAnimate(0.95, 10);
+                }
+            }
         }
         return pos;
     }
@@ -642,6 +708,18 @@ class Record {
         setTimeout(callback, 1);
     }
 
+    setBlockDefDims(blockDef) {
+        // TODO: Make the editor big enough for small screens!
+        // Set the size of the editor to large, to make sure we're not
+        // let mex = window.world.extent();
+        // let ph = mex.y * 0.15;
+        // let height = mex.y - ph * 2;
+        // let pw = ph * 1.5;
+        // let dims = new Rectangle(pw, ph, mex.x - pw, mex.y - ph);
+        // console.log(mex, ph, pw, dims);
+        // blockDef.editorDimensions = dims;
+    }
+
     replay_blockEditor_start(data, callback, fast) {
         setTimeout(callback, 1);
         let blockDef = Recorder.getCustomBlock(data.guid);
@@ -652,13 +730,17 @@ class Record {
                 console.warn('Missing block editor for: ', data);
                 return;
             }
-            // If this block was just created, update its guid
+            // If this block was just created, update its guid & size
             editor.definition.guid = data.guid;
+            this.setBlockDefDims(editor.definition);
+            editor.setInitialDimensions()
             return;
         }
 
         // Otherwise just edit the Sprite
-        new BlockEditorMorph(blockDef, window.ide.currentSprite).popUp();
+        this.setBlockDefDims(blockDef);
+        let editor = new BlockEditorMorph(blockDef, window.ide.currentSprite);
+        editor.popUp();
     }
 
     cursor_blockEditor_ok(data) {
@@ -1014,13 +1096,24 @@ class Recorder {
 
     static registerBlock(block) {
         this.blockMap.set(block.id, block);
+        // if (block.id % 10 === 0) console.trace();
+    }
+
+    static getTemplateBlock(selector) {
+        let matching = [...this.blockMap.values()].filter(
+            block => block.isTemplate && block.selector === selector
+        );
+        // TODO: This is a hack b/c we get multiple template blocks registered
+        // and the most recent is (probably?) the correct one. We really
+        // want a separate system for template blocks, but it's non-trivial
+        // because at registration time blocks don't have any info
+        // (e.g. isTemplate).
+        return matching[matching.length - 1];
     }
 
     static getBlock(blockDef) {
         if (blockDef.template) {
-            let block = [...this.blockMap.values()].filter(
-                block => block.isTemplate && block.selected === blockDef.selected
-            )[0];
+            let block = this.getTemplateBlock(blockDef.selector);
             if (block) return block;
         } else if (blockDef.isPrototype) {
             // Get the prototype from the relevant PHBM
@@ -1051,7 +1144,7 @@ class Recorder {
             .filter(c => c instanceof BlockMorph && c.id === block.id)[0];
         if (!newBlock) return block;
         // Update the blockMap
-        this.blockMap.set(newBlock.id, newBlock);
+        this.blockMap.registerBlock(newBlock);
         return newBlock;
     }
 
@@ -1090,9 +1183,7 @@ class Recorder {
         block.id = id;
         block.parent = this.getFrameMorph();
         block.isDraggable = true;
-        // We actually shouldn't update this, so the offset continues to work
-        // BlockMorph.nextId = Math.max(BlockMorph.nextId, blockDef.id + 1);
-        this.blockMap.set(id, block);
+        this.registerBlock(block);
         return block;
     }
 

@@ -1147,7 +1147,7 @@ class Recorder {
             .filter(c => c instanceof BlockMorph && c.id === block.id)[0];
         if (!newBlock) return block;
         // Update the blockMap
-        this.blockMap.registerBlock(newBlock);
+        this.registerBlock(newBlock);
         return newBlock;
     }
 

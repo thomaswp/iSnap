@@ -714,13 +714,21 @@ class Record {
     setBlockDefDims(blockDef) {
         // TODO: Make the editor big enough for small screens!
         // Set the size of the editor to large, to make sure we're not
-        // let mex = window.world.extent();
-        // let ph = mex.y * 0.15;
-        // let height = mex.y - ph * 2;
-        // let pw = ph * 1.5;
-        // let dims = new Rectangle(pw, ph, mex.x - pw, mex.y - ph);
-        // console.log(mex, ph, pw, dims);
-        // blockDef.editorDimensions = dims;
+        try {
+            let mex = window.world.extent();
+            let ph = mex.y * 0.15;
+            let height = mex.y - ph * 2;
+            let pw = ph * 1.5;
+            // let dims = new Rectangle(pw, ph, mex.x - pw, mex.y - ph);
+            let dims = new Rectangle(
+                Math.floor(mex.x * 0.5),
+                Math.floor(mex.y * 0.4),
+                Math.floor(mex.x * 0.9),
+                Math.floor(mex.y * 0.9)
+            );
+            // console.log(mex, ph, pw, dims);
+            blockDef.editorDimensions = dims;
+        } catch {}
     }
 
     replay_blockEditor_start(data, callback, fast) {

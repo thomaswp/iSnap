@@ -188,7 +188,10 @@ extend(IDE_Morph, 'addNewSprite', function(base) {
     window.recorder.addRecord(new Record('IDE_addSprite', data));
 });
 
-BlockMorph.prototype.scrollIntoView = function (lag, padding) {
+// TODO: Make this work with X as well (currently spazzes out)
+// I think you would have to check if the width (plus padding) is
+// larger than the container, and if so ignore it
+BlockMorph.prototype.scrollIntoViewY = function (lag, padding) {
     var leftOff, rightOff, topOff, bottomOff,
         sf = this.parentThatIsA(ScrollFrameMorph);
     let lerp = 1 - (lag || 0);
@@ -196,20 +199,20 @@ BlockMorph.prototype.scrollIntoView = function (lag, padding) {
     if (!sf) {return 0; }
 
     let remaining = 0;
-    rightOff = Math.min(
-        this.fullBounds().right() + padding - sf.right(),
-        sf.contents.right() - sf.right()
-    );
-    if (rightOff > 0) {
-        sf.contents.moveBy(new Point(-rightOff * lerp, 0));
-        remaining = Math.max(Math.abs(rightOff), remaining);
-    }
-    let left = Math.max(sf.contents.left(), this.fullBounds().left() - padding);
-    leftOff = left - sf.left();
-    if (leftOff < 0) {
-        sf.contents.moveBy(new Point(-leftOff * lerp, 0));
-        remaining = Math.max(Math.abs(leftOff), remaining);
-    }
+    // rightOff = Math.min(
+    //     this.fullBounds().right() + padding - sf.right(),
+    //     sf.contents.right() - sf.right()
+    // );
+    // if (rightOff > 0) {
+    //     sf.contents.moveBy(new Point(-rightOff * lerp, 0));
+    //     remaining = Math.max(Math.abs(rightOff), remaining);
+    // }
+    // let left = Math.max(sf.contents.left(), this.fullBounds().left() - padding);
+    // leftOff = left - sf.left();
+    // if (leftOff < 0) {
+    //     sf.contents.moveBy(new Point(-leftOff * lerp, 0));
+    //     remaining = Math.max(Math.abs(leftOff), remaining);
+    // }
     let top =  Math.max(sf.contents.top(), this.fullBounds().top() - padding);
     topOff = top - sf.top();
     if (topOff < 0) {
@@ -228,16 +231,16 @@ BlockMorph.prototype.scrollIntoView = function (lag, padding) {
     return remaining
 };
 
-BlockMorph.prototype.scrollIntoViewAnimate = function (lag, padding) {
+BlockMorph.prototype.scrollIntoViewYAnimate = function (lag, padding) {
     let sf = this.parentThatIsA(ScrollFrameMorph);
     if (!sf || sf.isAnimatingScroll) return;
     sf.isAnimatingScroll = true;
     let maxFrames = 100;
     let timeout = setInterval(() => {
-        let remaining = this.scrollIntoView(lag, padding);
+        let remaining = this.scrollIntoViewY(lag, padding);
         maxFrames--;
         if (remaining < 1 || maxFrames <= 0) {
-            this.scrollIntoView(0, padding);
+            this.scrollIntoViewY(0, padding);
             clearInterval(timeout);
             sf.isAnimatingScroll = false;
         }
@@ -322,7 +325,7 @@ class Record {
                     data.lastDroppedBlock.selector);
                 // console.log("SCROLLING", data.lastDroppedBlock, template);
                 if (template) {
-                    template.scrollIntoViewAnimate(0.95, 10);
+                    template.scrollIntoViewYAnimate(0.95, 10);
                 }
             }
         }

@@ -1133,8 +1133,7 @@ class Recorder {
             window.ide.newProject();
             window.ide.changeCategory('motion');
         } else {
-            // TODO: Is this async? Do I need to worry about it not being
-            // finished?
+            // Note: raw open is synchronous
             window.ide.rawOpenProjectString(startXML);
         }
     }
@@ -1271,7 +1270,9 @@ class Recorder {
     }
 
     static setRecordScale(scale) {
-        ide.setBlocksScale(scale);
+        if (SyntaxElementMorph.prototype.scale != scale) {
+            ide.setBlocksScale(scale);
+        }
         Recorder.recordScale = scale;
     }
 

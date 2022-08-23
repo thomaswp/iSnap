@@ -5798,7 +5798,9 @@ IDE_Morph.prototype.setBlocksScale = function (num) {
     this.createCategories();
     this.createCorralBar();
     this.fixLayout();
-    this.openProjectString(projectData);
+    // HACK(twprice): This makes this function synchronous, which is important
+    // for resetting snap / changing scale inside of other code.
+    this.rawOpenProjectString(projectData);
     this.saveSetting('zoom', num);
 };
 

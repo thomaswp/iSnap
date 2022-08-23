@@ -350,6 +350,10 @@ class Record {
                 }
             }
         }
+        if (scroll && data.lastDropTarget && data.lastDropTarget.element) {
+            let target = Recorder.getBlock(data.lastDropTarget.element);
+            if (target) target.scrollBlockIntoViewAnimate(0.95, 10);
+        }
         return pos;
     }
 
@@ -361,7 +365,16 @@ class Record {
         let sprite = window.ide.currentSprite;
         let scripts = sprite.scripts;
         // console.log('Dropping deserialized', data);
-        scripts.playDropRecord(data, callback,
+        const finish = () => {
+            // Don't allow any scrolling error to stop callback
+            try {
+                if (!fast && data.lastDroppedBlock) {
+                    data.lastDroppedBlock.scrollBlockIntoViewAnimate(0.95, 10);
+                }
+            } catch {}
+            if (callback) callback();
+        }
+        scripts.playDropRecord(data, finish,
             fast ? 1 : Recorder.BLOCK_DRAG_DURATION_MS);
     }
 

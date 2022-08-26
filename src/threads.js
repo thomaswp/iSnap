@@ -2876,7 +2876,9 @@ Process.prototype.doSayFor = function (data, secs) {
         this.context.startTime = Date.now();
         this.blockReceiver().bubble(data);
     }
-    if ((Date.now() - this.context.startTime) >= (secs * 1000)) {
+    // HACK(twprice): Skip talking when fast tracking
+    let isFast = this.reportIsFastTracking();
+    if (isFast || (Date.now() - this.context.startTime) >= (secs * 1000)) {
         this.blockReceiver().stopTalking();
         return null;
     }
@@ -2889,7 +2891,9 @@ Process.prototype.doThinkFor = function (data, secs) {
         this.context.startTime = Date.now();
         this.blockReceiver().doThink(data);
     }
-    if ((Date.now() - this.context.startTime) >= (secs * 1000)) {
+    // HACK(twprice): Skip talking when fast tracking
+    let isFast = this.reportIsFastTracking();
+    if (isFast || (Date.now() - this.context.startTime) >= (secs * 1000)) {
         this.blockReceiver().stopTalking();
         return null;
     }

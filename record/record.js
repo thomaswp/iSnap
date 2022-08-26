@@ -399,15 +399,13 @@ class Record {
     cursor_inputSlotEdit(data) {
         // TODO: This can sometime give faulty readings when
         // editing templates and possibly other blocks...
-        let def = data.id;
-        let block = Recorder.getBlock(def);
-        if (!block) return;
-        return block.inputs()[data.id.argIndex].center();
+        let input = Recorder.deserializeArgId(data.id, false);
+        if (!input || !input.center) return;
+        return input.center();
     }
 
     replay_inputSlotEdit(data, callback, fast) {
-        let block = Recorder.getOrCreateBlock(data.id);
-        let input = block.inputs()[data.id.argIndex];
+        let input = Recorder.deserializeArgId(data.id, true);
         if (input instanceof ColorSlotMorph) {
             input.setColor(data.value);
         } else if (input instanceof InputSlotMorph ||
@@ -1510,6 +1508,62 @@ class Recorder {
         return blocks[0];
     }
 
+    static deserializeArgId(value, createBlocks) {
+        let block;
+        if (value.parentBlock) {
+            // Need to wrap in an object to deserialize
+            block = Recorder.deserialize({
+                block: value.parentBlock
+            }, createBlocks).block;
+        } else {
+            // Legacy deserialization
+            if (createBlocks) {
+                block = Recorder.getOrCreateBlock(value);
+            } else {
+                block = Recorder.getBlock(value);
+            }
+        }
+
+        // If we couldn't find the (existing) block and we can't create it
+        // then return the data object
+        if (!block && !createBlocks) {
+            return this.deserialize(value, createBlocks);
+        }
+
+        // Otherwise, if we could create it but failed to, log the error
+        if (!block) {
+            console.error('Could not find/create parent block for arg', value);
+            return null;
+        }
+
+        let parentInputs = block.inputs();
+        if (value.multiArgIndex != null && value.multiArgIndex >= 0) {
+            let multiArg = parentInputs[value.multiArgIndex];
+            if (multiArg && multiArg instanceof MultiArgMorph) {
+                parentInputs = multiArg.inputs();
+            } else {
+                console.error('Missing MultiArgMorph', value, block);
+            }
+        } else if (
+            parentInputs.length == 1 &&
+            parentInputs[0] instanceof MultiArgMorph
+        ) {
+            // If the block has a single MultiArgMorph, use its inputs
+            // instead of the block's
+            parentInputs = parentInputs[0].inputs();
+        }
+
+        let input = parentInputs[value.argIndex];
+        if (!input) {
+            console.error('Block missing input:', block, value);
+            return null;
+        }
+
+        // Add index for new redo system
+        input.indexInParent = input.parent.children.indexOf(input);
+        return input;
+    }
+
     static deserialize(original, createBlocks) {
 
         let record = Object.assign({}, original);
@@ -1531,46 +1585,18 @@ class Recorder {
                 record[prop] = Recorder.getPHBM(value.guid);
                 // console.log('deserialized PHBM', record[prop]);
             } else if (type === BlockMorph.name) {
-                // Only create blocks if this is for an actual replay
-                // Otherwise, just return the ID object
-                if (createBlocks) {
-                    record[prop] = Recorder.getOrCreateBlock(value);
-                } else {
-                    record[prop] = this.deserialize(value, createBlocks);
+                record[prop] = Recorder.getBlock(value);
+                if (!record[prop]) {
+                    // Only create blocks if this is for an actual replay
+                    // Otherwise, just return the ID object
+                    if (createBlocks) {
+                        record[prop] = Recorder.getOrCreateBlock(value);
+                    } else {
+                        record[prop] = this.deserialize(value, createBlocks);
+                    }
                 }
             } else if (type === ArgMorph.name) {
-                if (!createBlocks) {
-                    record[prop] = this.deserialize(value, createBlocks);
-                    return;
-                }
-
-                let block;
-                if (value.parentBlock) {
-                    // Need to wrap in an object to deserialize
-                    block = Recorder.deserialize({
-                        block: value.parentBlock
-                    }, createBlocks).block;
-                } else {
-                    // Legacy deserialization
-                    block = Recorder.getOrCreateBlock(value);
-                }
-
-                if (!block) {
-                    console.error('Could not find parent block for arg', value);
-                    record[prop] = null;
-                    return;
-                }
-
-                let input = block.inputs()[value.argIndex];
-                if (!input) {
-                    console.error('Block missing input:', block, value);
-                    return;
-                }
-
-                // Add index for new redo system
-                input.indexInParent = block.children.indexOf(input);
-                record[prop] = input;
-
+                record[prop] = this.deserializeArgId(value, createBlocks);
             } else if (type === ScriptsMorph.name) {
                 record[prop] = null;
                 if (value.source === 'Sprite') {
@@ -1665,7 +1691,7 @@ class Recorder {
                     return;
                 }
                 let block = value.parentThatIsA(BlockMorph);
-                console.log('Arg parent block!!', block);
+                // console.log('Arg parent block!!', block);
                 // Directly serialize the parent. For backwards compatibility
                 // we also save the full argId, which duplicates most of this
                 // informaiton.

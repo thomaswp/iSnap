@@ -7997,7 +7997,15 @@ ArgMorph.prototype.argId = function() {
     var index = this.parent.inputs().indexOf(this);
     var id = block.blockId();
     id.argIndex = index;
-    id.argType = typeof(this);
+
+    let multiArg = this.parent;
+    if (multiArg instanceof MultiArgMorph) {
+        let parent = multiArg.parent;
+        if (parent && parent.inputs) {
+            id.multiArgIndex =
+                parent.inputs().indexOf(multiArg);
+        }
+    }
     return id;
 };
 

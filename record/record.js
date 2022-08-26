@@ -188,6 +188,16 @@ extend(IDE_Morph, 'addNewSprite', function(base) {
     window.recorder.addRecord(new Record('IDE_addSprite', data));
 });
 
+extend(SpeechBubbleMorph, 'popUp', function(base, world, pos, isClickable) {
+    if (!isClickable && SpeechBubbleMorph.silent) return;
+    base.call(this, world, pos, isClickable);
+    if (!isClickable) {
+        window.setTimeout(() => {
+            this.destroy();
+        }, 3000);
+    }
+});
+
 BlockMorph.prototype.scrollBlockIntoView = function (lag, padding) {
     var leftOff, rightOff, topOff, bottomOff,
         sf = this.parentThatIsA(ScrollFrameMorph);
@@ -285,6 +295,7 @@ class Record {
     }
 
     replay(callback, fast) {
+        SpeechBubbleMorph.silent = fast;
         let method = 'replay_' + this.type;
         if (!this[method]) {
             console.warn('Unknown record type: ' + this.type);

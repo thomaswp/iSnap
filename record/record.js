@@ -295,7 +295,14 @@ class Record {
     }
 
     replay(callback, fast) {
+        // No speech bubbles if fast-forwarding
         SpeechBubbleMorph.silent = fast;
+        // Also run scripts quickly
+        if (fast) {
+            window.ide.startFastTracking();
+        } else {
+            window.ide.stopFastTracking();
+        }
         let method = 'replay_' + this.type;
         if (!this[method]) {
             console.warn('Unknown record type: ' + this.type);
@@ -1032,10 +1039,23 @@ class Record {
         );
     }
 
-    replay_inputPromptEdited(data, callback, fast) {
-        setTimeout(callback, 1);
+    replay_inputPromptEdited(data, callback, fast, attempts) {
         let prompter = this.getActivePrompter();
-        if (!prompter) return;
+        attempts = attempts || 0;
+        if (!prompter) {
+            // Try a few times to get the prompter before giving up
+            if (attempts < 3) {
+                setTimeout(() => {
+                    this.replay_inputPromptEdited(
+                        data, callback, fast, attempts + 1);
+                }, 30);
+                return;
+            }
+            console.warn('Missing prompter!');
+            setTimeout(callback, 1);
+            return;
+        }
+        setTimeout(callback, 1);
         let stringMorph = prompter.inputField.contents().text;
         stringMorph.text = data.value;
         stringMorph.changed();
@@ -1043,12 +1063,32 @@ class Record {
         stringMorph.rerender();
     }
 
-    replay_inputPromptAccept(data, callback, fast) {
-        setTimeout(callback, 1);
+    cursor_inputPromptAccept(data) {
         let prompter = this.getActivePrompter();
-        if (!prompter) return;
-        Recorder.registerClick(prompter.button.center(), fast);
+        if (prompter) return prompter.button.center();
+    }
+
+    replay_inputPromptAccept(data, callback, fast, attempts) {
+        let prompter = this.getActivePrompter();
+        attempts = attempts || 0;
+        if (!prompter) {
+            // Try a few times to get the prompter before giving up
+            // Note this may not be necessary anymore, but in case code does
+            // take extra time to run in fast tracking, could be helpful.
+            if (attempts < 3) {
+                setTimeout(() => {
+                    this.replay_inputPromptAccept(
+                        data, callback, fast, attempts + 1);
+                }, 30);
+                return;
+            }
+            console.warn('Missing prompter!');
+            setTimeout(callback, 1);
+            return;
+        }
+        setTimeout(callback, 1);
         prompter.accept();
+        Recorder.registerClick();
     }
 
     findWatcherToggle(selectorOrSpec, isVar) {

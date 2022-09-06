@@ -418,6 +418,12 @@ class Record {
     cursor_inputSlotEdit(data) {
         // TODO: This can sometime give faulty readings when
         // editing templates and possibly other blocks...
+
+        // Ignore this if data isn't supposed to click or has an item
+        // (retroactive hack), since this selection is handled elsewhere
+        if (data.noClick || data.item != undefined) {
+            return;
+        }
         let input = Recorder.deserializeArgId(data.id, false);
         if (!input || !input.center) return;
         return input.center();
@@ -431,7 +437,7 @@ class Record {
                 input instanceof BooleanSlotMorph) {
             input.setContents(data.value);
         }
-        Recorder.registerClick();
+        if (!(data.noClick || data.item != undefined)) Recorder.registerClick();
         setTimeout(callback, 1);
     }
 
@@ -565,7 +571,7 @@ class Record {
     }
 
     cursor_menuItemSelect(data) {
-        if (!data.highlight || !Record.openMenu) return;
+        if (!data.highlight || !Recorder.openMenu) return;
         let item = Recorder.openMenu.children[data.index];
         if (item) return item.center();
     }
@@ -1174,6 +1180,23 @@ class Record {
         if (dialog) dialog.accept();
         this.replay_inputSlotEdit(data, callback, fast);
     }
+
+    cursor_inputSlot_dropDownMenu(data) {
+        let input = Recorder.deserializeArgId(data.id);
+        if (input) return input.center();
+    }
+
+    replay_inputSlot_dropDownMenu(data, callback, fast) {
+        setTimeout(callback, 1);
+        if (fast) return;
+        let input = Recorder.deserializeArgId(data.id);
+        if (!input) return;
+        var menu = input.menuFromDict(input.choices, null, false);
+        if (menu.items.length > 0) {
+            Recorder.openMenu = menu;
+            menu.popup(world, input.center());
+        }
+    }
 }
 
 class Recorder {
@@ -1371,7 +1394,10 @@ class Recorder {
         let blockChangedHandler = (m, data) => {
             data = Object.assign({}, data);
             if (m === 'InputSlot.edited') data.value = data.text;
-            if (m === 'InputSlot.menuItemSelected') data.value = data.item;
+            if (m === 'InputSlot.menuItemSelected') {
+                data.value = data.item;
+                data.noClick = true;
+            }
             if (m === 'ColorArg.changeColor') data.value = data.color;
             this.addRecord(Record.fromInputSlotEdit(data));
         };
@@ -1429,7 +1455,7 @@ class Recorder {
 
         this.addGroupedHandlers(
             'InputSlotMorph', [
-                'showNewMessageDialog', 'setToNewMessage',
+                'showNewMessageDialog', 'setToNewMessage', 'dropDownMenu'
             ], 'inputSlot');
     };
 

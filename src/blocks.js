@@ -9287,6 +9287,9 @@ InputSlotMorph.prototype.userSetContents = function (aStringOrFloat) {
 // InputSlotMorph drop-down menu:
 
 InputSlotMorph.prototype.dropDownMenu = function (enableKeyboard) {
+    Trace.log('InputSlotMorph.dropDownMenu', {
+        id: this.argId(),
+    });
     var menu = this.menuFromDict(this.choices, null, enableKeyboard);
     if (!menu) { // has already happened
         return;

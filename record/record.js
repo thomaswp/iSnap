@@ -119,7 +119,7 @@ extend(MenuMorph, 'destroy', function (base) {
             action = () => {
                 if (window.recorder) {
                     window.recorder.recordInputTyped(
-                        type.name, body.getValue());
+                        this.constructor.name, this.key, body.getValue());
                 }
             }
             if (body.reactToInput) {
@@ -133,9 +133,10 @@ extend(MenuMorph, 'destroy', function (base) {
         }, true);
     }
 
-    recordInput(BlockDialogMorph);
-    recordInput(VariableDialogMorph);
-    recordInput(InputSlotDialogMorph);
+    recordInput(DialogBoxMorph);
+    // recordInput(BlockDialogMorph); // Redundant w/ BlockDialogMorph
+    // recordInput(VariableDialogMorph);
+    // recordInput(InputSlotDialogMorph);
 })();
 
 
@@ -744,6 +745,8 @@ class Record {
         } else if (data.input === InputSlotDialogMorph.name) {
             return Recorder.getDialog('blockInput');
         }
+        // If we don't recognize the specific dialog type, just use the key
+        return Recorder.getDialog(data.key);
     }
 
     cursor_inputTyped(data) {
@@ -1155,6 +1158,22 @@ class Record {
         //     Recorder.registerClick(watcher.center(), fast);
         // }
     }
+
+    replay_inputSlot_showNewMessageDialog(data, callback, fast) {
+        let input = Recorder.deserializeArgId(data.id);
+        if (input) input.showNewMessageDialog();
+    }
+
+    cursor_inputSlot_setToNewMessage(data) {
+        let dialog = Recorder.getDialog('promptMessage namenull');
+        if (!dialog) return;
+    }
+
+    replay_inputSlot_setToNewMessage(data, callback, fast) {
+        let dialog = Recorder.getDialog('promptMessage namenull');
+        if (dialog) dialog.accept();
+        this.replay_inputSlotEdit(data, callback, fast);
+    }
 }
 
 class Recorder {
@@ -1407,6 +1426,11 @@ class Recorder {
             'SpriteMorph', [
                 'toggleVariableWatcher', 'toggleWatcher',
             ], 'sprite');
+
+        this.addGroupedHandlers(
+            'InputSlotMorph', [
+                'showNewMessageDialog', 'setToNewMessage',
+            ], 'inputSlot');
     };
 
     defaultHandler(type) {
@@ -1460,9 +1484,10 @@ class Recorder {
         }));
     }
 
-    recordInputTyped(input, value) {
+    recordInputTyped(input, key, value) {
         this.addRecord(new Record('inputTyped', {
             input: input,
+            key: key,
             value: value,
         }));
     }

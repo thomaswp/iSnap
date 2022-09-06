@@ -9343,9 +9343,9 @@ InputSlotMorph.prototype.menuFromDict = function (
         menu.addItem(' ', function() {
             Trace.log('InputSlot.menuItemSelected', {
                 'id': myself.argId(),
-                'item': ' ',
+                'item': null,
             });
-            return ' ';
+            return null;
         });
     }
     for (key in choices) {
@@ -9418,11 +9418,15 @@ InputSlotMorph.prototype.menuFromDict = function (
                     menu.addItem(
                         fKey,
                         function() {
-                            var choice = choices[fKey];
-                            if (choice instanceof Function) choice = choice();
+                            let choice = choices[fKey];
+                            let item = fKey;
+                            if (choice instanceof Function) {
+                                choice = choice();
+                                item = choice;
+                            }
                             Trace.log('InputSlot.menuItemSelected', {
                                 'id': myself.argId(),
-                                'item': choice,
+                                'item': item,
                             });
                             return choice;
                         },
@@ -9463,18 +9467,30 @@ InputSlotMorph.prototype.messagesMenu = function () {
     if (allNames.length > 0) {
         dict['~'] = null;
     }
-    dict['new...'] = () =>
-        new DialogBoxMorph(
-            this,
-            this.setContents,
-            this
-        ).prompt(
-            'Message name',
-            null,
-            this.world()
-        );
+    dict['new...'] = () => this.showNewMessageDialog();
     return dict;
 };
+
+InputSlotMorph.prototype.showNewMessageDialog = function() {
+    Trace.log('InputSlotMorph.showNewMessageDialog', {
+        id: this.argId(),
+    });
+    new DialogBoxMorph(
+        this,
+        (message) => {
+            Trace.log('InputSlotMorph.setToNewMessage', {
+                id: this.argId(),
+                value: message,
+            });
+            this.setContents(message);
+        },
+        this
+    ).prompt(
+        'Message name',
+        null,
+        this.world()
+    );
+}
 
 InputSlotMorph.prototype.messagesReceivedMenu = function () {
     var dict = {'any message': ['any message']},
@@ -9493,16 +9509,7 @@ InputSlotMorph.prototype.messagesReceivedMenu = function () {
         }
     });
     dict['~'] = null;
-    dict['new...'] = () =>
-        new DialogBoxMorph(
-            this,
-            this.setContents,
-            this
-        ).prompt(
-            'Message name',
-            null,
-            this.world()
-        );
+    dict['new...'] = () => this.showNewMessageDialog();
     return dict;
 };
 

@@ -419,11 +419,9 @@ class Record {
         // TODO: This can sometime give faulty readings when
         // editing templates and possibly other blocks...
 
-        // Ignore this if data isn't supposed to click or has an item
-        // (retroactive hack), since this selection is handled elsewhere
-        if (data.noClick || data.item != undefined) {
-            return;
-        }
+        // Ignore this if data isn't supposed to click
+        // since this selection is handled elsewhere
+        if (data.noClick) return;
         let input = Recorder.deserializeArgId(data.id, false);
         if (!input || !input.center) return;
         return input.center();
@@ -437,7 +435,7 @@ class Record {
                 input instanceof BooleanSlotMorph) {
             input.setContents(data.value);
         }
-        if (!(data.noClick || data.item != undefined)) Recorder.registerClick();
+        if (!data.noClick) Recorder.registerClick();
         setTimeout(callback, 1);
     }
 
@@ -1166,6 +1164,7 @@ class Record {
     }
 
     replay_inputSlot_showNewMessageDialog(data, callback, fast) {
+        setTimeout(callback, 1);
         let input = Recorder.deserializeArgId(data.id);
         if (input) input.showNewMessageDialog();
     }
@@ -1290,12 +1289,12 @@ class Recorder {
             return Recorder.updateBlockInBlockEditor(block);
         }
         let id = blockDef.id;
-        let sprite = window.ide.currentSprite;
         if (blockDef.selector === 'reportGetVar') {
             // Not confident this is the best method for determining locality,
             // but should work
+            let sprite = window.ide.currentSprite;
             let isLocal = !!sprite.variables.vars[blockDef.spec];
-            block = sprite.variableBlock(blockDef.spec, isLocal);
+            block = SpriteMorph.prototype.variableBlock(blockDef.spec, isLocal);
         } else if (blockDef.definitionGUID) {
             let customBlock = Recorder.getCustomBlock(blockDef.definitionGUID);
             if (!customBlock) {
@@ -1307,7 +1306,7 @@ class Recorder {
             console.error('Custom block without definition GUID! ' +
                 'Is this a legacy recording?');
         } else {
-            block = sprite.blockForSelector(
+            block = SpriteMorph.prototype.blockForSelector(
                 blockDef.selector, true);
             if (!block) {
                 console.error('No block selector to create for def', blockDef);
@@ -1707,6 +1706,8 @@ class Recorder {
                             record[prop] = sprite.scripts;
                         }
                     });
+                } else if (value.source === 'Stage') {
+                    record[prop] = window.ide.stage.scripts;
                 } else if (value.source === 'Editor') {
                     let editor = Recorder.findShowingBlockEditor(value.guid);
                     if (editor) {
@@ -1820,13 +1821,17 @@ class Recorder {
                 if (editorParent) {
                     record[prop] = editorParent.getDefinitionJSON();
                     record[prop].source = 'Editor'
+                } else if (window.ide.stage.scripts == value) {
+                    record[prop] = {
+                        'source': 'Stage',
+                    };
                 } else {
                     let selectedSprite = null;
                     window.ide.sprites.contents.forEach(sprite => {
                         if (sprite.scripts === value) {
                             selectedSprite = sprite;
                         }
-                    })
+                    });
                     if (selectedSprite) {
                         record[prop] = {
                             'source': 'Sprite',

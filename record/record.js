@@ -1196,6 +1196,46 @@ class Record {
             menu.popup(world, input.center());
         }
     }
+
+    cursor_multiArg_addOrRemoveInput(add, data) {
+        let input = Recorder.deserializeArgId(data, false, true);
+        if (!input) return;
+        let target = input.selectForEdit();
+        if (!target) return;
+        let arrows = target.arrows();
+        if (!arrows) return;
+        let child = arrows.children[add ? 1 : 0];
+        return child.center();
+
+    }
+
+    replay_multiArg_addOrRemoveInput(add, data, callback, fast) {
+        setTimeout(callback, 1);
+        let input = Recorder.deserializeArgId(data, false, true);
+        console.log(input);
+        if (!input) return;
+        let target = input.selectForEdit();
+        if (!target) return;
+        if (add) target.addInput();
+        else target.removeInput();
+        Recorder.registerClick();
+    }
+
+    cursor_multiArg_addInput(data) {
+        this.cursor_multiArg_addOrRemoveInput(true, data);
+    }
+
+    replay_multiArg_addInput(data, callback, fast) {
+        this.replay_multiArg_addOrRemoveInput(true, data, callback, fast);
+    }
+
+    cursor_multiArg_removeInput(data) {
+        this.cursor_multiArg_addOrRemoveInput(false, data);
+    }
+
+    replay_multiArg_removeInput(data, callback, fast) {
+        this.replay_multiArg_addOrRemoveInput(false, data, callback, fast);
+    }
 }
 
 class Recorder {
@@ -1456,6 +1496,11 @@ class Recorder {
             'InputSlotMorph', [
                 'showNewMessageDialog', 'setToNewMessage', 'dropDownMenu'
             ], 'inputSlot');
+
+        this.addGroupedHandlers(
+            'MultiArg', [
+                'addInput', 'removeInput',
+            ], 'multiArg');
     };
 
     defaultHandler(type) {
@@ -1609,7 +1654,7 @@ class Recorder {
         return blocks[0];
     }
 
-    static deserializeArgId(value, createBlocks) {
+    static deserializeArgId(value, createBlocks, isMultiArg) {
         let block;
         if (value.parentBlock) {
             // Need to wrap in an object to deserialize
@@ -1638,20 +1683,25 @@ class Recorder {
         }
 
         let parentInputs = block.inputs();
-        if (value.multiArgIndex != null && value.multiArgIndex >= 0) {
-            let multiArg = parentInputs[value.multiArgIndex];
-            if (multiArg && multiArg instanceof MultiArgMorph) {
-                parentInputs = multiArg.inputs();
-            } else {
-                console.error('Missing MultiArgMorph', value, block);
+
+        // Only correct for MultiArg parent if this arg is not itself a
+        // MultiArgMorph
+        if (!isMultiArg) {
+            if (value.multiArgIndex != null && value.multiArgIndex >= 0) {
+                let multiArg = parentInputs[value.multiArgIndex];
+                if (multiArg && multiArg instanceof MultiArgMorph) {
+                    parentInputs = multiArg.inputs();
+                } else {
+                    console.error('Missing MultiArgMorph', value, block);
+                }
+            } else if (
+                parentInputs.length == 1 &&
+                parentInputs[0] instanceof MultiArgMorph
+            ) {
+                // If the block has a single MultiArgMorph, use its inputs
+                // instead of the block's
+                parentInputs = parentInputs[0].inputs();
             }
-        } else if (
-            parentInputs.length == 1 &&
-            parentInputs[0] instanceof MultiArgMorph
-        ) {
-            // If the block has a single MultiArgMorph, use its inputs
-            // instead of the block's
-            parentInputs = parentInputs[0].inputs();
         }
 
         let input = parentInputs[value.argIndex];

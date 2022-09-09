@@ -1236,6 +1236,41 @@ class Record {
     replay_multiArg_removeInput(data, callback, fast) {
         this.replay_multiArg_addOrRemoveInput(false, data, callback, fast);
     }
+
+    replay_block_duplicate(data, callback, fast) {
+        setTimeout(callback, 1);
+        let block = Recorder.getOrCreateBlock(data.id);
+
+        // Save the current nextId (offset)
+        let nextId = BlockMorph.nextId;
+        // Then set it to the id the next block is supposed to have
+        // This will allow its children to be IDs correctly as well
+        BlockMorph.nextId = data.copy.id;
+        console.log(data.copy.id);
+
+        let dup = block.fullCopy()
+        let nb = block.nextBlock();
+        if (data.justMe && nb) {
+            nb.destroy();
+        }
+        console.log(dup);
+
+        // Register the block and its children manually, since init() is never
+        // called. Note: we don't want all copied blocks to be registered, since
+        // most block creating involves copying, and later updating the block's
+        // ID.
+        Recorder.registerBlock(dup);
+        dup.allChildren().forEach(child => {
+            if (child instanceof BlockMorph) {
+                Recorder.registerBlock(child);
+            }
+        });
+
+        dup.parent = Recorder.getFrameMorph();
+
+        // Restore the nextId
+        BlockMorph.nextId = nextId;
+    }
 }
 
 class Recorder {
@@ -1269,6 +1304,7 @@ class Recorder {
     }
 
     static registerBlock(block) {
+        // console.log('registering', block.id);
         this.blockMap.set(block.id, block);
         // if (block.id % 10 === 0) console.trace();
     }
@@ -1501,6 +1537,11 @@ class Recorder {
             'MultiArg', [
                 'addInput', 'removeInput',
             ], 'multiArg');
+
+        this.addGroupedHandlers(
+            'Block', [
+                'duplicate',
+            ], 'block');
     };
 
     defaultHandler(type) {
@@ -1616,6 +1657,7 @@ class Recorder {
 
     loadFromCache() {
         try {
+            Recorder.resetSnap();
             let stored = JSON.parse(
                 window.localStorage.getItem('playback') || '[]');
             this.records = this.loadRecords(stored);

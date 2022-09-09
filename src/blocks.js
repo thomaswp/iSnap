@@ -3014,46 +3014,13 @@ BlockMorph.prototype.userMenu = function () {
 
     menu.addItem(
         "duplicate",
-        () => {
-            var dup = this.fullCopy(),
-                ide = this.parentThatIsA(IDE_Morph),
-                blockEditor = this.parentThatIsA(BlockEditorMorph);
-            dup.pickUp(world);
-            // register the drop-origin, so the block can
-            // slide back to its former situation if dropped
-            // somewhere where it gets rejected
-            if (!ide && blockEditor) {
-                ide = blockEditor.target.parentThatIsA(IDE_Morph);
-            }
-            if (ide) {
-                world.hand.grabOrigin = {
-                    origin: ide.palette,
-                    position: ide.palette.center()
-                };
-            }
-        },
+        () => this.duplicate(false),
         'make a copy\nand pick it up'
     );
     if (this instanceof CommandBlockMorph && this.nextBlock()) {
         menu.addItem(
             (proc ? this.fullCopy() : this).thumbnail(0.5, 60),
-            () => {
-                var cpy = this.fullCopy(),
-                    nb = cpy.nextBlock(),
-                    ide = this.parentThatIsA(IDE_Morph),
-                    blockEditor = this.parentThatIsA(BlockEditorMorph);
-                if (nb) {nb.destroy(); }
-                cpy.pickUp(world);
-                if (!ide && blockEditor) {
-                    ide = blockEditor.target.parentThatIsA(IDE_Morph);
-                }
-                if (ide) {
-                    world.hand.grabOrigin = {
-                        origin: ide.palette,
-                        position: ide.palette.center()
-                    };
-                }
-            },
+            () => this.duplicate(true),
             'only duplicate this block'
         );
         menu.addItem(
@@ -3205,6 +3172,33 @@ BlockMorph.prototype.userMenu = function () {
     }
     return menu;
 };
+
+BlockMorph.prototype.duplicate = function(justMe) {
+    var dup = this.fullCopy(),
+        nb = dup.nextBlock(),
+        ide = this.parentThatIsA(IDE_Morph),
+        blockEditor = this.parentThatIsA(BlockEditorMorph);
+    Trace.log('Block.duplicate', {
+        id: this.blockId(),
+        justMe: justMe,
+        copy: dup.blockId(),
+    });
+    if (justMe && nb) { nb.destroy(); }
+    dup.pickUp(world);
+    // register the drop-origin, so the block can
+    // slide back to its former situation if dropped
+    // somewhere where it gets rejected
+    if (!ide && blockEditor) {
+        ide = blockEditor.target.parentThatIsA(IDE_Morph);
+    }
+    if (ide) {
+        world.hand.grabOrigin = {
+            origin: ide.palette,
+            position: ide.palette.center()
+        };
+    }
+    return dup;
+}
 
 BlockMorph.prototype.showMessageUsers = function () {
     var ide = this.parentThatIsA(IDE_Morph) ||

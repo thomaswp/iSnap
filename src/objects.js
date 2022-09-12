@@ -5957,6 +5957,16 @@ SpriteMorph.prototype.receiveUserInteraction = function (
         hats;
     if (!stage) {return; } // currently dragged
     hats = this.allHatBlocksForInteraction(interaction);
+    if (hats.length > 0) {
+        // Only log user interactions where there's a relevat hat block
+        // to receive them (otherwise it just bloats the log file)
+        Trace.log('Sprite.receiveUserInteraction', {
+            name: this.name,
+            interaction: interaction,
+            rightAway: rightAway,
+            threadSafe: threadSafe,
+        });
+    }
     hats.forEach(block =>
         procs.push(stage.threads.startProcess(
             block,
@@ -6091,7 +6101,7 @@ SpriteMorph.prototype.toggleVariableWatcher = function (varName, isGlobal) {
     }
     watcher = this.findVariableWatcher(varName);
 
-    Trace.log('SpriteMorph.toggleVariableWatcher', {
+    Trace.log('Sprite.toggleVariableWatcher', {
         varName: varName,
         isGlobal: isGlobal,
         visible: !(watcher && watcher.isVisible),
@@ -6166,7 +6176,7 @@ SpriteMorph.prototype.toggleWatcher = function (selector, label, color) {
     if (!stage) { return; }
     watcher = this.watcherFor(stage, selector);
 
-    Trace.log('SpriteMorph.toggleWatcher', {
+    Trace.log('Sprite.toggleWatcher', {
         selector: selector,
         visible: !(watcher && watcher.isVisible),
     });

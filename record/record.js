@@ -1146,7 +1146,7 @@ class Record {
 
     replay_sprite_toggleVariableWatcher(data, callback, fast) {
         setTimeout(callback, 1);
-        const sprite = ide.currentSprite, stage = ide.stage;
+        const sprite = window.ide.currentSprite, stage = ide.stage;
         const varName = data.varName;
         if (!sprite || !stage) return;
         // Don't toggle if already showing correctly. This can happen, e.g.
@@ -1161,6 +1161,30 @@ class Record {
         // if (watcher) {
         //     Recorder.registerClick(watcher.center(), fast);
         // }
+    }
+    
+    cursor_sprite_receiveUserInteraction(data) {
+        const sprite = window.ide.getSpriteByName(data.name);
+        if (!sprite) return;
+        const cursorInteractions = [
+            'clicked', 'pressed', 'mouse-entered', 'scrolled-up', 'scrolled-down'
+        ];
+        if (cursorInteractions.includes(data.interaction)) {
+            return sprite.center();
+        }
+    }
+
+    replay_sprite_receiveUserInteraction(data, callback, fast) {
+        setTimeout(callback, 1);
+        const sprite = window.ide.getSpriteByName(data.name);
+        if (!sprite) return;
+        sprite.receiveUserInteraction(
+            data.interaction, data.rightAway, data.threadSafe
+        );
+        const clickInteractions = ['clicked', 'pressed']
+        if (clickInteractions.includes(data.interaction)) {
+            Recorder.registerClick();
+        }
     }
 
     replay_inputSlot_showNewMessageDialog(data, callback, fast) {
@@ -1488,8 +1512,8 @@ class Recorder {
             ], 'IDE');
 
         this.addGroupedHandlers(
-            'SpriteMorph', [
-                'toggleVariableWatcher', 'toggleWatcher',
+            'Sprite', [
+                'toggleVariableWatcher', 'toggleWatcher', 'receiveUserInteraction',
             ], 'sprite');
 
         this.addGroupedHandlers(
@@ -1906,6 +1930,16 @@ class Recorder {
             } else if (type === 'Object') {
                 // recurse
                 record[prop] = this.serialize(value);
+            } else if (Array.isArray(value)) {
+                let array = [];
+                value.forEach(item => {
+                    if (typeof item === 'object') {
+                        array.push(Recorder.serialize(item));
+                    } else {
+                        array.push(item);
+                    }
+                })
+                record[prop] = array;
             } else if (value === Object(value)) {
                 console.error('Unknown object in record!', prop, value);
             }

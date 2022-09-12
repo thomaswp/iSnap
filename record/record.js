@@ -190,13 +190,12 @@ extend(IDE_Morph, 'addNewSprite', function(base) {
 });
 
 extend(SpeechBubbleMorph, 'popUp', function(base, world, pos, isClickable) {
-    if (!isClickable && SpeechBubbleMorph.silent) return;
+    if (SpeechBubbleMorph.silent) return;
     base.call(this, world, pos, isClickable);
-    if (!isClickable) {
-        window.setTimeout(() => {
-            this.destroy();
-        }, 3000);
-    }
+    if (!SpeechBubbleMorph.temporary) return;
+    window.setTimeout(() => {
+        this.destroy();
+    }, isClickable ? 5000 : 3000); // Longer for lists
 });
 
 BlockMorph.prototype.scrollBlockIntoView = function (lag, padding) {
@@ -298,6 +297,7 @@ class Record {
     replay(callback, fast) {
         // No speech bubbles if fast-forwarding
         SpeechBubbleMorph.silent = fast;
+        SpeechBubbleMorph.temporary = true;
         // Also run scripts quickly
         if (fast) {
             window.ide.startFastTracking();
@@ -318,6 +318,11 @@ class Record {
             if (point) Recorder.clickIfRegistered(point);
         }
         Recorder.clickRegistered = false;
+        SpeechBubbleMorph.silent = false;
+        // TODO: This may be too generous, since code may not compete
+        // in one frame, but ideally we shouldn't auto-close
+        // reporter bubbles unless this is during playback
+        // SpeechBubbleMorph.temporary = false;
     }
 
     getCursor(data, scroll) {

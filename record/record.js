@@ -1241,7 +1241,6 @@ class Record {
     replay_multiArg_addOrRemoveInput(add, data, callback, fast) {
         setTimeout(callback, 1);
         let input = Recorder.deserializeArgId(data, false, true);
-        console.log(input);
         if (!input) return;
         let target = input.selectForEdit();
         if (!target) return;
@@ -1251,7 +1250,7 @@ class Record {
     }
 
     cursor_multiArg_addInput(data) {
-        this.cursor_multiArg_addOrRemoveInput(true, data);
+        return this.cursor_multiArg_addOrRemoveInput(true, data);
     }
 
     replay_multiArg_addInput(data, callback, fast) {
@@ -1259,7 +1258,7 @@ class Record {
     }
 
     cursor_multiArg_removeInput(data) {
-        this.cursor_multiArg_addOrRemoveInput(false, data);
+        return this.cursor_multiArg_addOrRemoveInput(false, data);
     }
 
     replay_multiArg_removeInput(data, callback, fast) {

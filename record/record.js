@@ -190,13 +190,12 @@ extend(IDE_Morph, 'addNewSprite', function(base) {
 });
 
 extend(SpeechBubbleMorph, 'popUp', function(base, world, pos, isClickable) {
-    if (!isClickable && SpeechBubbleMorph.silent) return;
+    if (SpeechBubbleMorph.silent) return;
     base.call(this, world, pos, isClickable);
-    if (!isClickable) {
-        window.setTimeout(() => {
-            this.destroy();
-        }, 3000);
-    }
+    if (!SpeechBubbleMorph.temporary) return;
+    window.setTimeout(() => {
+        this.destroy();
+    }, isClickable ? 5000 : 3000); // Longer for lists
 });
 
 BlockMorph.prototype.scrollBlockIntoView = function (lag, padding) {
@@ -298,6 +297,7 @@ class Record {
     replay(callback, fast) {
         // No speech bubbles if fast-forwarding
         SpeechBubbleMorph.silent = fast;
+        SpeechBubbleMorph.temporary = true;
         // Also run scripts quickly
         if (fast) {
             window.ide.startFastTracking();
@@ -318,6 +318,11 @@ class Record {
             if (point) Recorder.clickIfRegistered(point);
         }
         Recorder.clickRegistered = false;
+        SpeechBubbleMorph.silent = false;
+        // TODO: This may be too generous, since code may not compete
+        // in one frame, but ideally we shouldn't auto-close
+        // reporter bubbles unless this is during playback
+        // SpeechBubbleMorph.temporary = false;
     }
 
     getCursor(data, scroll) {
@@ -1146,7 +1151,7 @@ class Record {
 
     replay_sprite_toggleVariableWatcher(data, callback, fast) {
         setTimeout(callback, 1);
-        const sprite = ide.currentSprite, stage = ide.stage;
+        const sprite = window.ide.currentSprite, stage = ide.stage;
         const varName = data.varName;
         if (!sprite || !stage) return;
         // Don't toggle if already showing correctly. This can happen, e.g.
@@ -1161,6 +1166,30 @@ class Record {
         // if (watcher) {
         //     Recorder.registerClick(watcher.center(), fast);
         // }
+    }
+    
+    cursor_sprite_receiveUserInteraction(data) {
+        const sprite = window.ide.getSpriteByName(data.name);
+        if (!sprite) return;
+        const cursorInteractions = [
+            'clicked', 'pressed', 'mouse-entered', 'scrolled-up', 'scrolled-down'
+        ];
+        if (cursorInteractions.includes(data.interaction)) {
+            return sprite.center();
+        }
+    }
+
+    replay_sprite_receiveUserInteraction(data, callback, fast) {
+        setTimeout(callback, 1);
+        const sprite = window.ide.getSpriteByName(data.name);
+        if (!sprite) return;
+        sprite.receiveUserInteraction(
+            data.interaction, data.rightAway, data.threadSafe
+        );
+        const clickInteractions = ['clicked', 'pressed']
+        if (clickInteractions.includes(data.interaction)) {
+            Recorder.registerClick();
+        }
     }
 
     replay_inputSlot_showNewMessageDialog(data, callback, fast) {
@@ -1524,8 +1553,8 @@ class Recorder {
             ], 'IDE');
 
         this.addGroupedHandlers(
-            'SpriteMorph', [
-                'toggleVariableWatcher', 'toggleWatcher',
+            'Sprite', [
+                'toggleVariableWatcher', 'toggleWatcher', 'receiveUserInteraction',
             ], 'sprite');
 
         this.addGroupedHandlers(
@@ -1948,6 +1977,16 @@ class Recorder {
             } else if (type === 'Object') {
                 // recurse
                 record[prop] = this.serialize(value);
+            } else if (Array.isArray(value)) {
+                let array = [];
+                value.forEach(item => {
+                    if (typeof item === 'object') {
+                        array.push(Recorder.serialize(item));
+                    } else {
+                        array.push(item);
+                    }
+                })
+                record[prop] = array;
             } else if (value === Object(value)) {
                 console.error('Unknown object in record!', prop, value);
             }

@@ -299,9 +299,12 @@ class Record {
         SpeechBubbleMorph.silent = fast;
         SpeechBubbleMorph.temporary = true;
         // Also run scripts quickly
-        if (fast) {
+        if (fast && !window.ide.stage.isFastTracked) {
+            Recorder.temporaryFastTracking = true;
             window.ide.startFastTracking();
-        } else {
+        }
+        if (!fast && Recorder.temporaryFastTracking) {
+            Recorder.temporaryFastTracking = false;
             window.ide.stopFastTracking();
         }
         let method = 'replay_' + this.type;
@@ -458,6 +461,7 @@ class Record {
         let threads = ide.stage.threads;
         var stopCondition;
         let stepping = Process.prototype.enableSingleStepping;
+        let isFastTracked = window.ide.stage.isFastTracked;
         let prepareToRun = () => {
             if (!fast) return;
             // console.log("Preparing to run", stepping);
@@ -521,7 +525,9 @@ class Record {
             if (Process.prototype.enableSingleStepping != stepping) {
                 threads.toggleSingleStepping();
             }
-            window.ide.stopFastTracking();
+            if (!isFastTracked) {
+                window.ide.stopFastTracking();
+            }
             clearInterval(interval);
             callback();
         }, 1);

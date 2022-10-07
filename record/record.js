@@ -334,10 +334,10 @@ class Record {
     }
 
     getCursorOrPreCursor(type, data, scroll) {
-        data = data || Recorder.deserialize(this.data, false);
-        let cursorMethod = this[type + '_' + this.type];
-        if (!cursorMethod) return null;
         try {
+            data = data || Recorder.deserialize(this.data, false);
+            let cursorMethod = this[type + '_' + this.type];
+            if (!cursorMethod) return null;
             return cursorMethod.call(this, data, scroll);
         } catch (e) {
             // Probably this is ok, but may want to log somehow...
@@ -1167,7 +1167,7 @@ class Record {
         //     Recorder.registerClick(watcher.center(), fast);
         // }
     }
-    
+
     cursor_sprite_receiveUserInteraction(data) {
         const sprite = window.ide.getSpriteByName(data.name);
         if (!sprite) return;
@@ -1410,15 +1410,28 @@ class Recorder {
             console.error('Custom block without definition GUID! ' +
                 'Is this a legacy recording?');
         } else {
+            // Set the next ID to be the desired block ID
+            // We need to do it this way in case this block comes with sub-
+            // blocks, e.g. RingMorphs, so their IDs will be created correctly.
+            let nextId = BlockMorph.nextId;
+            BlockMorph.nextId = id;
             block = SpriteMorph.prototype.blockForSelector(
                 blockDef.selector, true);
+            // Then make sure to set it back
+            BlockMorph.nextId = nextId;
             if (!block) {
                 console.error('No block selector to create for def', blockDef);
             }
         }
         if (!block) return undefined;
         // console.log('Creating', blockDef, block);
-        block.id = id;
+        if (block.id != id) {
+            // TODO: Somehow this happens when creating script variables...
+            // Shouldn't cause any bugs but I don't like it...
+            console.warn('Block created with incorrect ID:',
+                block.id, 'vs', id);
+            block.id = id;
+        }
         block.parent = this.getFrameMorph();
         block.isDraggable = true;
         this.registerBlock(block);
@@ -1740,14 +1753,16 @@ class Recorder {
             }
         }
 
+        let isBlock = block && block instanceof BlockMorph;
+
         // If we couldn't find the (existing) block and we can't create it
         // then return the data object
-        if (!block && !createBlocks) {
+        if (!isBlock && !createBlocks) {
             return this.deserialize(value, createBlocks);
         }
 
         // Otherwise, if we could create it but failed to, log the error
-        if (!block) {
+        if (!isBlock) {
             console.error('Could not find/create parent block for arg', value);
             return null;
         }
